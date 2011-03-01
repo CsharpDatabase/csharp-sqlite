@@ -4381,6 +4381,6 @@ return 0;
 }
 #endif
 #endif // * TCLSH */
-}
 #endif // NO_TCL
+}
 
