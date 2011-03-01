@@ -12,12 +12,14 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/base/Interp.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: Interp.java,v 1.44 2003/07/25 16:38:35 mdejong Exp $
 *
 */
 using System;
 using System.Collections;
+using System.IO;
+using System.Text;
 
 namespace tcl.lang
 {
@@ -103,7 +105,7 @@ namespace tcl.lang
 
     // Current working directory.
 
-    private System.IO.FileInfo workingDir;
+    private FileInfo workingDir;
 
     // Points to top-most in stack of all nested procedure
     // invocations.  null means there are no active procedures.
@@ -342,7 +344,7 @@ namespace tcl.lang
 
       // Init things that are specific to the Jacl implementation
 
-      workingDir = new System.IO.FileInfo( System.Environment.CurrentDirectory );
+      workingDir = new FileInfo( System.Environment.CurrentDirectory );
       noEval = 0;
 
       notifier = Notifier.getNotifierForThread( System.Threading.Thread.CurrentThread );
@@ -544,7 +546,7 @@ namespace tcl.lang
         {
           chan.close();
         }
-        catch ( System.IO.IOException ex )
+        catch ( IOException ex )
         {
           // Ignore any IO errors
         }
@@ -826,9 +828,9 @@ namespace tcl.lang
       {
         // Java does not support passing an address so we pass
         // an array of size 1 and then assign arr[0] to the value
-        NamespaceCmd.Namespace[] nsArr = new NamespaceCmd.Namespace[1];
-        NamespaceCmd.Namespace[] dummyArr = new NamespaceCmd.Namespace[1];
-        string[] tailArr = new string[1];
+        var nsArr = new NamespaceCmd.Namespace[1];
+        var dummyArr = new NamespaceCmd.Namespace[1];
+        var tailArr = new string[1];
 
         NamespaceCmd.getNamespaceForQualName( this, cmdName, null, TCL.VarFlag.CREATE_NS_IF_UNKNOWN, nsArr, dummyArr, dummyArr, tailArr );
 
@@ -959,9 +961,9 @@ namespace tcl.lang
       {
         // Java does not support passing an address so we pass
         // an array of size 1 and then assign arr[0] to the value
-        NamespaceCmd.Namespace[] nsArr = new NamespaceCmd.Namespace[1];
-        NamespaceCmd.Namespace[] dummyArr = new NamespaceCmd.Namespace[1];
-        string[] tailArr = new string[1];
+        var nsArr = new NamespaceCmd.Namespace[1];
+        var dummyArr = new NamespaceCmd.Namespace[1];
+        var tailArr = new string[1];
 
         NamespaceCmd.getNamespaceForQualName( this, cmdName, null, TCL.VarFlag.CREATE_NS_IF_UNKNOWN, nsArr, dummyArr, dummyArr, tailArr );
 
@@ -1063,7 +1065,7 @@ namespace tcl.lang
     // Token for the command.
     {
       Interp interp = this;
-      System.Text.StringBuilder name = new System.Text.StringBuilder();
+      var name = new StringBuilder();
 
       // Add the full name of the containing namespace, followed by the "::"
       // separator, and the command name.
@@ -1216,9 +1218,9 @@ namespace tcl.lang
       // automatically create the containing namespaces just like
       // Tcl_CreateCommand would.
 
-      NamespaceCmd.Namespace[] newNsArr = new NamespaceCmd.Namespace[1];
-      NamespaceCmd.Namespace[] dummyArr = new NamespaceCmd.Namespace[1];
-      string[] newTailArr = new string[1];
+      var newNsArr = new NamespaceCmd.Namespace[1];
+      var dummyArr = new NamespaceCmd.Namespace[1];
+      var newTailArr = new string[1];
 
       NamespaceCmd.getNamespaceForQualName( interp, newName, null, TCL.VarFlag.CREATE_NS_IF_UNKNOWN, newNsArr, dummyArr, dummyArr, newTailArr );
 
@@ -1482,7 +1484,7 @@ namespace tcl.lang
       int evalFlags = this.evalFlags;
       this.evalFlags &= ~Parser.TCL_ALLOW_EXCEPTIONS;
 
-      CharPointer script = new CharPointer( inString );
+      var script = new CharPointer( inString );
       try
       {
         Parser.eval2( this, script.array, script.index, script.length(), flags );
@@ -1615,8 +1617,8 @@ namespace tcl.lang
     private string readScriptFromFile( string sFilename )
     // The name of the file.
     {
-      System.IO.FileInfo sourceFile;
-      System.IO.StreamReader fs;
+      FileInfo sourceFile;
+      StreamReader fs;
       try
       {
         sourceFile = FileUtil.getNewFileObj( this, sFilename );
@@ -1626,7 +1628,7 @@ namespace tcl.lang
         resetResult();
         return null;
       }
-      catch ( System.IO.FileNotFoundException e )
+      catch ( FileNotFoundException e )
       {
         return null;
       }
@@ -1637,13 +1639,13 @@ namespace tcl.lang
       try
       {
         // HACK only UTF8 will be read
-        using ( fs = new System.IO.StreamReader( sourceFile.FullName, System.Text.Encoding.UTF8 ) )
+        using ( fs = new StreamReader( sourceFile.FullName, System.Text.Encoding.UTF8 ) )
         {
           // read all an do the new line conversations
           return fs.ReadToEnd().Replace( "\r\n", "\n" );
         }
       }
-      catch ( System.IO.IOException )
+      catch ( IOException )
       {
         return null;
       }
@@ -1686,7 +1688,7 @@ namespace tcl.lang
         {
           jar = (System.Net.HttpWebRequest)System.Net.WebRequest.Create( url );
         }
-        catch ( System.IO.IOException e2 )
+        catch ( IOException e2 )
         {
           return null;
         }
@@ -1710,7 +1712,7 @@ namespace tcl.lang
         }
       }
       // HACK
-      //			catch (System.IO.IOException e)
+      //			catch (IOException e)
       //			{
       //				return null;
       //			}
@@ -1723,21 +1725,21 @@ namespace tcl.lang
       {
         return (string)content;
       }
-      else if ( content is System.IO.Stream )
+      else if ( content is Stream )
       {
         // FIXME : use custom stream handler
-        System.IO.Stream fs = (System.IO.Stream)content;
+        Stream fs = (Stream)content;
 
         try
         {
           // FIXME : read does not check return values
           long available;
           available = fs.Length - fs.Position;
-          byte[] charArray = new byte[(int)available];
+          var charArray = new byte[(int)available];
           SupportClass.ReadInput( fs, ref charArray, 0, charArray.Length );
           return new string( SupportClass.ToCharArray( charArray ) );
         }
-        catch ( System.IO.IOException e2 )
+        catch ( IOException e2 )
         {
           return null;
         }
@@ -1751,20 +1753,20 @@ namespace tcl.lang
         return null;
       }
     }
-    private void closeInputStream( System.IO.Stream fs )
+    private void closeInputStream( Stream fs )
     {
       try
       {
         fs.Close();
       }
-      catch ( System.IO.IOException e )
+      catch ( IOException e )
       {
         ;
       }
     }
     internal void evalResource( string resName )
     {
-      //			System.IO.Stream stream = null;
+      //			Stream stream = null;
       //			
       //			try
       //			{
@@ -1801,8 +1803,8 @@ namespace tcl.lang
       //				if (System_Renamed.getProperty("java.version").StartsWith("1.2") && stream.GetType().FullName.Equals("java.util.zip.ZipFile$1"))
       //				{
       //					
-      //					System.IO.MemoryStream baos = new System.IO.MemoryStream(1024);
-      //					byte[] buffer = new byte[1024];
+      var baos = new MemoryStream(1024);
+      var buffer = new byte[1024];
       //					int numRead;
       //					
       //					// Read all data from the stream into a resizable buffer
@@ -1821,7 +1823,7 @@ namespace tcl.lang
       //					long available;
       //					available = stream.Length - stream.Position;
       //					int num = (int) available;
-      //					byte[] byteArray = new byte[num];
+      //          var byteArray = new byte[num];
       //					int offset = 0;
       //					while (num > 0)
       //					{
@@ -1833,7 +1835,7 @@ namespace tcl.lang
       //					eval(new string(SupportClass.ToCharArray(SupportClass.ToByteArray(byteArray))), 0);
       //				}
       //			}
-      //			catch (System.IO.IOException e)
+      //			catch (IOException e)
       //			{
       //				return ;
       //			}
@@ -1844,7 +1846,7 @@ namespace tcl.lang
     }
     internal static BackSlashResult backslash( string s, int i, int len )
     {
-      CharPointer script = new CharPointer( s.Substring( 0, ( len ) - ( 0 ) ) );
+      var script = new CharPointer( s.Substring( 0, ( len ) - ( 0 ) ) );
       script.index = i;
       return Parser.backslash( script.array, script.index );
     }
@@ -1973,7 +1975,7 @@ namespace tcl.lang
     {
       return new CallFrame( this );
     }
-    internal System.IO.FileInfo getWorkingDir()
+    internal FileInfo getWorkingDir()
     {
       if ( workingDir == null )
       {
@@ -1987,26 +1989,26 @@ namespace tcl.lang
         {
           resetResult();
         }
-        workingDir = new System.IO.FileInfo( Util.tryGetSystemProperty( "user.home", "." ) );
+        workingDir = new FileInfo( Util.tryGetSystemProperty( "user.home", "." ) );
       }
       return workingDir;
     }
     internal void setWorkingDir( string dirName )
     {
-      System.IO.FileInfo dirObj = FileUtil.getNewFileObj( this, dirName );
+      FileInfo dirObj = FileUtil.getNewFileObj( this, dirName );
 
       //  Use the canonical name of the path, if possible.
 
       try
       {
-        dirObj = new System.IO.FileInfo( dirObj.FullName );
+        dirObj = new FileInfo( dirObj.FullName );
       }
-      catch ( System.IO.IOException e )
+      catch ( IOException e )
       {
       }
 
 
-      if ( System.IO.Directory.Exists( dirObj.FullName ) )
+      if ( Directory.Exists( dirObj.FullName ) )
       {
         workingDir = dirObj;
       }
@@ -2444,15 +2446,15 @@ namespace tcl.lang
 
       if ( ( result == TCL.CompletionCode.ERROR ) && ( ( flags & INVOKE_NO_TRACEBACK ) == 0 ) && !errAlreadyLogged )
       {
-        System.Text.StringBuilder ds;
+        StringBuilder ds;
 
         if ( errInProgress )
         {
-          ds = new System.Text.StringBuilder( "\n    while invoking\n\"" );
+          ds = new StringBuilder( "\n    while invoking\n\"" );
         }
         else
         {
-          ds = new System.Text.StringBuilder( "\n    invoked from within\n\"" );
+          ds = new StringBuilder( "\n    invoked from within\n\"" );
         }
         for ( int i = 0 ; i < objv.Length ; i++ )
         {

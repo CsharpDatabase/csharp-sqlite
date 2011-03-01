@@ -10,7 +10,7 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/commands/InterpSlaveCmd.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: InterpSlaveCmd.java,v 1.1 2000/08/20 06:08:43 mo Exp $
 *
 */
@@ -31,8 +31,8 @@ namespace tcl.lang
 	
 	class InterpSlaveCmd : CommandWithDispose, AssocData
 	{
-		
-		private static readonly string[] options = new string[]{"alias", "aliases", "eval", "expose", "hide", "hidden", "issafe", "invokehidden", "marktrusted"};
+
+    private static readonly string[] options = new string[] { "alias", "aliases", "eval", "expose", "hide", "hidden", "issafe", "invokehidden", "marktrusted" };
 		private const int OPT_ALIAS = 0;
 		private const int OPT_ALIASES = 1;
 		private const int OPT_EVAL = 2;
@@ -42,8 +42,8 @@ namespace tcl.lang
 		private const int OPT_ISSAFE = 6;
 		private const int OPT_INVOKEHIDDEN = 7;
 		private const int OPT_MARKTRUSTED = 8;
-		
-		private static readonly string[] hiddenOptions = new string[]{"-global", "--"};
+
+    private static readonly string[] hiddenOptions = new string[] { "-global", "--" };
 		private const int OPT_HIDDEN_GLOBAL = 0;
 		private const int OPT_HIDDEN_LAST = 1;
 		
@@ -291,8 +291,8 @@ namespace tcl.lang
 				throw new TclException(interp, "interpreter named \"" + pathString + "\" already exists, cannot create");
 			}
 			
-			Interp slaveInterp = new Interp();
-			InterpSlaveCmd slave = new InterpSlaveCmd();
+			var slaveInterp = new Interp();
+			var slave = new InterpSlaveCmd();
 			
 			slaveInterp.slave = slave;
 			slaveInterp.setAssocData("InterpSlaveCmd", slave);
@@ -433,7 +433,7 @@ namespace tcl.lang
 			slaveInterp.preserve();
 			slaveInterp.allowExceptions();
 			
-			TclObject[] localObjv = new TclObject[objv.Length - objIx];
+			var localObjv = new TclObject[objv.Length - objIx];
 			for (int i = 0; i < objv.Length - objIx; i++)
 			{
 				localObjv[i] = objv[i + objIx];

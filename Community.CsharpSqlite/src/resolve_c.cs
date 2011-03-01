@@ -39,7 +39,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2010-03-09 19:31:43 4ae453ea7be69018d8c16eb8dabe05617397dc4d
+    **  SQLITE_SOURCE_ID: 2010-08-23 18:52:01 42537b60566f288167f1b5864a5435986838e3a3
     **
     **  $Header$
     *************************************************************************
@@ -441,6 +441,7 @@ namespace Community.CsharpSqlite
         {
           sqlite3ErrorMsg( pParse, "%s: %s", zErr, zCol );
         }
+        pParse.checkSchema = 1;
         pTopNC.nErr++;
       }
 
@@ -493,7 +494,7 @@ namespace Community.CsharpSqlite
 
     /*
     ** Allocate and return a pointer to an expression to load the column iCol
-    ** from datasource iSrc datasource in SrcList pSrc.
+    ** from datasource iSrc in SrcList pSrc.
     */
     static Expr sqlite3CreateColumnExpr( sqlite3 db, SrcList pSrc, int iSrc, int iCol )
     {
@@ -510,7 +511,9 @@ namespace Community.CsharpSqlite
         else
         {
           p.iColumn = (ynVar)iCol;
-          pItem.colUsed |= ( (Bitmask)1 ) << ( iCol >= BMS ? BMS - 1 : iCol );
+          testcase(iCol == BMS);
+          testcase(iCol == BMS - 1);
+          pItem.colUsed |= ((Bitmask)1) << (iCol >= BMS ? BMS - 1 : iCol);
         }
         ExprSetProperty( p, EP_Resolved );
       }
@@ -1327,7 +1330,7 @@ return 1;
     )
     {
       u8 savedHasAgg;
-      Walker w = new Walker();
+      var w = new Walker();
 
       if ( pExpr == null ) return 0;
 #if SQLITE_MAX_EXPR_DEPTH//>0
@@ -1383,7 +1386,7 @@ pNC.pParse.nHeight -= pExpr.nHeight;
     NameContext pOuterNC  /* Name context for parent SELECT statement */
     )
     {
-      Walker w = new Walker();
+      var w = new Walker();
 
       Debug.Assert( p != null );
       w.xExprCallback = resolveExprStep;

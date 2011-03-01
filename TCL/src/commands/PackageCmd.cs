@@ -9,19 +9,19 @@
 * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 *
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/commands/PackageCmd.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: PackageCmd.java,v 1.4 2002/04/12 21:00:26 mdejong Exp $
 */
-using System;
 using System.Collections;
+using System.Text;
 
 namespace tcl.lang
 {
 	
 	class PackageCmd : Command
 	{
-		
-		private static readonly string[] validCmds = new string[]{"forget", "ifneeded", "names", "present", "provide", "require", "unknown", "vcompare", "versions", "vsatisfies"};
+
+    private static readonly string[] validCmds = new string[] { "forget", "ifneeded", "names", "present", "provide", "require", "unknown", "vcompare", "versions", "vsatisfies" };
 		
 		private const int OPT_FORGET = 0;
 		private const int OPT_IFNEEDED = 1;
@@ -57,7 +57,7 @@ namespace tcl.lang
 			Package pkg;
 			PkgAvail avail, best;
 			string script;
-			System.Text.StringBuilder sbuf;
+      StringBuilder sbuf;
 			int pass, result;
 			
 			// Do extra check to make sure that version is not
@@ -151,7 +151,7 @@ namespace tcl.lang
 				script = interp.packageUnknown;
 				if ((System.Object) script != null)
 				{
-					sbuf = new System.Text.StringBuilder();
+					sbuf = new StringBuilder();
 					try
 					{
 						Util.appendElement(interp, sbuf, script);
@@ -190,7 +190,7 @@ namespace tcl.lang
 			}
 			if ((System.Object) pkg.version == null)
 			{
-				sbuf = new System.Text.StringBuilder();
+				sbuf = new StringBuilder();
 				sbuf.Append("can't find package " + pkgName);
 				if ((System.Object) version != null)
 				{
@@ -220,7 +220,7 @@ namespace tcl.lang
 		internal static string pkgPresent(Interp interp, string pkgName, string version, bool exact)
 		{
 			Package pkg;
-			VersionSatisfiesResult vsres = new VersionSatisfiesResult();
+			var vsres = new VersionSatisfiesResult();
 			int result;
 			
 			pkg = (Package) interp.packageTable[pkgName];
@@ -265,7 +265,7 @@ namespace tcl.lang
 			string key;
 			string cmd;
 			string ver1, ver2;
-			System.Text.StringBuilder sbuf;
+      StringBuilder sbuf;
 			IDictionaryEnumerator enum_Renamed;
 			int i, opt, exact;
 			bool once;
@@ -382,7 +382,7 @@ namespace tcl.lang
 						
 						try
 						{
-							sbuf = new System.Text.StringBuilder();
+							sbuf = new StringBuilder();
 							enum_Renamed = interp.packageTable.GetEnumerator();
 							once = false;
 							while (enum_Renamed.MoveNext())
@@ -561,7 +561,7 @@ namespace tcl.lang
 						{
 							try
 							{
-								sbuf = new System.Text.StringBuilder();
+								sbuf = new StringBuilder();
 								once = false;
 								for (avail = pkg.avail; avail != null; avail = avail.next)
 								{

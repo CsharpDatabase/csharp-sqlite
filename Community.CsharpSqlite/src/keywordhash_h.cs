@@ -20,7 +20,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2010-01-05 15:30:36 28d0d7710761114a44a1a3a425a6883c661f06e7
+    **  SQLITE_SOURCE_ID: 2010-08-23 18:52:01 42537b60566f288167f1b5864a5435986838e3a3
     **
     **  $Header$
     *************************************************************************
@@ -39,7 +39,7 @@ namespace Community.CsharpSqlite
       /*   CURRENT_TIMESTAMPRIMARYDEFERREDISTINCTDROPFAILFROMFULLGLOBYIF      */
       /*   ISNULLORDERESTRICTOUTERIGHTROLLBACKROWUNIONUSINGVACUUMVIEW         */
       /*   INITIALLY                                                          */
-      string zText = new string( new char[540]  {
+      var zText = new string( new char[540]  {
 'R','E','I','N','D','E','X','E','D','E','S','C','A','P','E','A','C','H',
 'E','C','K','E','Y','B','E','F','O','R','E','I','G','N','O','R','E','G',
 'E','X','P','L','A','I','N','S','T','E','A','D','D','A','T','A','B','A',

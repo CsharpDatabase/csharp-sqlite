@@ -31,7 +31,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2010-03-09 19:31:43 4ae453ea7be69018d8c16eb8dabe05617397dc4d
+    **  SQLITE_SOURCE_ID: 2010-12-07 20:14:09 a586a4deeb25330037a49df295b36aaf624d0f45
     **
     **  $Header$
     *************************************************************************
@@ -146,11 +146,17 @@ sqlite3_step(pStmt);
       dxTrace saved_xTrace;   //void (*saved_xTrace)(void*,const char*);  /* Saved db->xTrace */
       Db pDb = null;          /* Database to detach at end of vacuum */
       bool isMemDb;           /* True if vacuuming a :memory: database */
-      int nRes;
+      int nRes;               /* Bytes of reserved space at the end of each page */
+      int nDb;                /* Number of attached databases */
 
       if ( 0 == db.autoCommit )
       {
         sqlite3SetString( ref pzErrMsg, db, "cannot VACUUM from within a transaction" );
+        return SQLITE_ERROR;
+      }
+      if ( db.activeVdbeCnt > 1 )
+      {
+        sqlite3SetString( ref pzErrMsg, db, "cannot VACUUM - SQL statements in progress" );
         return SQLITE_ERROR;
       }
 
@@ -161,7 +167,7 @@ sqlite3_step(pStmt);
       saved_nChange = db.nChange;
       saved_nTotalChange = db.nTotalChange;
       saved_xTrace = db.xTrace;
-      db.flags |= SQLITE_WriteSchema | SQLITE_IgnoreChecks;
+      db.flags |= SQLITE_WriteSchema | SQLITE_IgnoreChecks | SQLITE_PreferBuiltin;
       db.flags &= ~( SQLITE_ForeignKeys | SQLITE_ReverseOrder );
 
       db.xTrace = null;
@@ -183,6 +189,7 @@ sqlite3_step(pStmt);
       ** time to parse and run the PRAGMA to turn journalling off than it does
       ** to write the journal header file.
       */
+      nDb = db.nDb;
       if (sqlite3TempInMemory(db))
       {
         zSql = "ATTACH ':memory:' AS vacuum_db;";
@@ -192,6 +199,11 @@ sqlite3_step(pStmt);
         zSql = "ATTACH '' AS vacuum_db;";
       }
       rc = execSql(db, pzErrMsg, zSql);
+      if (db.nDb > nDb)
+      {
+        pDb = db.aDb[db.nDb - 1];
+        Debug.Assert(pDb.zName== "vacuum_db");
+      }
       if (rc != SQLITE_OK) goto end_of_vacuum;
       pDb = db.aDb[db.nDb - 1];
       Debug.Assert( db.aDb[db.nDb - 1].zName == "vacuum_db" );
@@ -217,7 +229,14 @@ sqlite3_step(pStmt);
       }
 #endif
 
-      if ( sqlite3BtreeSetPageSize( pTemp, sqlite3BtreeGetPageSize( pMain ), nRes, 0 ) != 0
+      /* Do not attempt to change the page size for a WAL database */
+      if (sqlite3PagerGetJournalMode(sqlite3BtreePager(pMain))
+                                                   == PAGER_JOURNALMODE_WAL)
+      {
+        db.nextPagesize = 0;
+      }
+
+      if (sqlite3BtreeSetPageSize(pTemp, sqlite3BtreeGetPageSize(pMain), nRes, 0) != 0
       || ( !isMemDb && sqlite3BtreeSetPageSize( pTemp, db.nextPagesize, nRes, 0 ) != 0 )
         //|| NEVER( db.mallocFailed != 0 )
       )
@@ -319,7 +338,7 @@ sqlite3_step(pStmt);
         ** The increment is used to increase the schema cookie so that other
         ** connections to the same database will know to reread the schema.
         */
-        byte[] aCopy = new byte[]  {
+        var aCopy = new byte[]  {
 BTREE_SCHEMA_VERSION,     1,  /* Add one to the old schema cookie */
 BTREE_DEFAULT_CACHE_SIZE, 0,  /* Preserve the default page cache size */
 BTREE_TEXT_ENCODING,      0,  /* Preserve the text encoding */
@@ -356,6 +375,7 @@ BTREE_USER_VERSION,       0,  /* Preserve the user version */
       db.nChange = saved_nChange;
       db.nTotalChange = saved_nTotalChange;
       db.xTrace = saved_xTrace;
+      sqlite3BtreeSetPageSize(pMain, -1, -1, 1);
 
       /* Currently there is an SQL level transaction open on the vacuum
       ** database. No locks are held on any other files (since the main file

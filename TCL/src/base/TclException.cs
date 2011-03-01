@@ -11,7 +11,7 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/base/TclException.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: TclException.java,v 1.2 2000/04/03 14:09:11 mo Exp $
 *
 */

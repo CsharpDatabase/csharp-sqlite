@@ -11,7 +11,7 @@
 * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 *
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/commands/ParseAdaptor.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: ParseAdaptor.java,v 1.6 2003/02/05 09:24:40 mdejong Exp $
 */
 using System;

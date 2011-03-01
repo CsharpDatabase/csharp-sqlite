@@ -434,7 +434,6 @@ ifcapable malloc {
   } {1}
 }
 }
-
 } ;# ifcapable memorydb
 
 finish_test

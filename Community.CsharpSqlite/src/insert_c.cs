@@ -27,7 +27,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2010-03-09 19:31:43 4ae453ea7be69018d8c16eb8dabe05617397dc4d
+    **  SQLITE_SOURCE_ID: 2010-08-23 18:52:01 42537b60566f288167f1b5864a5435986838e3a3
     **
     **  $Header$
     *************************************************************************
@@ -90,7 +90,7 @@ namespace Community.CsharpSqlite
         int n;
         Table pTab = pIdx.pTable;
         sqlite3 db = sqlite3VdbeDb( v );
-        StringBuilder pIdx_zColAff = new StringBuilder( pIdx.nColumn + 2 );// (char *)sqlite3Malloc(pIdx.nColumn+2);
+        var pIdx_zColAff = new StringBuilder( pIdx.nColumn + 2 );// (char *)sqlite3DbMallocRaw(0, pIdx->nColumn+2);
         //      if ( pIdx_zColAff == null )
         //      {
         //        db.mallocFailed = 1;
@@ -136,7 +136,7 @@ namespace Community.CsharpSqlite
         int i;
         sqlite3 db = sqlite3VdbeDb( v );
 
-        zColAff = new StringBuilder( pTab.nCol + 1 );// (char*)sqlite3Malloc(db, pTab.nCol + 1);
+        zColAff = new StringBuilder( pTab.nCol + 1 );// (char*)sqlite3DbMallocRaw(0, pTab->nCol+1);
         if ( zColAff == null )
         {
           ////        db.mallocFailed = 1;
@@ -820,7 +820,7 @@ isView = false;
             {
               sqlite3ErrorMsg( pParse, "table %S has no column named %s",
               pTabList, 0, pColumn.a[i].zName );
-              pParse.nErr++;
+              pParse.checkSchema = 1;
               goto insert_cleanup;
             }
           }
@@ -959,9 +959,9 @@ isView = false;
               if ( pColumn.a[j].idx == i ) break;
             }
           }
-          if ( pColumn != null && j >= pColumn.nId )
+          if ((!useTempTable && null == pList) || (pColumn != null && j >= pColumn.nId))
           {
-            sqlite3ExprCode( pParse, pTab.aCol[i].pDflt, regCols + i + 1 );
+            sqlite3ExprCode(pParse, pTab.aCol[i].pDflt, regCols + i + 1);
           }
           else if ( useTempTable )
           {
@@ -1403,6 +1403,7 @@ isView = false;
         }
         else
         {
+          if ( onError == OE_Replace ) onError = OE_Abort; /* IMP: R-15569-63625 */
           sqlite3HaltConstraint( pParse, onError, (string)null, 0 );
         }
         sqlite3VdbeResolveLabel( v, allOk );
@@ -1577,7 +1578,7 @@ isView = false;
           case OE_Fail:
             {
               int j;
-              StrAccum errMsg = new StrAccum(200);
+              StrAccum errMsg = new StrAccum( 200 );
               string zSep;
               string zErr;
 

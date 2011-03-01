@@ -19,6 +19,7 @@ using time_t = System.Int64;
 namespace Community.CsharpSqlite
 {
   using sqlite3_value = Sqlite3.Mem;
+  using System.Threading;
 
   public partial class Sqlite3
   {
@@ -79,7 +80,7 @@ namespace Community.CsharpSqlite
       return 0;
     }
 
-    //String with Offset & String Testing
+    //byte with Offset & String Testing
     static int memcmp( byte[] a, int Offset, byte[] b, int Limit )
     {
       if ( a.Length < Offset + Limit ) return ( a.Length - Offset < b.Length ) ? -1 : +1;
@@ -91,7 +92,19 @@ namespace Community.CsharpSqlite
       return 0;
     }
 
-    static int memcmp( string a, int Offset, byte[] b, int Limit )
+    //byte with Offset & String Testing
+    static int memcmp(byte[] a, int Aoffset, byte[] b, int Boffset, int Limit)
+    {
+      if (a.Length < Aoffset + Limit) return (a.Length - Aoffset < b.Length - Boffset) ? -1 : +1;
+      if (b.Length < Boffset + Limit) return +1;
+      for (int i = 0; i < Limit; i++)
+      {
+        if (a[i + Aoffset] != b[i + Boffset]) return (a[i + Aoffset] < b[i + Boffset]) ? -1 : 1;
+      }
+      return 0;
+    }
+
+    static int memcmp(string a, int Offset, byte[] b, int Limit)
     {
       if ( a.Length < Offset + Limit ) return ( a.Length - Offset < b.Length ) ? -1 : +1;
       if ( b.Length < Limit ) return +1;
@@ -247,6 +260,8 @@ namespace Community.CsharpSqlite
           return (void_function)ap[vaNEXT - 1];
         case "MemPage":
           return (MemPage)ap[vaNEXT - 1];
+        case "sqlite3":
+          return (sqlite3)ap[vaNEXT - 1];
         default:
           Debugger.Break();
           return ap[vaNEXT - 1];
@@ -261,9 +276,9 @@ namespace Community.CsharpSqlite
 
     public static tm localtime( time_t baseTime )
     {
-      System.DateTime RefTime = new System.DateTime( 1970, 1, 1, 0, 0, 0, 0 );
+      var RefTime = new System.DateTime( 1970, 1, 1, 0, 0, 0, 0 );
       RefTime = RefTime.AddSeconds( Convert.ToDouble( baseTime ) ).ToLocalTime();
-      tm tm = new tm();
+      var tm = new tm();
       tm.tm_sec = RefTime.Second;
       tm.tm_min = RefTime.Minute;
       tm.tm_hour = RefTime.Hour;
@@ -278,14 +293,14 @@ namespace Community.CsharpSqlite
 
     public static long ToUnixtime( System.DateTime date )
     {
-      System.DateTime unixStartTime = new System.DateTime( 1970, 1, 1, 0, 0, 0, 0 );
+      var unixStartTime = new System.DateTime( 1970, 1, 1, 0, 0, 0, 0 );
       System.TimeSpan timeSpan = date - unixStartTime;
       return Convert.ToInt64( timeSpan.TotalSeconds );
     }
 
     public static System.DateTime ToCSharpTime( long unixTime )
     {
-      System.DateTime unixStartTime = new System.DateTime( 1970, 1, 1, 0, 0, 0, 0 );
+      var unixStartTime = new System.DateTime( 1970, 1, 1, 0, 0, 0, 0 );
       return unixStartTime.AddSeconds( Convert.ToDouble( unixTime ) );
     }
 
@@ -312,12 +327,12 @@ namespace Community.CsharpSqlite
     public static int GetbytesPerSector( StringBuilder diskPath )
     {
 #if !SQLITE_SILVERLIGHT
-      ManagementObjectSearcher mosLogicalDisks = new ManagementObjectSearcher( "select * from Win32_LogicalDisk where DeviceID = '" + diskPath.ToString().Remove( diskPath.Length - 1, 1 ) + "'" );
+      var mosLogicalDisks = new ManagementObjectSearcher( "select * from Win32_LogicalDisk where DeviceID = '" + diskPath.ToString().Remove( diskPath.Length - 1, 1 ) + "'" );
       try
       {
         foreach ( ManagementObject moLogDisk in mosLogicalDisks.Get() )
         {
-          ManagementObjectSearcher mosDiskDrives = new ManagementObjectSearcher( "select * from Win32_DiskDrive where SystemName = '" + moLogDisk["SystemName"] + "'" );
+          var mosDiskDrives = new ManagementObjectSearcher( "select * from Win32_DiskDrive where SystemName = '" + moLogDisk["SystemName"] + "'" );
           foreach ( ManagementObject moPDisk in mosDiskDrives.Get() )
           {
             return int.Parse( moPDisk["BytesPerSector"].ToString() );
@@ -413,6 +428,7 @@ namespace Community.CsharpSqlite
         }
       }
     }
+
 #if SQLITE_MUTEX_W32
 //---------------------WIN32 Definitions
 static int GetCurrentThreadId()
@@ -441,9 +457,10 @@ static void LeaveCriticalSection(Mutex mtx)
 {
 Monitor.Exit(mtx);
 }
-
-}
 #endif
 
+  // Miscellaneous Windows Constants
+  //#define ERROR_HANDLE_DISK_FULL           39L
+    const long ERROR_HANDLE_DISK_FULL = 39L;
   }
 }

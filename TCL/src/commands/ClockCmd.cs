@@ -14,7 +14,7 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/commands/ClockCmd.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: ClockCmd.java,v 1.6 2003/02/03 04:48:46 mdejong Exp $
 *
 */
@@ -31,24 +31,24 @@ namespace tcl.lang
 	
 	class ClockCmd : Command
 	{
-		
-		private static readonly string[] validCmds = new string[]{"clicks", "format", "scan", "seconds"};
+
+    private static readonly string[] validCmds = new string[] { "clicks", "format", "scan", "seconds" };
 		
 		private const int CMD_CLICKS = 0;
 		private const int CMD_FORMAT = 1;
 		private const int CMD_SCAN = 2;
 		private const int CMD_SECONDS = 3;
-		
-		private static readonly string[] clicksOpts = new string[]{"-milliseconds"};
+
+    private static readonly string[] clicksOpts = new string[] { "-milliseconds" };
 		
 		private const int OPT_CLICKS_MILLISECONDS = 0;
-		
-		private static readonly string[] formatOpts = new string[]{"-format", "-gmt"};
+
+    private static readonly string[] formatOpts = new string[] { "-format", "-gmt" };
 		
 		private const int OPT_FORMAT_FORMAT = 0;
 		private const int OPT_FORMAT_GMT = 1;
-		
-		private static readonly string[] scanOpts = new string[]{"-base", "-gmt"};
+
+    private static readonly string[] scanOpts = new string[] { "-base", "-gmt" };
 		
 		private const int OPT_SCAN_BASE = 0;
 		private const int OPT_SCAN_GMT = 1;
@@ -193,12 +193,12 @@ namespace tcl.lang
       }
 		private void  FormatClock(Interp interp, int clockVal, bool useGMT, string format)
 		{
-			DateTime date = new System.DateTime((long) clockVal * 10000 * 1000 + 621355968000000000);
+			var date = new System.DateTime((long) clockVal * 10000 * 1000 + 621355968000000000);
 
-			System.Globalization.DateTimeFormatInfo formatInfo = new System.Globalization.DateTimeFormatInfo();
+			var formatInfo = new System.Globalization.DateTimeFormatInfo();
 			string fmt, locFmt;
 			
-			GregorianCalendar calendar = new GregorianCalendar();
+			var calendar = new GregorianCalendar();
 			
 			System.Int32[] temp_int_array;
 			temp_int_array = new System.Int32[3];
@@ -206,11 +206,11 @@ namespace tcl.lang
 			temp_int_array[1] = 0;
 			temp_int_array[2] = 0;
 			System.Int32[] fp = temp_int_array;
-			System.Text.StringBuilder result = new System.Text.StringBuilder();
+			var result = new StringBuilder();
 			
 			if ((System.Object) format == null)
 			{
-				format = new System.Text.StringBuilder("%a %b %d %H:%M:%S %Z %Y").ToString();
+				format = new StringBuilder("%a %b %d %H:%M:%S %Z %Y").ToString();
 			}
 			
 			if (useGMT)
@@ -410,7 +410,7 @@ namespace tcl.lang
 		}
 		private int GetWeek(DateTime date, System.DayOfWeek firstDayOfWeek, bool iso)
 		{
-			GregorianCalendar cal = new GregorianCalendar();
+			var cal = new GregorianCalendar();
 			CalendarWeekRule weekRule = CalendarWeekRule.FirstFullWeek;
 			if (iso)
 			{
@@ -463,7 +463,7 @@ namespace tcl.lang
 			{
 				baseDate = baseDate.ToUniversalTime();
 			}
-			TclDateTime calendar = new TclDateTime();
+			var calendar = new TclDateTime();
 			calendar.dateTime = baseDate;
 			calendar.hour = 0;
 			calendar.minute = 0;
@@ -473,7 +473,7 @@ namespace tcl.lang
 			ClockToken[] dt = GetTokens(dateString, false);
 			
 			System.Int32 parsePos = 0;
-			ClockRelTimespan diff = new ClockRelTimespan();
+			var diff = new ClockRelTimespan();
 			int hasTime = 0;
 			int hasZone = 0;
 			int hasDate = 0;
@@ -968,7 +968,7 @@ namespace tcl.lang
 			
 			if (pos + 3 < dt.Length && dt[pos].is_Renamed(ClockToken.STARDATE) && dt[pos + 1].UNumber && dt[pos + 2].is_Renamed('.') && dt[pos + 3].UNumber)
 			{
-				GregorianCalendar gcal = new GregorianCalendar();
+				var gcal = new GregorianCalendar();
 				int trekYear = dt[pos + 1].Int / 1000 + 2323 - 377;
 				int trekDay = 1 + ((dt[pos + 1].Int % 1000) * (gcal.IsLeapYear(trekYear)?366:365)) / 1000;
 				int trekSeconds = dt[pos + 3].Int * 144 * 60;
@@ -1008,14 +1008,14 @@ namespace tcl.lang
 		{
 			System.Int32 parsePos = 0;
 			ClockToken dt;
-			ArrayList tokenVector = new ArrayList(in_Renamed.Length);
+			var tokenVector = new ArrayList(in_Renamed.Length);
 			
 			while ((dt = GetNextToken(in_Renamed, ref parsePos)) != null)
 			{
 				tokenVector.Add(dt);
 			}
 			
-			ClockToken[] tokenArray = new ClockToken[tokenVector.Count];
+			var tokenArray = new ClockToken[tokenVector.Count];
 			tokenVector.CopyTo(tokenArray);
 			
 #if DEBUG
@@ -1118,7 +1118,7 @@ namespace tcl.lang
 			}
 			
 			
-			System.Globalization.DateTimeFormatInfo symbols = new System.Globalization.CultureInfo("en-US").DateTimeFormat;
+			var symbols = new System.Globalization.CultureInfo("en-US").DateTimeFormat;
 			if (abbrev)
 			{
 				names = symbols.AbbreviatedMonthNames;
@@ -1152,7 +1152,7 @@ namespace tcl.lang
 			
 			// Drop out any periods and try the timezone table.
 			
-			System.Text.StringBuilder withoutDotsBuf = new System.Text.StringBuilder(word.Length);
+			var withoutDotsBuf = new StringBuilder(word.Length);
 			for (ix = 0; ix < word.Length; ix++)
 			{
 				if (word[ix] != '.')
@@ -1161,7 +1161,7 @@ namespace tcl.lang
 				}
 			}
 			
-			string withoutDots = new string(withoutDotsBuf.ToString().ToCharArray());
+			var withoutDots = new string(withoutDotsBuf.ToString().ToCharArray());
 			
 //			zones = symbols.getZoneStrings();
 			

@@ -1,6 +1,6 @@
 namespace tcl.lang
 {
-#if !NO_TCL
+#if TCLSH
   public partial class TCL
   {
 
@@ -299,7 +299,7 @@ namespace tcl.lang
     * 
     * 
     */
-    //#if defined(__WIN32__) && !HAVE_WINNT_IGNORE_VOID)
+    //#if (__WIN32__) && !HAVE_WINNT_IGNORE_VOID)
     //#if !VOID
     ////#define VOID void
     ////typedef char CHAR;

@@ -11,7 +11,7 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/base/TclByteArray.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: TclByteArray.java,v 1.4 2003/03/08 02:05:06 mdejong Exp $
 *
 */
@@ -93,7 +93,7 @@ namespace tcl.lang
 		/// </returns>
 		public override string ToString()
 		{
-			char[] c = new char[used];
+			var c = new char[used];
 			for (int ix = 0; ix < used; ix++)
 			{
 				c[ix] = (char) (bytes[ix] & 0xff);
@@ -185,7 +185,7 @@ namespace tcl.lang
 			
 			if (length > tbyteArray.bytes.Length)
 			{
-				byte[] newBytes = new byte[length];
+				var newBytes = new byte[length];
 				Array.Copy(tbyteArray.bytes, 0, newBytes, 0, tbyteArray.used);
 				tbyteArray.bytes = newBytes;
 			}

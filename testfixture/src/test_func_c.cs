@@ -7,7 +7,7 @@ using u8 = System.Byte;
 
 namespace Community.CsharpSqlite
 {
-#if !NO_TCL
+#if TCLSH
   using tcl.lang;
   using sqlite3_stmt = Sqlite3.Vdbe;
   using sqlite3_value = Sqlite3.Mem;
@@ -33,7 +33,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2010-03-09 19:31:43 4ae453ea7be69018d8c16eb8dabe05617397dc4d
+    **  SQLITE_SOURCE_ID: 2010-08-23 18:52:01 42537b60566f288167f1b5864a5435986838e3a3
     **
     **  $Header$
     *************************************************************************
@@ -52,7 +52,7 @@ namespace Community.CsharpSqlite
     */
     static Object testContextMalloc( sqlite3_context context, int nByte )
     {
-      Object z = new Object();// sqlite3Malloc( nByte );
+      var z = new Object();// sqlite3Malloc( nByte );
       if ( z == null && nByte > 0 )
       {
         sqlite3_result_error_nomem( context );
@@ -74,7 +74,7 @@ namespace Community.CsharpSqlite
       int iMin, iMax, n, i;
       i64 r = 0;
 
-      StringBuilder zBuf = new StringBuilder( 1000 );
+      var zBuf = new StringBuilder( 1000 );
 
       /* It used to be possible to call randstr() with any number of arguments,
       ** but now it is registered with SQLite as requiring exactly 2.
@@ -102,7 +102,7 @@ namespace Community.CsharpSqlite
         zBuf.Append( zSrc[(int)( Math.Abs( zRan ) % ( zSrc.Length - 1 ) )] );
       }
       //zBuf[n] = 0;
-      sqlite3_result_text( context, zBuf.ToString(), n, SQLITE_TRANSIENT );
+      sqlite3_result_text( context, zBuf, n, SQLITE_TRANSIENT );
     }
 
     /*
@@ -229,7 +229,7 @@ sqlite3_result_text16(pCtx, zVal, -1, destructor);
     )
     {
       int i;
-      StringBuilder zRet = new StringBuilder( nArg * 2 );//testContextMalloc( pCtx, nArg * 2 );
+      var zRet = new StringBuilder( nArg * 2 );//testContextMalloc( pCtx, nArg * 2 );
       if ( null == zRet ) return;
       //memset(zRet, 0, nArg*2);
       for ( i = 0 ; i < nArg ; i++ )
@@ -258,7 +258,7 @@ sqlite3_result_text16(pCtx, zVal, -1, destructor);
           zRet.Append( ' ' );// zRet[i * 2 + 1] = ' ';
         }
       }
-      sqlite3_result_text( pCtx, zRet.ToString(), 2 * nArg - 1, free_test_auxdata );
+      sqlite3_result_text( pCtx, zRet, 2 * nArg - 1, free_test_auxdata );
     }
 
     /*
@@ -344,7 +344,7 @@ sqlite3_value_text(argv[0]);
     sqlite3_value[] argv      /* Values for all function arguments */
     )
     {
-      sqlite3_stmt pStmt = new sqlite3_stmt();
+      var pStmt = new sqlite3_stmt();
       int rc;
       sqlite3 db = sqlite3_context_db_handle( pCtx );
       string zSql;
@@ -358,7 +358,7 @@ sqlite3_value_text(argv[0]);
         {
           sqlite3_result_value( pCtx, sqlite3_column_value( pStmt, 0 ) );
         }
-        rc = sqlite3_finalize( ref pStmt );
+        rc = sqlite3_finalize( pStmt );
       }
       if ( rc != 0 )
       {
@@ -495,7 +495,7 @@ static void testHexToUtf16le(
 
 static int registerTestFunctions( sqlite3 db, ref string dummy1, sqlite3_api_routines dummy2 )
     {
-      _aFuncs[] aFuncs = new _aFuncs[]  {
+      var aFuncs = new _aFuncs[]  {
 new _aFuncs( "randstr",               2, SQLITE_UTF8, randStr    ),
 new _aFuncs( "test_destructor",       1, SQLITE_UTF8, test_destructor),
 #if !SQLITE_OMIT_UTF16
@@ -641,7 +641,7 @@ abuse_err:
       //   char *zName;
       //   Tcl_ObjCmdProc *xProc;
       //}
-      _aObjCmd[] aObjCmd = new _aObjCmd[]  {
+      var aObjCmd = new _aObjCmd[]  {
 new _aObjCmd( "autoinstall_test_functions",    autoinstall_test_funcs ),
 new _aObjCmd( "abuse_create_function",         abuse_create_function  ),
 };

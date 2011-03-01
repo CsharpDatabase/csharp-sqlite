@@ -8,11 +8,12 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/commands/FormatCmd.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: FormatCmd.java,v 1.7 2003/02/01 00:56:29 mdejong Exp $
 *
 */
 using System;
+using System.Text;
 namespace tcl.lang
 {
 	
@@ -60,9 +61,9 @@ namespace tcl.lang
 		
 		public TCL.CompletionCode cmdProc(Interp interp, TclObject[] argv)
 		{
-			
-			
-			System.Text.StringBuilder sbuf; // Stores the return value of the parsed
+
+
+      StringBuilder sbuf; // Stores the return value of the parsed
 			// format string
 			StrtoulResult stoul; // A return object to the strtoul call
 			char[] format; // The format argument is converted to a char 
@@ -101,7 +102,19 @@ namespace tcl.lang
 			gotXpg = gotSequential = false;
 			
 			format = argv[1].ToString().ToCharArray();
-			sbuf = new System.Text.StringBuilder();
+			sbuf = new StringBuilder();
+      if (argv.Length>2 && argv[2].ToString().StartsWith("{*}"))
+      {
+        // Kludge to workaround incomplete TCL implementation -- 2011-02 NBH
+        {
+          string temp = argv[2].stringRep.Length == 3 ? "" : argv[2].stringRep.Substring(3);
+          for (int i = 3; i < argv.Length; i++)
+            temp += argv[i].ToString().Replace("{", "").Replace("}", "").Replace("  ", " ") + " ";
+          string[] tempSplit = temp.Split(' ');
+          Array.Resize(ref argv, 2+tempSplit.Length);
+          for (int i = 0; i < tempSplit.Length; i++) argv[2 + i] = TclString.newInstance(tempSplit[i]);
+        }
+      }
 			
 			// So, what happens here is to scan the format string one % group
 			// at a time, making many individual appends to the StringBuffer.
@@ -448,7 +461,7 @@ namespace tcl.lang
 					
 					case 'c':  {
 							intValue = 0;
-							char[] arr = new char[]{(char) TclInteger.get(interp, argv[argIndex])};
+							var arr = new char[]{(char) TclInteger.get(interp, argv[argIndex])};
 							strValue = new string(arr);
 							sbuf.Append(cvtStrToStr(strValue, width, precision, fmtFlags));
 							break;
@@ -532,8 +545,8 @@ namespace tcl.lang
 		
 		private string cvtLngToStr(long lngValue, int width, int precision, int flags, int base_, char[] charSet, string altPrefix)
 		{
-			System.Text.StringBuilder sbuf = new System.Text.StringBuilder(100);
-			System.Text.StringBuilder tmpBuf = new System.Text.StringBuilder(0).Append("");
+			var sbuf = new StringBuilder(100);
+      var tmpBuf = new StringBuilder( 0 ).Append( "" );
 			
 			int i;
 			int length;
@@ -616,7 +629,7 @@ namespace tcl.lang
 			nspace = width - sbuf.Length;
 			if (nspace > 0)
 			{
-				tmpBuf = new System.Text.StringBuilder(nspace);
+				tmpBuf = new StringBuilder(nspace);
 				for (i = 0; i < nspace; i++)
 				{
 					tmpBuf.Append(" ");
@@ -673,7 +686,7 @@ namespace tcl.lang
 		private static string cvtDblToStr(double dblValue, int width, int precision, int flags, int base_, char[] charSet, string altPrefix, int xtype)
 		{
       if ( base_ == 10 ) return dblValue.ToString();
-      System.Text.StringBuilder sbuf = new System.Text.StringBuilder( 100 );
+      var sbuf = new StringBuilder( 100 );
 			int i;
 			int exp;
 			int length;
@@ -897,7 +910,7 @@ namespace tcl.lang
 					
 					if (index > 0)
 					{
-						sbuf = new System.Text.StringBuilder(sbuf.ToString().Substring(0, (sbuf.Length - index) - (0)));
+						sbuf = new StringBuilder(sbuf.ToString().Substring(0, (sbuf.Length - index) - (0)));
 					}
 				}
 			}
@@ -948,7 +961,7 @@ namespace tcl.lang
 					
 					if (i > 0)
 					{
-						sbuf = new System.Text.StringBuilder(sbuf.ToString().Substring(0, (sbuf.Length - i) - (0)));
+						sbuf = new StringBuilder(sbuf.ToString().Substring(0, (sbuf.Length - i) - (0)));
 					}
 				}
 				if ((exp != 0) || flag_exp)
@@ -997,10 +1010,10 @@ namespace tcl.lang
 			// (tmpBuf) with the correct number of spaces.
 			
 			int nspace = width - length;
-			System.Text.StringBuilder tmpBuf = new System.Text.StringBuilder(0).Append("");
+			var tmpBuf = new StringBuilder(0).Append("");
 			if (nspace > 0)
 			{
-				tmpBuf = new System.Text.StringBuilder(nspace);
+				tmpBuf = new StringBuilder(nspace);
 				for (i = 0; i < nspace; i++)
 				{
 					tmpBuf.Append(" ");
@@ -1056,7 +1069,7 @@ namespace tcl.lang
 			
 			if (width > strValue.Length)
 			{
-				System.Text.StringBuilder sbuf = new System.Text.StringBuilder();
+				var sbuf = new StringBuilder();
 				int index = (width - strValue.Length);
 				for (int i = 0; i < index; i++)
 				{

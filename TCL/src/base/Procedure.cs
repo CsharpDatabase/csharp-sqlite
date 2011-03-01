@@ -12,7 +12,7 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/base/Procedure.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: Procedure.java,v 1.4 1999/08/05 03:40:31 mo Exp $
 *
 */

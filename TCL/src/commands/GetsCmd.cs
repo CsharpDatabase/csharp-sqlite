@@ -8,11 +8,11 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/commands/GetsCmd.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: GetsCmd.java,v 1.6 2003/03/08 03:42:44 mdejong Exp $
 *
 */
-using System;
+using System.Text;
 namespace tcl.lang
 {
 	
@@ -61,7 +61,7 @@ namespace tcl.lang
 			
 			try
 			{
-				line = TclString.newInstance(new System.Text.StringBuilder(64));
+				line = TclString.newInstance(new StringBuilder(64));
 				lineLen = chan.read(interp, line, TclIO.READ_LINE, 0);
 				if (lineLen < 0)
 				{

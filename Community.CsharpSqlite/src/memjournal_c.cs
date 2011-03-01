@@ -33,7 +33,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2009-12-07 16:39:13 1ed88e9d01e9eda5cbc622e7614277f29bcc551c
+    **  SQLITE_SOURCE_ID: 2010-12-07 20:14:09 a586a4deeb25330037a49df295b36aaf624d0f45
     **
     **  $Header$
     *************************************************************************
@@ -179,7 +179,7 @@ namespace Community.CsharpSqlite
         if ( iChunkOffset == 0 )
         {
           /* New chunk is required to extend the file. */
-          FileChunk pNew = new FileChunk();// sqlite3_malloc( sizeof( FileChunk ) );
+          var pNew = new FileChunk();// sqlite3_malloc( sizeof( FileChunk ) );
           if ( null == pNew )
           {
             return SQLITE_IOERR_NOMEM;
@@ -246,11 +246,10 @@ namespace Community.CsharpSqlite
     ** part of SQLite causes Sync to be called by mistake.
     */
     static int memjrnlSync( sqlite3_file NotUsed, int NotUsed2 )
-    {   /*NO_TEST*/
-      UNUSED_PARAMETER2( NotUsed, NotUsed2 );                      /*NO_TEST*/
-      Debug.Assert( false );                                       /*NO_TEST*/
-      return SQLITE_OK;                                            /*NO_TEST*/
-    }                                                              /*NO_TEST*/
+    {
+      UNUSED_PARAMETER2( NotUsed, NotUsed2 );
+      return SQLITE_OK;
+    }
 
     /*
     ** Query the size of the file in bytes.
@@ -278,8 +277,12 @@ namespace Community.CsharpSqlite
     null,                        /* xCheckReservedLock */
     null,                        /* xFileControl */
     null,                        /* xSectorSize */
-    null                         /* xDeviceCharacteristics */
-    );
+    null,                        /* xDeviceCharacteristics */
+    null,                        /* xShmMap */
+    null,                        /* xShmLock */
+    null,                        /* xShmBarrier */
+    null                         /* xShmUnlock */
+      );
 
     /*
     ** Open a journal file.
@@ -291,7 +294,7 @@ namespace Community.CsharpSqlite
       p.pFirst = null;
       p.endpoint = new FilePoint();
       p.readpoint = new FilePoint();
-      p.pMethods = MemJournalMethods;
+      p.pMethods = MemJournalMethods;//(sqlite3_io_methods*)&MemJournalMethods;
     }
 
     /*
@@ -304,8 +307,7 @@ namespace Community.CsharpSqlite
     }
 
     /*
-    ** Return the number of bytes required to store a MemJournal that uses vfs
-    ** pVfs to create the underlying on-disk files.
+    ** Return the number of bytes required to store a MemJournal file descriptor.
     */
     static int sqlite3MemJournalSize()
     {

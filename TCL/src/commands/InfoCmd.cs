@@ -9,7 +9,7 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/commands/InfoCmd.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: InfoCmd.java,v 1.8 2001/11/16 23:57:13 mdejong Exp $
 *
 */
@@ -23,7 +23,7 @@ namespace tcl.lang
 	
 	class InfoCmd : Command
 	{
-		private static readonly string[] validCmds = new string[]{"args", "body", "cmdcount", "commands", "complete", "default", "exists", "globals", "hostname", "level", "library", "loaded", "locals", "nameofexecutable", "patchlevel", "procs", "script", "sharedlibextension", "tclversion", "vars"};
+    private static readonly string[] validCmds = new string[] { "args", "body", "cmdcount", "commands", "complete", "default", "exists", "globals", "hostname", "level", "library", "loaded", "locals", "nameofexecutable", "patchlevel", "procs", "script", "sharedlibextension", "tclversion", "vars" };
 		
 		internal const int OPT_ARGS = 0;
 		internal const int OPT_BODY = 1;
@@ -331,10 +331,10 @@ namespace tcl.lang
 				
 				// Java does not support passing an address so we pass
 				// an array of size 1 and then assign arr[0] to the value
-				NamespaceCmd.Namespace[] nsArr = new NamespaceCmd.Namespace[1];
-				NamespaceCmd.Namespace[] dummy1Arr = new NamespaceCmd.Namespace[1];
-				NamespaceCmd.Namespace[] dummy2Arr = new NamespaceCmd.Namespace[1];
-				string[] simplePatternArr = new string[1];
+				var nsArr = new NamespaceCmd.Namespace[1];
+				var dummy1Arr = new NamespaceCmd.Namespace[1];
+				var dummy2Arr = new NamespaceCmd.Namespace[1];
+				var simplePatternArr = new string[1];
 				
 				NamespaceCmd.getNamespaceForQualName(interp, pattern, null, 0, nsArr, dummy1Arr, dummy2Arr, simplePatternArr);
 				
@@ -1208,10 +1208,10 @@ namespace tcl.lang
 				
 				// Java does not support passing an address so we pass
 				// an array of size 1 and then assign arr[0] to the value
-				NamespaceCmd.Namespace[] nsArr = new NamespaceCmd.Namespace[1];
-				NamespaceCmd.Namespace[] dummy1Arr = new NamespaceCmd.Namespace[1];
-				NamespaceCmd.Namespace[] dummy2Arr = new NamespaceCmd.Namespace[1];
-				string[] simplePatternArr = new string[1];
+				var nsArr = new NamespaceCmd.Namespace[1];
+				var dummy1Arr = new NamespaceCmd.Namespace[1];
+				var dummy2Arr = new NamespaceCmd.Namespace[1];
+				var simplePatternArr = new string[1];
 				
 				NamespaceCmd.getNamespaceForQualName(interp, pattern, null, 0, nsArr, dummy1Arr, dummy2Arr, simplePatternArr);
 				

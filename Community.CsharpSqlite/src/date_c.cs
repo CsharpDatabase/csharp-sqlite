@@ -61,7 +61,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2010-03-09 19:31:43 4ae453ea7be69018d8c16eb8dabe05617397dc4d
+    **  SQLITE_SOURCE_ID: 2010-12-07 20:14:09 a586a4deeb25330037a49df295b36aaf624d0f45
     **
     **  $Header$
     *************************************************************************
@@ -122,6 +122,10 @@ namespace Community.CsharpSqlite
       }
     };
 
+
+    // Temporary String for use in this module
+    static StringBuilder zdtTemp = new StringBuilder( 100 );
+    static StringBuilder zdtBuf = new StringBuilder( 100 );
 
     /*
     ** Convert zDate into one or more integers.  Additional arguments
@@ -191,12 +195,6 @@ namespace Community.CsharpSqlite
       //va_end( ap );
       return cnt;
     }
-
-    /*
-    ** Read text from z[] and convert into a floating point number.  Return
-    ** the number of digits converted.
-    */
-    //#define getValue sqlite3AtoF
 
     /*
     ** Parse a timezone extension on the end of a date-time.
@@ -413,10 +411,8 @@ namespace Community.CsharpSqlite
     */
     static void setDateTimeToCurrent( sqlite3_context context, DateTime p )
     {
-      double r = 0;
       sqlite3 db = sqlite3_context_db_handle( context );
-      sqlite3OsCurrentTime( db.pVfs, ref r );
-      p.iJD = (sqlite3_int64)( r * 86400000.0 + 0.5 );
+      sqlite3OsCurrentTimeInt64(db.pVfs, ref p.iJD);
       p.validJD = 1;
     }
 
@@ -442,7 +438,7 @@ namespace Community.CsharpSqlite
     ref DateTime p
     )
     {
-      int isRealNum = 0;    /* Return from sqlite3IsNumber().  Not used */
+      double r = 0.0;
       if ( parseYyyyMmDd( zDate, p ) == 0 )
       {
         return 0;
@@ -456,10 +452,8 @@ namespace Community.CsharpSqlite
         setDateTimeToCurrent( context, p );
         return 0;
       }
-      else if ( sqlite3IsNumber( zDate, ref isRealNum, SQLITE_UTF8 ) != 0 )
+      else if ( sqlite3AtoF( zDate, ref r, sqlite3Strlen30( zDate ), SQLITE_UTF8 )  )
       {
-        double r = 0;
-        sqlite3AtoF( zDate, ref r );// getValue( zDate, ref r );
         p.iJD = (sqlite3_int64)( r * 86400000.0 + 0.5 );
         p.validJD = 1;
         return 0;
@@ -636,10 +630,10 @@ y.s = sLocal.tm_sec;
       int rc = 1;
       int n;
       double r = 0;
-      StringBuilder z = new StringBuilder( zMod.ToLower() );
-      string zBuf;//[30];
-      //z = zBuf;
-      //for(n=0; n<ArraySize(zBuf)-1 && zMod[n]; n++){
+      var z = new StringBuilder( zMod.ToLower() );
+      zdtBuf.Length = 0;
+      //z = zdtBuf;
+      //for(n=0; n<ArraySize(zdtBuf)-1 && zMod[n]; n++){
       //  z.Append( zMod.Substring( n ).ToLower() );
       //}
       //z[n] = 0;
@@ -700,7 +694,8 @@ y.s = sLocal.tm_sec;
             ** weekday N where 0==Sunday, 1==Monday, and so forth.  If the
             ** date is already on the appropriate weekday, this is a no-op.
             */
-            if ( z.ToString().StartsWith( "weekday " ) && sqlite3AtoF( z.ToString().Substring( 8 ), ref r ) != 0 //getValue( z[8], ref r ) > 0
+            if ( z.ToString().StartsWith( "weekday " ) 
+            && sqlite3AtoF(z.ToString().Substring(8), ref r, sqlite3Strlen30(z.ToString().Substring(8)), SQLITE_UTF8)
             && ( n = (int)r ) == r && n >= 0 && r < 7 )
             {
               sqlite3_int64 Z;
@@ -763,7 +758,11 @@ y.s = sLocal.tm_sec;
         case '9':
           {
             double rRounder;
-            n = sqlite3AtoF( z.ToString(), ref r );//getValue( z, ref r );
+      for(n=1; n < z.Length && z[n]!=':' && !sqlite3Isspace(z[n]); n++){}
+      if( !sqlite3AtoF(z.ToString(), ref r, n, SQLITE_UTF8) ){
+        rc = 1;
+        break;
+      }
             Debug.Assert( n >= 1 );
             if ( z[n] == ':' )
             {
@@ -945,11 +944,11 @@ y.s = sLocal.tm_sec;
       DateTime x = null;
       if ( isDate( context, argc, argv, ref x ) == 0 )
       {
-        string zBuf = "";//[100];
+        zdtBuf.Length = 0;
         computeYMD_HMS( x );
-        sqlite3_snprintf( 100, ref zBuf, "%04d-%02d-%02d %02d:%02d:%02d",
+        sqlite3_snprintf( 100, zdtBuf, "%04d-%02d-%02d %02d:%02d:%02d",
         x.Y, x.M, x.D, x.h, x.m, (int)( x.s ) );
-        sqlite3_result_text( context, zBuf, -1, SQLITE_TRANSIENT );
+        sqlite3_result_text( context, zdtBuf, -1, SQLITE_TRANSIENT );
       }
     }
 
@@ -964,13 +963,13 @@ y.s = sLocal.tm_sec;
     sqlite3_value[] argv
     )
     {
-      DateTime x = new DateTime();
+      var x = new DateTime();
       if ( isDate( context, argc, argv, ref x ) == 0 )
       {
-        string zBuf = "";//[100];
+        zdtBuf.Length = 0;
         computeHMS( x );
-        sqlite3_snprintf( 100, ref zBuf, "%02d:%02d:%02d", x.h, x.m, (int)x.s );
-        sqlite3_result_text( context, zBuf, -1, SQLITE_TRANSIENT );
+        sqlite3_snprintf( 100, zdtBuf, "%02d:%02d:%02d", x.h, x.m, (int)x.s );
+        sqlite3_result_text( context, zdtBuf, -1, SQLITE_TRANSIENT );
       }
     }
 
@@ -988,10 +987,10 @@ y.s = sLocal.tm_sec;
       DateTime x = null;
       if ( isDate( context, argc, argv, ref x ) == 0 )
       {
-        string zBuf = "";//[100];
+        StringBuilder zdtBuf = new StringBuilder( 100 );
         computeYMD( x );
-        sqlite3_snprintf( 100, ref zBuf, "%04d-%02d-%02d", x.Y, x.M, x.D );
-        sqlite3_result_text( context, zBuf, -1, SQLITE_TRANSIENT );
+        sqlite3_snprintf( 100, zdtBuf, "%04d-%02d-%02d", x.Y, x.M, x.D );
+        sqlite3_result_text( context, zdtBuf, -1, SQLITE_TRANSIENT );
       }
     }
 
@@ -1021,15 +1020,15 @@ y.s = sLocal.tm_sec;
     )
     {
       {
-        DateTime x = new DateTime();
+        var x = new DateTime();
         u64 n;
         int i, j;
         StringBuilder z;
         sqlite3 db;
         string zFmt = sqlite3_value_text( argv[0] );
-        StringBuilder zBuf = new StringBuilder( 100 );
-        sqlite3_value[] argv1 = new sqlite3_value[argc - 1];
-        for ( i = 0; i < argc - 1; i++ ) { argv1[i] = new sqlite3_value(); argv[i + 1].CopyTo( argv1[i] ); }
+        var zdtBuf = new StringBuilder( 100 );
+        var argv1 = new sqlite3_value[argc - 1];
+        for ( i = 0; i < argc - 1; i++ ) { argv[i + 1].CopyTo( ref argv1[i] ); }
         if ( String.IsNullOrEmpty( zFmt ) || isDate( context, argc - 1, argv1, ref x ) != 0 ) return;
         db = sqlite3_context_db_handle( context );
         for ( i = 0, n = 1; i < zFmt.Length; i++, n++ )
@@ -1069,13 +1068,13 @@ y.s = sLocal.tm_sec;
             i++;
           }
         }
-        testcase( n == (u64)( zBuf.Length - 1 ) );
-        testcase( n == (u64)zBuf.Length );
+        testcase( n == (u64)( zdtBuf.Length - 1 ) );
+        testcase( n == (u64)zdtBuf.Length );
         testcase( n == (u64)db.aLimit[SQLITE_LIMIT_LENGTH] + 1 );
         testcase( n == (u64)db.aLimit[SQLITE_LIMIT_LENGTH] );
-        if ( n < (u64)zBuf.Capacity )
+        if ( n < (u64)zdtBuf.Capacity )
         {
-          z = zBuf;
+          z = zdtBuf;
         }
         else if ( n > (u64)db.aLimit[SQLITE_LIMIT_LENGTH] )
         {
@@ -1102,24 +1101,24 @@ y.s = sLocal.tm_sec;
           else
           {
             i++;
-            string zTemp = "";
+            zdtTemp.Length = 0;
             switch ( (char)zFmt[i] )
             {
-              case 'd': sqlite3_snprintf( 3, ref zTemp, "%02d", x.D ); z.Append( zTemp ); j += 2; break;
+              case 'd': sqlite3_snprintf( 3,  zdtTemp, "%02d", x.D ); z.Append( zdtTemp ); j += 2; break;
               case 'f':
                 {
                   double s = x.s;
                   if ( s > 59.999 ) s = 59.999;
-                  sqlite3_snprintf( 7, ref zTemp, "%06.3f", s ); z.Append( zTemp );
+                  sqlite3_snprintf( 7,  zdtTemp, "%06.3f", s ); z.Append( zdtTemp );
                   j = sqlite3Strlen30( z );
                   break;
                 }
-              case 'H': sqlite3_snprintf( 3, ref zTemp, "%02d", x.h ); z.Append( zTemp ); j += 2; break;
+              case 'H': sqlite3_snprintf( 3,  zdtTemp, "%02d", x.h ); z.Append( zdtTemp ); j += 2; break;
               case 'W': /* Fall thru */
               case 'j':
                 {
                   int nDay;             /* Number of days since 1st day of year */
-                  DateTime y = new DateTime();
+                  var y = new DateTime();
                   x.CopyTo( y );
                   y.validJD = 0;
                   y.M = 1;
@@ -1130,32 +1129,32 @@ y.s = sLocal.tm_sec;
                   {
                     int wd;   /* 0=Monday, 1=Tuesday, ... 6=Sunday */
                     wd = (int)( ( ( x.iJD + 43200000 ) / 86400000 ) % 7 );
-                    sqlite3_snprintf( 3, ref zTemp, "%02d", ( nDay + 7 - wd ) / 7 ); z.Append( zTemp );
+                    sqlite3_snprintf( 3,  zdtTemp, "%02d", ( nDay + 7 - wd ) / 7 ); z.Append( zdtTemp );
                     j += 2;
                   }
                   else
                   {
-                    sqlite3_snprintf( 4, ref zTemp, "%03d", nDay + 1 ); z.Append( zTemp );
+                    sqlite3_snprintf( 4,  zdtTemp, "%03d", nDay + 1 ); z.Append( zdtTemp );
                     j += 3;
                   }
                   break;
                 }
               case 'J':
                 {
-                  sqlite3_snprintf( 20, ref zTemp, "%.16g", x.iJD / 86400000.0 ); z.Append( zTemp );
+                  sqlite3_snprintf( 20, zdtTemp, "%.16g", x.iJD / 86400000.0 ); z.Append( zdtTemp );
                   j = sqlite3Strlen30( z );
                   break;
                 }
-              case 'm': sqlite3_snprintf( 3, ref zTemp, "%02d", x.M ); z.Append( zTemp ); j += 2; break;
-              case 'M': sqlite3_snprintf( 3, ref zTemp, "%02d", x.m ); z.Append( zTemp ); j += 2; break;
+              case 'm': sqlite3_snprintf( 3, zdtTemp, "%02d", x.M ); z.Append( zdtTemp ); j += 2; break;
+              case 'M': sqlite3_snprintf( 3, zdtTemp, "%02d", x.m ); z.Append( zdtTemp ); j += 2; break;
               case 's':
                 {
-                  sqlite3_snprintf( 30, ref zTemp, "%lld",
-                               (i64)( x.iJD / 1000 - 21086676 * (i64)10000 ) ); z.Append( zTemp );
+                  sqlite3_snprintf( 30, zdtTemp, "%lld",
+                               (i64)( x.iJD / 1000 - 21086676 * (i64)10000 ) ); z.Append( zdtTemp );
                   j = sqlite3Strlen30( z );
                   break;
                 }
-              case 'S': sqlite3_snprintf( 3, ref zTemp, "%02d", (int)x.s ); z.Append( zTemp ); j += 2; break;
+              case 'S': sqlite3_snprintf( 3, zdtTemp, "%02d", (int)x.s ); z.Append( zdtTemp ); j += 2; break;
               case 'w':
                 {
                   z.Append( ( ( ( x.iJD + 129600000 ) / 86400000 ) % 7 ) );
@@ -1163,7 +1162,7 @@ y.s = sLocal.tm_sec;
                 }
               case 'Y':
                 {
-                  sqlite3_snprintf( 5, ref zTemp, "%04d", x.Y ); z.Append( zTemp ); j = sqlite3Strlen30( z );
+                  sqlite3_snprintf( 5, zdtTemp, "%04d", x.Y ); z.Append( zdtTemp ); j = sqlite3Strlen30( z );
                   break;
                 }
               default: z.Append( '%' ); break;
@@ -1171,8 +1170,8 @@ y.s = sLocal.tm_sec;
           }
         }
         //z[j] = 0;
-        sqlite3_result_text( context, z.ToString(), -1,
-        z == zBuf ? SQLITE_TRANSIENT : SQLITE_DYNAMIC );
+        sqlite3_result_text( context, z, -1,
+        z == zdtBuf ? SQLITE_TRANSIENT : SQLITE_DYNAMIC );
       }
     }
 
@@ -1242,37 +1241,30 @@ y.s = sLocal.tm_sec;
 time_t t;
 char *zFormat = (char *)sqlite3_user_data(context);
 sqlite3 db;
-double rT;
-char zBuf[20];
+sqlite3_int64 rT;
+char zdtBuf[20];
 UNUSED_PARAMETER(argc);
 UNUSED_PARAMETER(argv);
 db = sqlite3_context_db_handle(context);
-sqlite3OsCurrentTime(db.pVfs, rT);
-#if !SQLITE_OMIT_FLOATING_POINT
-t = 86400.0*(rT - 2440587.5) + 0.5;
-#else
-/* without floating point support, rT will have
-** already lost fractional day precision.
-*/
-t = 86400 * (rT - 2440587) - 43200;
-#endif
+  sqlite3OsCurrentTimeInt64(db->pVfs, &iT);
+  t = iT/1000 - 10000*(sqlite3_int64)21086676;
 #if HAVE_GMTIME_R
 //  {
 //    struct tm sNow;
 //    gmtime_r(&t, sNow);
-//    strftime(zBuf, 20, zFormat, sNow);
+//    strftime(zdtBuf, 20, zFormat, sNow);
 //  }
 #else
 //  {
 //    struct tm pTm;
 //    sqlite3_mutex_enter(sqlite3MutexAlloc(SQLITE_MUTEX_STATIC_MASTER));
 //    pTm = gmtime(&t);
-//    strftime(zBuf, 20, zFormat, pTm);
+//    strftime(zdtBuf, 20, zFormat, pTm);
 //    sqlite3_mutex_leave(sqlite3MutexAlloc(SQLITE_MUTEX_STATIC_MASTER));
 //  }
 #endif
 
-//  sqlite3_result_text(context, zBuf, -1, SQLITE_TRANSIENT);
+//  sqlite3_result_text(context, zdtBuf, -1, SQLITE_TRANSIENT);
 //}
 #endif
 
@@ -1284,7 +1276,7 @@ t = 86400 * (rT - 2440587) - 43200;
 */
     static void sqlite3RegisterDateTimeFunctions()
     {
-      FuncDef[] aDateTimeFuncs = new FuncDef[]  {
+      var aDateTimeFuncs = new FuncDef[]  {
 #if !SQLITE_OMIT_DATETIME_FUNCS
 FUNCTION("julianday",        -1, 0, 0, (dxFunc)juliandayFunc ),
 FUNCTION("date",             -1, 0, 0, (dxFunc)dateFunc      ),

@@ -8,7 +8,7 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/base/Var.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: Var.java,v 1.11 2003/01/09 02:15:39 mdejong Exp $
 *
 */
@@ -374,7 +374,7 @@ namespace tcl.lang
 
     public override string ToString()
     {
-      System.Text.StringBuilder sb = new System.Text.StringBuilder();
+      var sb = new StringBuilder();
       sb.Append( ns );
       if ( sb.Length == 2 )
       {
@@ -639,9 +639,9 @@ namespace tcl.lang
 
             // Java does not support passing an address so we pass
             // an array of size 1 and then assign arr[0] to the value
-            NamespaceCmd.Namespace[] varNsArr = new NamespaceCmd.Namespace[1];
-            NamespaceCmd.Namespace[] dummyArr = new NamespaceCmd.Namespace[1];
-            string[] tailArr = new string[1];
+            var varNsArr = new NamespaceCmd.Namespace[1];
+            var dummyArr = new NamespaceCmd.Namespace[1];
+            var tailArr = new string[1];
 
             NamespaceCmd.getNamespaceForQualName( interp, part1, null, flags, varNsArr, dummyArr, dummyArr, tailArr );
 
@@ -748,7 +748,7 @@ namespace tcl.lang
 
       if ( (System.Object)elName == null )
       {
-        Var[] ret = new Var[2];
+        var ret = new Var[2];
         ret[0] = var;
         ret[1] = null;
         return ret;
@@ -836,7 +836,7 @@ namespace tcl.lang
         }
       }
 
-      Var[] ret2 = new Var[2];
+      var ret2 = new Var[2];
       ret2[0] = var; // The Var in the array
       ret2[1] = arrayVar; // The array (Hashtable) Var
       return ret2;
@@ -1184,8 +1184,7 @@ namespace tcl.lang
         }
         else
         {
-          oldValue = (TclObject)
-          var.value;
+          oldValue = (TclObject)var.value;
 
           if ( ( flags & TCL.VarFlag.APPEND_VALUE ) != 0 )
           {
@@ -1648,7 +1647,7 @@ namespace tcl.lang
         var.traces = new ArrayList( 10 );
       }
 
-      TraceRecord rec = new TraceRecord();
+      var rec = new TraceRecord();
       rec.trace = proc;
       rec.flags = flags & ( TCL.VarFlag.TRACE_READS | TCL.VarFlag.TRACE_WRITES | TCL.VarFlag.TRACE_UNSETS | TCL.VarFlag.TRACE_ARRAY );
 
@@ -1893,10 +1892,10 @@ namespace tcl.lang
 
         // Java does not support passing an address so we pass
         // an array of size 1 and then assign arr[0] to the value
-        NamespaceCmd.Namespace[] nsArr = new NamespaceCmd.Namespace[1];
-        NamespaceCmd.Namespace[] altNsArr = new NamespaceCmd.Namespace[1];
-        NamespaceCmd.Namespace[] dummyNsArr = new NamespaceCmd.Namespace[1];
-        string[] tailArr = new string[1];
+        var nsArr = new NamespaceCmd.Namespace[1];
+        var altNsArr = new NamespaceCmd.Namespace[1];
+        var dummyNsArr = new NamespaceCmd.Namespace[1];
+        var tailArr = new string[1];
 
         NamespaceCmd.getNamespaceForQualName( interp, myName, null, myFlags, nsArr, altNsArr, dummyNsArr, tailArr );
 
@@ -2035,7 +2034,7 @@ namespace tcl.lang
 
     internal static string getVariableFullName( Interp interp, Var var )
     {
-      System.Text.StringBuilder buff = new System.Text.StringBuilder();
+      var buff = new StringBuilder();
 
       // Add the full name of the containing namespace (if any), followed by
       // the "::" separator, then the variable name.

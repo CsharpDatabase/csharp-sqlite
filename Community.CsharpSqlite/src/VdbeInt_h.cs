@@ -45,7 +45,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2009-12-07 16:39:13 1ed88e9d01e9eda5cbc622e7614277f29bcc551c
+    **  SQLITE_SOURCE_ID: 2011-01-28 17:03:50 ed759d5a9edb3bba5f48f243df47be29e3fe8cd7
     **
     **  $Header$
     *************************************************************************
@@ -74,17 +74,15 @@ namespace Community.CsharpSqlite
     **
     ** Every cursor that the virtual machine has open is represented by an
     ** instance of the following structure.
-    **
-    ** If the VdbeCursor.isTriggerRow flag is set it means that this cursor is
-    ** really a single row that represents the NEW or OLD pseudo-table of
-    ** a row trigger.  The data for the row is stored in VdbeCursor.pData and
-    ** the rowid is in VdbeCursor.iKey.
     */
     public class VdbeCursor
     {
       public BtCursor pCursor;     /* The cursor structure of the backend */
-      public int iDb;              /* Index of cursor database in db.aDb[] (or -1) */
-      public i64 lastRowid;        /* Last rowid from a Next or NextIdx operation */
+      public Btree pBt;            /* Separate file holding temporary table */
+      public KeyInfo pKeyInfo;     /* Info about index keys needed by index cursors */
+      public int iDb;              /* Index of cursor database in db->aDb[] (or -1) */
+      public int pseudoTableReg;   /* Register holding pseudotable content. */
+      public int nField;           /* Number of fields in the header */
       public bool zeroed;          /* True if zeroed out and ready for reuse */
       public bool rowidIsValid;    /* True if lastRowid is valid */
       public bool atFirst;         /* True if pointing to first entry */
@@ -93,16 +91,14 @@ namespace Community.CsharpSqlite
       public bool deferredMoveto;  /* A call to sqlite3BtreeMoveto() is needed */
       public bool isTable;         /* True if a table requiring integer keys */
       public bool isIndex;         /* True if an index containing keys only - no data */
-      public i64 movetoTarget;     /* Argument to the deferred sqlite3BtreeMoveto() */
-      public Btree pBt;            /* Separate file holding temporary table */
-      public int pseudoTableReg;   /* Register holding pseudotable content. */
-      public KeyInfo pKeyInfo;     /* Info about index keys needed by index cursors */
-      public int nField;           /* Number of fields in the header */
-      public int seqCount;         /* Sequence counter */
+      public bool isOrdered;       /* True if the underlying table is BTREE_UNORDERED */
 #if !SQLITE_OMIT_VIRTUALTABLE
 public sqlite3_vtab_cursor pVtabCursor;  /* The cursor for a virtual table */
 public readonly sqlite3_module pModule; /* Module for cursor pVtabCursor */
 #endif
+      public i64 seqCount;         /* Sequence counter */
+      public i64 movetoTarget;     /* Argument to the deferred sqlite3BtreeMoveto() */
+      public i64 lastRowid;        /* Last rowid from a Next or NextIdx operation */
 
       /* Result of last sqlite3BtreeMoveto() done by an OP_NotExists or
       ** OP_IsUnique opcode on this cursor. */
@@ -140,27 +136,35 @@ public readonly sqlite3_module pModule; /* Module for cursor pVtabCursor */
     ** restoring the state of the VM to as it was before the sub-program
     ** began executing.
     **
-    ** Frames are stored in a linked list headed at Vdbe.pParent. Vdbe.pParent
-    ** is the parent of the current frame, or zero if the current frame
-    ** is the main Vdbe program.
+    ** The memory for a VdbeFrame object is allocated and managed by a memory
+    ** cell in the parent (calling) frame. When the memory cell is deleted or
+    ** overwritten, the VdbeFrame object is not freed immediately. Instead, it
+    ** is linked into the Vdbe.pDelFrame list. The contents of the Vdbe.pDelFrame
+    ** list is deleted when the VM is reset in VdbeHalt(). The reason for doing
+    ** this instead of deleting the VdbeFrame immediately is to avoid recursive
+    ** calls to sqlite3VdbeMemRelease() when the memory cells belonging to the
+    ** child frame are released.
+    **
+    ** The currently executing frame is stored in Vdbe.pFrame. Vdbe.pFrame is
+    ** set to NULL if the currently executing frame is the main program.
     */
     //typedef struct VdbeFrame VdbeFrame;
     public class VdbeFrame
     {
       public Vdbe v;                 /* VM this frame belongs to */
-      public int pc;                 /* Program Counter */
-      public Op[] aOp;               /* Program instructions */
+      public int pc;                 /* Program Counter in parent (calling) frame */
+      public Op[] aOp;               /* Program instructions for parent frame */
       public int nOp;                /* Size of aOp array */
-      public Mem[] aMem;             /* Array of memory cells */
+      public Mem[] aMem;             /* Array of memory cells for parent frame */
       public int nMem;               /* Number of entries in aMem */
-      public VdbeCursor[] apCsr;     /* Element of Vdbe cursors */
+      public VdbeCursor[] apCsr;     /* Array of Vdbe cursors for parent frame */
       public u16 nCursor;            /* Number of entries in apCsr */
       public int token;              /* Copy of SubProgram.token */
       public int nChildMem;          /* Number of memory cells for child frame */
       public int nChildCsr;          /* Number of cursors for child frame */
       public i64 lastRowid;          /* Last insert rowid (sqlite3.lastRowid) */
       public int nChange;            /* Statement changes (Vdbe.nChanges)     */
-      public VdbeFrame pParent;      /* Parent of this frame */
+      public VdbeFrame pParent;      /* Parent of this frame, or NULL if parent is main */
 //
 // Needed for C# Implementation
 //
@@ -177,16 +181,13 @@ public readonly sqlite3_module pModule; /* Module for cursor pVtabCursor */
     /*
     ** Internally, the vdbe manipulates nearly all SQL values as Mem
     ** structures. Each Mem struct may cache multiple representations (string,
-    ** integer etc.) of the same value.  A value (and therefore Mem structure)
-    ** has the following properties:
-    **
-    ** Each value has a manifest type. The manifest type of the value stored
-    ** in a Mem struct is returned by the MemType(Mem*) macro. The type is
-    ** one of SQLITE_NULL, SQLITE_INTEGER, SQLITE_REAL, SQLITE_TEXT or
-    ** SQLITE_BLOB.
+    ** integer etc.) of the same value.
     */
     public class Mem
     {
+      public sqlite3 db;            /* The associated database connection */
+      public string z;              /* String value */
+      public double r;              /* Real value */
       public struct union_ip
       {
 #if DEBUG_CLASS_MEM || DEBUG_CLASS_ALL
@@ -197,7 +198,7 @@ get { return _i; }
 set { _i = value; }
 }
 #else
-        public i64 i;               /* Integer value. */
+        public i64 i;               /* Integer value used when MEM_Int is set in flags */
 #endif
         public int nZero;           /* Used when bit MEM_Zero is set in flags */
         public FuncDef pDef;        /* Used only when flags==MEM_Agg */
@@ -205,9 +206,6 @@ set { _i = value; }
         public VdbeFrame pFrame;    /* Used when flags==MEM_Frame */
       };
       public union_ip u;
-      public double r;              /* Real value */
-      public sqlite3 db;            /* The associated database connection */
-      public string z;              /* String value */
       public byte[] zBLOB;          /* BLOB value */
       public int n;                 /* Number of characters in string value, excluding '\0' */
 #if DEBUG_CLASS_MEM || DEBUG_CLASS_ALL
@@ -222,6 +220,10 @@ set { _flags = value; }
 #endif
       public u8 type = SQLITE_NULL; /* One of SQLITE_NULL, SQLITE_TEXT, SQLITE_INTEGER, etc */
       public u8 enc;                /* SQLITE_UTF8, SQLITE_UTF16BE, SQLITE_UTF16LE */
+#if SQLITE_DEBUG
+      public Mem pScopyFrom;        /* This Mem is a shallow copy of pScopyFrom */
+      public object pFiller;        /* So that sizeof(Mem) is a multiple of 8 */
+#endif
       public dxDel xDel;            /* If not null, call this function to delete Mem.z */
       // Not used under c#
       //public string zMalloc;      /* Dynamic buffer allocated by sqlite3Malloc() */
@@ -232,13 +234,16 @@ set { _flags = value; }
       public object _MD5Context;    /* Used when C# overload Z as MD5 context */
 
 
-      public void CopyTo( Mem ct )
+      public void CopyTo(ref Mem ct )
       {
+        if ( ct == null )
+          ct = new Mem();
         ct.u = u;
         ct.r = r;
         ct.db = db;
         ct.z = z;
-        if ( zBLOB == null ) ct.zBLOB = null;
+        if ( zBLOB == null )
+          ct.zBLOB = null;
         else
         {
           ct.zBLOB = sqlite3Malloc( zBLOB.Length );
@@ -264,9 +269,6 @@ set { _flags = value; }
     ** database (see below for exceptions). If the MEM_Term flag is also
     ** set, then the string is nul terminated. The MEM_Int and MEM_Real
     ** flags may coexist with the MEM_Str flag.
-    **
-    ** Multiple of these values can appear in Mem.flags.  But only one
-    ** at a time can appear in Mem.type.
     */
     //#define MEM_Null      0x0001   /* Value is NULL */
     //#define MEM_Str       0x0002   /* Value is a string */
@@ -275,6 +277,7 @@ set { _flags = value; }
     //#define MEM_Blob      0x0010   /* Value is a BLOB */
     //#define MEM_RowSet    0x0020   /* Value is a RowSet object */
     //#define MEM_Frame     0x0040   /* Value is a VdbeFrame object */
+    //#define MEM_Invalid   0x0080   /* Value is undefined */
     //#define MEM_TypeMask  0x00ff   /* Mask of type bits */
     const int MEM_Null = 0x0001;
     const int MEM_Str = 0x0002;
@@ -283,6 +286,7 @@ set { _flags = value; }
     const int MEM_Blob = 0x0010;
     const int MEM_RowSet = 0x0020;
     const int MEM_Frame = 0x0040;
+    const int MEM_Invalid = 0x0080;
     const int MEM_TypeMask = 0x00ff;
 
     /* Whenever Mem contains a valid string or blob representation, one of
@@ -318,11 +322,18 @@ set { _flags = value; }
     //   ((p)->flags = ((p)->flags&~(MEM_TypeMask|MEM_Zero))|f)
     static void MemSetTypeFlag( Mem p, int f ) { p.flags = (u16)( p.flags & ~( MEM_TypeMask | MEM_Zero ) | f ); }// TODO -- Convert back to inline for speed
 
-#if  SQLITE_OMIT_INCRBLOB
-    //#undef MEM_Zero
+/*
+** Return true if a memory cell is not marked as invalid.  This macro
+** is for use inside assert() statements only.
+*/
+#if SQLITE_DEBUG
+//#define memIsValid(M)  ((M)->flags & MEM_Invalid)==0
+    static bool memIsValid( Mem M ) { return ( ( M ).flags & MEM_Invalid ) == 0; }
+#else
+    static bool memIsValid( Mem M ) { return true; }
 #endif
 
-    /* A VdbeFunc is just a FuncDef (defined in sqliteInt.h) that contains
+/* A VdbeFunc is just a FuncDef (defined in sqliteInt.h) that contains
 ** additional information about auxiliary information bound to arguments
 ** of the function.  This is used to implement the sqlite3_get_auxdata()
 ** and sqlite3_set_auxdata() APIs.  The "auxdata" is some auxiliary data
@@ -368,23 +379,10 @@ set { _flags = value; }
     };
 
     /*
-    ** A Set structure is used for quick testing to see if a value
-    ** is part of a small set.  Sets are used to implement code like
-    ** this:
-    **            x.y IN ('hi','hoo','hum')
-    */
-    //typedef struct Set Set;
-    public class Set
-    {
-      Hash hash;             /* A set is just a hash table */
-      HashElem prev;         /* Previously accessed hash elemen */
-    };
-
-    /*
     ** An instance of the virtual machine.  This structure contains the complete
     ** state of the virtual machine.
     **
-    ** The "sqlite3_stmt" structure pointer that is returned by sqlite3_compile()
+    ** The "sqlite3_stmt" structure pointer that is returned by sqlite3_prepare()
     ** is really a pointer to an instance of this structure.
     **
     ** The Vdbe.inVtabMethod variable is set to non-zero for the duration of
@@ -398,32 +396,32 @@ set { _flags = value; }
     public class Vdbe
     {
       public sqlite3 db;             /* The database connection that owns this statement */
-      public Vdbe pPrev;             /* Linked list of VDBEs with the same Vdbe.db */
-      public Vdbe pNext;             /* Linked list of VDBEs with the same Vdbe.db */
-      public int nOp;                /* Number of instructions in the program */
-      public int nOpAlloc;           /* Number of slots allocated for aOp[] */
       public Op[] aOp;               /* Space to hold the virtual machine's program */
-      public int nLabel;             /* Number of labels used */
-      public int nLabelAlloc;        /* Number of slots allocated in aLabel[] */
-      public int[] aLabel;           /* Space to hold the labels */
+      public Mem[] aMem;             /* The memory locations */
       public Mem[] apArg;            /* Arguments to currently executing user function */
       public Mem[] aColName;         /* Column names to return */
       public Mem[] pResultSet;       /* Pointer to an array of results */
+      public int nMem;               /* Number of memory locations currently allocated */
+      public int nOp;                /* Number of instructions in the program */
+      public int nOpAlloc;           /* Number of slots allocated for aOp[] */
+      public int nLabel;             /* Number of labels used */
+      public int nLabelAlloc;        /* Number of slots allocated in aLabel[] */
+      public int[] aLabel;           /* Space to hold the labels */
       public u16 nResColumn;         /* Number of columns in one row of the result set */
       public u16 nCursor;            /* Number of slots in apCsr[] */
+      public u32 magic;              /* Magic number for sanity checking */
+      public string zErrMsg;         /* Error message written here */
+      public Vdbe pPrev;             /* Linked list of VDBEs with the same Vdbe.db */
+      public Vdbe pNext;             /* Linked list of VDBEs with the same Vdbe.db */
       public VdbeCursor[] apCsr;     /* One element of this array for each open cursor */
-      public u8 errorAction;         /* Recovery action to do in case of an error */
-      public u8 okVar;               /* True if azVar[] has been initialized */
-      public ynVar nVar;             /* Number of entries in aVar[] */
       public Mem[] aVar;             /* Values for the OP_Variable opcode. */
       public string[] azVar;         /* Name of variables */
-      public u32 magic;              /* Magic number for sanity checking */
-      public int nMem;               /* Number of memory locations currently allocated */
-      public Mem[] aMem;             /* The memory locations */
+      public ynVar nVar;             /* Number of entries in aVar[] */
       public u32 cacheCtr;           /* VdbeCursor row cache generation counter */
       public int pc;                 /* The program counter */
       public int rc;                 /* Value to return */
-      public string zErrMsg;         /* Error message written here */
+      public u8 errorAction;         /* Recovery action to do in case of an error */
+      public u8 okVar;               /* True if azVar[] has been initialized */
       public int explain;            /* True if EXPLAIN present on SQL command */
       public bool changeCntOn;       /* True to update the change-counter */
       public bool expired;           /* True if the VM needs to be recompiled */
@@ -435,20 +433,24 @@ set { _flags = value; }
       public int nChange;            /* Number of db changes made since last reset */
       public bool isPrepareV2;       /* True if prepared with prepare_v2() */
       public int btreeMask;          /* Bitmask of db.aDb[] entries referenced */
-      public u64 startTime;          /* Time when query started - used for profiling */
+      public int iStatement;         /* Statement number (or 0 if has not opened stmt) */
+      public int[] aCounter = new int[3]; /* Counters used by sqlite3_stmt_status() */
       public BtreeMutexArray aMutex; /* An array of Btree used here and needing locks */
-      public int[] aCounter = new int[2]; /* Counters used by sqlite3_stmt_status() */
-      public string zSql = "";       /* Text of the SQL statement that generated this */
-      public object pFree;           /* Free this when deleting the vdbe */
+#if !SQLITE_OMIT_TRACE
+      public i64 startTime;          /* Time when query started - used for profiling */
+#endif
       public i64 nFkConstraint;      /* Number of imm. FK constraints this VM */
       public i64 nStmtDefCons;       /* Number of def. constraints when stmt started */
-      public int iStatement;         /* Statement number (or 0 if has not opened stmt) */
+      public string zSql = "";       /* Text of the SQL statement that generated this */
+      public object pFree;           /* Free this when deleting the vdbe */
 #if SQLITE_DEBUG
       public FILE trace;                  /* Write an execution trace here, if not NULL */
 #endif
       public VdbeFrame pFrame;       /* Parent frame */
+      public VdbeFrame pDelFrame;    /* List of frame objects to free on VM reset */
       public int nFrame;             /* Number of frames in pFrame list */
       public u32 expmask;            /* Binding to these vars invalidates VM */
+      public SubProgram pProgram;    /* Linked list of all sub-programs used by VM */
 
       public Vdbe Copy()
       {
@@ -493,7 +495,9 @@ set { _flags = value; }
         ct.readOnly = readOnly;
         ct.nChange = nChange;
         ct.isPrepareV2 = isPrepareV2;
+#if !SQLITE_OMIT_TRACE
         ct.startTime = startTime;
+#endif
         ct.btreeMask = btreeMask;
         ct.aMutex = aMutex;
         aCounter.CopyTo( ct.aCounter, 0 );
@@ -508,7 +512,7 @@ set { _flags = value; }
         ct.pFrame = pFrame;
         ct.nFrame = nFrame;
         ct.expmask = expmask;
-
+        ct.pProgram = pProgram;
 #if SQLITE_SSE
 ct.fetchId=fetchId;
 ct.lru=lru;
@@ -537,7 +541,7 @@ ct.pLruNext=pLruNext;
     //void sqlite3VdbeFreeCursor(Vdbe *, VdbeCursor*);
     //void sqliteVdbePopStack(Vdbe*,int);
     //int sqlite3VdbeCursorMoveto(VdbeCursor*);
-    //#if defined(SQLITE_DEBUG) || defined(VDBE_PROFILE)
+    //#if (SQLITE_DEBUG) || defined(VDBE_PROFILE)
     //void sqlite3VdbePrintOp(FILE*, int, Op*);
     //#endif
     //u32 sqlite3VdbeSerialTypeLen(u32);
@@ -587,6 +591,11 @@ ct.pLruNext=pLruNext;
     //void sqlite3VdbeFrameDelete(VdbeFrame*);
     //int sqlite3VdbeFrameRestore(VdbeFrame *);
     //void sqlite3VdbeMemStoreType(Mem *pMem);  
+
+#if SQLITE_DEBUG
+//void sqlite3VdbeMemPrepareToChange(Vdbe*,Mem*);
+#endif
+
 #if !SQLITE_OMIT_FOREIGN_KEY
     //int sqlite3VdbeCheckFk(Vdbe *, int);
 #else

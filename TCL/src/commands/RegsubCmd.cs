@@ -1,3 +1,4 @@
+using System.Text;
 /*
 * RegsubCmd.java
 *
@@ -11,10 +12,9 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/commands/RegsubCmd.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: RegsubCmd.java,v 1.4 2000/02/23 22:07:23 mo Exp $
 */
-using System;
 using Regexp = sunlabs.brazil.util.regexp.Regexp;
 using Regsub = sunlabs.brazil.util.regexp.Regsub;
 namespace tcl.lang
@@ -24,8 +24,8 @@ namespace tcl.lang
 	
 	class RegsubCmd : Command
 	{
-		
-		private static readonly string[] validOpts = new string[]{"-all", "-nocase", "--"};
+
+    private static readonly string[] validOpts = new string[] { "-all", "-nocase", "--" };
 		private const int OPT_ALL = 0;
 		private const int OPT_NOCASE = 1;
 		private const int OPT_LAST = 2;
@@ -95,8 +95,8 @@ opts_brk: ;
 				}
 				else
 				{
-					System.Text.StringBuilder sb = new System.Text.StringBuilder();
-					Regsub s = new Regsub(r, inString);
+					var sb = new StringBuilder();
+					var s = new Regsub(r, inString);
 					while (s.nextMatch())
 					{
 						count++;

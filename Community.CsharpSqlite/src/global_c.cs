@@ -25,7 +25,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2010-03-09 19:31:43 4ae453ea7be69018d8c16eb8dabe05617397dc4d
+    **  SQLITE_SOURCE_ID: 2010-08-23 18:52:01 42537b60566f288167f1b5864a5435986838e3a3
     **
     **  $Header$
     *************************************************************************
@@ -195,6 +195,13 @@ namespace Community.CsharpSqlite
     ** read-only.
     */
     static FuncDefHash sqlite3GlobalFunctions;
+/*
+** Constant tokens for values 0 and 1.
+*/
+static Token[] sqlite3IntTokens =  {
+   new Token( "0", 1 ),
+   new Token( "1", 1 )
+};
 
     /*
     ** The value of the "pending" byte must be 0x40000000 (1 byte past the
@@ -214,7 +221,9 @@ namespace Community.CsharpSqlite
     ** Changing the pending byte during operating results in undefined
     ** and dileterious behavior.
     */
+#if !SQLITE_OMIT_WSD
     static int sqlite3PendingByte = 0x40000000;
+#endif
 
     //#include "opcodes.h"
     /*

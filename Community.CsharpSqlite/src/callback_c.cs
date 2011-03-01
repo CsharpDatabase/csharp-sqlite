@@ -30,7 +30,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2009-12-07 16:39:13 1ed88e9d01e9eda5cbc622e7614277f29bcc551c
+    **  SQLITE_SOURCE_ID: 2010-12-07 20:14:09 a586a4deeb25330037a49df295b36aaf624d0f45
     **
     **  $Header$
     *************************************************************************
@@ -198,7 +198,7 @@ sqlite3ValueFree(ref pTmp);
     {
       CollSeq[] pColl;
       int nName = sqlite3Strlen30( zName );
-      pColl = (CollSeq[])sqlite3HashFind( db.aCollSeq, zName, nName );
+      pColl = sqlite3HashFind( db.aCollSeq, zName, nName,(CollSeq[])null );
 
       if ( ( null == pColl ) && create != 0 )
       {
@@ -217,8 +217,9 @@ sqlite3ValueFree(ref pTmp);
           pColl[2].enc = SQLITE_UTF16BE;
           //memcpy(pColl[0].zName, zName, nName);
           //pColl[0].zName[nName] = 0;
-          pDel = (CollSeq)sqlite3HashInsert( ref db.aCollSeq, pColl[0].zName, nName, pColl );
-
+          CollSeq[] pDelArray = sqlite3HashInsert( ref db.aCollSeq, pColl[0].zName, nName, pColl );
+          if ( pDelArray != null )
+            pDel = pDelArray[0];
           /* If a malloc() failure occurred in sqlite3HashInsert(), it will
           ** return the pColl pointer to be deleted (because it wasn't added
           ** to the hash table).
@@ -429,19 +430,24 @@ sqlite3ValueFree(ref pTmp);
 
       /* If no match is found, search the built-in functions.
       **
+      ** If the SQLITE_PreferBuiltin flag is set, then search the built-in
+      ** functions even if a prior app-defined function was found.  And give
+      ** priority to built-in functions.
+      **
       ** Except, if createFlag is true, that means that we are trying to
-      ** install a new function.  Whatever FuncDef structure is returned will
+      ** install a new function.  Whatever FuncDef structure is returned it will
       ** have fields overwritten with new information appropriate for the
       ** new function.  But the FuncDefs for built-in functions are read-only.
       ** So we must not search for built-ins when creating a new function.
       */
-      if ( 0 == createFlag && pBest == null )
+      if (0 == createFlag && (pBest == null || (db.flags & SQLITE_PreferBuiltin) != 0))
       {
 #if SQLITE_OMIT_WSD
 FuncDefHash pHash = GLOBAL( FuncDefHash, sqlite3GlobalFunctions );
 #else
         FuncDefHash pHash = sqlite3GlobalFunctions;
 #endif
+        bestScore = 0;
         p = functionSearch( pHash, h, zName, nName );
         while ( p != null )
         {
@@ -487,32 +493,32 @@ FuncDefHash pHash = GLOBAL( FuncDefHash, sqlite3GlobalFunctions );
     */
     static void sqlite3SchemaFree( Schema p )
     {
-      Hash temp1;
-      Hash temp2;
-      HashElem pElem;
-      Schema pSchema = p;
+      p.Clear();
+      //Hash temp1;
+      //Hash temp2;
+      //HashElem pElem;
+      //Schema pSchema = p;
 
-      temp1 = pSchema.tblHash;
-      temp2 = pSchema.trigHash;
-      sqlite3HashInit( pSchema.trigHash );
-      sqlite3HashClear( pSchema.idxHash );
-      for ( pElem = sqliteHashFirst( temp2 ); pElem != null; pElem = sqliteHashNext( pElem ) )
-      {
-        Trigger pTrigger = (Trigger)sqliteHashData( pElem );
-        sqlite3DeleteTrigger( null, ref pTrigger );
-      }
-      sqlite3HashClear( temp2 );
-      sqlite3HashInit( pSchema.trigHash );
-      for ( pElem = temp1.first; pElem != null; pElem = pElem.next )//sqliteHashFirst(&temp1); pElem; pElem = sqliteHashNext(pElem))
-      {
-        Table pTab = (Table)pElem.data; //sqliteHashData(pElem);
-        Debug.Assert( pTab.dbMem == null );
-        sqlite3DeleteTable( ref pTab );
-      }
-      sqlite3HashClear( temp1 );
-      sqlite3HashClear( pSchema.fkeyHash );
-      pSchema.pSeqTab = null;
-      pSchema.flags = (u16)( pSchema.flags & ~DB_SchemaLoaded );
+      //temp1 = pSchema.tblHash;
+      //temp2 = pSchema.trigHash;
+      //sqlite3HashInit( pSchema.trigHash );
+      //sqlite3HashClear( pSchema.idxHash );
+      //for ( pElem = sqliteHashFirst( temp2 ); pElem != null; pElem = sqliteHashNext( pElem ) )
+      //{
+      //  Trigger pTrigger = (Trigger)sqliteHashData( pElem );
+      //  sqlite3DeleteTrigger( null, ref pTrigger );
+      //}
+      //sqlite3HashClear( temp2 );
+      //sqlite3HashInit( pSchema.trigHash );
+      //for ( pElem = temp1.first; pElem != null; pElem = pElem.next )//sqliteHashFirst(&temp1); pElem; pElem = sqliteHashNext(pElem))
+      //{
+      //  Table pTab = (Table)pElem.data; //sqliteHashData(pElem);
+      //  sqlite3DeleteTable(null, ref pTab );
+      //}
+      //sqlite3HashClear( temp1 );
+      //sqlite3HashClear( pSchema.fkeyHash );
+      //pSchema.pSeqTab = null;
+      //pSchema.flags = (u16)( pSchema.flags & ~DB_SchemaLoaded );
     }
 
     /*
@@ -528,7 +534,7 @@ FuncDefHash pHash = GLOBAL( FuncDefHash, sqlite3GlobalFunctions );
       }
       else
       {
-        p = new Schema(); // (Schema*)sqlite3MallocZero(Schema).Length;
+        p = new Schema(); // (Schema *)sqlite3DbMallocZero(0, sizeof(Schema));
       }
       if ( p == null )
       {

@@ -11,7 +11,7 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/commands/ExecCmd.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: ExecCmd.java,v 1.8 2002/01/19 00:15:01 mdejong Exp $
 */
 using System;
@@ -42,7 +42,7 @@ namespace tcl.lang
       //bool keepNewline; /* Retains newline in pipline output */
       System.Diagnostics.Process p; /* The exec-ed process               */
       string argStr; /* Conversion of argv to a string    */
-      System.Text.StringBuilder sbuf;
+      StringBuilder sbuf;
 
       /*
       * Check for a leading "-keepnewline" argument.
@@ -134,7 +134,7 @@ namespace tcl.lang
 
 
         //Make buffer for the results of the subprocess execution
-        sbuf = new System.Text.StringBuilder();
+        sbuf = new StringBuilder();
 
         //read data on stdout stream into  result buffer
         readStreamIntoBuffer( p.StandardOutput.BaseStream, sbuf );
@@ -201,10 +201,10 @@ namespace tcl.lang
     }
 
 
-    internal static int readStreamIntoBuffer( System.IO.Stream in_Renamed, System.Text.StringBuilder sbuf )
+    internal static int readStreamIntoBuffer( System.IO.Stream in_Renamed, StringBuilder sbuf )
     {
       int numRead = 0;
-      System.IO.StreamReader br = new System.IO.StreamReader( new System.IO.StreamReader( in_Renamed ).BaseStream, System.Text.Encoding.UTF7 );
+      var br = new System.IO.StreamReader( new System.IO.StreamReader( in_Renamed ).BaseStream, System.Text.Encoding.UTF7 );
 
       try
       {
@@ -244,7 +244,7 @@ namespace tcl.lang
         return str;
 
       char[] arr = str.ToCharArray();
-      System.Text.StringBuilder sb = new System.Text.StringBuilder( 50 );
+      var sb = new StringBuilder( 50 );
 
       for ( int i = 0 ; i < arr.Length ; i++ )
       {
@@ -266,7 +266,7 @@ namespace tcl.lang
 
     private System.Diagnostics.Process execWin( Interp interp, TclObject[] argv, int first, int last )
     {
-      StringBuilder sb = new StringBuilder();
+      var sb = new StringBuilder();
       for ( int i = ( first + 1 ) ; i < last ; i++ )
       {
         sb.Append( '"' );
@@ -275,7 +275,7 @@ namespace tcl.lang
         sb.Append( ' ' );
       }
 
-      System.Diagnostics.Process proc = new System.Diagnostics.Process();
+      var proc = new System.Diagnostics.Process();
       proc.StartInfo.UseShellExecute = false;
       proc.StartInfo.RedirectStandardOutput = true;
       proc.StartInfo.RedirectStandardError = true;
@@ -294,7 +294,7 @@ namespace tcl.lang
     private System.Diagnostics.Process execReflection( Interp interp, TclObject[] argv, int first, int last )
     {
 
-      string[] strv = new string[last - first];
+      var strv = new string[last - first];
 
       for ( int i = first, j = 0 ; i < last ; j++, i++ )
       {
@@ -302,7 +302,7 @@ namespace tcl.lang
         strv[j] = argv[i].ToString();
       }
 
-      System.Object[] methodArgs = new System.Object[3];
+      var methodArgs = new System.Object[3];
       methodArgs[0] = strv; // exec command arguments
       methodArgs[1] = null; // inherit all environment variables
       methodArgs[2] = interp.getWorkingDir();
@@ -341,7 +341,7 @@ namespace tcl.lang
     {
       {
         // Runtime.exec(String[] cmdArr, String[] envArr, File currDir)
-        System.Type[] parameterTypes = new System.Type[] { typeof( string[] ), typeof( string[] ), typeof( System.IO.FileInfo ) };
+        var parameterTypes = new System.Type[] { typeof( string[] ), typeof( string[] ), typeof( System.IO.FileInfo ) };
         try
         {
           execMethod = System.Diagnostics.Process.GetCurrentProcess().GetType().GetMethod( "exec", (System.Type[])parameterTypes );

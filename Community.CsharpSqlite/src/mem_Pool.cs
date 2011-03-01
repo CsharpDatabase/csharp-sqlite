@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 using sqlite3_int64 = System.Int64;
+using u32 = System.UInt32;
 using System.Text;
 
 namespace Community.CsharpSqlite
@@ -32,7 +33,8 @@ namespace Community.CsharpSqlite
     */
 #if SQLITE_POOL_MEM
 #if TRUE
-static byte[] sqlite3MemMalloc(int nByte) { return new byte[nByte]; }
+    static byte[] sqlite3MemMalloc(u32 nByte) { return new byte[nByte]; }
+    static byte[] sqlite3MemMalloc(int nByte) { return new byte[nByte]; }
 static int[] sqlite3MemMallocInt(int nInt) { return new int[nInt]; }
 #else
     static byte[] sqlite3MemMalloc(int nByte)
@@ -119,7 +121,8 @@ static Mem sqlite3MemMallocMem(Mem dummy)
         mem0.msMem.cached++;
         mem0.msMem.next--;
       }
-      else pMem = new Mem();
+      else
+        pMem = new Mem();
       return pMem;
     }
     static BtCursor sqlite3MemMallocBtCursor( BtCursor dummy )
@@ -129,11 +132,13 @@ static Mem sqlite3MemMallocMem(Mem dummy)
       if (mem0.msBtCursor.next > 0 && mem0.aBtCursor[mem0.msBtCursor.next] != null)
       {
         pBtCursor = mem0.aBtCursor[mem0.msBtCursor.next];
+        Debug.Assert( pBtCursor.pNext == null && pBtCursor.pPrev == null && pBtCursor.wrFlag == 0 );
         mem0.aBtCursor[mem0.msBtCursor.next] = null;
         mem0.msBtCursor.cached++;
         mem0.msBtCursor.next--;
       }
-      else pBtCursor = new BtCursor();
+      else
+        pBtCursor = new BtCursor();
       return pBtCursor;
     }
 #endif
@@ -324,7 +329,7 @@ static void sqlite3MemFreeBtCursor(ref BtCursor pPrior) { pPrior = null; }
       //  p = (sqlite3_int64*)pPrior;
       //  p--;
       //  return p[0];
-      return (int)pPrior.Length;
+      return pPrior == null ? 0 : (int)pPrior.Length;
     }
 
     /*
@@ -332,7 +337,7 @@ static void sqlite3MemFreeBtCursor(ref BtCursor pPrior) { pPrior = null; }
     */
     static int sqlite3MemRoundup(int n)
     {
-      return ROUND8(n);
+      return n;//      ROUND8( n );
     }
 
     /*
@@ -368,7 +373,7 @@ static void sqlite3MemFreeBtCursor(ref BtCursor pPrior) { pPrior = null; }
     */
     static void sqlite3MemSetDefault()
     {
-      sqlite3_mem_methods defaultMethods = new sqlite3_mem_methods(
+      var defaultMethods = new sqlite3_mem_methods(
       sqlite3MemMalloc,
       sqlite3MemMallocInt,
       sqlite3MemMallocMem,

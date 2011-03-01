@@ -79,7 +79,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2009-12-07 16:39:13 1ed88e9d01e9eda5cbc622e7614277f29bcc551c
+    **  SQLITE_SOURCE_ID: 2010-08-23 18:52:01 42537b60566f288167f1b5864a5435986838e3a3
     **
     **  $Header$
     *************************************************************************
@@ -165,7 +165,7 @@ namespace Community.CsharpSqlite
     */
     static RowSet sqlite3RowSetInit( sqlite3 db, object pSpace, u32 N )
     {
-      RowSet p = new RowSet( db, (int)N );
+      var p = new RowSet( db, (int)N );
       //Debug.Assert(N >= ROUND8(sizeof(*p)) );
       //  p = pSpace;
       //  p.pChunk = 0;
@@ -258,7 +258,7 @@ namespace Community.CsharpSqlite
     RowSetEntry pB     /* Second sorted list to be merged */
     )
     {
-      RowSetEntry head = new RowSetEntry();
+      var head = new RowSetEntry();
       RowSetEntry pTail;
 
       pTail = head;
@@ -303,7 +303,7 @@ namespace Community.CsharpSqlite
     {
       u32 i;
       RowSetEntry pEntry;
-      RowSetEntry[] aBucket = new RowSetEntry[40];
+      var aBucket = new RowSetEntry[40];
 
       Debug.Assert( p.isSorted == false );
       //memset(aBucket, 0, sizeof(aBucket));
@@ -343,7 +343,7 @@ namespace Community.CsharpSqlite
       Debug.Assert( pIn != null );
       if ( pIn.pLeft != null )
       {
-        RowSetEntry p = new RowSetEntry();
+        var p = new RowSetEntry();
         rowSetTreeToList( pIn.pLeft, ref  ppFirst, ref  p );
         p.pRight = pIn;
       }
@@ -444,7 +444,8 @@ namespace Community.CsharpSqlite
       }
       if ( p.pTree != null )
       {
-        RowSetEntry pHead = new RowSetEntry(), pTail = new RowSetEntry();
+        var pHead = new RowSetEntry();
+        var pTail = new RowSetEntry();
         rowSetTreeToList( p.pTree, ref  pHead, ref  pTail );
         p.pTree = null;
         p.pEntry = rowSetMerge( p.pEntry, pHead );

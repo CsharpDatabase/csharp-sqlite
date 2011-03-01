@@ -204,4 +204,5 @@ namespace Community.CsharpSqlite.SQLiteClient
 #endif
 		#endregion
 	}
+  public class SQLiteParameter : SqliteParameter { }
 }

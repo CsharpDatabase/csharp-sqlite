@@ -5,6 +5,7 @@ syntax: glob
 
 # Ignore Visual Studio 2008 files
 *~*.*
+*_*.*
 *_p.c
 *.aps
 *.bak
@@ -28,3 +29,4 @@ syntax: glob
 [Db]ebug/
 obj/
 [Rr]elease/
+glob:.hgignore

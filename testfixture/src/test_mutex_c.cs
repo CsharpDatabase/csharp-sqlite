@@ -2,10 +2,11 @@ using System.Diagnostics;
 
 namespace Community.CsharpSqlite
 {
-#if !NO_TCL
+#if TCLSH
   using tcl.lang;
   using Tcl_Interp = tcl.lang.Interp;
   using Tcl_Obj = tcl.lang.TclObject;
+  using System.Text;
 
 
   public partial class Sqlite3
@@ -26,7 +27,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2009-12-07 16:39:13 1ed88e9d01e9eda5cbc622e7614277f29bcc551c
+    **  SQLITE_SOURCE_ID: 2011-01-28 17:03:50 ed759d5a9edb3bba5f48f243df47be29e3fe8cd7
     **
     **  $Header$
     *************************************************************************
@@ -63,13 +64,13 @@ namespace Community.CsharpSqlite
     static test_mutex_globals g = new test_mutex_globals();
 
     /* Return true if the countable mutex is currently held */
-    static int counterMutexHeld( _sqlite3_mutex p )
+    static bool counterMutexHeld( _sqlite3_mutex p )
     {
       return g.m.xMutexHeld( p.pReal );
     }
 
     /* Return true if the countable mutex is not currently held */
-    static int counterMutexNotheld( _sqlite3_mutex p )
+    static bool counterMutexNotheld( _sqlite3_mutex p )
     {
       return g.m.xMutexNotheld( p.pReal );
     }
@@ -82,7 +83,8 @@ namespace Community.CsharpSqlite
     static int counterMutexInit()
     {
       int rc;
-      if ( g.disableInit ) return g.disableInit ? 1 : 0;
+      if ( g.disableInit )
+        return g.disableInit ? 1 : 0;
       rc = g.m.xMutexInit();
       g.isInit = true;
       return rc;
@@ -127,7 +129,7 @@ namespace Community.CsharpSqlite
     static void counterMutexFree( _sqlite3_mutex p )
     {
       Debug.Assert( g.isInit );
-      g.m.xMutexFree( p.pReal );
+      g.m.xMutexFree( ref p.pReal );
       if ( p.eType == SQLITE_MUTEX_FAST || p.eType == SQLITE_MUTEX_RECURSIVE )
       {
         p = null;//free(p);
@@ -151,7 +153,8 @@ namespace Community.CsharpSqlite
     {
       Debug.Assert( g.isInit );
       g.aCounter[p.eType]++;
-      if ( g.disableTry ) return SQLITE_BUSY;
+      if ( g.disableTry )
+        return SQLITE_BUSY;
       return g.m.xMutexTry( p.pReal );
     }
 
@@ -282,7 +285,7 @@ namespace Community.CsharpSqlite
     //  int ii;
     //  char *aName[8] = {
     //    "fast",        "recursive",   "static_master", "static_mem",
-    //    "static_open", "static_prng", "static_lru",    "static_lru2"
+    //    "static_open", "static_prng", "static_lru",    "static_pmem"
     //  };
 
     //  if( objc!=1 ){
@@ -320,7 +323,7 @@ namespace Community.CsharpSqlite
         return TCL.TCL_ERROR;
       }
 
-      for ( ii = 0 ; ii < 8 ; ii++ )
+      for ( ii = 0; ii < 8; ii++ )
       {
         g.aCounter[ii] = 0;
       }
@@ -339,11 +342,11 @@ namespace Community.CsharpSqlite
     Tcl_Obj[] objv )
     {
 #if SQLITE_THREADSAFE
-sqlite3_mutex p = sqlite3_mutex_alloc( SQLITE_MUTEX_FAST );
-string zBuf = "";//[100];
-sqlite3_mutex_free( ref p );
-sqlite3_snprintf( 100, ref zBuf, "%p", p );
-TCL.Tcl_AppendResult( interp, zBuf );
+      sqlite3_mutex p = sqlite3_mutex_alloc( SQLITE_MUTEX_FAST );
+      StringBuilder zBuf = new StringBuilder( 100 );
+      sqlite3_mutex_free( ref p );
+      sqlite3_snprintf( 100, zBuf, "->%p", p );
+      TCL.Tcl_AppendResult( interp, zBuf );
 #endif
       return TCL.TCL_OK;
     }
@@ -373,7 +376,7 @@ TCL.Tcl_AppendResult( interp, zBuf );
     {
       try
       {
-        for ( index = 0 ; index < table.Length ; index++ )
+        for ( index = 0; index < table.Length; index++ )
         { if ( table[index].zName == msg ) return false; }
         return true;
       }
@@ -388,7 +391,7 @@ TCL.Tcl_AppendResult( interp, zBuf );
     Tcl_Obj[] objv
     )
     {
-      ConfigOption[] aOpt = new ConfigOption[] {
+      var aOpt = new ConfigOption[] {
 new ConfigOption("singlethread", SQLITE_CONFIG_SINGLETHREAD),
 new ConfigOption("multithread",  SQLITE_CONFIG_MULTITHREAD),
 new ConfigOption("serialized",   SQLITE_CONFIG_SERIALIZED),
@@ -406,7 +409,7 @@ new ConfigOption(null,0)
 
       if ( Tcl_GetIndexFromObjStruct( interp, objv[1], aOpt, s, "flag", 0, ref i ) )
       {
-        if ( TCL.Tcl_GetIntFromObj( interp, objv[1], ref i ) )
+        if ( TCL.TCL_OK != TCL.Tcl_GetIntFromObj( interp, objv[1], ref i ) )
         {
           return TCL.TCL_ERROR;
         }
@@ -477,7 +480,7 @@ new ConfigOption(null,0)
       //  char *zName;
       //  Tcl_ObjCmdProc *xProc;
       //}
-      _aObjCmd[] aCmd = new _aObjCmd[]{
+      var aCmd = new _aObjCmd[]{
 new _aObjCmd( "sqlite3_shutdown",         test_shutdown ),
 new _aObjCmd( "sqlite3_initialize",       test_initialize ),
 new _aObjCmd( "sqlite3_config",           test_config ),
@@ -491,7 +494,7 @@ new _aObjCmd( "sqlite3_config",           test_config ),
 //new _aCmd( "clear_mutex_counters",    (Tcl_ObjCmdProc)test_clear_mutex_counters ),
 };
       int i;
-      for ( i = 0 ; i < aCmd.Length ; i++ )
+      for ( i = 0; i < aCmd.Length; i++ )
       {//sizeof(aCmd)/sizeof(aCmd[0]); i++){
         TCL.Tcl_CreateObjCommand( interp, aCmd[i].zName, aCmd[i].xProc, null, null );
       }

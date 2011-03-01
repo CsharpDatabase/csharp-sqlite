@@ -12,10 +12,10 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/base/TclIndex.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: TclIndex.java,v 1.5 2003/01/10 01:35:58 mdejong Exp $
 */
-using System;
+using System.Text;
 namespace tcl.lang
 {
 	
@@ -123,7 +123,7 @@ namespace tcl.lang
 				}
 				if (numAbbrev != 1)
 				{
-					System.Text.StringBuilder sbuf = new System.Text.StringBuilder();
+					var sbuf = new StringBuilder();
 					if (numAbbrev > 1)
 					{
 						sbuf.Append("ambiguous ");

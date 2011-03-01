@@ -8,12 +8,13 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/base/TclList.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: TclList.java,v 1.5 2003/01/09 02:15:39 mdejong Exp $
 *
 */
 using System;
 using System.Collections;
+using System.Text;
 
 namespace tcl.lang
 {
@@ -64,7 +65,7 @@ namespace tcl.lang
     public InternalRep duplicate()
     {
       int size = vector.Count;
-      TclList newList = new TclList( size );
+      var newList = new TclList( size );
 
       for ( int i = 0 ; i < size ; i++ )
       {
@@ -85,7 +86,7 @@ namespace tcl.lang
     /// </returns>
     public override string ToString()
     {
-      System.Text.StringBuilder sbuf = new System.Text.StringBuilder();
+      var sbuf = new StringBuilder();
       int size = vector.Count;
 
       try
@@ -139,7 +140,7 @@ namespace tcl.lang
 
       if ( !( rep is TclList ) )
       {
-        TclList tlist = new TclList();
+        var tlist = new TclList();
 
         splitList( interp, tlist.vector, tobj.ToString() );
         tobj.InternalRep = tlist;
@@ -204,9 +205,9 @@ namespace tcl.lang
 
       TclList tlist = (TclList)tobj.InternalRep;
 
-      if ( !String.IsNullOrEmpty( elemObj.stringRep ) && elemObj.stringRep[0] == '{' ) elemObj = TclString.newInstance( elemObj.stringRep.Substring( 1, elemObj.stringRep.Length - 2 ) );
+      if (!String.IsNullOrEmpty(elemObj.stringRep) && elemObj.stringRep.StartsWith("{") && elemObj.stringRep.EndsWith("}")) elemObj = TclString.newInstance(elemObj.stringRep.Substring(1, elemObj.stringRep.Length - 2));
       elemObj.preserve();
-      tlist.vector.Add( elemObj );
+      tlist.vector.Add(elemObj);
     }
 
     /// <summary> Queries the length of the list. If tobj is not a list object,
@@ -252,7 +253,7 @@ namespace tcl.lang
       TclList tlist = (TclList)tobj.InternalRep;
 
       int size = tlist.vector.Count;
-      TclObject[] objArray = new TclObject[size];
+      var objArray = new TclObject[size];
       for ( int i = 0 ; i < size ; i++ )
       {
         objArray[i] = (TclObject)tlist.vector[i];
@@ -426,13 +427,13 @@ namespace tcl.lang
         return;
       }
 
-      TclObject[] objArray = new TclObject[size];
+      var objArray = new TclObject[size];
       for ( int i = 0 ; i < size ; i++ )
       {
         objArray[i] = (TclObject)tlist.vector[i];
       }
 
-      QSort s = new QSort();
+      var s = new QSort();
       int newsize = s.sort( interp, objArray, sortMode, sortIndex, sortIncreasing, command, unique );
 
       for ( int i = 0 ; i < size   ; i++ )

@@ -10,7 +10,7 @@
 * WARRANTIES.
 *
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/commands/VwaitCmd.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: VwaitCmd.java,v 1.2 1999/08/03 03:22:47 mo Exp $
 */
 using System;
@@ -31,7 +31,7 @@ namespace tcl.lang
 				throw new TclNumArgsException(interp, 1, argv, "name");
 			}
 			
-			VwaitTrace trace = new VwaitTrace();
+			var trace = new VwaitTrace();
 			Var.traceVar(interp, argv[1], TCL.VarFlag.GLOBAL_ONLY | TCL.VarFlag.TRACE_WRITES | TCL.VarFlag.TRACE_UNSETS, trace);
 			
 			int foundEvent = 1;

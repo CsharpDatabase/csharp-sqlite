@@ -9,7 +9,7 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/commands/PutsCmd.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: PutsCmd.java,v 1.6 2002/01/21 06:34:26 mdejong Exp $
 *
 */

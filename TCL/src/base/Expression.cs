@@ -9,7 +9,7 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/base/Expression.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: Expression.java,v 1.10 2003/02/04 00:35:41 mdejong Exp $
 *
 */
@@ -71,8 +71,8 @@ namespace tcl.lang
 		internal static int[] precTable = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 12, 12, 12, 11, 11, 10, 10, 9, 9, 9, 9, 8, 8, 7, 6, 5, 4, 3, 2, 1, 13, 13, 13, 13};
 		
 		// Mapping from operator numbers to strings;  used for error messages.
-		
-		internal static string[] operatorStrings = new string[]{"VALUE", "(", ")", ",", "END", "UNKNOWN", "6", "7", "*", "/", "%", "+", "-", "<<", ">>", "<", ">", "<=", ">=", "==", "!=", "&", "^", "|", "&&", "||", "?", ":", "-", "+", "!", "~","eq","ne"};
+
+    internal static string[] operatorStrings = new string[] { "VALUE", "(", ")", ",", "END", "UNKNOWN", "6", "7", "*", "/", "%", "+", "-", "<<", ">>", "<", ">", "<=", ">=", "==", "!=", "&", "^", "|", "&&", "||", "?", ":", "-", "+", "!", "~", "eq", "ne" };
 		
 		internal Hashtable mathFuncTable;
 		

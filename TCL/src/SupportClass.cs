@@ -9,11 +9,14 @@
 // the architecture of the resulting solution may differ somewhat.
 //
 // Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-//$Header: TCL/src/SupportClass.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+//$Header$
 
 using System;
 using System.Collections;
-
+using System.Globalization;
+using System.IO;
+using System.Reflection;
+using System.Threading;
 
 	/// <summary>
 	/// This interface should be implemented by any class whose instances are intended
@@ -39,16 +42,16 @@ public class SupportClass
 	public class ThreadClass : IThreadRunnable
 	{
 		/// <summary>
-		/// The instance of System.Threading.Thread
+		/// The instance of Thread
 		/// </summary>
-		private System.Threading.Thread threadField;
+		private Thread threadField;
 
 		/// <summary>
 		/// Initializes a new instance of the ThreadClass class
 		/// </summary>
 		public ThreadClass()
 		{
-			threadField = new System.Threading.Thread(new System.Threading.ThreadStart(Run));
+			threadField = new Thread(new ThreadStart(Run));
 		}
 
 		/// <summary>
@@ -57,7 +60,7 @@ public class SupportClass
 		/// <param name="Name">The name of the thread</param>
 		public ThreadClass(string Name)
 		{
-			threadField = new System.Threading.Thread(new System.Threading.ThreadStart(Run));
+			threadField = new Thread(new ThreadStart(Run));
 			this.Name = Name;
 		}
 
@@ -65,9 +68,9 @@ public class SupportClass
 		/// Initializes a new instance of the Thread class.
 		/// </summary>
 		/// <param name="Start">A ThreadStart delegate that references the methods to be invoked when this thread begins executing</param>
-		public ThreadClass(System.Threading.ThreadStart Start)
+		public ThreadClass(ThreadStart Start)
 		{
-			threadField = new System.Threading.Thread(Start);
+			threadField = new Thread(Start);
 		}
 
 		/// <summary>
@@ -75,9 +78,9 @@ public class SupportClass
 		/// </summary>
 		/// <param name="Start">A ThreadStart delegate that references the methods to be invoked when this thread begins executing</param>
 		/// <param name="Name">The name of the thread</param>
-		public ThreadClass(System.Threading.ThreadStart Start, string Name)
+		public ThreadClass(ThreadStart Start, string Name)
 		{
-			threadField = new System.Threading.Thread(Start);
+			threadField = new Thread(Start);
 			this.Name = Name;
 		}
 
@@ -107,7 +110,7 @@ public class SupportClass
 		/// <summary>
 		/// Gets the current thread instance
 		/// </summary>
-		public System.Threading.Thread Instance
+		public Thread Instance
 		{
 			get
 			{
@@ -138,7 +141,7 @@ public class SupportClass
 		/// <summary>
 		/// Gets or sets a value indicating the scheduling priority of a thread
 		/// </summary>
-		public System.Threading.ThreadPriority Priority
+		public ThreadPriority Priority
 		{
 			get
 			{
@@ -192,7 +195,7 @@ public class SupportClass
 		{
 			lock(this)
 			{
-				threadField.Join(new System.TimeSpan(MiliSeconds * 10000));
+				threadField.Join(new TimeSpan(MiliSeconds * 10000));
 			}
 		}
 
@@ -205,7 +208,7 @@ public class SupportClass
 		{
 			lock(this)
 			{
-				threadField.Join(new System.TimeSpan(MiliSeconds * 10000 + NanoSeconds * 100));
+				threadField.Join(new TimeSpan(MiliSeconds * 10000 + NanoSeconds * 100));
 			}
 		}
 
@@ -234,7 +237,7 @@ public class SupportClass
 		/// Calling this method usually terminates the thread.
 		/// </summary>
 		/// <param name="stateInfo">An object that contains application-specific information, such as state, which can be used by the thread being aborted</param>
-		public void Abort(System.Object stateInfo)
+		public void Abort(Object stateInfo)
 		{
 			lock(this)
 			{
@@ -265,8 +268,8 @@ public class SupportClass
 		/// <returns>The currently running thread</returns>
 		public static ThreadClass Current()
 		{
-			ThreadClass CurrentThread = new ThreadClass();
-			CurrentThread.Instance = System.Threading.Thread.CurrentThread;
+			var CurrentThread = new ThreadClass();
+			CurrentThread.Instance = Thread.CurrentThread;
 			return CurrentThread;
 		}
 	}
@@ -279,9 +282,9 @@ public class SupportClass
 	/// <param name="arrayList">The ArrayList instance</param>
 	/// <param name="element">The element to remove</param>
 	/// <returns>True if item is found in the ArrayList; otherwise, false</returns>
-	public static System.Boolean VectorRemoveElement(ArrayList arrayList, Object element)
+	public static Boolean VectorRemoveElement(ArrayList arrayList, Object element)
 	{
-		System.Boolean containsItem = arrayList.Contains(element);
+		Boolean containsItem = arrayList.Contains(element);
 		arrayList.Remove(element);
 		return containsItem;
 	}
@@ -294,7 +297,7 @@ public class SupportClass
 	/// <returns>The new array of bytes</returns>
 	public static byte[] ToByteArray(sbyte[] sbyteArray)
 	{
-		byte[] byteArray = new byte[sbyteArray.Length];
+		var byteArray = new byte[sbyteArray.Length];
 		for(int index=0; index < sbyteArray.Length; index++)
 			byteArray[index] = (byte) sbyteArray[index];
 		return byteArray;
@@ -307,7 +310,7 @@ public class SupportClass
 	/// <returns>The new array of bytes</returns>
 	public static byte[] ToByteArray(string sourceString)
 	{
-		byte[] byteArray = new byte[sourceString.Length];
+		var byteArray = new byte[sourceString.Length];
 		for (int index=0; index < sourceString.Length; index++)
 			byteArray[index] = (byte) sourceString[index];
 		return byteArray;
@@ -320,7 +323,7 @@ public class SupportClass
 	/// <returns>An array of byte type elements.</returns>
 	public static byte[] ToByteArray(object[] tempObjectArray)
 	{
-		byte[] byteArray = new byte[tempObjectArray.Length];
+		var byteArray = new byte[tempObjectArray.Length];
 		for (int index = 0; index < tempObjectArray.Length; index++)
 			byteArray[index] = (byte)tempObjectArray[index];
 		return byteArray;
@@ -472,7 +475,7 @@ public class SupportClass
 
 		/// <summary>
 		/// Internal class that inherits from HashTable to manage the different calendars.
-		/// This structure will contain an instance of System.Globalization.Calendar that represents
+		/// This structure will contain an instance of Calendar that represents
 		/// a type of calendar and its properties (represented by an instance of CalendarProperties
 		/// class).
 		/// </summary>
@@ -482,27 +485,27 @@ public class SupportClass
 			/// Gets the calendar current date and time.
 			/// </summary>
 			/// <param name="calendar">The calendar to get its current date and time.</param>
-			/// <returns>A System.DateTime value that indicates the current date and time for the
+			/// <returns>A DateTime value that indicates the current date and time for the
 			/// calendar given.</returns>
-			public System.DateTime GetDateTime(System.Globalization.Calendar calendar)
+			public DateTime GetDateTime(Calendar calendar)
 			{
 				if (this[calendar] != null)
 					return ((CalendarProperties) this[calendar]).dateTime;
 				else
 				{
-					CalendarProperties tempProps = new CalendarProperties();
-					tempProps.dateTime = System.DateTime.Now;
+					var tempProps = new CalendarProperties();
+					tempProps.dateTime = DateTime.Now;
 					this.Add(calendar, tempProps);
 					return this.GetDateTime(calendar);
 				}
 			}
 
 			/// <summary>
-			/// Sets the specified System.DateTime value to the specified calendar.
+			/// Sets the specified DateTime value to the specified calendar.
 			/// </summary>
 			/// <param name="calendar">The calendar to set its date.</param>
-			/// <param name="date">The System.DateTime value to set to the calendar.</param>
-			public void SetDateTime(System.Globalization.Calendar calendar, System.DateTime date)
+			/// <param name="date">The DateTime value to set to the calendar.</param>
+			public void SetDateTime(Calendar calendar, DateTime date)
 			{
 				if (this[calendar] != null)
 				{
@@ -510,7 +513,7 @@ public class SupportClass
 				}
 				else
 				{
-					CalendarProperties tempProps = new CalendarProperties();
+					var tempProps = new CalendarProperties();
 					tempProps.dateTime = date;
 					this.Add(calendar, tempProps);
 				}
@@ -525,11 +528,11 @@ public class SupportClass
 			/// <param name="calendar">The calendar to set its date or time.</param>
 			/// <param name="field">One of the fields that composes a date/time.</param>
 			/// <param name="fieldValue">The value to be set.</param>
-			public void Set(System.Globalization.Calendar calendar, int field, int fieldValue)
+			public void Set(Calendar calendar, int field, int fieldValue)
 			{
 				if (this[calendar] != null)
 				{
-					System.DateTime tempDate = ((CalendarProperties) this[calendar]).dateTime;
+					DateTime tempDate = ((CalendarProperties) this[calendar]).dateTime;
 					switch (field)
 					{
 						case CalendarManager.DATE:
@@ -571,8 +574,8 @@ public class SupportClass
 				}
 				else
 				{
-					CalendarProperties tempProps = new CalendarProperties();
-					tempProps.dateTime = System.DateTime.Now;
+					var tempProps = new CalendarProperties();
+					tempProps.dateTime = DateTime.Now;
 					this.Add(calendar, tempProps);
 					this.Set(calendar, field, fieldValue);
 				}
@@ -587,7 +590,7 @@ public class SupportClass
 			/// <param name="year">Integer value that represent the year.</param>
 			/// <param name="month">Integer value that represent the month.</param>
 			/// <param name="day">Integer value that represent the day.</param>
-			public void Set(System.Globalization.Calendar calendar, int year, int month, int day)
+			public void Set(Calendar calendar, int year, int month, int day)
 			{
 				if (this[calendar] != null)
 				{
@@ -597,9 +600,9 @@ public class SupportClass
 				}
 				else
 				{
-					CalendarProperties tempProps = new CalendarProperties();
+					var tempProps = new CalendarProperties();
 					//Month value is 0-based. e.g., 0 for January
-					tempProps.dateTime = new System.DateTime(year, month + 1, day);
+					tempProps.dateTime = new DateTime(year, month + 1, day);
 					this.Add(calendar, tempProps);
 				}
 			}
@@ -616,7 +619,7 @@ public class SupportClass
 			/// <param name="day">Integer value that represent the day.</param>
 			/// <param name="hour">Integer value that represent the hour.</param>
 			/// <param name="minute">Integer value that represent the minutes.</param>
-			public void Set(System.Globalization.Calendar calendar, int year, int month, int day, int hour, int minute)
+			public void Set(Calendar calendar, int year, int month, int day, int hour, int minute)
 			{
 				if (this[calendar] != null)
 				{
@@ -628,9 +631,9 @@ public class SupportClass
 				}
 				else
 				{
-					CalendarProperties tempProps = new CalendarProperties();
+					var tempProps = new CalendarProperties();
 					//Month value is 0-based. e.g., 0 for January
-					tempProps.dateTime = new System.DateTime(year, month + 1, day, hour, minute, 0);
+					tempProps.dateTime = new DateTime(year, month + 1, day, hour, minute, 0);
 					this.Add(calendar, tempProps);
 				}
 			}
@@ -648,7 +651,7 @@ public class SupportClass
 			/// <param name="hour">Integer value that represent the hour.</param>
 			/// <param name="minute">Integer value that represent the minutes.</param>
 			/// <param name="second">Integer value that represent the seconds.</param>
-			public void Set(System.Globalization.Calendar calendar, int year, int month, int day, int hour, int minute, int second)
+			public void Set(Calendar calendar, int year, int month, int day, int hour, int minute, int second)
 			{
 				if (this[calendar] != null)
 				{
@@ -661,9 +664,9 @@ public class SupportClass
 				}
 				else
 				{
-					CalendarProperties tempProps = new CalendarProperties();
+					var tempProps = new CalendarProperties();
 					//Month value is 0-based. e.g., 0 for January
-					tempProps.dateTime = new System.DateTime(year, month + 1, day, hour, minute, second);
+					tempProps.dateTime = new DateTime(year, month + 1, day, hour, minute, second);
 					this.Add(calendar, tempProps);
 				}
 			}
@@ -674,7 +677,7 @@ public class SupportClass
 			/// <param name="calendar">The calendar to get its date or time.</param>
 			/// <param name="field">One of the field that composes a date/time.</param>
 			/// <returns>The integer value for the field given.</returns>
-			public int Get(System.Globalization.Calendar calendar, int field)
+			public int Get(Calendar calendar, int field)
 			{
 				if (this[calendar] != null)
 				{
@@ -713,8 +716,8 @@ public class SupportClass
 				}
 				else
 				{
-					CalendarProperties tempProps = new CalendarProperties();
-					tempProps.dateTime = System.DateTime.Now;
+					var tempProps = new CalendarProperties();
+					tempProps.dateTime = DateTime.Now;
 					this.Add(calendar, tempProps);
 					return this.Get(calendar, field);
 				}
@@ -726,16 +729,16 @@ public class SupportClass
 			/// <param name="calendar">The calendar to set its date and time.</param>
 			/// <param name="milliseconds">A long value that indicates the milliseconds to be set to
 			/// the hour for the calendar.</param>
-			public void SetTimeInMilliseconds(System.Globalization.Calendar calendar, long milliseconds)
+			public void SetTimeInMilliseconds(Calendar calendar, long milliseconds)
 			{
 				if (this[calendar] != null)
 				{
-					((CalendarProperties) this[calendar]).dateTime = new System.DateTime(milliseconds);
+					((CalendarProperties) this[calendar]).dateTime = new DateTime(milliseconds);
 				}
 				else
 				{
-					CalendarProperties tempProps = new CalendarProperties();
-					tempProps.dateTime = new System.DateTime(System.TimeSpan.TicksPerMillisecond * milliseconds);
+					var tempProps = new CalendarProperties();
+					tempProps.dateTime = new DateTime(TimeSpan.TicksPerMillisecond * milliseconds);
 					this.Add(calendar, tempProps);
 				}
 			}
@@ -744,8 +747,8 @@ public class SupportClass
 			/// Gets what the first day of the week is; e.g., Sunday in US, Monday in France.
 			/// </summary>
 			/// <param name="calendar">The calendar to get its first day of the week.</param>
-			/// <returns>A System.DayOfWeek value indicating the first day of the week.</returns>
-			public System.DayOfWeek GetFirstDayOfWeek(System.Globalization.Calendar calendar)
+			/// <returns>A DayOfWeek value indicating the first day of the week.</returns>
+			public DayOfWeek GetFirstDayOfWeek(Calendar calendar)
 			{
 				if (this[calendar] != null && ((CalendarProperties)this[calendar]).dateTimeFormat != null)
 				{
@@ -753,9 +756,9 @@ public class SupportClass
 				}
 				else
 				{
-					CalendarProperties tempProps = new CalendarProperties();
-					tempProps.dateTimeFormat = new System.Globalization.DateTimeFormatInfo();
-					tempProps.dateTimeFormat.FirstDayOfWeek = System.DayOfWeek.Sunday;
+					var tempProps = new CalendarProperties();
+					tempProps.dateTimeFormat = new DateTimeFormatInfo();
+					tempProps.dateTimeFormat.FirstDayOfWeek = DayOfWeek.Sunday;
 					this.Add(calendar, tempProps);
 					return this.GetFirstDayOfWeek(calendar);
 				}
@@ -765,9 +768,9 @@ public class SupportClass
 			/// Sets what the first day of the week is; e.g., Sunday in US, Monday in France.
 			/// </summary>
 			/// <param name="calendar">The calendar to set its first day of the week.</param>
-			/// <param name="firstDayOfWeek">A System.DayOfWeek value indicating the first day of the week
+			/// <param name="firstDayOfWeek">A DayOfWeek value indicating the first day of the week
 			/// to be set.</param>
-			public void SetFirstDayOfWeek(System.Globalization.Calendar calendar, System.DayOfWeek  firstDayOfWeek)
+			public void SetFirstDayOfWeek(Calendar calendar, DayOfWeek  firstDayOfWeek)
 			{
 				if (this[calendar] != null && ((CalendarProperties)this[calendar]).dateTimeFormat != null)
 				{
@@ -775,8 +778,8 @@ public class SupportClass
 				}
 				else
 				{
-					CalendarProperties tempProps = new CalendarProperties();
-					tempProps.dateTimeFormat = new System.Globalization.DateTimeFormatInfo();
+					var tempProps = new CalendarProperties();
+					tempProps.dateTimeFormat = new DateTimeFormatInfo();
 					this.Add(calendar, tempProps);
 					this.SetFirstDayOfWeek(calendar, firstDayOfWeek);
 				}
@@ -786,7 +789,7 @@ public class SupportClass
 			/// Removes the specified calendar from the hash table.
 			/// </summary>
 			/// <param name="calendar">The calendar to be removed.</param>
-			public void Clear(System.Globalization.Calendar calendar)
+			public void Clear(Calendar calendar)
 			{
 				if (this[calendar] != null)
 					this.Remove(calendar);
@@ -798,7 +801,7 @@ public class SupportClass
 			/// </summary>
 			/// <param name="calendar">The calendar to remove the value from.</param>
 			/// <param name="field">The field to be removed from the calendar.</param>
-			public void Clear(System.Globalization.Calendar calendar, int field)
+			public void Clear(Calendar calendar, int field)
 			{
 				if (this[calendar] != null)
 					this.Remove(calendar);
@@ -814,12 +817,12 @@ public class SupportClass
 				/// <summary>
 				/// The date and time of a calendar.
 				/// </summary>
-				public System.DateTime dateTime;
+				public DateTime dateTime;
 
 				/// <summary>
 				/// The format for the date and time in a calendar.
 				/// </summary>
-				public System.Globalization.DateTimeFormatInfo dateTimeFormat;
+				public DateTimeFormatInfo dateTimeFormat;
 			}
 		}
 	}
@@ -842,13 +845,13 @@ public class DateTimeFormatManager
 		/// </summary>
 		/// <param name="format">DateTimeFormat instance to set the pattern</param>
 		/// <param name="newPattern">A string with the pattern format</param>
-		public void SetDateFormatPattern(System.Globalization.DateTimeFormatInfo format, string newPattern)
+		public void SetDateFormatPattern(DateTimeFormatInfo format, string newPattern)
 		{
 			if (this[format] != null)
 				((DateTimeFormatProperties) this[format]).DateFormatPattern = newPattern;
 			else
 			{
-				DateTimeFormatProperties tempProps = new DateTimeFormatProperties();
+				var tempProps = new DateTimeFormatProperties();
 				tempProps.DateFormatPattern  = newPattern;
 				Add(format, tempProps);
 			}
@@ -859,7 +862,7 @@ public class DateTimeFormatManager
 		/// </summary>
 		/// <param name="format">The DateTimeFormat instance which the value will be obtained</param>
 		/// <returns>The string representing the current datetimeformat pattern</returns>
-		public string GetDateFormatPattern(System.Globalization.DateTimeFormatInfo format)
+		public string GetDateFormatPattern(DateTimeFormatInfo format)
 		{
 			if (this[format] == null)
 				return "d-MMM-yy";
@@ -872,13 +875,13 @@ public class DateTimeFormatManager
 		/// </summary>
 		/// <param name="format">The datetimeformat instance to set</param>
 		/// <param name="newPattern">The new datetimeformat pattern</param>
-		public void SetTimeFormatPattern(System.Globalization.DateTimeFormatInfo format, string newPattern)
+		public void SetTimeFormatPattern(DateTimeFormatInfo format, string newPattern)
 		{
 			if (this[format] != null)
 				((DateTimeFormatProperties) this[format]).TimeFormatPattern = newPattern;
 			else
 			{
-				DateTimeFormatProperties tempProps = new DateTimeFormatProperties();
+				var tempProps = new DateTimeFormatProperties();
 				tempProps.TimeFormatPattern  = newPattern;
 				Add(format, tempProps);
 			}
@@ -889,7 +892,7 @@ public class DateTimeFormatManager
 		/// </summary>
 		/// <param name="format">The DateTimeFormat instance which the value will be obtained</param>
 		/// <returns>The string representing the current datetimeformat pattern</returns>
-		public string GetTimeFormatPattern(System.Globalization.DateTimeFormatInfo format)
+		public string GetTimeFormatPattern(DateTimeFormatInfo format)
 		{
 			if (this[format] == null)
 				return "h:mm:ss tt";
@@ -915,9 +918,9 @@ public class DateTimeFormatManager
 	/// <param name="timeStyle">The desired time style</param>
 	/// <param name="culture">The CultureInfo instance used to obtain the DateTimeFormat</param>
 	/// <returns>The DateTimeFomatInfo of the culture and with the desired date or time style</returns>
-	public static System.Globalization.DateTimeFormatInfo GetDateTimeFormatInstance(int dateStyle, int timeStyle, System.Globalization.CultureInfo culture)
+	public static DateTimeFormatInfo GetDateTimeFormatInstance(int dateStyle, int timeStyle, CultureInfo culture)
 	{
-		System.Globalization.DateTimeFormatInfo format = culture.DateTimeFormat;
+		DateTimeFormatInfo format = culture.DateTimeFormat;
 
 		switch (timeStyle)
 		{
@@ -975,7 +978,7 @@ public class DateTimeFormatManager
 	/// <param name="format">The DateTimeFormat to obtain the time and date pattern</param>
 	/// <param name="date">The date instance used to get the date</param>
 	/// <returns>A string representing the date with the time and date patterns</returns>
-	public static string FormatDateTime(System.Globalization.DateTimeFormatInfo format, System.DateTime date)
+	public static string FormatDateTime(DateTimeFormatInfo format, DateTime date)
 	{
 		string timePattern = DateTimeFormatManager.manager.GetTimeFormatPattern(format);
 		string datePattern = DateTimeFormatManager.manager.GetDateFormatPattern(format);
@@ -1008,17 +1011,17 @@ public class DateTimeFormatManager
 		/// </summary>
 		/// <param name="fileName">A relative or absolute path for the file to open</param>
 		/// <param name="mode">Mode to open the file in</param>
-		/// <returns>The new System.IO.FileStream</returns>
-		public static System.IO.FileStream CreateRandomAccessFile(string fileName, string mode)
+		/// <returns>The new FileStream</returns>
+		public static FileStream CreateRandomAccessFile(string fileName, string mode)
 		{
-			System.IO.FileStream newFile = null;
+			FileStream newFile = null;
 
 			if (mode.CompareTo("rw") == 0)
-				newFile =  new System.IO.FileStream(fileName, System.IO.FileMode.OpenOrCreate, System.IO.FileAccess.ReadWrite);
+				newFile =  new FileStream(fileName, FileMode.OpenOrCreate, FileAccess.ReadWrite);
 			else if (mode.CompareTo("r") == 0 )
-				newFile =  new System.IO.FileStream(fileName, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+				newFile =  new FileStream(fileName, FileMode.Open, FileAccess.Read);
 			else
-				throw new System.ArgumentException();
+				throw new ArgumentException();
 
 			return newFile;
 		}
@@ -1028,8 +1031,8 @@ public class DateTimeFormatManager
 		/// </summary>
 		/// <param name="fileName">File infomation for the file to open</param>
 		/// <param name="mode">Mode to open the file in</param>
-		/// <returns>The new System.IO.FileStream</returns>
-		public static System.IO.FileStream CreateRandomAccessFile(System.IO.FileInfo fileName, string mode)
+		/// <returns>The new FileStream</returns>
+		public static FileStream CreateRandomAccessFile(FileInfo fileName, string mode)
 		{
 			return CreateRandomAccessFile(fileName.FullName, mode);
 		}
@@ -1039,7 +1042,7 @@ public class DateTimeFormatManager
 		/// </summary>
 		/// <param name="data">Data to write</param>
 		/// <param name="fileStream">File to write to</param>
-		public static void WriteBytes(string data,System.IO.FileStream fileStream)
+		public static void WriteBytes(string data,FileStream fileStream)
 		{
 			int index = 0;
 			int length = data.Length;
@@ -1053,7 +1056,7 @@ public class DateTimeFormatManager
 		/// </summary>
 		/// <param name="data">String of information to write</param>
 		/// <param name="fileStream">File to write to</param>
-		public static void WriteChars(string data,System.IO.FileStream fileStream)
+		public static void WriteChars(string data,FileStream fileStream)
 		{
 			WriteBytes(data, fileStream);
 		}
@@ -1063,7 +1066,7 @@ public class DateTimeFormatManager
 		/// </summary>
 		/// <param name="sByteArray">Data to write</param>
 		/// <param name="fileStream">File to write to</param>
-		public static void WriteRandomFile(sbyte[] sByteArray,System.IO.FileStream fileStream)
+		public static void WriteRandomFile(sbyte[] sByteArray,FileStream fileStream)
 		{
 			byte[] byteArray = ToByteArray(sByteArray);
 			fileStream.Write(byteArray, 0, byteArray.Length);
@@ -1076,9 +1079,9 @@ public class DateTimeFormatManager
 	/// </summary>
 	/// <param name="file">The file instance to check</param>
 	/// <returns>True if have write permissions otherwise false</returns>
-public static bool FileCanWrite(System.IO.FileInfo file)
+public static bool FileCanWrite(FileInfo file)
 {
-return (System.IO.File.GetAttributes(file.FullName) & System.IO.FileAttributes.ReadOnly) != System.IO.FileAttributes.ReadOnly;
+return (File.GetAttributes(file.FullName) & FileAttributes.ReadOnly) != FileAttributes.ReadOnly;
 }
 
 	/*******************************/
@@ -1087,9 +1090,9 @@ return (System.IO.File.GetAttributes(file.FullName) & System.IO.FileAttributes.R
 	/// </summary>
 	/// <param name="file">The File instance to check</param>
 	/// <returns>The length of the file</returns>
-	public static long FileLength(System.IO.FileInfo file)
+	public static long FileLength(FileInfo file)
 	{
-		if (System.IO.Directory.Exists(file.FullName))
+		if (Directory.Exists(file.FullName))
 			return 0;
 		else
 			return file.Length;
@@ -1102,13 +1105,13 @@ return (System.IO.File.GetAttributes(file.FullName) & System.IO.FileAttributes.R
 	/// <param name="start">The starting index of the target array.</param>
 	/// <param name="count">The maximum number of characters to read from the source Stream.</param>
 	/// <returns>The number of characters read. The number will be less than or equal to count depending on the data available in the source Stream. Returns -1 if the end of the stream is reached.</returns>
-	public static System.Int32 ReadInput(System.IO.Stream sourceStream, ref byte[] target, int start, int count)
+	public static Int32 ReadInput(Stream sourceStream, ref byte[] target, int start, int count)
 	{
 		// Returns 0 bytes if not enough space in target
 		if (target.Length == 0)
 			return 0;
 
-		byte[] receiver = new byte[target.Length];
+		var receiver = new byte[target.Length];
 		int bytesRead   = sourceStream.Read(receiver, start, count);
 
 		// Returns -1 if EOF
@@ -1127,12 +1130,12 @@ return (System.IO.File.GetAttributes(file.FullName) & System.IO.FileAttributes.R
 	/// <param name="start">The starting index of the target array.</param>
 	/// <param name="count">The maximum number of characters to read from the source TextReader.</param>
 	/// <returns>The number of characters read. The number will be less than or equal to count depending on the data available in the source TextReader. Returns -1 if the end of the stream is reached.</returns>
-	public static System.Int32 ReadInput(System.IO.TextReader sourceTextReader, ref sbyte[] target, int start, int count)
+	public static Int32 ReadInput(TextReader sourceTextReader, ref sbyte[] target, int start, int count)
 	{
 		// Returns 0 bytes if not enough space in target
 		if (target.Length == 0) return 0;
 
-		char[] charArray = new char[target.Length];
+		var charArray = new char[target.Length];
 		int bytesRead = sourceTextReader.Read(charArray, start, count);
 
 		// Returns -1 if EOF
@@ -1201,7 +1204,7 @@ return (System.IO.File.GetAttributes(file.FullName) & System.IO.FileAttributes.R
 	/// </summary>
 	/// <param name="throwable">Exception to obtain information from</param>
 	/// <param name="stream">Output sream used to write to</param>
-	public static void WriteStackTrace(System.Exception throwable, System.IO.TextWriter stream)
+	public static void WriteStackTrace(Exception throwable, TextWriter stream)
 	{
 		stream.Write(throwable.StackTrace);
 		stream.Flush();
@@ -1229,7 +1232,7 @@ return (System.IO.File.GetAttributes(file.FullName) & System.IO.FileAttributes.R
 	/// <returns>The new array of chars</returns>
 	public static char[] ToCharArray(sbyte[] sByteArray)
 	{
-		char[] charArray = new char[sByteArray.Length];
+		var charArray = new char[sByteArray.Length];
 		sByteArray.CopyTo(charArray, 0);
 		return charArray;
 	}
@@ -1241,7 +1244,7 @@ return (System.IO.File.GetAttributes(file.FullName) & System.IO.FileAttributes.R
 	/// <returns>The new array of chars</returns>
 	public static char[] ToCharArray(byte[] byteArray)
 	{
-		char[] charArray = new char[byteArray.Length];
+		var charArray = new char[byteArray.Length];
 		byteArray.CopyTo(charArray, 0);
 		return charArray;
 	}
@@ -1254,7 +1257,7 @@ return (System.IO.File.GetAttributes(file.FullName) & System.IO.FileAttributes.R
 	/// <returns>The transformed array</returns>
 	public static sbyte[] ToSByteArray(byte[] byteArray)
 	{
-		sbyte[] sbyteArray = new sbyte[byteArray.Length];
+		var sbyteArray = new sbyte[byteArray.Length];
 		for(int index=0; index < byteArray.Length; index++)
 			sbyteArray[index] = (sbyte) byteArray[index];
 		return sbyteArray;
@@ -1300,29 +1303,29 @@ return (System.IO.File.GetAttributes(file.FullName) & System.IO.FileAttributes.R
 	/// </summary>
 	/// <param name="classType">The Type of the new class instance to return.</param>
 	/// <returns>An Object containing the new instance.</returns>
-	public static Object CreateNewInstance(System.Type classType)
+	public static Object CreateNewInstance(Type classType)
 	{
 		Object instance = null;
-		System.Type[] constructor = new System.Type[]{};
-		System.Reflection.ConstructorInfo[] constructors = null;
+		var constructor = new Type[]{};
+		ConstructorInfo[] constructors = null;
 
 		constructors = classType.GetConstructors();
 
 		if (constructors.Length == 0)
-			throw new System.UnauthorizedAccessException();
+			throw new UnauthorizedAccessException();
 		else
 		{
 			for(int i = 0; i < constructors.Length; i++)
 			{
-				System.Reflection.ParameterInfo[] parameters = constructors[i].GetParameters();
+				ParameterInfo[] parameters = constructors[i].GetParameters();
 
 				if (parameters.Length == 0)
 				{
-					instance = classType.GetConstructor(constructor).Invoke(new System.Object[]{});
+					instance = classType.GetConstructor(constructor).Invoke(new Object[]{});
 					break;
 				}
 				else if (i == constructors.Length -1)
-					throw new System.MethodAccessException();
+					throw new MethodAccessException();
 			}
 		}
 		return instance;
@@ -1335,7 +1338,7 @@ return (System.IO.File.GetAttributes(file.FullName) & System.IO.FileAttributes.R
 	/// </summary>
 	/// <param name="constructor">The ConstructorInfo used to obtain the int value</param>
 	/// <returns>The int value of the modifier present in the constructor. 1 if it's public, 2 if it's private, otherwise 4</returns>
-	public static int GetConstructorModifiers(System.Reflection.ConstructorInfo constructor)
+	public static int GetConstructorModifiers(ConstructorInfo constructor)
 	{
 		int temp;
 		if (constructor.IsPublic)
@@ -1353,7 +1356,7 @@ return (System.IO.File.GetAttributes(file.FullName) & System.IO.FileAttributes.R
 	/// </summary>
 	/// <param name="FileStreamWrite">FileStream that must be updated.</param>
 	/// <param name="Source">Array of bytes that must be written in the FileStream.</param>
-	public static void WriteOutput(System.IO.FileStream FileStreamWrite, sbyte[] Source)
+	public static void WriteOutput(FileStream FileStreamWrite, sbyte[] Source)
 	{
 		FileStreamWrite.Write(ToByteArray(Source), 0, Source.Length);
 	}

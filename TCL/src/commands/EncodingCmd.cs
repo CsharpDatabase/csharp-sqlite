@@ -8,7 +8,7 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/commands/EncodingCmd.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: EncodingCmd.java,v 1.2 2002/04/12 15:32:44 mdejong Exp $
 *
 */
@@ -27,14 +27,14 @@ namespace tcl.lang
 		// property!
 		internal static string systemTclEncoding = "utf-8";
 		internal static Encoding systemJavaEncoding = UTF8Encoding.UTF8;
-		
-		internal static string[] tclNames = new string[]{"utf-8", "unicode", "ascii", "utf-7"};
+
+    internal static string[] tclNames = new string[] { "utf-8", "unicode", "ascii", "utf-7" };
 		
 		internal static readonly Encoding[] encodings = new Encoding[]{UTF8Encoding.UTF8,UnicodeEncoding.Unicode,ASCIIEncoding.Unicode,UTF7Encoding.UTF7};
 		
 		internal static int[] bytesPerChar = new int[]{1, 2, 1, 1};
-		
-		private static readonly string[] validCmds = new string[]{"convertfrom", "convertto", "names", "system"};
+
+    private static readonly string[] validCmds = new string[] { "convertfrom", "convertto", "names", "system" };
 		
 		internal const int OPT_CONVERTFROM = 0;
 		internal const int OPT_CONVERTTO = 1;

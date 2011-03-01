@@ -28,7 +28,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2010-03-09 19:31:43 4ae453ea7be69018d8c16eb8dabe05617397dc4d
+    **  SQLITE_SOURCE_ID: 2010-12-07 20:14:09 a586a4deeb25330037a49df295b36aaf624d0f45
     **
     **  $Header$
     *************************************************************************
@@ -183,7 +183,7 @@ expensive_assert( pcacheCheckSynced(p) );
         {
           pCache.pPage1 = null;
         }
-        sqlite3GlobalConfig.pcache.xUnpin( pCache.pCache, p, 0 );
+        sqlite3GlobalConfig.pcache.xUnpin( pCache.pCache, p, false );
       }
     }
 
@@ -196,6 +196,9 @@ expensive_assert( pcacheCheckSynced(p) );
     {
       if ( sqlite3GlobalConfig.pcache.xInit == null )
       {
+        /* IMPLEMENTATION-OF: R-26801-64137 If the xInit() method is NULL, then the
+        ** built-in default page cache is used instead of the application defined
+        ** page cache. */
         sqlite3PCacheSetDefault();
       }
       return sqlite3GlobalConfig.pcache.xInit( sqlite3GlobalConfig.pcache.pArg );
@@ -204,6 +207,7 @@ expensive_assert( pcacheCheckSynced(p) );
     {
       if ( sqlite3GlobalConfig.pcache.xShutdown != null )
       {
+        /* IMPLEMENTATION-OF: R-26000-56589 The xShutdown() method may be NULL. */
         sqlite3GlobalConfig.pcache.xShutdown( sqlite3GlobalConfig.pcache.pArg );
       }
     }
@@ -277,7 +281,7 @@ expensive_assert( pcacheCheckSynced(p) );
         sqlite3_pcache p;
         int nByte;
         nByte = pCache.szPage + pCache.szExtra + 0;// sizeof( PgHdr );
-        p = sqlite3GlobalConfig.pcache.xCreate( nByte, pCache.bPurgeable ? 1 : 0 );
+        p = sqlite3GlobalConfig.pcache.xCreate( nByte, pCache.bPurgeable  );
         if ( null == p )
         {
           return SQLITE_NOMEM;
@@ -331,17 +335,18 @@ expensive_assert( pcacheCheckSynced(pCache) );
       {
         if ( null == pPage.pData )
         {
-//memset( pPage, 0, sizeof( PgHdr ) + pCache.szExtra );
-          pPage.pData = sqlite3Malloc(pCache.szPage);
-          //pPage.pExtra = (void*)&pPage[1];
-          //pPage.pData = (void*)&( (char*)pPage )[sizeof( PgHdr ) + pCache.szExtra];
+          //          memset(pPage, 0, sizeof(PgHdr));
+          pPage.pData = sqlite3Malloc(pCache.szPage);//          pPage->pData = (void*)&pPage[1];
+          //pPage->pExtra = (void*)&((char*)pPage->pData)[pCache->szPage];
+          //memset(pPage->pExtra, 0, pCache->szExtra);
           pPage.pCache = pCache;
           pPage.pgno = pgno;
         }
         Debug.Assert( pPage.pCache == pCache );
         Debug.Assert( pPage.pgno == pgno );
-        //Debug.Assert( pPage.pExtra == (void*)&pPage[1] );
-        if ( 0 == pPage.nRef )
+        //assert(pPage->pData == (void*)&pPage[1]);
+        //assert(pPage->pExtra == (void*)&((char*)&pPage[1])[pCache->szPage]);
+        if (0 == pPage.nRef)
         {
           pCache.nRef++;
         }
@@ -408,7 +413,7 @@ expensive_assert( pcacheCheckSynced(pCache) );
       {
         pCache.pPage1 = null;
       }
-      sqlite3GlobalConfig.pcache.xUnpin( pCache.pCache, p, 1 );
+      sqlite3GlobalConfig.pcache.xUnpin( pCache.pCache, p, true );
     }
 
     /*
@@ -503,9 +508,14 @@ expensive_assert( pcacheCheckSynced(pCache) );
         for ( p = pCache.pDirty; p != null; p = pNext )
         {
           pNext = p.pDirtyNext;
-          if ( p.pgno > pgno )
+          /* This routine never gets call with a positive pgno except right
+          ** after sqlite3PcacheCleanAll().  So if there are dirty pages,
+          ** it must be that pgno==0.
+          */
+          Debug.Assert(p.pgno > 0);
+          if (ALWAYS(p.pgno > pgno))
           {
-            Debug.Assert( ( p.flags & PGHDR_DIRTY ) != 0 );
+            Debug.Assert((p.flags & PGHDR_DIRTY) != 0);
             sqlite3PcacheMakeClean( p );
           }
         }
@@ -545,7 +555,7 @@ expensive_assert( pcacheCheckSynced(pCache) );
     */
     static PgHdr pcacheMergeDirtyList( PgHdr pA, PgHdr pB )
     {
-      PgHdr result = new PgHdr();
+      var result = new PgHdr();
       PgHdr pTail = result;
       while ( pA != null && pB != null )
       {

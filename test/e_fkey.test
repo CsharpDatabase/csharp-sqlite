@@ -968,19 +968,21 @@ do_test e_fkey-25.1 {
     );
   }
 } {}
-do_test e_fkey-25.2 {
-  execsql {
-    PRAGMA foreign_keys = OFF;
-    EXPLAIN QUERY PLAN DELETE FROM artist WHERE 1;
-    EXPLAIN QUERY PLAN SELECT rowid FROM track WHERE trackartist = ?;
-  }
-} {0 0 {TABLE artist} 0 0 {TABLE track}}
-do_test e_fkey-25.3 {
-  execsql { 
-    PRAGMA foreign_keys = ON;
-    EXPLAIN QUERY PLAN DELETE FROM artist WHERE 1;
-  }
-} {0 0 {TABLE artist} 0 0 {TABLE track}}
+do_execsql_test e_fkey-25.2 {
+  PRAGMA foreign_keys = OFF;
+  EXPLAIN QUERY PLAN DELETE FROM artist WHERE 1;
+  EXPLAIN QUERY PLAN SELECT rowid FROM track WHERE trackartist = ?;
+} {
+  0 0 0 {SCAN TABLE artist (~1000000 rows)} 
+  0 0 0 {SCAN TABLE track (~100000 rows)}
+}
+do_execsql_test e_fkey-25.3 {
+  PRAGMA foreign_keys = ON;
+  EXPLAIN QUERY PLAN DELETE FROM artist WHERE 1;
+} {
+  0 0 0 {SCAN TABLE artist (~1000000 rows)} 
+  0 0 0 {SCAN TABLE track (~100000 rows)}
+}
 do_test e_fkey-25.4 {
   execsql {
     INSERT INTO artist VALUES(5, 'artist 5');
@@ -1093,19 +1095,19 @@ do_test e_fkey-27.1 {
 do_test e_fkey-27.2 {
   eqp { INSERT INTO artist VALUES(?, ?) }
 } {}
-do_test e_fkey-27.3 {
-  eqp { UPDATE artist SET artistid = ?, artistname = ? }
-} [list \
-  0 0 {TABLE artist} \
-  0 0 {TABLE track WITH INDEX trackindex} \
-  0 0 {TABLE track WITH INDEX trackindex}
-]
-do_test e_fkey-27.4 {
-  eqp { DELETE FROM artist }
-} [list \
-  0 0 {TABLE artist} \
-  0 0 {TABLE track WITH INDEX trackindex}
-]
+do_execsql_test e_fkey-27.3 {
+  EXPLAIN QUERY PLAN UPDATE artist SET artistid = ?, artistname = ?
+} {
+  0 0 0 {SCAN TABLE artist (~1000000 rows)} 
+  0 0 0 {SEARCH TABLE track USING COVERING INDEX trackindex (trackartist=?) (~10 rows)} 
+  0 0 0 {SEARCH TABLE track USING COVERING INDEX trackindex (trackartist=?) (~10 rows)}
+}
+do_execsql_test e_fkey-27.4 {
+  EXPLAIN QUERY PLAN DELETE FROM artist
+} {
+  0 0 0 {SCAN TABLE artist (~1000000 rows)} 
+  0 0 0 {SEARCH TABLE track USING COVERING INDEX trackindex (trackartist=?) (~10 rows)}
+}
 
 
 ###########################################################################
@@ -2943,18 +2945,11 @@ proc test_on_update_recursion {limit} {
   "
 }
 
-#-------------------------------------------------------------------------
-# C# seems to have some serious stack issues when SQLITE_MAX_TRIGGER_DEPTH
-# is hard coded to 1000, so test this section with a limited subset
-#-------------------------------------------------------------------------
-set SQLITE_MAX_TRIGGER_DEPTH_TEST 300
-sqlite3_limit db SQLITE_LIMIT_TRIGGER_DEPTH $SQLITE_MAX_TRIGGER_DEPTH_TEST
-
 do_test e_fkey-63.1.1 {
-  test_on_delete_recursion $SQLITE_MAX_TRIGGER_DEPTH_TEST
+  test_on_delete_recursion $SQLITE_MAX_TRIGGER_DEPTH
 } {0 0}
 do_test e_fkey-63.1.2 {
-  test_on_delete_recursion [expr $SQLITE_MAX_TRIGGER_DEPTH_TEST+1]
+  test_on_delete_recursion [expr $SQLITE_MAX_TRIGGER_DEPTH+1]
 } {1 {too many levels of trigger recursion}}
 do_test e_fkey-63.1.3 {
   sqlite3_limit db SQLITE_LIMIT_TRIGGER_DEPTH 5
@@ -2966,12 +2961,11 @@ do_test e_fkey-63.1.4 {
 do_test e_fkey-63.1.5 {
   sqlite3_limit db SQLITE_LIMIT_TRIGGER_DEPTH 1000000
 } {5}
-sqlite3_limit db SQLITE_LIMIT_TRIGGER_DEPTH $SQLITE_MAX_TRIGGER_DEPTH_TEST
 do_test e_fkey-63.2.1 {
-  test_on_update_recursion $SQLITE_MAX_TRIGGER_DEPTH_TEST
+  test_on_update_recursion $SQLITE_MAX_TRIGGER_DEPTH
 } {0 0}
 do_test e_fkey-63.2.2 {
-  test_on_update_recursion [expr $SQLITE_MAX_TRIGGER_DEPTH_TEST+1]
+  test_on_update_recursion [expr $SQLITE_MAX_TRIGGER_DEPTH+1]
 } {1 {too many levels of trigger recursion}}
 do_test e_fkey-63.2.3 {
   sqlite3_limit db SQLITE_LIMIT_TRIGGER_DEPTH 5

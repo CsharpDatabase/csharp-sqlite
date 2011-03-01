@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using HANDLE = System.IntPtr;
+using System.Text;
 
 namespace Community.CsharpSqlite
 {
@@ -23,7 +24,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2009-12-07 16:39:13 1ed88e9d01e9eda5cbc622e7614277f29bcc551c
+    **  SQLITE_SOURCE_ID: 2010-12-07 20:14:09 a586a4deeb25330037a49df295b36aaf624d0f45
     **
     **  $Header$
     *************************************************************************
@@ -146,6 +147,11 @@ static void sqlite3_progress_handler (sqlite3 db,       int nOps, dxProgress xPr
 ** also check to make sure that the pointer to the function is
 ** not NULL before calling it.
 */
+    public class sqlite3_api_routines
+    {
+      public sqlite3 context_db_handle;
+    };
+    
     static sqlite3_api_routines sqlite3Apis = new sqlite3_api_routines();
     //{
     //  sqlite3_aggregate_context,
@@ -355,6 +361,46 @@ static void sqlite3_progress_handler (sqlite3 db,       int nOps, dxProgress xPr
     //  sqlite3_next_stmt,
     //  sqlite3_sql,
     //  sqlite3_status,
+
+    //  /*
+    //  ** Added for 3.7.4
+    //  */
+    //  sqlite3_backup_finish,
+    //  sqlite3_backup_init,
+    //  sqlite3_backup_pagecount,
+    //  sqlite3_backup_remaining,
+    //  sqlite3_backup_step,
+    //#ifndef SQLITE_OMIT_COMPILEOPTION_DIAGS
+    //  sqlite3_compileoption_get,
+    //  sqlite3_compileoption_used,
+    //#else
+    //  0,
+    //  0,
+    //#endif
+    //  sqlite3_create_function_v2,
+    //  sqlite3_db_config,
+    //  sqlite3_db_mutex,
+    //  sqlite3_db_status,
+    //  sqlite3_extended_errcode,
+    //  sqlite3_log,
+    //  sqlite3_soft_heap_limit64,
+    //  sqlite3_sourceid,
+    //  sqlite3_stmt_status,
+    //  sqlite3_strnicmp,
+    //#ifdef SQLITE_ENABLE_UNLOCK_NOTIFY
+    //  sqlite3_unlock_notify,
+    //#else
+    //  0,
+    //#endif
+    //#ifndef SQLITE_OMIT_WAL
+    //  sqlite3_wal_autocheckpoint,
+    //  sqlite3_wal_checkpoint,
+    //  sqlite3_wal_hook,
+    //#else
+    //  0,
+    //  0,
+    //  0,
+    //#endif
     //};
 
     /*
@@ -379,7 +425,7 @@ static void sqlite3_progress_handler (sqlite3 db,       int nOps, dxProgress xPr
       sqlite3_vfs pVfs = db.pVfs;
       HANDLE handle;
       dxInit xInit; //int (*xInit)(sqlite3*,char**,const sqlite3_api_routines*);
-      string zErrmsg = "";
+      StringBuilder zErrmsg = new StringBuilder(100);
       //object aHandle;
       const int nMsg = 300;
       if ( pzErrMsg != null ) pzErrMsg = null;
@@ -408,14 +454,11 @@ static void sqlite3_progress_handler (sqlite3 db,       int nOps, dxProgress xPr
       if ( handle == IntPtr.Zero )
       {
         //    if( pzErrMsg ){
-        zErrmsg = "";//zErrmsg = sqlite3StackAllocZero(db, nMsg);
+        pzErrMsg = "";//*pzErrMsg = zErrmsg = sqlite3_malloc(nMsg);
         //if( zErrmsg !=null){
-        sqlite3_snprintf( nMsg, ref zErrmsg,
+        sqlite3_snprintf( nMsg, zErrmsg,
         "unable to open shared library [%s]", zFile );
-        sqlite3OsDlError( pVfs, nMsg - 1, ref zErrmsg );
-        pzErrMsg = zErrmsg;// sqlite3DbStrDup( 0, zErrmsg );
-        //sqlite3StackFree( db, zErrmsg );
-        //}
+        sqlite3OsDlError( pVfs, nMsg - 1, zErrmsg.ToString() );
         return SQLITE_ERROR;
       }
       //xInit = (int(*)(sqlite3*,char**,const sqlite3_api_routines*))
@@ -424,13 +467,11 @@ static void sqlite3_progress_handler (sqlite3 db,       int nOps, dxProgress xPr
       Debugger.Break(); // TODO --
       //if( xInit==0 ){
       //  if( pzErrMsg ){
-      //    zErrmsg = sqlite3StackAllocZero(db, nMsg);
+      //          *pzErrMsg = zErrmsg = sqlite3_malloc(nMsg);
       //    if( zErrmsg ){
       //      sqlite3_snprintf(nMsg, zErrmsg,
       //          "no entry point [%s] in shared library [%s]", zProc,zFile);
       //      sqlite3OsDlError(pVfs, nMsg-1, zErrmsg);
-      //      *pzErrMsg = sqlite3DbStrDup(0, zErrmsg);
-      //      //sqlite3StackFree(db, zErrmsg);
       //    }
       //    sqlite3OsDlClose(pVfs, handle);
       //  }

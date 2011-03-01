@@ -2,7 +2,7 @@ using ClientData = System.Object;
 
 namespace Community.CsharpSqlite
 {
-#if !NO_TCL
+#if TCLSH
   using tcl.lang;
   using Tcl_Interp = tcl.lang.Interp;
   using Tcl_Obj = tcl.lang.TclObject;
@@ -26,7 +26,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2009-12-07 16:39:13 1ed88e9d01e9eda5cbc622e7614277f29bcc551c
+    **  SQLITE_SOURCE_ID: 2010-08-23 18:52:01 42537b60566f288167f1b5864a5435986838e3a3
     **
     **  $Header$
     *************************************************************************
@@ -77,7 +77,7 @@ namespace Community.CsharpSqlite
     Tcl_Obj[] objv
     )
     {
-      BackupSubCommand[] aSub = new BackupSubCommand[] {
+      var aSub = new BackupSubCommand[] {
 new BackupSubCommand("step",      BackupSubCommandEnum.BACKUP_STEP      , 1, "npage" ),
 new BackupSubCommand("finish",    BackupSubCommandEnum.BACKUP_FINISH    , 0, ""      ),
 new BackupSubCommand("remaining", BackupSubCommandEnum.BACKUP_REMAINING , 0, ""      ),
@@ -123,7 +123,7 @@ new BackupSubCommand(null,0,0,null)
         case BackupSubCommandEnum.BACKUP_STEP:
           {
             int nPage = 0;
-            if ( TCL.Tcl_GetIntFromObj( interp, objv[2], ref nPage ) )
+            if ( TCL.TCL_OK != TCL.Tcl_GetIntFromObj( interp, objv[2], ref nPage ) )
             {
               return TCL.TCL_ERROR;
             }

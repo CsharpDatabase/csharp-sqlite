@@ -36,7 +36,7 @@ using va_list = System.Object;
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library 
     **
-    **  $Header: Community.CsharpSqlite.shell/src/shell.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+    **  $Header$
     *************************************************************************
     */
     //#if (_WIN32) || (WIN32)
@@ -1002,7 +1002,7 @@ if( db ) sqlite3_interrupt(db);
         fprintf( _out, "%s;\n", Sqlite3.sqlite3_column_text( pSelect, 0 ) );
         rc = Sqlite3.sqlite3_step( pSelect );
       }
-      return Sqlite3.sqlite3_finalize( ref pSelect );
+      return Sqlite3.sqlite3_finalize( pSelect );
     }
 
 
@@ -1101,7 +1101,7 @@ if( db ) sqlite3_interrupt(db);
             appendText( zSelect, ") ", '\0' );
           }
         }
-        rc = Sqlite3.sqlite3_finalize( ref pTableInfo );
+        rc = Sqlite3.sqlite3_finalize( pTableInfo );
         if ( rc != Sqlite3.SQLITE_OK )
         {
           //if ( zSelect ) free( ref zSelect );
@@ -1143,7 +1143,7 @@ if( db ) sqlite3_interrupt(db);
         //if ( pzErrMsg ) sqlite3_free( ref pzErrMsg );
         zQ2 = new StringBuilder( len + 100 );// malloc( len + 100 );
         if ( zQ2 == null ) return rc;
-        Sqlite3.sqlite3_snprintf( zQ2.Capacity, ref zQ2, "%s ORDER BY rowid DESC", zQuery );
+        Sqlite3.sqlite3_snprintf(zQ2.Capacity, zQ2, "%s ORDER BY rowid DESC", zQuery);
         rc = Sqlite3.sqlite3_exec( p.db, zQ2.ToString(), (dxCallback)dump_callback, p, ref pzErrMsg );
         free( ref zQ2 );
       }
@@ -1588,11 +1588,11 @@ int i, j;                     /* Loop counters */
                           {
                             nCol = Sqlite3.sqlite3_column_count( pStmt );
                           }
-                          Sqlite3.sqlite3_finalize( ref pStmt );
+                          Sqlite3.sqlite3_finalize( pStmt );
                           if ( nCol == 0 ) return 0;
                           zSql = new StringBuilder( nByte + 20 + nCol * 2 );//malloc( nByte + 20 + nCol * 2 );
                           if ( zSql == null ) return 0;
-                          Sqlite3.sqlite3_snprintf( nByte + 20, ref zSql, "INSERT INTO '%q' VALUES(?", zTable );
+                          Sqlite3.sqlite3_snprintf(nByte + 20, zSql, "INSERT INTO '%q' VALUES(?", zTable);
                           int j = strlen30( zSql );
                           for ( i = 1 ; i < nCol ; i++ )
                           {
@@ -1605,7 +1605,7 @@ int i, j;                     /* Loop counters */
                           if ( rc != 0 )
                           {
                             fprintf( stderr, "Error: %s\n", Sqlite3.sqlite3_errmsg( db ) );
-                            Sqlite3.sqlite3_finalize( ref pStmt );
+                            Sqlite3.sqlite3_finalize( pStmt );
                             return 1;
                           }
                           try
@@ -1620,7 +1620,7 @@ int i, j;                     /* Loop counters */
                           if ( _in == null )
                           {
                             fprintf( stderr, "cannot open file: %s\n", zFile );
-                            Sqlite3.sqlite3_finalize( ref pStmt );
+                            Sqlite3.sqlite3_finalize( pStmt );
                             return 0;
                           }
                           azCol = new string[nCol + 1];//malloc( sizeof(azCol[0])*(nCol+1) );
@@ -1679,7 +1679,7 @@ int i, j;                     /* Loop counters */
                           }
                           //free( ref azCol );
                           _in.Close();// fclose( _in );
-                          Sqlite3.sqlite3_finalize( ref pStmt );
+                          Sqlite3.sqlite3_finalize( pStmt );
                           Sqlite3.sqlite3_exec( p.db, zCommit.ToString(), null, null, ref sDummy );
                         }
                         else
@@ -1783,12 +1783,12 @@ sqlite3IoTrace = iotracePrintf;
                                 else if ( strncmp( azArg[1], "csv", n2 ) == 0 )
                                 {
                                   p.mode = MODE_Csv;
-                                  Sqlite3.sqlite3_snprintf( 2, ref p.separator, "," );
+                                  snprintf( 2, ref p.separator, "," );
                                 }
                                 else if ( strncmp( azArg[1], "tabs", n2 ) == 0 )
                                 {
                                   p.mode = MODE_List;
-                                  Sqlite3.sqlite3_snprintf( 2, ref p.separator, "\t" );
+                                  snprintf( 2, ref p.separator, "\t" );
                                 }
                                 else if ( strncmp( azArg[1], "insert", n2 ) == 0 )
                                 {
@@ -1812,7 +1812,7 @@ sqlite3IoTrace = iotracePrintf;
 
                                 if ( c == 'n' && strncmp( azArg[0], "nullvalue", n ) == 0 && nArg == 2 )
                                 {
-                                  Sqlite3.sqlite3_snprintf( 20, ref p.nullvalue,
+                                  snprintf( 20, ref p.nullvalue,
                                                    "%.*s", 19 - 1, azArg[1] );
                                 }
                                 else
@@ -1826,7 +1826,7 @@ sqlite3IoTrace = iotracePrintf;
                                     if ( strcmp( azArg[1], "stdout" ) == 0 )
                                     {
                                       p._out = stdout;
-                                      Sqlite3.sqlite3_snprintf( p.outfile.Capacity, ref p.outfile, "stdout" );
+                                      Sqlite3.sqlite3_snprintf(p.outfile.Capacity, p.outfile, "stdout");
                                     }
                                     else
                                     {
@@ -1838,7 +1838,7 @@ sqlite3IoTrace = iotracePrintf;
                                       }
                                       else
                                       {
-                                        Sqlite3.sqlite3_snprintf( p.outfile.Capacity, ref p.outfile, "%s", azArg[1] );
+                                        Sqlite3.sqlite3_snprintf(p.outfile.Capacity, p.outfile, "%s", azArg[1]);
                                       }
                                     }
                                   }
@@ -2024,7 +2024,7 @@ sqlite3IoTrace = iotracePrintf;
 
                                               if ( c == 's' && strncmp( azArg[0], "separator", n ) == 0 && nArg == 2 )
                                               {
-                                                Sqlite3.sqlite3_snprintf( 2, ref p.separator,
+                                                snprintf( 2, ref p.separator,
                                                                  "%.*s", 2 - 1, azArg[1] );
                                               }
                                               else
@@ -2336,12 +2336,12 @@ END_TIMER;
             string zPrefix = "";
             if ( _in != null || !stdin_is_interactive )
             {
-              Sqlite3.sqlite3_snprintf( 20, ref zPrefix,
+              snprintf( 20, ref zPrefix,
                            "SQL error near line %d:", startline );
             }
             else
             {
-              Sqlite3.sqlite3_snprintf( 20, ref zPrefix, "SQL error:" );
+              snprintf( 20, ref zPrefix, "SQL error:" );
             }
             if ( zErrMsg != "" )
             {
@@ -2399,7 +2399,7 @@ END_TIMER;
 			    n = strlen30( zDrive ) + strlen30( zPath ) + 1;
 			    home_dir = "";// malloc( n );
 			    //if ( home_dir == null ) return "";
-			    Sqlite3.sqlite3_snprintf( n, ref home_dir, "%s%s", zDrive, zPath );
+			    snprintf( n, ref home_dir, "%s%s", zDrive, zPath );
 			    return home_dir;
 		    }
 		    home_dir = "c:\\";
@@ -2498,8 +2498,8 @@ END_TIMER;
       data.mode = MODE_List;
       data.separator = "|";// memcpy( data.separator, "|", 2 );
       data.showHeader = false;
-      Sqlite3.sqlite3_snprintf( 20, ref mainPrompt, "C#-sqlite> " );
-      Sqlite3.sqlite3_snprintf( 20, ref continuePrompt, "   ...> " );
+      snprintf( 20, ref mainPrompt, "C#-sqlite> " );
+      snprintf( 20, ref continuePrompt, "   ...> " );
     }
 
     static int main( int argc, string[] argv )
@@ -2626,13 +2626,13 @@ if( data.zDbFilename=="" ){
         else if ( strcmp( z, "-separator" ) == 0 )
         {
           i++;
-          Sqlite3.sqlite3_snprintf( 8, ref data.separator,
+          snprintf( 8, ref data.separator,
                    "%.*s", 8 - 1, argv[i] );
         }
         else if ( strcmp( z, "-nullvalue" ) == 0 )
         {
           i++;
-          Sqlite3.sqlite3_snprintf( 20, ref data.nullvalue,
+          snprintf( 20, ref data.nullvalue,
                    "%.*s", (int)20 - 1, argv[i] );
         }
         else if ( strcmp( z, "-header" ) == 0 )
@@ -2721,7 +2721,7 @@ if( data.zDbFilename=="" ){
             nHistory = strlen30( zHome ) + 20;
             //if ( ( zHistory = malloc( nHistory ) ) != 0 )
             //{
-            Sqlite3.sqlite3_snprintf( nHistory, ref zHistory, "%s/.sqlite_history", zHome );
+            snprintf( nHistory, ref zHistory, "%s/.sqlite_history", zHome );
             //}
           }
 #if (HAVE_READLINE) //&& HAVE_READLINE==1
@@ -2848,5 +2848,12 @@ if( zHistory ) read_history(zHistory);
       {
         throw new Exception("The method or operation is not implemented.");
       }
+    }
+
+    private static void snprintf(int n, ref string zBuf, string zFormat, params va_list[] ap)
+    {
+      StringBuilder sbBuf = new StringBuilder(100);
+      Sqlite3.sqlite3_snprintf(n, sbBuf, zFormat, ap);
+      zBuf = sbBuf.ToString();
     }
   }

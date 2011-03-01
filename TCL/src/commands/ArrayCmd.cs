@@ -8,7 +8,7 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/commands/ArrayCmd.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: ArrayCmd.java,v 1.4 2003/01/10 01:57:57 mdejong Exp $
 *
 */
@@ -23,8 +23,8 @@ namespace tcl.lang
 	class ArrayCmd : Command
 	{
 		internal static Type procClass = null;
-		
-		private static readonly string[] validCmds = new string[]{"anymore", "donesearch", "exists", "get", "names", "nextelement", "set", "size", "startsearch", "unset"};
+
+    private static readonly string[] validCmds = new string[] { "anymore", "donesearch", "exists", "get", "names", "nextelement", "set", "size", "startsearch", "unset" };
 		
 		internal const int OPT_ANYMORE = 0;
 		internal const int OPT_DONESEARCH = 1;
@@ -432,7 +432,7 @@ namespace tcl.lang
 						{
 							
 							pattern = objv[3].ToString();
-							Hashtable table = (Hashtable) var.value;
+							Hashtable table = (Hashtable)(((Hashtable) var.value).Clone());
 							for (IDictionaryEnumerator e = table.GetEnumerator(); e.MoveNext(); )
 							{
 								name = (string)e.Key;

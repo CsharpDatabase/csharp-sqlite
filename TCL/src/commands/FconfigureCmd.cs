@@ -9,7 +9,7 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/commands/FconfigureCmd.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: FconfigureCmd.java,v 1.11 2003/03/08 03:42:43 mdejong Exp $
 *
 */
@@ -23,8 +23,8 @@ namespace tcl.lang
 	
 	class FconfigureCmd : Command
 	{
-		
-		private static readonly string[] validCmds = new string[]{"-blocking", "-buffering", "-buffersize", "-encoding", "-eofchar", "-translation"};
+
+    private static readonly string[] validCmds = new string[] { "-blocking", "-buffering", "-buffersize", "-encoding", "-eofchar", "-translation" };
 		
 		internal const int OPT_BLOCKING = 0;
 		internal const int OPT_BUFFERING = 1;

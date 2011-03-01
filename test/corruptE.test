@@ -20,9 +20,15 @@ catch {file delete -force test.db test.db-journal test.bu}
 
 set testdir [file dirname $argv0]
 source $testdir/tester.tcl
-# Skip this whole file if a codec is active
+
+# Do not use a codec for tests in this file, as the database file is
+# manipulated directly using tcl scripts (using the [hexio_write] command).
 #
-if {[sqlite3 -has-codec]} {
+do_not_use_codec
+
+# Do not run the tests in this file if ENABLE_OVERSIZE_CELL_CHECK is on.
+#
+ifcapable oversize_cell_check {
   finish_test
   return
 }
@@ -83,19 +89,7 @@ do_test corruptE-2.1 {
   list [regexp {out of order.*previous was} $ans] \
        [regexp {out of order.*max larger than parent max} $ans]
 } {1 1}
-ifcapable oversize_cell_check {
-do_test corruptE-2.2 {
-  db close
-  copy_file test.bu test.db
 
-  # insert corrupt byte(s)
-  hexio_write test.db 2047 [format %02x 0x84]
-
-  sqlite3 db test.db
-
-  set res [ catchsql {PRAGMA integrity_check} ]
-} {1 {database disk image is malformed}}
-} else {
 do_test corruptE-2.2 {
   db close
   copy_file test.bu test.db
@@ -111,7 +105,7 @@ do_test corruptE-2.2 {
   list [regexp {out of order.*previous was} $ans] \
        [regexp {out of order.*min less than parent min} $ans]
 } {1 1}
-}
+
 do_test corruptE-2.3 {
   db close
   copy_file test.bu test.db
@@ -144,7 +138,6 @@ do_test corruptE-2.4 {
 } {1}
 
 
-ifcapable !oversize_cell_check { 
 set tests [list {10233 0xd0} \
                 {941 0x42} \
                 {1028 0x53} \
@@ -186,5 +179,5 @@ foreach test $tests {
   } {1}
   incr tc 1
 }
-}
+
 finish_test

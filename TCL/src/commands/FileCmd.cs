@@ -12,7 +12,7 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/commands/FileCmd.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: FileCmd.java,v 1.9 2003/02/03 01:39:02 mdejong Exp $
 *
 */
@@ -31,8 +31,8 @@ namespace tcl.lang
 		private static System.Reflection.MethodInfo listRootsMethod;
 		
 		internal static Type procClass = null;
-		
-		private static readonly string[] validCmds = new string[]{"atime", "attributes", "channels", "copy", "delete", "dirname", "executable", "exists", "extension", "isdirectory", "isfile", "join", "link", "lstat", "mtime", "mkdir", "nativename", "normalize", "owned", "pathtype", "readable", "readlink", "rename", "rootname", "separator", "size", "split", "stat", "system", "tail", "type", "volumes", "writable"};
+
+    private static readonly string[] validCmds = new string[] { "atime", "attributes", "channels", "copy", "delete", "dirname", "executable", "exists", "extension", "isdirectory", "isfile", "join", "link", "lstat", "mtime", "mkdir", "nativename", "normalize", "owned", "pathtype", "readable", "readlink", "rename", "rootname", "separator", "size", "split", "stat", "system", "tail", "type", "volumes", "writable" };
 		
 		private const int OPT_ATIME = 0;
 		private const int OPT_ATTRIBUTES = 1;
@@ -67,8 +67,8 @@ namespace tcl.lang
 		private const int OPT_TYPE = 30;
 		private const int OPT_VOLUMES = 31;
 		private const int OPT_WRITABLE = 32;
-		
-		private static readonly string[] validOptions = new string[]{"-force", "--"};
+
+    private static readonly string[] validOptions = new string[] { "-force", "--" };
 		
 		private const int OPT_FORCE = 0;
 		private const int OPT_LAST = 1;
@@ -863,7 +863,7 @@ namespace tcl.lang
 					for (int i = 0; i < fileList.Length; i++)
 					{
 						
-						TclObject[] joinArrayObj = new TclObject[2];
+						var joinArrayObj = new TclObject[2];
 						joinArrayObj[0] = TclString.newInstance(fileName);
 						joinArrayObj[1] = TclString.newInstance(fileList[i]);
 						
@@ -969,7 +969,7 @@ namespace tcl.lang
 					{
 						string tailName = getTail(interp, sourceName);
 						
-						TclObject[] joinArrayObj = new TclObject[2];
+						var joinArrayObj = new TclObject[2];
 						joinArrayObj[0] = TclString.newInstance(targetName);
 						joinArrayObj[1] = TclString.newInstance(tailName);
 						
@@ -1145,7 +1145,7 @@ namespace tcl.lang
 		{
 			{
 				// File.listRoots()
-				System.Type[] parameterTypes = new System.Type[0];
+				var parameterTypes = new System.Type[0];
 				try
 				{
 					listRootsMethod = typeof(System.IO.FileInfo).GetMethod("listRoots", (System.Type[]) parameterTypes);

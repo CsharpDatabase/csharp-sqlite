@@ -9,7 +9,7 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/commands/ForeachCmd.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: ForeachCmd.java,v 1.4 1999/08/07 06:44:04 mo Exp $
 *
 */
@@ -45,8 +45,8 @@ namespace tcl.lang
 			//	name[0] = {n1 n2}	value[0] = {1 2 3 4}
 			//	name[1] = {n3}		value[0] = {1 2}
 			
-			TclObject[] name = new TclObject[(objv.Length - 2) / 2];
-			TclObject[] value = new TclObject[(objv.Length - 2) / 2];
+			var name = new TclObject[(objv.Length - 2) / 2];
+			var value = new TclObject[(objv.Length - 2) / 2];
 			
 			int c, i, j, base_;
 			int maxIter = 0;

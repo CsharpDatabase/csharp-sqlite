@@ -10,7 +10,7 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/commands/InterpCmd.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: InterpCmd.java,v 1.1 2000/08/20 06:08:43 mo Exp $
 *
 */
@@ -24,8 +24,8 @@ namespace tcl.lang
 	
 	class InterpCmd : Command
 	{
-		
-		private static readonly string[] options = new string[]{"alias", "aliases", "create", "delete", "eval", "exists", "expose", "hide", "hidden", "issafe", "invokehidden", "marktrusted", "slaves", "share", "target", "transfer"};
+
+    private static readonly string[] options = new string[] { "alias", "aliases", "create", "delete", "eval", "exists", "expose", "hide", "hidden", "issafe", "invokehidden", "marktrusted", "slaves", "share", "target", "transfer" };
 		private const int OPT_ALIAS = 0;
 		private const int OPT_ALIASES = 1;
 		private const int OPT_CREATE = 2;
@@ -42,12 +42,12 @@ namespace tcl.lang
 		private const int OPT_SHARE = 13;
 		private const int OPT_TARGET = 14;
 		private const int OPT_TRANSFER = 15;
-		
-		private static readonly string[] createOptions = new string[]{"-safe", "--"};
+
+    private static readonly string[] createOptions = new string[] { "-safe", "--" };
 		private const int OPT_CREATE_SAFE = 0;
 		private const int OPT_CREATE_LAST = 1;
-		
-		private static readonly string[] hiddenOptions = new string[]{"-global", "--"};
+
+    private static readonly string[] hiddenOptions = new string[] { "-global", "--" };
 		private const int OPT_HIDDEN_GLOBAL = 0;
 		private const int OPT_HIDDEN_LAST = 1;
 		

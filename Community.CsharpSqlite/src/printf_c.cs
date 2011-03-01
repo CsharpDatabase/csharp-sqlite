@@ -69,7 +69,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2010-03-09 19:31:43 4ae453ea7be69018d8c16eb8dabe05617397dc4dy
+    **  SQLITE_SOURCE_ID: 2011-01-28 17:03:50 ed759d5a9edb3bba5f48f243df47be29e3fe8cd7
     **
     **  $Header$
     *************************************************************************
@@ -225,7 +225,8 @@ new et_info(   'r', 10, 3, etORDINAL,    0,  0 ),
     {
       int digit;
       LONGDOUBLE_TYPE d;
-      if ( cnt++ >= 16 ) return '\0';
+      if ( cnt++ >= 16 )
+        return '\0';
       digit = (int)val;
       d = digit;
       //digit += '0';
@@ -316,7 +317,7 @@ const int SQLITE_PRINT_BUF_SIZE = 50;
       i64 longvalue;
       LONGDOUBLE_TYPE realvalue; /* Value for real types */
       et_info infop;      /* Pointer to the appropriate info structure */
-      //char[] buf = new char[etBUFSIZE];       /* Conversion buffer */
+      var buf = new char[etBUFSIZE];       /* Conversion buffer */
       char prefix;                /* Prefix character.  "+" or "-" or " " or '\0'. */
       byte xtype = 0;             /* Conversion paradigm */
       // Not used in C# -- string zExtra;              /* Extra memory used for etTCLESCAPE conversions */
@@ -340,9 +341,11 @@ const int SQLITE_PRINT_BUF_SIZE = 50;
           int amt;
           bufpt = _fmt;
           amt = 1;
-          while ( _fmt < fmt.Length && ( c = ( fmt[++_fmt] ) ) != '%' && c != 0 ) amt++;
+          while ( _fmt < fmt.Length && ( c = ( fmt[++_fmt] ) ) != '%' && c != 0 )
+            amt++;
           sqlite3StrAccumAppend( pAccum, fmt.Substring( bufpt, amt ), amt );
-          if ( c == 0 ) break;
+          if ( c == 0 )
+            break;
         }
         if ( _fmt < fmt.Length && ( c = ( fmt[++_fmt] ) ) == 0 )
         {
@@ -357,13 +360,27 @@ const int SQLITE_PRINT_BUF_SIZE = 50;
         {
           switch ( c )
           {
-            case '-': flag_leftjustify = true; break;
-            case '+': flag_plussign = true; break;
-            case ' ': flag_blanksign = true; break;
-            case '#': flag_alternateform = true; break;
-            case '!': flag_altform2 = true; break;
-            case '0': flag_zeropad = true; break;
-            default: done = true; break;
+            case '-':
+              flag_leftjustify = true;
+              break;
+            case '+':
+              flag_plussign = true;
+              break;
+            case ' ':
+              flag_blanksign = true;
+              break;
+            case '#':
+              flag_alternateform = true;
+              break;
+            case '!':
+              flag_altform2 = true;
+              break;
+            case '0':
+              flag_zeropad = true;
+              break;
+            default:
+              done = true;
+              break;
           }
         } while ( !done && _fmt < fmt.Length - 1 && ( c = ( fmt[++_fmt] ) ) != 0 );
         /* Get the field width */
@@ -398,7 +415,8 @@ const int SQLITE_PRINT_BUF_SIZE = 50;
           if ( c == '*' )
           {
             precision = (int)va_arg( ap, "int" );
-            if ( precision < 0 ) precision = -precision;
+            if ( precision < 0 )
+              precision = -precision;
             c = fmt[++_fmt];
           }
           else
@@ -513,9 +531,12 @@ const int SQLITE_PRINT_BUF_SIZE = 50;
               else
               {
                 longvalue = v;
-                if ( flag_plussign ) prefix = '+';
-                else if ( flag_blanksign ) prefix = ' ';
-                else prefix = '\0';
+                if ( flag_plussign )
+                  prefix = '+';
+                else if ( flag_blanksign )
+                  prefix = ' ';
+                else
+                  prefix = '\0';
               }
             }
             else
@@ -534,7 +555,8 @@ const int SQLITE_PRINT_BUF_SIZE = 50;
               }
               prefix = '\0';
             }
-            if ( longvalue == 0 ) flag_alternateform = false;
+            if ( longvalue == 0 )
+              flag_alternateform = false;
             if ( flag_zeropad && precision < width - ( ( prefix != '\0' ) ? 1 : 0 ) )
             {
               precision = width - ( ( prefix != '\0' ) ? 1 : 0 );
@@ -596,13 +618,15 @@ const int SQLITE_PRINT_BUF_SIZE = 50;
             {
               buf[( --bufpt )] = '0';                             /* Zero pad */
             }
-            if ( prefix != '\0' ) buf[--bufpt] = prefix;   /* Add sign */
+            if ( prefix != '\0' )
+              buf[--bufpt] = prefix;   /* Add sign */
             if ( flag_alternateform && infop.prefix != 0 )
             {      /* Add "0" or "0x" */
               int pre;
               char x;
               pre = infop.prefix;
-              for ( ; ( x = aPrefix[pre] ) != 0; pre++ ) buf[--bufpt] = x;
+              for ( ; ( x = aPrefix[pre] ) != 0; pre++ )
+                buf[--bufpt] = x;
             }
             length = buf.Length - bufpt;//length = (int)(&buf[etBUFSIZE-1]-bufpt);
             break;
@@ -611,10 +635,12 @@ const int SQLITE_PRINT_BUF_SIZE = 50;
           case etGENERIC:
             realvalue = (double)va_arg( ap, "double" );
 #if SQLITE_OMIT_FLOATING_POINT
-        length = 0;
+length = 0;
 #else
-            if (precision < 0) precision = 6;         /* Set default precision */
-            if ( precision > etBUFSIZE / 2 - 10 ) precision = etBUFSIZE / 2 - 10;
+            if ( precision < 0 )
+              precision = 6;         /* Set default precision */
+            if ( precision > etBUFSIZE / 2 - 10 )
+              precision = etBUFSIZE / 2 - 10;
             if ( realvalue < 0.0 )
             {
               realvalue = -realvalue;
@@ -622,11 +648,15 @@ const int SQLITE_PRINT_BUF_SIZE = 50;
             }
             else
             {
-              if ( flag_plussign ) prefix = '+';
-              else if ( flag_blanksign ) prefix = ' ';
-              else prefix = '\0';
+              if ( flag_plussign )
+                prefix = '+';
+              else if ( flag_blanksign )
+                prefix = ' ';
+              else
+                prefix = '\0';
             }
-            if ( xtype == etGENERIC && precision > 0 ) precision--;
+            if ( xtype == etGENERIC && precision > 0 )
+              precision--;
 #if FALSE
 /* Rounding works like BSD when the constant 0.4999 is used.  Wierd! */
 for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
@@ -634,13 +664,16 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
             /* It makes more sense to use 0.5 */
             for ( idx = precision, rounder = 0.5; idx > 0; idx--, rounder *= 0.1 ) { }
 #endif
-            if ( xtype == etFLOAT ) realvalue += rounder;
+            if ( xtype == etFLOAT )
+              realvalue += rounder;
             /* Normalize realvalue to within 10.0 > realvalue >= 1.0 */
             exp = 0;
             double d = 0;
             if ( Double.IsNaN( realvalue ) || !( Double.TryParse( Convert.ToString( realvalue ), out d ) ) )//if( sqlite3IsNaN((double)realvalue) )
             {
-              buf[0] = 'N'; buf[1] = 'a'; buf[2] = 'N';// "NaN"
+              buf[0] = 'N';
+              buf[1] = 'a';
+              buf[2] = 'N';// "NaN"
               length = 3;
               break;
             }
@@ -655,17 +688,25 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
               {
                 if ( prefix == '-' )
                 {
-                  buf[0] = '-'; buf[1] = 'I'; buf[2] = 'n'; buf[3] = 'f';// "-Inf"
+                  buf[0] = '-';
+                  buf[1] = 'I';
+                  buf[2] = 'n';
+                  buf[3] = 'f';// "-Inf"
                   bufpt = 4;
                 }
                 else if ( prefix == '+' )
                 {
-                  buf[0] = '+'; buf[1] = 'I'; buf[2] = 'n'; buf[3] = 'f';// "+Inf"
+                  buf[0] = '+';
+                  buf[1] = 'I';
+                  buf[2] = 'n';
+                  buf[3] = 'f';// "+Inf"
                   bufpt = 4;
                 }
                 else
                 {
-                  buf[0] = 'I'; buf[1] = 'n'; buf[2] = 'f';// "Inf"
+                  buf[0] = 'I';
+                  buf[1] = 'n';
+                  buf[2] = 'f';// "Inf"
                   bufpt = 3;
                 }
                 length = sqlite3Strlen30( bufpt );// sqlite3Strlen30(bufpt);
@@ -749,7 +790,8 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
             /* Remove trailing zeros and the "." if no digits follow the "." */
             if ( flag_rtz && flag_dp )
             {
-              while ( buf[bufpt - 1] == '0' ) buf[--bufpt] = '\0';
+              while ( buf[bufpt - 1] == '0' )
+                buf[--bufpt] = '\0';
               Debug.Assert( bufpt > 0 );
               if ( buf[bufpt - 1] == '.' )
               {
@@ -769,7 +811,8 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
               buf[bufpt++] = aDigits[infop.charset];
               if ( exp < 0 )
               {
-                buf[bufpt++] = '-'; exp = -exp;
+                buf[bufpt++] = '-';
+                exp = -exp;
               }
               else
               {
@@ -802,7 +845,8 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
                 buf[bufpt + i] = buf[bufpt + i - nPad];
               }
               i = ( prefix != '\0' ? 1 : 0 );
-              while ( nPad-- != 0 ) buf[( bufpt++ ) + i] = '0';
+              while ( nPad-- != 0 )
+                buf[( bufpt++ ) + i] = '0';
               length = width;
               bufpt = 0;
             }
@@ -822,7 +866,8 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
             buf[0] = (char)c;
             if ( precision >= 0 )
             {
-              for ( idx = 1; idx < precision; idx++ ) buf[idx] = (char)c;
+              for ( idx = 1; idx < precision; idx++ )
+                buf[idx] = (char)c;
               length = precision;
             }
             else
@@ -835,7 +880,8 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
           case etDYNSTRING:
             bufpt = 0;//
             string bufStr = (string)va_arg( ap, "string" );
-            if ( bufStr.Length > buf.Length ) buf = new char[bufStr.Length];
+            if ( bufStr.Length > buf.Length )
+              buf = new char[bufStr.Length];
             bufStr.ToCharArray().CopyTo( buf, 0 );
             bufpt = bufStr.Length;
             if ( bufpt == 0 )
@@ -861,18 +907,23 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
           case etSQLESCAPE2:
           case etSQLESCAPE3:
             {
-              int i; int j; int k; int n;
+              int i;
+              int j;
+              int k;
+              int n;
               bool isnull;
               bool needQuote;
               char ch;
               char q = ( ( xtype == etSQLESCAPE3 ) ? '"' : '\'' );   /* Quote character */
               string escarg = (string)va_arg( ap, "char*" ) + '\0';
               isnull = ( escarg == "" || escarg == "NULL\0" );
-              if ( isnull ) escarg = ( xtype == etSQLESCAPE2 ) ? "NULL\0" : "(NULL)\0";
+              if ( isnull )
+                escarg = ( xtype == etSQLESCAPE2 ) ? "NULL\0" : "(NULL)\0";
               k = precision;
-              for (i = n = 0; k != 0 && (ch = escarg[i]) != 0; i++, k--)
+              for ( i = n = 0; k != 0 && ( ch = escarg[i] ) != 0; i++, k-- )
               {
-                if ( ch == q ) n++;
+                if ( ch == q )
+                  n++;
               }
               needQuote = !isnull && ( xtype == etSQLESCAPE2 );
               n += i + 1 + ( needQuote ? 2 : 0 );
@@ -892,14 +943,17 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
                 bufpt = 0; //Start of Buffer
               }
               j = 0;
-              if ( needQuote ) buf[bufpt + j++] = q;
+              if ( needQuote )
+                buf[bufpt + j++] = q;
               k = i;
               for ( i = 0; i < k; i++ )
               {
                 buf[bufpt + j++] = ch = escarg[i];
-                if ( ch == q ) buf[bufpt + j++] = ch;
+                if ( ch == q )
+                  buf[bufpt + j++] = ch;
               }
-              if ( needQuote ) buf[bufpt + j++] = q;
+              if ( needQuote )
+                buf[bufpt + j++] = q;
               buf[bufpt + j] = '\0';
               length = j;
               /* The precision in %q and %Q means how many input characters to
@@ -978,7 +1032,7 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
     static void sqlite3StrAccumAppend( StrAccum p, string z, int N )
     {
       Debug.Assert( z != null || N == 0 );
-      if ( p.tooBig != 0 )//|| p.mallocFailed != 0 )
+      if ( p.tooBig )//|| p.mallocFailed != 0 )
       {
         testcase( p.tooBig );
         //testcase( p.mallocFailed );
@@ -992,50 +1046,43 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
       {
         return;
       }
-      //if ( p.nChar + N >= p.nAlloc )
-      //{
-      //  char* zNew;
-      //  if ( !p.useMalloc )
-      //  {
-      //    p.tooBig = 1;
-      //    N = p.nAlloc - p.nChar - 1;
-      //    if ( N <= 0 )
-      //    {
+      //if( p->nChar+N >= p->nAlloc ){
+      //  char *zNew;
+      //  if( !p->useMalloc ){
+      //    p->tooBig = 1;
+      //    N = p->nAlloc - p->nChar - 1;
+      //    if( N<=0 ){
       //      return;
       //    }
-      //  }
-      //  else
-      //  {
-      //    i64 szNew = p.nChar;
+      //  }else{
+      //    char *zOld = (p->zText==p->zBase ? 0 : p->zText);
+      //    i64 szNew = p->nChar;
       //    szNew += N + 1;
-      //    if ( szNew > p.mxAlloc )
-      //    {
-      //      sqlite3StrAccumReset( p );
-      //      p.tooBig = 1;
+      //    if( szNew > p->mxAlloc ){
+      //      sqlite3StrAccumReset(p);
+      //      p->tooBig = 1;
       //      return;
+      //    }else{
+      //      p->nAlloc = (int)szNew;
       //    }
-      //    else
-      //    {
-      //      p.nAlloc = (int)szNew;
+      //    if( p->useMalloc==1 ){
+      //      zNew = sqlite3DbRealloc(p->db, zOld, p->nAlloc);
+      //    }else{
+      //      zNew = sqlite3_realloc(zOld, p->nAlloc);
       //    }
-      //    zNew = sqlite3DbMalloc( p.nAlloc );
-      //    if ( zNew )
-      //    {
-      //      memcpy( zNew, p.zText, p.nChar );
-      //      sqlite3StrAccumReset( p );
-      //      p.zText = zNew;
-      //    }
-      //    else
-      //    {
-      //      p.mallocFailed = 1;
-      //      sqlite3StrAccumReset( p );
+      //    if( zNew ){
+      //      if( zOld==0 ) memcpy(zNew, p->zText, p->nChar);
+      //      p->zText = zNew;
+      //    }else{
+      //      p->mallocFailed = 1;
+      //      sqlite3StrAccumReset(p);
       //      return;
       //    }
       //  }
       //}
-      //memcpy( &p.zText[p.nChar], z, N );
+      //memcpy(&p->zText[p->nChar], z, N);
       p.zText.Append( z.Substring( 0, N <= z.Length ? N : z.Length ) );
-      p.nChar += N;
+      //p.nChar += N;
     }
 
     /*
@@ -1045,19 +1092,26 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
     */
     static string sqlite3StrAccumFinish( StrAccum p )
     {
-      //if (p.zText.Length > 0)
+      //if ( p->zText )
       //{
-      //  p.zText[p.nChar] = 0;
-      //  if (p.useMalloc && p.zText == p.zBase)
+      //  p->zText[p->nChar] = 0;
+      //  if ( p->useMalloc && p->zText == p->zBase )
       //  {
-      //    p.zText = sqlite3DbMalloc(p.nChar + 1);
-      //    if (p.zText)
+      //    if ( p->useMalloc == 1 )
       //    {
-      //      memcpy(p.zText, p.zBase, p.nChar + 1);
+      //      p->zText = sqlite3DbMallocRaw( p->db, p->nChar + 1 );
       //    }
       //    else
       //    {
-      //      p.mallocFailed = 1;
+      //      p->zText = sqlite3_malloc( p->nChar + 1 );
+      //    }
+      //    if ( p->zText )
+      //    {
+      //      memcpy( p->zText, p->zBase, p->nChar + 1 );
+      //    }
+      //    else
+      //    {
+      //      p->mallocFailed = 1;
       //    }
       //  }
       //}
@@ -1069,10 +1123,17 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
     */
     static void sqlite3StrAccumReset( StrAccum p )
     {
-      if ( p.zText.ToString() != p.zBase.ToString() )
-      {
-        sqlite3DbFree( p.db, ref p.zText );
-      }
+      //if ( p.zText.ToString() != p.zBase.ToString() )
+      //{
+      //  if ( p.useMalloc == 1 )
+      //  {
+      //    sqlite3DbFree( p.db, ref p.zText );
+      //  }
+      //  else
+      //  {
+      //    sqlite3_free( ref p.zText );
+      //  }
+      //}
       p.zText.Length = 0;
     }
 
@@ -1081,40 +1142,43 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
     */
     static void sqlite3StrAccumInit( StrAccum p, StringBuilder zBase, int n, int mx )
     {
-      p.zBase.Length = 0;
-      if ( p.zBase.Capacity < n ) p.zBase.Capacity = n;
+      //p.zBase.Length = 0;
+      //if ( p.zBase.Capacity < n )
+      //  p.zBase.Capacity = n;
       p.zText.Length = 0;
-      if ( p.zText.Capacity < n ) p.zBase.Capacity = n;
+      if ( p.zText.Capacity < n )
+        p.zText.Capacity = n;
       p.db = null;
-      p.nChar = 0;
-      p.nAlloc = n;
+      //p.nChar = 0;
+      //p.nAlloc = n;
       p.mxAlloc = mx;
-      p.useMalloc = 1;
-      p.tooBig = 0;
+      //p.useMalloc = 1;
+      //p.tooBig = 0;
       //p.mallocFailed = 0;
     }
     /*
     ** Print into memory obtained from sqliteMalloc().  Use the internal
     ** %-conversion extensions.
     */
-    static StrAccum acc = new StrAccum(SQLITE_PRINT_BUF_SIZE);
+    static StrAccum acc = new StrAccum( SQLITE_PRINT_BUF_SIZE );
     static string sqlite3VMPrintf( sqlite3 db, string zFormat, params va_list[] ap )
     {
-      if ( zFormat == null ) return null;
-      if ( ap.Length == 0 ) return zFormat;
-      string z;
+      if ( zFormat == null )
+        return null;
+      if ( ap.Length == 0 )
+        return zFormat;
+      //string z;
       Debug.Assert( db != null );
-      sqlite3StrAccumInit( acc, null,SQLITE_PRINT_BUF_SIZE,
+      sqlite3StrAccumInit( acc, null, SQLITE_PRINT_BUF_SIZE,
       db.aLimit[SQLITE_LIMIT_LENGTH] );
       acc.db = db;
       acc.zText.Length = 0;
       sqlite3VXPrintf( acc, 1, zFormat, ap );
-      z = sqlite3StrAccumFinish( acc );
       //      if ( acc.mallocFailed != 0 )
       //      {
       //////        db.mallocFailed = 1;
       //      }
-      return z;
+      return sqlite3StrAccumFinish( acc );
     }
 
     /*
@@ -1156,15 +1220,15 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
     */
     static string sqlite3_vmprintf( string zFormat, params  va_list[] ap )
     {
-      string z;
-      //StrAccum acc = new StrAccum(SQLITE_PRINT_BUF_SIZE);
+      //var acc = new StrAccum( SQLITE_PRINT_BUF_SIZE );
 #if !SQLITE_OMIT_AUTOINIT
-      if ( sqlite3_initialize() != 0 ) return "";
+      if ( sqlite3_initialize() != 0 )
+        return "";
 #endif
       sqlite3StrAccumInit( acc, null, SQLITE_PRINT_BUF_SIZE, SQLITE_PRINT_BUF_SIZE );//zBase).Length;
+      //acc.useMalloc = 2;
       sqlite3VXPrintf( acc, 0, zFormat, ap );
-      z = sqlite3StrAccumFinish( acc );
-      return z;
+      return sqlite3StrAccumFinish( acc );
     }
 
     /*
@@ -1176,7 +1240,8 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
       //va_list ap;
       string z;
 #if  !SQLITE_OMIT_AUTOINIT
-      if ( sqlite3_initialize() != 0 ) return "";
+      if ( sqlite3_initialize() != 0 )
+        return "";
 #endif
       va_start( ap, zFormat );
       z = sqlite3_vmprintf( zFormat, ap );
@@ -1189,78 +1254,93 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
     ** current locale settings.  This is important for SQLite because we
     ** are not able to use a "," as the decimal point in place of "." as
     ** specified by some locales.
+    **
+    ** Oops:  The first two arguments of sqlite3_snprintf() are backwards
+    ** from the snprintf() standard.  Unfortunately, it is too late to change
+    ** this without breaking compatibility, so we just have to live with the
+    ** mistake.
+    **
+    ** sqlite3_vsnprintf() is the varargs version.
     */
-    static public string sqlite3_snprintf(int n, ref StringBuilder zBuf, string zFormat, params va_list[] ap)
+    static public void sqlite3_vsnprintf( int n, StringBuilder zBuf, string zFormat, params va_list[] ap )
     {
-      //va_list ap;
-      //StrAccum acc = new StrAccum( SQLITE_PRINT_BUF_SIZE );
-
+      //var acc = new StrAccum( SQLITE_PRINT_BUF_SIZE );
       if ( n <= 0 )
-      {
-        return zBuf.ToString();
-      }
+        return;
       sqlite3StrAccumInit( acc, null, n, 0 );
-      acc.useMalloc = 0;
-      va_start( ap, zFormat );
+      //acc.useMalloc = 0;
       sqlite3VXPrintf( acc, 0, zFormat, ap );
-      va_end( ap );
       zBuf.Length = 0;
+      if (n > 1 && n <= acc.zText.Length) acc.zText.Length = n-1;
       zBuf.Append( sqlite3StrAccumFinish( acc ) );
-      if ( n - 1 < zBuf.Length ) zBuf.Length = n - 1;
-      return zBuf.ToString();
+      return;
     }
 
-    static public string sqlite3_snprintf( int n, ref string zBuf, string zFormat, params va_list[] ap )
+    static public void sqlite3_snprintf( int n, StringBuilder zBuf, string zFormat, params va_list[] ap )
     {
-      string z;
+      //string z;
       //va_list ap;
-      //StrAccum acc = new StrAccum();
-
-      if ( n <= 0 )
-      {
-        return zBuf;
-      }
-      sqlite3StrAccumInit( acc, null, n, 0 );
-      acc.useMalloc = 0;
+      //var acc = new StrAccum( SQLITE_PRINT_BUF_SIZE );
+      zBuf.EnsureCapacity( SQLITE_PRINT_BUF_SIZE );
       va_start( ap, zFormat );
-      sqlite3VXPrintf( acc, 0, zFormat, ap );
+      sqlite3_vsnprintf( n, zBuf, zFormat, ap );
       va_end( ap );
-      z = sqlite3StrAccumFinish( acc );
-      return ( zBuf = z );
+      return;
     }
 
-/*
-** This is the routine that actually formats the sqlite3_log() message.
-** We house it in a separate routine from sqlite3_log() to avoid using
-** stack space on small-stack systems when logging is disabled.
-**
-** sqlite3_log() must render into a static buffer.  It cannot dynamically
-** allocate memory because it might be called while the memory allocator
-** mutex is held.
-*/
-static void renderLogMsg(int iErrCode, string zFormat, params object[] ap){
-  //StrAccum acc;                          /* String accumulator */
-  //char zMsg[SQLITE_PRINT_BUF_SIZE*3];    /* Complete log message */
+    //static public string sqlite3_snprintf( int n, ref string zBuf, string zFormat, params va_list[] ap )
+    //{
+    //  string z;
+    //  //va_list ap;
+    //  var acc = new StrAccum( SQLITE_PRINT_BUF_SIZE );
 
-  sqlite3StrAccumInit(acc, null, SQLITE_PRINT_BUF_SIZE * 3, 0);
-  acc.useMalloc = 0;
-  sqlite3VXPrintf(acc, 0, zFormat, ap);
-  sqlite3GlobalConfig.xLog(sqlite3GlobalConfig.pLogArg, iErrCode,
-                           sqlite3StrAccumFinish(acc));
-}
+    //  if ( n <= 0 )
+    //  {
+    //    return zBuf;
+    //  }
+    //  sqlite3StrAccumInit( acc, null, n, 0 );
+    //  //acc.useMalloc = 0;
+    //  va_start( ap, zFormat );
+    //  sqlite3VXPrintf( acc, 0, zFormat, ap );
+    //  va_end( ap );
+    //  z = sqlite3StrAccumFinish( acc );
+    //  return ( zBuf = z );
+    //}
 
-/*
-** Format and write a message to the log if logging is enabled.
-*/
-static void sqlite3_log(int iErrCode, string zFormat, params va_list[] ap )
-{
-  //va_list ap;                             /* Vararg list */
-  if( sqlite3GlobalConfig.xLog != null){
-    va_start(ap, zFormat);
-    renderLogMsg(iErrCode, zFormat, ap);
-    va_end(ap);
-  }
-}
+    /*
+    ** This is the routine that actually formats the sqlite3_log() message.
+    ** We house it in a separate routine from sqlite3_log() to avoid using
+    ** stack space on small-stack systems when logging is disabled.
+    **
+    ** sqlite3_log() must render into a static buffer.  It cannot dynamically
+    ** allocate memory because it might be called while the memory allocator
+    ** mutex is held.
+    */
+    static void renderLogMsg( int iErrCode, string zFormat, params object[] ap )
+    {
+      //StrAccum acc;                          /* String accumulator */
+      //char zMsg[SQLITE_PRINT_BUF_SIZE*3];    /* Complete log message */
+
+      sqlite3StrAccumInit( acc, null, SQLITE_PRINT_BUF_SIZE * 3, 0 );
+      //acc.useMalloc = 0;
+      sqlite3VXPrintf( acc, 0, zFormat, ap );
+      sqlite3GlobalConfig.xLog( sqlite3GlobalConfig.pLogArg, iErrCode,
+      sqlite3StrAccumFinish( acc ) );
+    }
+
+    /*
+    ** Format and write a message to the log if logging is enabled.
+    */
+    static void sqlite3_log( int iErrCode, string zFormat, params va_list[] ap )
+    {
+      //va_list ap;                             /* Vararg list */
+      if ( sqlite3GlobalConfig.xLog != null )
+      {
+        va_start( ap, zFormat );
+        renderLogMsg( iErrCode, zFormat, ap );
+        va_end( ap );
+      }
+    }
 
 #if SQLITE_DEBUG || DEBUG || TRACE
     /*
@@ -1271,15 +1351,13 @@ static void sqlite3_log(int iErrCode, string zFormat, params va_list[] ap )
     static void sqlite3DebugPrintf( string zFormat, params va_list[] ap )
     {
       //va_list ap;
-      //StrAccum acc = new StrAccum();
-      StringBuilder zBuf = new StringBuilder( SQLITE_PRINT_BUF_SIZE );
-      sqlite3StrAccumInit( acc, zBuf, zBuf.Capacity, 0 );
-      acc.useMalloc = 0;
+      //var acc = new StrAccum( SQLITE_PRINT_BUF_SIZE );
+      sqlite3StrAccumInit( acc, null, SQLITE_PRINT_BUF_SIZE, 0 );
+      //acc.useMalloc = 0;
       va_start( ap, zFormat );
       sqlite3VXPrintf( acc, 0, zFormat, ap );
       va_end( ap );
-      sqlite3StrAccumFinish( acc );
-      Console.Write( zBuf.ToString() );
+      Console.Write( sqlite3StrAccumFinish( acc ) );
       //fflush(stdout);
     }
 #endif

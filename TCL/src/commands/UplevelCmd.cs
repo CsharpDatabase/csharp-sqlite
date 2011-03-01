@@ -11,7 +11,7 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/commands/UplevelCmd.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: UplevelCmd.java,v 1.3 1999/07/12 02:38:53 mo Exp $
 *
 */
@@ -45,7 +45,7 @@ namespace tcl.lang
 			
 			optLevel = objv[1].ToString();
 			// Java does not support passing a reference by refernece so use an array
-			CallFrame[] frameArr = new CallFrame[1];
+			var frameArr = new CallFrame[1];
 			result = CallFrame.getFrame(interp, optLevel, frameArr);
 			frame = frameArr[0];
 			

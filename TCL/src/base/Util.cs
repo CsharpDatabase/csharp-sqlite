@@ -11,10 +11,11 @@
 * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 *
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/base/Util.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: Util.java,v 1.10 2002/05/16 22:53:45 mdejong Exp $
 */
 using System;
+using System.Text;
 using Regexp = sunlabs.brazil.util.regexp.Regexp;
 namespace tcl.lang
 {
@@ -93,7 +94,7 @@ namespace tcl.lang
     // is 10^2^i.  Used to convert decimal
     // exponents into floating-point numbers.
 
-    internal static readonly double[] powersOf10 = new double[] { 10.0, 100.0, 1.0e4, 1.0e8, 1.0e16, 1.0e32, 1.0e64, 1.0e128, 1.0e256 };
+    internal static readonly double[]  powersOf10 = new double[] { 10.0, 100.0, 1.0e4, 1.0e8, 1.0e16, 1.0e32, 1.0e64, 1.0e128, 1.0e256 };
 
     // Default precision for converting floating-point values to strings.
 
@@ -637,7 +638,7 @@ namespace tcl.lang
     internal static string concat( int from, int to, TclObject[] argv )
     // The CmdArgs.
     {
-      System.Text.StringBuilder sbuf;
+      StringBuilder sbuf;
 
       if ( from > argv.Length )
       {
@@ -648,7 +649,7 @@ namespace tcl.lang
         to = argv.Length - 1;
       }
 
-      sbuf = new System.Text.StringBuilder();
+      sbuf = new StringBuilder();
       for ( int i = from ; i <= to ; i++ )
       {
 
@@ -821,7 +822,7 @@ namespace tcl.lang
       {
         return "";
       }
-      System.Text.StringBuilder buf = new System.Text.StringBuilder( length );
+      var buf = new StringBuilder( length );
       buf.Append( System.Char.ToUpper( str[0] ) );
       buf.Append( str.Substring( 1 ).ToLower() );
       return buf.ToString();
@@ -831,7 +832,7 @@ namespace tcl.lang
       Regexp r = TclRegexp.compile( interp, pattern, false );
       return r.match( inString, (string[])null );
     }
-    internal static void appendElement( Interp interp, System.Text.StringBuilder sbuf, string s )
+    internal static void appendElement( Interp interp, StringBuilder sbuf, string s )
     {
       if ( sbuf.Length > 0 )
       {
@@ -865,7 +866,7 @@ namespace tcl.lang
         inQuotes = true;
         i++;
       }
-      System.Text.StringBuilder sbuf = new System.Text.StringBuilder();
+      var sbuf = new StringBuilder();
 
       while ( true )
       {
@@ -1145,7 +1146,7 @@ namespace tcl.lang
         return "{}";
       }
 
-      System.Text.StringBuilder sbuf = new System.Text.StringBuilder();
+      var sbuf = new StringBuilder();
 
       if ( ( ( flags & USE_BRACES ) != 0 ) && ( ( flags & TCL_DONT_USE_BRACES ) == 0 ) )
       {

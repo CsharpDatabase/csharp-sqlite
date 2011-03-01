@@ -26,7 +26,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2010-01-05 15:30:36 28d0d7710761114a44a1a3a425a6883c661f06e7
+    **  SQLITE_SOURCE_ID: 2010-08-23 18:52:01 42537b60566f288167f1b5864a5435986838e3a3
     **
     **  $Header$
     *************************************************************************
@@ -44,7 +44,7 @@ namespace Community.CsharpSqlite
       Table pTab;
       Debug.Assert( pItem != null && pSrc.nSrc == 1 );
       pTab = sqlite3LocateTable( pParse, 0, pItem.zName, pItem.zDatabase );
-      sqlite3DeleteTable( ref pItem.pTab );
+      sqlite3DeleteTable( pParse.db, ref pItem.pTab );
       pItem.pTab = pTab;
       if ( pTab != null )
       {
@@ -110,7 +110,7 @@ namespace Community.CsharpSqlite
     int iCur           /* VdbeCursor number for ephemerial table */
     )
     {
-      SelectDest dest = new SelectDest();
+      var dest = new SelectDest();
       Select pDup;
       sqlite3 db = pParse.db;
 
@@ -575,9 +575,7 @@ sqlite3AuthContextPop(sContext);
         {
           if ( mask == 0xffffffff || ( mask & ( 1 << iCol ) ) != 0 )
           {
-            int iTarget = iOld + iCol + 1;
-            sqlite3VdbeAddOp3( v, OP_Column, iCur, iCol, iTarget );
-            sqlite3ColumnDefault( v, pTab, iCol, iTarget );
+            sqlite3ExprCodeGetColumnOfTable(v, pTab, iCur, iCol, iOld + iCol + 1);
           }
         }
 

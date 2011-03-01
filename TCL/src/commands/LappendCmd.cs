@@ -11,7 +11,7 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/commands/LappendCmd.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: LappendCmd.java,v 1.3 2003/01/09 02:15:39 mdejong Exp $
 *
 */
@@ -126,7 +126,9 @@ namespace tcl.lang
 				
 				for (i = 2; i < objv.Length; i++)
 				{
-					TclList.append(interp, varValue, objv[i]);
+					if (objv[i].ToString().StartsWith("{*}"))
+            TclList.append(interp, varValue,TclString.newInstance("{"+objv[i].ToString().Substring(3)+"}"));
+            else TclList.append(interp, varValue, objv[i]);
 				}
 				
 				// No need to call varValue.invalidateStringRep() since it

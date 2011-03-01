@@ -8,7 +8,7 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/base/TclObject.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: TclObject.java,v 1.9 2003/01/09 02:15:40 mdejong Exp $
 *
 */
@@ -189,7 +189,6 @@ namespace tcl.lang
 			internalRep = rep;
 			stringRep = null;
 			refCount = 0;
-      typePtr = rep.GetType().Name.Replace("Tcl", "");
 		}
 		
 		/// <summary> Creates a TclObject with the given InternalRep and stringRep.
@@ -287,8 +286,7 @@ namespace tcl.lang
 					stringRep = internalRep.ToString();
 				}
 			}
-			TclObject newObj = new TclObject(internalRep.duplicate());
-      newObj.typePtr = this.typePtr;
+			var newObj = new TclObject(internalRep.duplicate());
       newObj.stringRep = this.stringRep;
 			newObj.refCount = 0;
 			return newObj;
@@ -318,7 +316,7 @@ namespace tcl.lang
 						stringRep = internalRep.ToString();
 					}
 				}
-				TclObject newObj = new TclObject(internalRep.duplicate());
+				var newObj = new TclObject(internalRep.duplicate());
 				newObj.stringRep = this.stringRep;
 				newObj.refCount = 1;
 				refCount--;
@@ -411,12 +409,19 @@ namespace tcl.lang
 			}
 		}
 
-    protected internal string _typePtr;
     /// <summary> Return string describing type.</summary>
     public string typePtr
     {
-      get { return _typePtr; }
-      set { _typePtr = value; }
+      get {
+        if ( this.internalRep == null )
+          return "null";
+        string sType = this.internalRep.GetType().ToString().Replace( "tcl.lang.Tcl", "" ).ToLower();
+        if ( sType == "integer" )
+          return "int";
+        if ( sType == "long" )
+          return "int";
+        return sType;
+      }
     }
 
   }

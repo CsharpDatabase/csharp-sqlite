@@ -99,7 +99,6 @@
     <Compile Include="src\SqliteCommand.cs">
     </Compile>
     <Compile Include="src\SqliteCommandBuilder.cs">
-      <SubType>Component</SubType>
     </Compile>
     <Compile Include="src\SqliteConnection.cs">
     </Compile>

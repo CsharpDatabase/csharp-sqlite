@@ -1,4 +1,4 @@
-//  $Header: Community.CsharpSqlite.Benchmark/Classes/SQLiteVdbe.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+//  $Header$
 using System;
 
 namespace Community.CsharpSqlite
@@ -203,7 +203,7 @@ Sqlite3.sqlite3_reset
 #else
 Sqlite3.sqlite3_finalize
 #endif
-( ref vm );
+( vm );
     }
 
   }

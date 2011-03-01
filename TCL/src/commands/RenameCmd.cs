@@ -10,7 +10,7 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/commands/RenameCmd.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: RenameCmd.java,v 1.2 1999/08/03 03:07:54 mo Exp $
 *
 */

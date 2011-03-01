@@ -9,7 +9,7 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/io/TclInputStream.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: TclInputStream.java,v 1.1 2003/03/08 03:42:44 mdejong Exp $
 */
 
@@ -368,15 +368,15 @@ namespace tcl.lang
 				}
 				
 			}
-			internal TclObject obj;
-			//int dst;
-			internal System.Text.Encoding encoding;
-			internal ChannelBuffer buf;
-			internal Object state;
-						internal IntPtr rawRead;
-			//IntPtr bytesWrote = new IntPtr();
-						internal IntPtr charsWrote;
-			internal int totalChars;
+      internal TclObject obj;
+      //int dst;
+      internal System.Text.Encoding encoding;
+      internal ChannelBuffer buf;
+      internal Object state;
+      internal IntPtr rawRead;
+      IntPtr bytesWrote = new IntPtr();
+      internal IntPtr charsWrote;
+      internal int totalChars;
 		}
 		
 		/// <summary> Tcl_GetsObj -> getsObj
@@ -456,7 +456,7 @@ namespace tcl.lang
 			// the TclString so we can query the data that
 			// was just added to the buffer.
 			TclString.empty(obj);
-			System.Text.StringBuilder obj_sbuf = ((TclString) obj.InternalRep).sbuf;
+			var obj_sbuf = ((TclString) obj.InternalRep).sbuf;
 			
 			dst = 0;
 			dstEnd = dst;
@@ -590,8 +590,8 @@ namespace tcl.lang
 									{
 										// Skip the raw bytes that make up the '\n'.
 										
-										char[] tmp = new char[1];
-										IntPtr rawRead = new IntPtr(this);
+										var tmp = new char[1];
+										var rawRead = new IntPtr(this);
 										
 										buf = gs.buf;
 										// FIXME: We don't actually pass gs.state here, should we?
@@ -616,7 +616,7 @@ namespace tcl.lang
 											// \n is available.
 											
 											//int offset;
-											//IntPtr dstEndPtr = new IntPtr();
+											var dstEndPtr = new IntPtr();
 											
 											//offset = eol /* - objPtr->bytes*/;
 											dst = dstEnd;
@@ -696,7 +696,7 @@ restore_or_goteol_brk: ;
 				// remove the correct number of bytes from the channel buffer.
 				
 				int linelen = eol - dst + skip;
-				char[] tmp = new char[linelen];
+				var tmp = new char[linelen];
 				
 				buf = gs.buf;
 				encodingState = gs.state;
@@ -1155,7 +1155,7 @@ cleanup_brk: ;
 		{
 			ChannelBuffer buf;
 			int copied, copiedNow, result;
-			IntPtr offset = new IntPtr(this);
+			var offset = new IntPtr(this);
 			
 			if ((System.Object) encoding == null)
 			{

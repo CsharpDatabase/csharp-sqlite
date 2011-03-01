@@ -11,11 +11,11 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/commands/StringCmd.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: StringCmd.java,v 1.4 2000/08/20 08:37:47 mo Exp $
 *
 */
-using System;
+using System.Text;
 namespace tcl.lang
 {
 	
@@ -23,8 +23,8 @@ namespace tcl.lang
 	
 	class StringCmd : Command
 	{
-		
-		private static readonly string[] options = new string[]{"bytelength", "compare", "equal", "first", "index", "is", "last", "length", "map", "match", "range", "repeat", "replace", "tolower", "toupper", "totitle", "trim", "trimleft", "trimright", "wordend", "wordstart"};
+
+    private static readonly string[] options = new string[] { "bytelength", "compare", "equal", "first", "index", "is", "last", "length", "map", "match", "range", "repeat", "replace", "tolower", "toupper", "totitle", "trim", "trimleft", "trimright", "wordend", "wordstart" };
 		private const int STR_BYTELENGTH = 0;
 		private const int STR_COMPARE = 1;
 		private const int STR_EQUAL = 2;
@@ -46,8 +46,8 @@ namespace tcl.lang
 		private const int STR_TRIMRIGHT = 18;
 		private const int STR_WORDEND = 19;
 		private const int STR_WORDSTART = 20;
-		
-		private static readonly string[] isOptions = new string[]{"alnum", "alpha", "ascii", "control", "boolean", "digit", "double", "false", "graph", "integer", "lower", "print", "punct", "space", "true", "upper", "wordchar", "xdigit"};
+
+    private static readonly string[] isOptions = new string[] { "alnum", "alpha", "ascii", "control", "boolean", "digit", "double", "false", "graph", "integer", "lower", "print", "punct", "space", "true", "upper", "wordchar", "xdigit" };
 		private const int STR_IS_ALNUM = 0;
 		private const int STR_IS_ALPHA = 1;
 		private const int STR_IS_ASCII = 2;
@@ -692,8 +692,8 @@ namespace tcl.lang
 						// This saves us repeated function calls later,
 						// significantly speeding up the algorithm.
 						
-						string[] mapStrings = new string[mapElemv.Length];
-						int[] mapLens = new int[mapElemv.Length];
+						var mapStrings = new string[mapElemv.Length];
+						var mapLens = new int[mapElemv.Length];
 						for (int ix = 0; ix < mapElemv.Length; ix++)
 						{
 							
@@ -821,7 +821,7 @@ namespace tcl.lang
 						}
 						else
 						{
-							interp.setResult(string1.Substring(first, (last + 1) - (first)));
+						interp.setResult(string1.Substring(first, (last + 1) - (first)));
 						}
 						break;
 					}
@@ -955,7 +955,7 @@ namespace tcl.lang
 							}
 							
 							string string2;
-							System.Text.StringBuilder buf = new System.Text.StringBuilder();
+							var buf = new StringBuilder();
 							buf.Append(string1.Substring(0, (first) - (0)));
 							if (last + 1 > length1)
 							{

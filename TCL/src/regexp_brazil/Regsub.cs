@@ -8,7 +8,7 @@
 * SCCS: %Z% %M% %I% %E% %U%
 */
 // Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-//$Header: TCL/src/regexp_brazil/Regsub.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+//$Header$
 
 using System;
 namespace sunlabs.brazil.util.regexp
@@ -30,7 +30,7 @@ namespace sunlabs.brazil.util.regexp
 	/// throws Exception
 	/// {
 	/// Regexp re = new Regexp("%[a-fA-F0-9][a-fA-F0-9]");
-	/// Regsub rs = new Regsub(re, args[0]);
+	/// var rs = new Regsub(re, args[0]);
 	/// 
 	/// StringBuffer sb = new StringBuffer();
 	/// 

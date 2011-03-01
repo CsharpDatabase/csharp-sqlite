@@ -9,11 +9,11 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/commands/ExprCmd.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: ExprCmd.java,v 1.2 1999/05/08 23:59:30 dejong Exp $
 *
 */
-using System;
+using System.Text;
 namespace tcl.lang
 {
 	
@@ -41,7 +41,7 @@ namespace tcl.lang
 			}
 			else
 			{
-				System.Text.StringBuilder sbuf = new System.Text.StringBuilder();
+				var sbuf = new StringBuilder();
 				
 				sbuf.Append(argv[1].ToString());
 				for (int i = 2; i < argv.Length; i++)

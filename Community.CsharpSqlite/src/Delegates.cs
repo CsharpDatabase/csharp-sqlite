@@ -4,7 +4,7 @@
 **  C#-SQLite is an independent reimplementation of the SQLite software library
 **
 **  Repository path : $HeadURL: https://sqlitecs.googlecode.com/svn/trunk/C%23SQLite/src/Delegates.cs $
-**  Revision        : $Revision: 47be2d23056c $
+**  Revision        : $Revision$
 **  Last Change Date: $LastChangedDate: 2009-08-04 13:34:52 -0700 (Tue, 04 Aug 2009) $
 **  Last Changed By : $LastChangedBy: noah.hart $
 *************************************************************************
@@ -13,10 +13,9 @@
 using System;
 using System.Text;
 using HANDLE = System.IntPtr;
-using sqlite3_int64 = System.Int64;
 using i16 = System.Int16;
+using sqlite3_int64 = System.Int64;
 using u32 = System.UInt32;
-using u64 = System.UInt64;
 
 
 namespace Community.CsharpSqlite
@@ -40,19 +39,22 @@ namespace Community.CsharpSqlite
     public delegate void dxDel(ref string pDelArg); // needs ref
     public delegate void dxDelCollSeq(ref object pDelArg); // needs ref
     public delegate void dxLog(object pLogArg, int i, string msg);
-    public delegate void dxProfile(object pProfileArg, string msg, u64 time);
+    public delegate void dxLogcallback( object pCallbackArg, int argc, string p2 );
+    public delegate void dxProfile( object pProfileArg, string msg, sqlite3_int64 time );
     public delegate int dxProgress(object pProgressArg);
     public delegate void dxRollbackCallback(object pRollbackArg);
     public delegate void dxTrace(object pTraceArg, string msg);
     public delegate void dxUpdateCallback(object pUpdateArg, int b, string c, string d, sqlite3_int64 e);
-
-      /*
+    public delegate int dxWalCallback(object pWalArg, sqlite3 db, string zDb, int nEntry);
+    
+    /*
      * FUNCTIONS
      *
      */
     public delegate void dxFunc(sqlite3_context ctx, int intValue, sqlite3_value[] value);
     public delegate void dxStep(sqlite3_context ctx, int intValue, sqlite3_value[] value);
     public delegate void dxFinal(sqlite3_context ctx);
+    public delegate void dxFDestroy( object pArg );
     //
     public delegate string dxColname(sqlite3_value pVal);
     public delegate int dxFuncBtree(Btree p);
@@ -65,7 +67,7 @@ namespace Community.CsharpSqlite
     public delegate int dxClose(sqlite3_file File_ID);
     public delegate int dxCheckReservedLock(sqlite3_file File_ID, ref int pRes);
     public delegate int dxDeviceCharacteristics(sqlite3_file File_ID);
-    public delegate int dxFileControl(sqlite3_file File_ID, int op, ref int pArgs);
+    public delegate int dxFileControl(sqlite3_file File_ID, int op, ref sqlite3_int64 pArgs);
     public delegate int dxFileSize(sqlite3_file File_ID, ref long size);
     public delegate int dxLock(sqlite3_file File_ID, int locktype);
     public delegate int dxRead(sqlite3_file File_ID, byte[] buffer, int amount, sqlite3_int64 offset);
@@ -74,7 +76,10 @@ namespace Community.CsharpSqlite
     public delegate int dxTruncate(sqlite3_file File_ID, sqlite3_int64 size);
     public delegate int dxUnlock(sqlite3_file File_ID, int locktype);
     public delegate int dxWrite(sqlite3_file File_ID, byte[] buffer, int amount, sqlite3_int64 offset);
-
+    public delegate int dxShmMap(sqlite3_file File_ID, int iPg, int pgsz, int pInt, ref object pvolatile);
+    public delegate int dxShmLock(sqlite3_file File_ID, int offset, int n, int flags);
+    public delegate void dxShmBarrier(sqlite3_file File_ID);
+    public delegate int dxShmUnmap (sqlite3_file File_ID, int deleteFlag);
     /*
          sqlite_vfs Delegates
      */
@@ -83,13 +88,14 @@ namespace Community.CsharpSqlite
     public delegate int dxAccess(sqlite3_vfs vfs, string zName, int flags, ref int pResOut);
     public delegate int dxFullPathname(sqlite3_vfs vfs, string zName, int nOut, StringBuilder zOut);
     public delegate HANDLE dxDlOpen(sqlite3_vfs vfs, string zFilename);
-    public delegate int dxDlError(sqlite3_vfs vfs, int nByte, ref string zErrMsg);
+    public delegate int dxDlError(sqlite3_vfs vfs, int nByte, string zErrMsg);
     public delegate HANDLE dxDlSym(sqlite3_vfs vfs, HANDLE data, string zSymbol);
     public delegate int dxDlClose(sqlite3_vfs vfs, HANDLE data);
     public delegate int dxRandomness(sqlite3_vfs vfs, int nByte, ref byte[] buffer);
     public delegate int dxSleep(sqlite3_vfs vfs, int microseconds);
     public delegate int dxCurrentTime(sqlite3_vfs vfs, ref double currenttime);
     public delegate int dxGetLastError(sqlite3_vfs pVfs, int nBuf, ref string zBuf);
+    public delegate int dxCurrentTimeInt64(sqlite3_vfs pVfs, ref sqlite3_int64 pTime);
 
     /*
      * Pager Delegates
@@ -175,12 +181,12 @@ namespace Community.CsharpSqlite
     public delegate int dxMutexInit();
     public delegate int dxMutexEnd();
     public delegate sqlite3_mutex dxMutexAlloc(int iNumber);
-    public delegate void dxMutexFree(sqlite3_mutex sm);
+    public delegate void dxMutexFree(ref sqlite3_mutex sm);
     public delegate void dxMutexEnter(sqlite3_mutex sm);
     public delegate int dxMutexTry(sqlite3_mutex sm);
     public delegate void dxMutexLeave(sqlite3_mutex sm);
-    public delegate int dxMutexHeld(sqlite3_mutex sm);
-    public delegate int dxMutexNotheld(sqlite3_mutex sm);
+    public delegate bool dxMutexHeld(sqlite3_mutex sm);
+    public delegate bool dxMutexNotheld( sqlite3_mutex sm );
 
     public delegate object dxColumn(sqlite3_stmt pStmt, int i);
     public delegate int dxColumn_I(sqlite3_stmt pStmt, int i);
@@ -193,11 +199,11 @@ namespace Community.CsharpSqlite
     // pcache Methods
     public delegate int dxPC_Init(object NotUsed);
     public delegate void dxPC_Shutdown(object NotUsed);
-    public delegate sqlite3_pcache dxPC_Create(int szPage, int bPurgeable);
+    public delegate sqlite3_pcache dxPC_Create( int szPage, bool bPurgeable );
     public delegate void dxPC_Cachesize(sqlite3_pcache pCache, int nCachesize);
     public delegate int dxPC_Pagecount(sqlite3_pcache pCache);
     public delegate PgHdr dxPC_Fetch(sqlite3_pcache pCache, u32 key, int createFlag);
-    public delegate void dxPC_Unpin(sqlite3_pcache pCache, PgHdr p2, int discard);
+    public delegate void dxPC_Unpin(sqlite3_pcache pCache, PgHdr p2, bool discard);
     public delegate void dxPC_Rekey(sqlite3_pcache pCache, PgHdr p2, u32 oldKey, u32 newKey);
     public delegate void dxPC_Truncate(sqlite3_pcache pCache, u32 iLimit);
     public delegate void dxPC_Destroy(ref sqlite3_pcache pCache);
@@ -223,7 +229,7 @@ namespace Community.CsharpSqlite
     public static Action<sqlite3_context, Int32, String, dxDel> SetAuxdata = sqlite3_set_auxdata;
 
     //API Simplifications -- Functions
-    public delegate Int32 FinalizeDelegate(ref sqlite3_stmt pStmt);
+    public delegate Int32 FinalizeDelegate(sqlite3_stmt pStmt);
     public static FinalizeDelegate Finalize = sqlite3_finalize;
 
     public static Func<sqlite3_stmt, Int32> ClearBindings = sqlite3_clear_bindings;

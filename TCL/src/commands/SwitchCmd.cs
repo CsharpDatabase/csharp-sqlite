@@ -8,7 +8,7 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/commands/SwitchCmd.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: SwitchCmd.java,v 1.2 1999/05/09 01:32:03 dejong Exp $
 *
 */
@@ -20,8 +20,8 @@ namespace tcl.lang
 	
 	class SwitchCmd : Command
 	{
-		
-		private static readonly string[] validCmds = new string[]{"-exact", "-glob", "-regexp", "--"};
+
+    private static readonly string[] validCmds = new string[] { "-exact", "-glob", "-regexp", "--" };
 		private const int EXACT = 0;
 		private const int GLOB = 1;
 		private const int REGEXP = 2;

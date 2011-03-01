@@ -9,11 +9,11 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/commands/ProcCmd.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: ProcCmd.java,v 1.2 1999/08/03 03:04:19 mo Exp $
 *
 */
-using System;
+using System.Text;
 namespace tcl.lang
 {
 	
@@ -40,7 +40,7 @@ namespace tcl.lang
 			string fullName, procName;
 			NamespaceCmd.Namespace ns, altNs, cxtNs;
 			Command cmd;
-			System.Text.StringBuilder ds;
+      StringBuilder ds;
 			
 			if (objv.Length != 4)
 			{
@@ -56,10 +56,10 @@ namespace tcl.lang
 			
 			// Java does not support passing an address so we pass
 			// an array of size 1 and then assign arr[0] to the value
-			NamespaceCmd.Namespace[] nsArr = new NamespaceCmd.Namespace[1];
-			NamespaceCmd.Namespace[] altNsArr = new NamespaceCmd.Namespace[1];
-			NamespaceCmd.Namespace[] cxtNsArr = new NamespaceCmd.Namespace[1];
-			string[] procNameArr = new string[1];
+			var nsArr = new NamespaceCmd.Namespace[1];
+			var altNsArr = new NamespaceCmd.Namespace[1];
+			var cxtNsArr = new NamespaceCmd.Namespace[1];
+			var procNameArr = new string[1];
 			
 			NamespaceCmd.getNamespaceForQualName(interp, fullName, null, 0, nsArr, altNsArr, cxtNsArr, procNameArr);
 			
@@ -92,7 +92,7 @@ namespace tcl.lang
 			// qualifiers. To create the new command in the right namespace, we
 			// generate a fully qualified name for it.
 			
-			ds = new System.Text.StringBuilder();
+			ds = new StringBuilder();
 			if (ns != NamespaceCmd.getGlobalNamespace(interp))
 			{
 				ds.Append(ns.fullName);

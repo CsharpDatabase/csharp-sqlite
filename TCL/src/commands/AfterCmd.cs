@@ -11,7 +11,7 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/commands/AfterCmd.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: AfterCmd.java,v 1.2 2002/04/12 21:00:26 mdejong Exp $
 *
 */
@@ -38,8 +38,8 @@ namespace tcl.lang
 		/*
 		* Valid command options.
 		*/
-		
-		private static readonly string[] validOpts = new string[]{"cancel", "idle", "info"};
+
+    private static readonly string[] validOpts = new string[] { "cancel", "idle", "info" };
 		
 		internal const int OPT_CANCEL = 0;
 		internal const int OPT_IDLE = 1;
@@ -135,7 +135,7 @@ namespace tcl.lang
 				cmd.preserve();
 				
 				assocData.lastAfterId++;
-				TimerInfo timerInfo = new TimerInfo(this, notifier, ms);
+				var timerInfo = new TimerInfo(this, notifier, ms);
 				timerInfo.interp = interp;
 				timerInfo.command = cmd;
 				timerInfo.id = assocData.lastAfterId;
@@ -242,7 +242,7 @@ namespace tcl.lang
 					cmd2.preserve();
 					assocData.lastAfterId++;
 					
-					IdleInfo idleInfo = new IdleInfo(this, notifier);
+					var idleInfo = new IdleInfo(this, notifier);
 					idleInfo.interp = interp;
 					idleInfo.command = cmd2;
 					idleInfo.id = assocData.lastAfterId;

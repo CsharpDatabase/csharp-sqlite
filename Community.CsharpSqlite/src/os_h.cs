@@ -27,7 +27,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2009-12-07 16:39:13 1ed88e9d01e9eda5cbc622e7614277f29bcc551c
+    **  SQLITE_SOURCE_ID: 2010-08-23 18:52:01 42537b60566f288167f1b5864a5435986838e3a3
     **
     **  $Header$
     *************************************************************************
@@ -42,7 +42,7 @@ namespace Community.CsharpSqlite
     ** will defined to either 1 or 0.  One of the four will be 1.  The other
     ** three will be 0.
     */
-    //#if defined(SQLITE_OS_OTHER)
+    //#if (SQLITE_OS_OTHER)
     //# if SQLITE_OS_OTHER==1
     //#   undef SQLITE_OS_UNIX
     //#   define SQLITE_OS_UNIX 0
@@ -88,7 +88,7 @@ namespace Community.CsharpSqlite
     ** Determine if we are dealing with WindowsCE - which has a much
     ** reduced API.
     */
-    //#if defined(_WIN32_WCE)
+    //#if (_WIN32_WCE)
     //# define SQLITE_OS_WINCE 1
     //#else
     //# define SQLITE_OS_WINCE 0
@@ -236,7 +236,13 @@ namespace Community.CsharpSqlite
     ** 1GB boundary.
     **
     */
-    static int PENDING_BYTE = 0x40000000; //sqlite3PendingByte;
+#if SQLITE_OMIT_WSD
+//# define PENDING_BYTE     (0x40000000)
+    static int PENDING_BYTE = 0x40000000; 
+#else
+    //# define PENDING_BYTE      sqlite3PendingByte
+    static int PENDING_BYTE = 0x40000000; 
+#endif
 
     static int RESERVED_BYTE = ( PENDING_BYTE + 1 );
     static int SHARED_FIRST = ( PENDING_BYTE + 2 );
@@ -265,6 +271,10 @@ namespace Community.CsharpSqlite
 
     //int sqlite3OsSectorSize(sqlite3_file *id);
     //int sqlite3OsDeviceCharacteristics(sqlite3_file *id);
+    //int sqlite3OsShmMap(sqlite3_file *,int,int,int,void volatile **);
+    //int sqlite3OsShmLock(sqlite3_file *id, int, int, int);
+    //void sqlite3OsShmBarrier(sqlite3_file *id);
+    //int sqlite3OsShmUnmap(sqlite3_file *id, int);
 
     /*
     ** Functions for accessing sqlite3_vfs methods
@@ -281,7 +291,7 @@ namespace Community.CsharpSqlite
 #endif
     //int sqlite3OsRandomness(sqlite3_vfs *, int, char *);
     //int sqlite3OsSleep(sqlite3_vfs *, int);
-    //int sqlite3OsCurrentTime(sqlite3_vfs *, double*);
+    //int sqlite3OsCurrentTimeInt64(sqlite3_vfs *, sqlite3_int64*);
 
     /*
     ** Convenience functions for opening and closing files using

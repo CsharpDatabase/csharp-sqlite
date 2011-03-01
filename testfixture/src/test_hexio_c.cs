@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Community.CsharpSqlite
 {
-#if !NO_TCL
+#if TCLSH
   using tcl.lang;
   using Tcl_Interp = tcl.lang.Interp;
   using Tcl_Obj = tcl.lang.TclObject;
@@ -34,7 +34,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2009-12-07 16:39:13 1ed88e9d01e9eda5cbc622e7614277f29bcc551c
+    **  SQLITE_SOURCE_ID: 2010-08-23 18:52:01 42537b60566f288167f1b5864a5435986838e3a3
     **
     **  $Header$
     *************************************************************************
@@ -53,7 +53,7 @@ namespace Community.CsharpSqlite
     */
     static void sqlite3TestBinToHex(byte[] zBuf, int N)
     {
-      StringBuilder zHex = new StringBuilder("0123456789ABCDEF");
+      var zHex = new StringBuilder("0123456789ABCDEF");
       int i, j;
       byte c;
       i = N * 2;
@@ -75,7 +75,7 @@ namespace Community.CsharpSqlite
     */
     static int sqlite3TestHexToBin(string zIn, int N, byte[] aOut)
     {
-      int[] aMap = new int[]  {
+      var aMap = new int[]  {
 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,
 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,
 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,
@@ -141,8 +141,8 @@ namespace Community.CsharpSqlite
         TCL.Tcl_WrongNumArgs(interp, 1, objv, "FILENAME OFFSET AMT");
         return TCL.TCL_ERROR;
       }
-      if (TCL.Tcl_GetIntFromObj(interp, objv[2], ref offset)) return TCL.TCL_ERROR;
-      if (TCL.Tcl_GetIntFromObj(interp, objv[3], ref amt)) return TCL.TCL_ERROR;
+      if ( TCL.TCL_OK != TCL.Tcl_GetIntFromObj(interp, objv[2], ref offset)) return TCL.TCL_ERROR;
+      if ( TCL.TCL_OK != TCL.Tcl_GetIntFromObj(interp, objv[3], ref amt)) return TCL.TCL_ERROR;
       zFile = TCL.Tcl_GetString(objv[1]);
       zBuf = new byte[amt * 2 + 1];// sqlite3Malloc( amt * 2 + 1 );
       if (zBuf == null)
@@ -198,7 +198,7 @@ namespace Community.CsharpSqlite
         TCL.Tcl_WrongNumArgs(interp, 1, objv, "FILENAME OFFSET HEXDATA");
         return TCL.TCL_ERROR;
       }
-      if (TCL.Tcl_GetIntFromObj(interp, objv[2], ref offset)) return TCL.TCL_ERROR;
+      if ( TCL.TCL_OK != TCL.Tcl_GetIntFromObj(interp, objv[2], ref offset)) return TCL.TCL_ERROR;
       zFile = TCL.Tcl_GetString(objv[1]);
       zIn = TCL.Tcl_GetStringFromObj(objv[3], ref nIn);
       aOut = new byte[nIn / 2 + 1];//sqlite3Malloc( nIn/2 );
@@ -245,7 +245,7 @@ namespace Community.CsharpSqlite
       int nIn = 0, nOut;
       string zIn;
       byte[] aOut;
-      byte[] aNum = new byte[4];
+      var aNum = new byte[4];
 
       if (objc != 2)
       {
@@ -295,14 +295,14 @@ namespace Community.CsharpSqlite
     )
     {
       int val = 0;
-      byte[] aNum = new byte[10];
+      var aNum = new byte[10];
 
       if (objc != 2)
       {
         TCL.Tcl_WrongNumArgs(interp, 1, objv, "INTEGER");
         return TCL.TCL_ERROR;
       }
-      if (TCL.Tcl_GetIntFromObj(interp, objv[1], ref val)) return TCL.TCL_ERROR;
+      if ( TCL.TCL_OK != TCL.Tcl_GetIntFromObj(interp, objv[1], ref val)) return TCL.TCL_ERROR;
       aNum[0] = (byte)(val >> 8);
       aNum[1] = (byte)val;
       sqlite3TestBinToHex(aNum, 2);
@@ -324,14 +324,14 @@ namespace Community.CsharpSqlite
     )
     {
       int val = 0;
-      byte[] aNum = new byte[10];
+      var aNum = new byte[10];
 
       if (objc != 2)
       {
         TCL.Tcl_WrongNumArgs(interp, 1, objv, "INTEGER");
         return TCL.TCL_ERROR;
       }
-      if (TCL.Tcl_GetIntFromObj(interp, objv[1], ref val)) return TCL.TCL_ERROR;
+      if ( TCL.TCL_OK != TCL.Tcl_GetIntFromObj(interp, objv[1], ref val)) return TCL.TCL_ERROR;
       aNum[0] = (byte)(val >> 24);
       aNum[1] = (byte)(val >> 16);
       aNum[2] = (byte)(val >> 8);
@@ -428,7 +428,7 @@ namespace Community.CsharpSqlite
       //   string zName;
       //   Tcl_ObjCmdProc *xProc;
       //}
-      _aObjCmd[] aObjCmd = new _aObjCmd[] {
+      var aObjCmd = new _aObjCmd[] {
 new _aObjCmd(  "hexio_read",                   hexio_read            ),
 new _aObjCmd(  "hexio_write",                  hexio_write           ),
 new _aObjCmd(  "hexio_get_int",                hexio_get_int         ),

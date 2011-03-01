@@ -10,7 +10,7 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/base/BgErrorMgr.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: BgErrorMgr.java,v 1.6 2002/01/21 06:34:26 mdejong Exp $
 *
 */
@@ -64,7 +64,7 @@ namespace tcl.lang
 		}
 		internal  void  addBgError()
 		{
-			BgError bgErr = new BgError(this, interp.getNotifier());
+			var bgErr = new BgError(this, interp.getNotifier());
 			
 			// The addErrorInfo() call below (with an empty string)
 			// ensures that errorInfo gets properly set.  It's needed in
@@ -199,7 +199,7 @@ namespace tcl.lang
 					
 					// Invoke the bgerror command.
 					
-					TclObject[] argv = new TclObject[2];
+					var argv = new TclObject[2];
 					argv[0] = Enclosing_Instance.bgerrorCmdObj;
 					argv[1] = errorMsg;
 					

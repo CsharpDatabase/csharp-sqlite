@@ -22,7 +22,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2009-12-07 16:39:13 1ed88e9d01e9eda5cbc622e7614277f29bcc551c
+    **  SQLITE_SOURCE_ID: 2010-12-07 20:14:09 a586a4deeb25330037a49df295b36aaf624d0f45
     **
     **  $Header$
     *************************************************************************
@@ -72,8 +72,10 @@ namespace Community.CsharpSqlite
     */
     //#define PAGER_OMIT_JOURNAL  0x0001    /* Do not use a rollback journal */
     //#define PAGER_NO_READLOCK   0x0002    /* Omit readlocks on readonly files */
-    const int PAGER_OMIT_JOURNAL = 0x0001;   /* Do not use a rollback journal */
-    const int PAGER_NO_READLOCK = 0x0002;  /* Omit readlocks on readonly files */
+    //#define PAGER_MEMORY        0x0004    /* In-memory database */
+    const int PAGER_OMIT_JOURNAL = 0x0001;
+    const int PAGER_NO_READLOCK = 0x0002;
+    const int PAGER_MEMORY = 0x0004;  
 
     /*
     ** Valid values for the second argument to sqlite3PagerLockingMode().
@@ -86,20 +88,22 @@ namespace Community.CsharpSqlite
     static int PAGER_LOCKINGMODE_EXCLUSIVE = 1;
 
     /*
-    ** Valid values for the second argument to sqlite3PagerJournalMode().
+    ** Numeric constants that encode the journalmode.  
     */
-    //#define PAGER_JOURNALMODE_QUERY      -1
+    //#define PAGER_JOURNALMODE_QUERY     (-1)  /* Query the value of journalmode */
     //#define PAGER_JOURNALMODE_DELETE      0   /* Commit by deleting journal file */
     //#define PAGER_JOURNALMODE_PERSIST     1   /* Commit by zeroing journal header */
     //#define PAGER_JOURNALMODE_OFF         2   /* Journal omitted.  */
     //#define PAGER_JOURNALMODE_TRUNCATE    3   /* Commit by truncating journal */
     //#define PAGER_JOURNALMODE_MEMORY      4   /* In-memory journal file */
+    //#define PAGER_JOURNALMODE_WAL         5   /* Use write-ahead logging */
     const int PAGER_JOURNALMODE_QUERY = -1;
-    const int PAGER_JOURNALMODE_DELETE = 0;  /* Commit by deleting journal file */
-    const int PAGER_JOURNALMODE_PERSIST = 1; /* Commit by zeroing journal header */
-    const int PAGER_JOURNALMODE_OFF = 2;     /* Journal omitted.  */
-    const int PAGER_JOURNALMODE_TRUNCATE = 3;/* Commit by truncating journal */
-    const int PAGER_JOURNALMODE_MEMORY = 4;/* In-memory journal file */
+    const int PAGER_JOURNALMODE_DELETE = 0;
+    const int PAGER_JOURNALMODE_PERSIST = 1;
+    const int PAGER_JOURNALMODE_OFF = 2;    
+    const int PAGER_JOURNALMODE_TRUNCATE = 3;
+    const int PAGER_JOURNALMODE_MEMORY = 4;
+    const int PAGER_JOURNALMODE_WAL = 5;
 
     /*
     ** The remainder of this file contains the declarations of the functions
@@ -121,12 +125,14 @@ namespace Community.CsharpSqlite
 
     /* Functions used to configure a Pager object. */
     //void sqlite3PagerSetBusyhandler(Pager*, int(*)(void *), void *);
-    //int sqlite3PagerSetPagesize(Pager*, u16*, int);
+    //int sqlite3PagerSetPagesize(Pager*, u32*, int);
     //int sqlite3PagerMaxPageCount(Pager*, int);
     //void sqlite3PagerSetCachesize(Pager*, int);
-    //void sqlite3PagerSetSafetyLevel(Pager*,int,int);
+    //void sqlite3PagerSetSafetyLevel(Pager*,int,int,int);
     //int sqlite3PagerLockingMode(Pager *, int);
-    //int sqlite3PagerJournalMode(Pager *, int);
+    //int sqlite3PagerSetJournalMode(Pager *, int);
+    //int sqlite3PagerGetJournalMode(Pager*);
+    //int sqlite3PagerOkToChangeJournalMode(Pager*);
     //i64 sqlite3PagerJournalSizeLimit(Pager *, i64);
     //sqlite3_backup **sqlite3PagerBackupPtr(Pager*);
 
@@ -146,9 +152,10 @@ namespace Community.CsharpSqlite
     //void *sqlite3PagerGetExtra(DbPage *);
 
     /* Functions used to manage pager transactions and savepoints. */
-    //int sqlite3PagerPagecount(Pager*, int*);
+    //void sqlite3PagerPagecount(Pager*, int*);
     //int sqlite3PagerBegin(Pager*, int exFlag, int);
     //int sqlite3PagerCommitPhaseOne(Pager*,const char *zMaster, int);
+    //int sqlite3PagerExclusiveLock(Pager*);
     //int sqlite3PagerSync(Pager *pPager);
     //int sqlite3PagerCommitPhaseTwo(Pager*);
     //int sqlite3PagerRollback(Pager*);
@@ -156,9 +163,16 @@ namespace Community.CsharpSqlite
     //int sqlite3PagerSavepoint(Pager *pPager, int op, int iSavepoint);
     //int sqlite3PagerSharedLock(Pager *pPager);
 
+    //int sqlite3PagerCheckpoint(Pager* pPager);
+    //int sqlite3PagerWalSupported(Pager* pPager);
+    //int sqlite3PagerWalCallback(Pager* pPager);
+    //int sqlite3PagerOpenWal(Pager* pPager, int* pisOpen);
+    //int sqlite3PagerCloseWal(Pager* pPager);
+
     /* Functions used to query pager state and configuration. */
     //u8 sqlite3PagerIsreadonly(Pager*);
     //int sqlite3PagerRefcount(Pager*);
+    //int sqlite3PagerMemUsed(Pager*);
     //const char *sqlite3PagerFilename(Pager*);
     //const sqlite3_vfs *sqlite3PagerVfs(Pager*);
     //sqlite3_file *sqlite3PagerFile(Pager*);
@@ -169,6 +183,10 @@ namespace Community.CsharpSqlite
 
     /* Functions used to truncate the database file. */
     //void sqlite3PagerTruncateImage(Pager*,Pgno);
+
+    //#if (SQLITE_HAS_CODEC) && !defined(SQLITE_OMIT_WAL)
+    //void *sqlite3PagerCodec(DbPage *);
+    //#endif
 
     /* Functions to support testing and debugging. */
     //#if !NDEBUG || SQLITE_TEST

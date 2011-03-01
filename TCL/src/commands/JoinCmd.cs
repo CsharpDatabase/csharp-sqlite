@@ -9,11 +9,11 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/commands/JoinCmd.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: JoinCmd.java,v 1.1.1.1 1998/10/14 21:09:18 cvsadmin Exp $
 *
 */
-using System;
+using System.Text;
 namespace tcl.lang
 {
 	
@@ -49,7 +49,7 @@ namespace tcl.lang
 			}
 			
 			
-			System.Text.StringBuilder sbuf = new System.Text.StringBuilder(TclList.index(interp, list, 0).ToString());
+			var sbuf = new StringBuilder(TclList.index(interp, list, 0).ToString());
 			
 			for (int i = 1; i < size; i++)
 			{

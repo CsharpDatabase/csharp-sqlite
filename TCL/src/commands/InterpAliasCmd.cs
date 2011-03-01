@@ -10,7 +10,7 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/commands/InterpAliasCmd.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: InterpAliasCmd.java,v 1.1 2000/08/20 06:08:42 mo Exp $
 *
 */
@@ -127,7 +127,7 @@ namespace tcl.lang
 			
 			string inString = name.ToString();
 			
-			InterpAliasCmd alias = new InterpAliasCmd();
+			var alias = new InterpAliasCmd();
 			
 			alias.name = name;
 			name.preserve();

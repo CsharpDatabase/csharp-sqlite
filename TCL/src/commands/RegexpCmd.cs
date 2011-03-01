@@ -11,7 +11,7 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/commands/RegexpCmd.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: RegexpCmd.java,v 1.3 2000/02/23 22:07:23 mo Exp $
 */
 using System;
@@ -23,8 +23,8 @@ namespace tcl.lang
 	
 	class RegexpCmd : Command
 	{
-		
-		private static readonly string[] validOpts = new string[]{"-indices", "-nocase", "--"};
+
+    private static readonly string[] validOpts = new string[] { "-indices", "-nocase", "--" };
 		private const int OPT_INDICES = 0;
 		private const int OPT_NOCASE = 1;
 		private const int OPT_LAST = 2;
@@ -77,7 +77,7 @@ opts_brk: ;
 				
 				Regexp r = TclRegexp.compile(interp, exp, nocase);
 				
-				int[] args = new int[matches * 2];
+				var args = new int[matches * 2];
 				bool matched = r.match(inString, args);
 				if (matched)
 				{

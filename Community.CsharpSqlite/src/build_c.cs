@@ -41,7 +41,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2010-03-09 19:31:43 4ae453ea7be69018d8c16eb8dabe05617397dc4d
+    **  SQLITE_SOURCE_ID: 2010-12-07 20:14:09 a586a4deeb25330037a49df295b36aaf624d0f45
     **
     **  $Header$
     *************************************************************************
@@ -290,7 +290,7 @@ pParse.nVtabLock = 0;
       pParse.ResetMembers();    //  memset(pParse.nVar, 0, SAVE_SZ);
       sqlite3RunParser( pParse, zSql, ref zErrMsg );
       sqlite3DbFree( db, ref zErrMsg );
-      sqlite3DbFree( db, ref  zSql );
+      sqlite3DbFree( db, ref zSql );
       pParse.RestoreMembers();  //  memcpy(pParse.nVar, saveBuf, SAVE_SZ);
       pParse.nested--;
     }
@@ -318,7 +318,7 @@ pParse.nVtabLock = 0;
       {
         int j = ( i < 2 ) ? i ^ 1 : i;   /* Search TEMP before MAIN */
         if ( zDatabase != null && sqlite3StrICmp( zDatabase, db.aDb[j].zName ) != 0 ) continue;
-        p = (Table)sqlite3HashFind( db.aDb[j].pSchema.tblHash, zName, nName );
+        p = sqlite3HashFind( db.aDb[j].pSchema.tblHash, zName, nName, ( Table )null );
         if ( p != null ) break;
       }
       return p;
@@ -390,7 +390,7 @@ pParse.nVtabLock = 0;
         Schema pSchema = db.aDb[j].pSchema;
         Debug.Assert( pSchema != null );
         if ( zDb != null && sqlite3StrICmp( zDb, db.aDb[j].zName ) != 0 ) continue;
-        p = (Index)sqlite3HashFind( pSchema.idxHash, zName, nName );
+        p = sqlite3HashFind( pSchema.idxHash, zName, nName, (Index)null );
         if ( p != null ) break;
       }
       return p;
@@ -399,33 +399,13 @@ pParse.nVtabLock = 0;
     /*
     ** Reclaim the memory used by an index
     */
-    static void freeIndex( ref Index p )
+    static void freeIndex( sqlite3 db, ref Index p )
     {
-      sqlite3 db = p.pTable.dbMem;
 #if !SQLITE_OMIT_ANALYZE
-      sqlite3DeleteIndexSamples( p );
+      sqlite3DeleteIndexSamples(db, p );
 #endif
       sqlite3DbFree( db, ref p.zColAff );
       sqlite3DbFree( db, ref p );
-    }
-
-    /*
-    ** Remove the given index from the index hash table, and free
-    ** its memory structures.
-    **
-    ** The index is removed from the database hash tables but
-    ** it is not unlinked from the Table that it indexes.
-    ** Unlinking from the Table must be done by the calling function.
-    */
-    static void sqlite3DeleteIndex( Index p )
-    {
-      Index pOld;
-      string zName = p.zName;
-
-      pOld = (Index)sqlite3HashInsert( ref p.pSchema.idxHash, zName,
-      sqlite3Strlen30( zName ), null );
-      Debug.Assert( pOld == null || pOld == p );
-      freeIndex( ref p );
     }
 
     /*
@@ -441,7 +421,7 @@ pParse.nVtabLock = 0;
       Hash pHash = db.aDb[iDb].pSchema.idxHash;
 
       len = sqlite3Strlen30( zIdxName );
-      pIndex = (Index)sqlite3HashInsert( ref pHash, zIdxName, len, null );
+      pIndex = sqlite3HashInsert( ref pHash, zIdxName, len, (Index)null );
       if ( pIndex != null )
       {
         if ( pIndex.pTable.pIndex == pIndex )
@@ -460,7 +440,7 @@ pParse.nVtabLock = 0;
             p.pNext = pIndex.pNext;
           }
         }
-        freeIndex( ref pIndex );
+        freeIndex( db, ref pIndex );
       }
       db.flags |= SQLITE_InternChanges;
     }
@@ -539,14 +519,13 @@ pParse.nVtabLock = 0;
     }
 
     /*
-    ** Clear the column names from a table or view.
+    ** Delete memory allocated for the column names of a table or view (the
+    ** Table.aCol[] array).
     */
-    static void sqliteResetColumnNames( Table pTable )
+    static void sqliteDeleteColumnNames( sqlite3 db, Table pTable )
     {
       int i;
       Column pCol;
-      sqlite3 db = pTable.dbMem;
-      testcase( db == null );
       Debug.Assert( pTable != null );
       for ( i = 0; i < pTable.nCol; i++ )
       {
@@ -560,8 +539,6 @@ pParse.nVtabLock = 0;
           sqlite3DbFree( db, ref pCol.zColl );
         }
       }
-      pTable.aCol = null; sqlite3DbFree( db, ref pTable.aCol );
-      pTable.nCol = 0;
     }
 
     /*
@@ -573,46 +550,62 @@ pParse.nVtabLock = 0;
     ** memory structures of the indices and foreign keys associated with
     ** the table.
     */
-    static void sqlite3DeleteTable( ref Table pTable )
+    static void sqlite3DeleteTable( sqlite3 db, ref Table pTable )
     {
       Index pIndex; Index pNext;
-      sqlite3 db;
 
-      if ( pTable == null ) return;
-      db = pTable.dbMem;
-      testcase( db == null );
+      Debug.Assert( null==pTable || pTable.nRef > 0 );
 
       /* Do not delete the table until the reference count reaches zero. */
-      pTable.nRef--;
-      if ( pTable.nRef > 0 )
-      {
+      if ( null == pTable ) return;
+      if ( (// ( !db || db->pnBytesFreed == 0 ) && 
+        ( --pTable.nRef ) > 0 ) )
         return;
-      }
-      Debug.Assert( pTable.nRef == 0 );
 
-      /* Delete all indices associated with this table
-      */
+      /* Delete all indices associated with this table. */
       for ( pIndex = pTable.pIndex; pIndex != null; pIndex = pNext )
       {
         pNext = pIndex.pNext;
         Debug.Assert( pIndex.pSchema == pTable.pSchema );
-        sqlite3DeleteIndex( pIndex );
+    //if( null==db || db.pnBytesFreed==0 ){
+      string zName = pIndex.zName; 
+//
+#if !NDEBUG || SQLITE_COVERAGE_TEST
+    //  TESTONLY ( Index pOld = ) sqlite3HashInsert(
+    //ref pIndex.pSchema.idxHash, zName, sqlite3Strlen30(zName), 0
+    //  );
+      Index pOld = sqlite3HashInsert(
+    ref pIndex.pSchema.idxHash, zName, sqlite3Strlen30( zName ), (Index)null
+      );
+        Debug.Assert( pOld==pIndex || pOld==null );
+#else
+    //  TESTONLY ( Index pOld = ) sqlite3HashInsert(
+    //ref pIndex.pSchema.idxHash, zName, sqlite3Strlen30(zName), 0
+    //  );
+      sqlite3HashInsert(
+    ref pIndex.pSchema.idxHash, zName, sqlite3Strlen30(zName),(Index)null
+      );
+#endif
+    //}
+    freeIndex(db, ref pIndex);
       }
 
       /* Delete any foreign keys attached to this table. */
-      sqlite3FkDelete( pTable );
+      sqlite3FkDelete( db, pTable );
 
       /* Delete the Table structure itself.
 */
-      sqliteResetColumnNames( pTable );
+      sqliteDeleteColumnNames(db, pTable );
       sqlite3DbFree( db, ref pTable.zName );
       sqlite3DbFree( db, ref pTable.zColAff );
       sqlite3SelectDelete( db, ref pTable.pSelect );
 #if !SQLITE_OMIT_CHECK
       sqlite3ExprDelete( db, ref pTable.pCheck );
 #endif
-      sqlite3VtabClear( pTable );
-      sqlite3DbFree( db, ref pTable );
+#if !SQLITE_OMIT_VIRTUALTABLE
+  sqlite3VtabClear(db, pTable);
+#endif
+      pTable = null;//      sqlite3DbFree( db, ref pTable );
     }
 
     /*
@@ -629,9 +622,9 @@ pParse.nVtabLock = 0;
       Debug.Assert( zTabName != null );
       testcase( zTabName.Length == 0 );  /* Zero-length table names are allowed */
       pDb = db.aDb[iDb];
-      p = (Table)sqlite3HashInsert( ref pDb.pSchema.tblHash, zTabName,
-      sqlite3Strlen30( zTabName ), null );
-      sqlite3DeleteTable( ref p );
+      p = sqlite3HashInsert( ref pDb.pSchema.tblHash, zTabName,
+      sqlite3Strlen30( zTabName ), (Table)null );
+      sqlite3DeleteTable(db, ref p );
       db.flags |= SQLITE_InternChanges;
     }
 
@@ -823,7 +816,7 @@ pParse.nVtabLock = 0;
       sqlite3 db = pParse.db;
       Vdbe v;
       int iDb;         /* Database number to create the table in */
-      Token pName = new Token();    /* Unqualified name of the table to create */
+      var pName = new Token();    /* Unqualified name of the table to create */
 
       /* The table or view name to create is passed to this routine via tokens
       ** pName1 and pName2. If the table name was fully qualified, for example:
@@ -844,9 +837,11 @@ pParse.nVtabLock = 0;
       */
       iDb = sqlite3TwoPartName( pParse, pName1, pName2, ref pName );
       if ( iDb < 0 ) return;
-      if ( OMIT_TEMPDB == 0 && isTemp != 0 && iDb > 1 )
+      if ( 0 == OMIT_TEMPDB && isTemp != 0 && pName2.n > 0 && iDb != 1 )
       {
-        /* If creating a temp table, the name may not be qualified */
+          /* If creating a temp table, the name may not be qualified. Unless 
+          ** the database name is "temp" anyway.  */
+
         sqlite3ErrorMsg( pParse, "temporary table name must be unqualified" );
         return;
       }
@@ -896,11 +891,12 @@ goto begin_table_error;
 */
       if ( !IN_DECLARE_VTAB )
       {
+        String zDb = db.aDb[iDb].zName;
         if ( SQLITE_OK != sqlite3ReadSchema( pParse ) )
         {
           goto begin_table_error;
         }
-        pTable = sqlite3FindTable( db, zName, db.aDb[iDb].zName );
+        pTable = sqlite3FindTable( db, zName, zDb );
         if ( pTable != null )
         {
           if ( noErr == 0 )
@@ -909,7 +905,7 @@ goto begin_table_error;
           }
           goto begin_table_error;
         }
-        if ( sqlite3FindIndex( db, zName, null ) != null && ( iDb == 0 || 0 == db.init.busy ) )
+        if ( sqlite3FindIndex( db, zName, zDb ) != null )
         {
           sqlite3ErrorMsg( pParse, "there is already an index named %s", zName );
           goto begin_table_error;
@@ -928,7 +924,7 @@ goto begin_table_error;
       pTable.iPKey = -1;
       pTable.pSchema = db.aDb[iDb].pSchema;
       pTable.nRef = 1;
-      pTable.dbMem = null;
+      pTable.nRowEst = 1000000;
       Debug.Assert( pParse.pNewTable == null );
       pParse.pNewTable = pTable;
 
@@ -1362,7 +1358,7 @@ goto begin_table_error;
 
       if ( ( p = pParse.pNewTable ) == null ) return;
       i = p.nCol - 1;
-      db = p.dbMem;
+      db = pParse.db;
       zColl = sqlite3NameFromToken( db, pToken );
       if ( zColl == null ) return;
 
@@ -1547,7 +1543,7 @@ goto begin_table_error;
       }
       n += 35 + 6 * p.nCol;
       zStmt = new StringBuilder( n );
-      //zStmt = sqlite3Malloc( n );
+      //zStmt = sqlite3DbMallocRaw(0, n);
       //if( zStmt==0 ){
       //  db.mallocFailed = 1;
       //  return 0;
@@ -1560,7 +1556,7 @@ goto begin_table_error;
       for ( i = 0; i < p.nCol; i++ )
       {//, pCol++){
         pCol = p.aCol[i];
-        string[] azType = new string[]  {
+        var azType = new string[]  {
 /* SQLITE_AFF_TEXT    */ " TEXT",
 /* SQLITE_AFF_NONE    */ "",
 /* SQLITE_AFF_NUMERIC */ " NUM",
@@ -1731,7 +1727,7 @@ goto begin_table_error;
         */
         if ( pSelect != null )
         {
-          SelectDest dest = new SelectDest();
+          var dest = new SelectDest();
           Table pSelTab;
 
           Debug.Assert( pParse.nTab == 1 );
@@ -1750,7 +1746,7 @@ goto begin_table_error;
             p.aCol = pSelTab.aCol;
             pSelTab.nCol = 0;
             pSelTab.aCol = null;
-            sqlite3DeleteTable( ref pSelTab );
+            sqlite3DeleteTable(db, ref pSelTab );
           }
         }
 
@@ -1815,7 +1811,7 @@ goto begin_table_error;
       {
         Table pOld;
         Schema pSchema = p.pSchema;
-        pOld = (Table)sqlite3HashInsert( ref pSchema.tblHash, p.zName,
+        pOld = sqlite3HashInsert( ref pSchema.tblHash, p.zName,
         sqlite3Strlen30( p.zName ), p );
         if ( pOld != null )
         {
@@ -1862,7 +1858,7 @@ goto begin_table_error;
       int n;
       string z;//const char *z;
       Token sEnd;
-      DbFixer sFix = new DbFixer();
+      var sFix = new DbFixer();
       Token pName = null;
       int iDb;
       sqlite3 db = pParse.db;
@@ -1875,13 +1871,11 @@ goto begin_table_error;
       }
       sqlite3StartTable( pParse, pName1, pName2, isTemp, 1, 0, noErr );
       p = pParse.pNewTable;
-      if ( p == null )
+      if ( p == null || pParse.nErr != 0 )
       {
         sqlite3SelectDelete( db, ref pSelect );
         return;
       }
-      Debug.Assert( pParse.nErr == 0 ); /* If sqlite3StartTable return non-NULL then
-** there could not have been an error */
       sqlite3TwoPartName( pParse, pName1, pName2, ref pName );
       iDb = sqlite3SchemaToIndex( db, p.pSchema );
       if ( sqlite3FixInit( sFix, pParse, iDb, "view", pName ) != 0
@@ -2015,7 +2009,7 @@ db.xAuth = xAuth;
           pTable.aCol = pSelTab.aCol;
           pSelTab.nCol = 0;
           pSelTab.aCol = null;
-          sqlite3DeleteTable( ref pSelTab );
+          sqlite3DeleteTable(db, ref pSelTab );
           pTable.pSchema.flags |= DB_UnresetViews;
         }
         else
@@ -2048,7 +2042,10 @@ db.xAuth = xAuth;
         Table pTab = (Table)i.data;// sqliteHashData( i );
         if ( pTab.pSelect != null )
         {
-          sqliteResetColumnNames( pTab );
+          sqliteDeleteColumnNames( db, pTab );
+          pTab.aCol = null;
+          pTab.nCol = 0;
+
         }
       }
       DbClearProperty( db, idx, DB_UnresetViews );
@@ -2502,7 +2499,7 @@ goto exit_drop_table;
       pFKey.aAction[0] = (u8)( flags & 0xff );            /* ON DELETE action */
       pFKey.aAction[1] = (u8)( ( flags >> 8 ) & 0xff );    /* ON UPDATE action */
 
-      pNextTo = (FKey)sqlite3HashInsert( ref p.pSchema.fkeyHash,
+      pNextTo = sqlite3HashInsert( ref p.pSchema.fkeyHash,
           pFKey.zTo, sqlite3Strlen30( pFKey.zTo ), pFKey
       );
       //if( pNextTo==pFKey ){
@@ -2669,8 +2666,8 @@ return;
       string zName = null;          /* Name of the index */
       int nName;                    /* Number of characters in zName */
       int i, j;
-      Token nullId = new Token();   /* Fake token for an empty ID list */
-      DbFixer sFix = new DbFixer(); /* For assigning database names to pTable */
+      var nullId = new Token();   /* Fake token for an empty ID list */
+      var sFix = new DbFixer(); /* For assigning database names to pTable */
       int sortOrderMask;            /* 1 to honor DESC in index.  0 to ignore. */
       sqlite3 db = pParse.db;
       Db pDb;                       /* The specific table containing the indexed database */
@@ -2679,7 +2676,7 @@ return;
       ExprList_item pListItem;      /* For looping over pList */
       int nCol;
       int nExtra = 0;
-      StringBuilder zExtra = new StringBuilder();
+      var zExtra = new StringBuilder();
 
       Debug.Assert( pStart == null || pEnd != null ); /* pEnd must be non-NULL if pStart is */
       Debug.Assert( pParse.nErr == 0 );      /* Never called with prior errors */
@@ -2933,6 +2930,7 @@ goto exit_create_index;
         {
           sqlite3ErrorMsg( pParse, "table %s has no column named %s",
           pTab.zName, zColName );
+          pParse.checkSchema = 1;
           goto exit_create_index;
         }
         pIndex.aiColumn[i] = j;
@@ -3043,7 +3041,7 @@ goto exit_create_index;
       if ( db.init.busy != 0 )
       {
         Index p;
-        p = (Index)sqlite3HashInsert( ref pIndex.pSchema.idxHash,
+        p = sqlite3HashInsert( ref pIndex.pSchema.idxHash,
         pIndex.zName, sqlite3Strlen30( pIndex.zName ),
         pIndex );
         if ( p != null )
@@ -3128,7 +3126,7 @@ goto exit_create_index;
           sqlite3RefillIndex( pParse, pIndex, iMem );
           sqlite3ChangeCookie( pParse, iDb );
           sqlite3VdbeAddOp4( v, OP_ParseSchema, iDb, 0, 0,
-          sqlite3MPrintf( db, "name='%q'", pIndex.zName ), P4_DYNAMIC );
+          sqlite3MPrintf( db, "name='%q' AND type='index'", pIndex.zName ), P4_DYNAMIC );
           sqlite3VdbeAddOp1( v, OP_Expire, 0 );
         }
       }
@@ -3165,7 +3163,7 @@ goto exit_create_index;
     exit_create_index:
       if ( pIndex != null )
       {
-        //sqlite3_free( ref pIndex.zColAff );
+        //sqlite3DbFree(db, ref pIndex.zColAff );
         sqlite3DbFree( db, ref pIndex );
       }
       sqlite3ExprListDelete( db, ref pList );
@@ -3196,16 +3194,17 @@ goto exit_create_index;
     {
       int[] a = pIdx.aiRowEst;
       int i;
+      int  n;
       Debug.Assert( a != null );
-      a[0] = 1000000;
-      for ( i = pIdx.nColumn; i >= 5; i-- )
+      a[0] = (int) pIdx.pTable.nRowEst;
+      if ( a[0] < 10 )
+        a[0] = 10;
+      n = 10;
+      for ( i = 1; i <= pIdx.nColumn; i++ )
       {
-        a[i] = 5;
-      }
-      while ( i >= 1 )
-      {
-        a[i] = 11 - i;
-        i--;
+        a[i] = n;
+        if ( n > 5 )
+          n--;
       }
       if ( pIdx.onError != OE_None )
       {
@@ -3273,7 +3272,7 @@ goto exit_drop_index;
       {
         sqlite3BeginWriteOperation( pParse, 1, iDb );
         sqlite3NestedParse( pParse,
-        "DELETE FROM %Q.%s WHERE name=%Q",
+        "DELETE FROM %Q.%s WHERE name=%Q AND type='index'",
         db.aDb[iDb].zName, SCHEMA_TABLE( iDb ),
         pIndex.zName
         );
@@ -3595,7 +3594,7 @@ goto exit_drop_index;
         sqlite3DbFree( db, ref pItem.zName );
         sqlite3DbFree( db, ref pItem.zAlias );
         sqlite3DbFree( db, ref pItem.zIndex );
-        sqlite3DeleteTable( ref pItem.pTab );
+        sqlite3DeleteTable( db, ref pItem.pTab );
         sqlite3SelectDelete( db, ref pItem.pSelect );
         sqlite3ExprDelete( db, ref pItem.pOn );
         sqlite3IdListDelete( db, ref pItem.pUsing );
@@ -3803,14 +3802,16 @@ goto exit_drop_index;
     ** This function is called by the parser when it parses a command to create,
     ** release or rollback an SQL savepoint.
     */
-    static void sqlite3Savepoint( Parse pParse, int op, Token pName )
+#if !SQLITE_OMIT_AUTHORIZATION
+const string[] az = { "BEGIN", "RELEASE", "ROLLBACK" };
+#endif
+    static void sqlite3Savepoint(Parse pParse, int op, Token pName)
     {
       string zName = sqlite3NameFromToken( pParse.db, pName );
       if ( zName != null )
       {
         Vdbe v = sqlite3GetVdbe( pParse );
 #if !SQLITE_OMIT_AUTHORIZATION
-byte az[] = { "BEGIN", "RELEASE", "ROLLBACK" };
 Debug.Assert( !SAVEPOINT_BEGIN && SAVEPOINT_RELEASE==1 && SAVEPOINT_ROLLBACK==2 );
 #endif
         if ( null == v
@@ -3844,7 +3845,7 @@ Debug.Assert( !SAVEPOINT_BEGIN && SAVEPOINT_RELEASE==1 && SAVEPOINT_ROLLBACK==2 
         SQLITE_OPEN_DELETEONCLOSE |
         SQLITE_OPEN_TEMP_DB;
 
-        rc = sqlite3BtreeFactory( db, null, false, SQLITE_DEFAULT_CACHE_SIZE, flags, ref pBt);
+        rc = sqlite3BtreeOpen( null, db, ref pBt, 0, flags);
         if ( rc != SQLITE_OK )
         {
           sqlite3ErrorMsg( pParse, "unable to open a temporary database " +
@@ -3858,7 +3859,6 @@ Debug.Assert( !SAVEPOINT_BEGIN && SAVEPOINT_RELEASE==1 && SAVEPOINT_ROLLBACK==2 
         {
         //  db.mallocFailed = 1;
         }
-        sqlite3PagerJournalMode( sqlite3BtreePager( pBt ), db.dfltJournalMode );
       }
       return 0;
     }
@@ -4092,7 +4092,7 @@ Debug.Assert( !SAVEPOINT_BEGIN && SAVEPOINT_RELEASE==1 && SAVEPOINT_ROLLBACK==2 
       Index pIndex;                 /* An index associated with pTab */
       int iDb;                      /* The database index number */
       sqlite3 db = pParse.db;       /* The database connection */
-      Token pObjName = new Token();  /* Name of the table or index to be reindexed */
+      var pObjName = new Token();  /* Name of the table or index to be reindexed */
 
       /* Read the database schema. If an error occurs, leave an error message
       ** and code in pParse and return NULL. */
@@ -4161,7 +4161,7 @@ Debug.Assert( !SAVEPOINT_BEGIN && SAVEPOINT_RELEASE==1 && SAVEPOINT_ROLLBACK==2 
       int nCol = pIdx.nColumn;
       //int nBytes = KeyInfo.Length + (nCol - 1) * CollSeq*.Length + nCol;
       sqlite3 db = pParse.db;
-      KeyInfo pKey = new KeyInfo();// (KeyInfo*)sqlite3DbMallocZero(db, nBytes);
+      var pKey = new KeyInfo();// (KeyInfo*)sqlite3DbMallocZero(db, nBytes);
 
       if ( pKey != null )
       {

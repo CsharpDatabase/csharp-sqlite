@@ -10,12 +10,12 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/commands/TraceCmd.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: TraceCmd.java,v 1.6 1999/08/15 19:38:36 mo Exp $
 *
 */
-using System;
 using System.Collections;
+using System.Text;
 
 namespace tcl.lang
 {
@@ -30,8 +30,8 @@ namespace tcl.lang
 	{
 		
 		// Valid sub-commands for the trace command.
-		
-		private static readonly string[] validCmds = new string[]{"variable", "vdelete", "vinfo"};
+
+    private static readonly string[] validCmds = new string[] { "variable", "vdelete", "vinfo" };
 		
 		private const int OPT_VARIABLE = 0;
 		private const int OPT_VDELETE = 1;
@@ -61,7 +61,7 @@ namespace tcl.lang
 		
 		private static TclObject[] initOptStr()
 		{
-			TclObject[] strings = new TclObject[8];
+			var strings = new TclObject[8];
 			strings[0] = TclString.newInstance("error");
 			strings[1] = TclString.newInstance("r");
 			strings[2] = TclString.newInstance("w");
@@ -147,7 +147,7 @@ check_ops_brk: ;
 					if (opt == OPT_VARIABLE)
 					{
 						
-						CmdTraceProc trace = new CmdTraceProc(objv[4].ToString(), flags);
+						var trace = new CmdTraceProc(objv[4].ToString(), flags);
 						Var.traceVar(interp, objv[2], flags, trace);
 					}
 					else
@@ -249,7 +249,7 @@ check_ops_brk: ;
 		{
 			if (((this.flags & flags) != 0) && ((flags & TCL.VarFlag.INTERP_DESTROYED) == 0))
 			{
-				System.Text.StringBuilder sbuf = new System.Text.StringBuilder(command);
+				var sbuf = new StringBuilder(command);
 				
 				try
 				{

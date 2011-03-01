@@ -26,7 +26,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2010-03-09 19:31:43 4ae453ea7be69018d8c16eb8dabe05617397dc4d
+    **  SQLITE_SOURCE_ID: 2010-08-23 18:52:01 42537b60566f288167f1b5864a5435986838e3a3
     **
     **  $Header$
     *************************************************************************
@@ -617,7 +617,7 @@ sqlite3ParserStackPeak(pEngine)
       if ( pParse.zErrMsg != null )
       {
         pzErrMsg = pParse.zErrMsg;
-        sqlite3_log(pParse.rc, "%s", pzErrMsg);
+        sqlite3_log( pParse.rc, "%s", pzErrMsg );
         pParse.zErrMsg = "";
         nErr++;
       }
@@ -635,7 +635,7 @@ pParse.nTableLock = 0;
 }
 #endif
 #if !SQLITE_OMIT_VIRTUALTABLE
-sqlite3DbFree(db,pParse.apVtabLock);
+sqlite3_free(pParse.apVtabLock);
 #endif
       if ( !IN_DECLARE_VTAB )
       {
@@ -643,7 +643,7 @@ sqlite3DbFree(db,pParse.apVtabLock);
         ** structure built up in pParse.pNewTable. The calling code (see vtab.c)
         ** will take responsibility for freeing the Table structure.
         */
-        sqlite3DeleteTable( ref pParse.pNewTable );
+        sqlite3DeleteTable( db, ref pParse.pNewTable );
       }
 
 #if !SQLITE_OMIT_TRIGGER
@@ -661,7 +661,7 @@ sqlite3DbFree(db,pParse.apVtabLock);
       {
         Table p = pParse.pZombieTab;
         pParse.pZombieTab = p.pNextZombie;
-        sqlite3DeleteTable( ref p );
+        sqlite3DeleteTable( db, ref p );
       }
       if ( nErr > 0 && pParse.rc == SQLITE_OK )
       {

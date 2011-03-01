@@ -26,7 +26,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2009-12-07 16:39:13 1ed88e9d01e9eda5cbc622e7614277f29bcc551c
+    **  SQLITE_SOURCE_ID: 2010-08-23 18:52:01 42537b60566f288167f1b5864a5435986838e3a3
     **
     **  $Header$
     *************************************************************************
@@ -251,11 +251,11 @@ if( new_size==pH->htsize ) return false;
     ** that matches pKey,nKey.  Return the data for this element if it is
     ** found, or NULL if there is no match.
     */
-    static object sqlite3HashFind( Hash pH, string pKey, int nKey )
+    static T sqlite3HashFind <T>( Hash pH, string pKey, int nKey, T nullType ) where T: class
     {
       HashElem elem;  /* The element that matches key */
       u32 h;          /* A hash on key */
-
+      
       Debug.Assert( pH != null );
       Debug.Assert( pKey != null );
       Debug.Assert( nKey >= 0 );
@@ -268,7 +268,7 @@ if( new_size==pH->htsize ) return false;
         h = 0;
       }
       elem = findElementGivenHash( pH, pKey, nKey, h );
-      return elem != null ? elem.data : null;
+      return elem != null ? (T)elem.data : nullType;
     }
 
     /* Insert an element into the hash table pH.  The key is pKey,nKey
@@ -285,7 +285,7 @@ if( new_size==pH->htsize ) return false;
     ** If the "data" parameter to this function is NULL, then the
     ** element corresponding to "key" is removed from the hash table.
     */
-    static object sqlite3HashInsert( ref Hash pH, string pKey, int nKey, object data )
+    static T sqlite3HashInsert<T>( ref Hash pH, string pKey, int nKey, T data ) where T : class
     {
       u32 h;       /* the hash of the key modulo hash table size */
 
@@ -307,7 +307,7 @@ if( new_size==pH->htsize ) return false;
       elem = findElementGivenHash( pH, pKey, nKey, h );
       if ( elem != null )
       {
-        object old_data = elem.data;
+        T old_data = (T)elem.data;
         if ( data == null )
         {
           removeElementGivenHash( pH, ref elem, h );
@@ -320,7 +320,8 @@ if( new_size==pH->htsize ) return false;
         }
         return old_data;
       }
-      if ( data == null ) return null;
+      if ( data == null )
+        return data;
       new_elem = new HashElem();//(HashElem*)sqlite3Malloc( sizeof(HashElem) );
       if ( new_elem == null ) return data;
       new_elem.pKey = pKey;

@@ -11,12 +11,12 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/commands/GlobCmd.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: GlobCmd.java,v 1.5 1999/08/28 03:55:18 mo Exp $
 *
 */
-using System;
 using System.IO;
+using System.Text;
 
 namespace tcl.lang
 {
@@ -37,8 +37,8 @@ namespace tcl.lang
 		/*
 		* Options to the glob command.
 		*/
-		
-		private static readonly string[] validOptions = new string[]{"-nocomplain", "--"};
+
+    private static readonly string[] validOptions = new string[] { "-nocomplain", "--" };
 		private const int OPT_NOCOMPLAIN = 0;
 		private const int OPT_LAST = 1;
 
@@ -193,7 +193,7 @@ namespace tcl.lang
 				
 				try
 				{
-					doGlob(interp, separators, new System.Text.StringBuilder(head), tail, resultList);
+					doGlob(interp, separators, new StringBuilder(head), tail, resultList);
 				}
 				catch (TclException e)
 				{
@@ -217,7 +217,7 @@ namespace tcl.lang
 				if ((TclList.getLength(interp, resultList) == 0) && !noComplain)
 				{
 					string sep = "";
-					System.Text.StringBuilder ret = new System.Text.StringBuilder();
+					var ret = new StringBuilder();
 					
 					ret.Append("no files matched glob pattern");
 					ret.Append((argv.Length == 2)?" \"":"s \"");
@@ -281,7 +281,7 @@ namespace tcl.lang
 			}
 			return - 1;
 		}
-		private static void  doGlob(Interp interp, string separators, System.Text.StringBuilder headBuf, string tail, TclObject resultList)
+    private static void doGlob( Interp interp, string separators, StringBuilder headBuf, string tail, TclObject resultList )
 		{
 			int count = 0; // Counts the number of leading file 
 			//   spearators for the tail. 
@@ -442,7 +442,7 @@ namespace tcl.lang
 			if (openBraceIndex != - 1)
 			{
 				int nextIndex;
-				System.Text.StringBuilder baseBuf = new System.Text.StringBuilder();
+				var baseBuf = new StringBuilder();
 				
 				// For each element within in the outermost pair of braces,
 				// append the element and the remainder to the fixed portion
@@ -562,7 +562,7 @@ namespace tcl.lang
 			int patLen = pattern.Length; // Caches the len of the pattern 
 			string[] dirListing; // Listing of files in dirBuf 
 			System.IO.FileInfo dirObj; // File object of dirBuf 
-			System.Text.StringBuilder dirBuf = new System.Text.StringBuilder();
+			var dirBuf = new StringBuilder();
 			// Converts the dirName to string 
 			//   buffer or initializes it with '.' 
 			
@@ -623,7 +623,7 @@ namespace tcl.lang
 			else
 			{
 				matchHidden = false;
-				DirectoryInfo dirInfo = new System.IO.DirectoryInfo(dirObj.FullName);
+				var dirInfo = new System.IO.DirectoryInfo(dirObj.FullName);
 				FileSystemInfo[] fileInfos = dirInfo.GetFileSystemInfos();
 				// TCL await only file names
                 // dirListing = System.IO.Directory.GetFileSystemEntries(dirObj.FullName);

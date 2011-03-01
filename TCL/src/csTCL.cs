@@ -20,7 +20,7 @@ class csTCL
   ** This file contains code to implement the "sqlite" test harness
   ** which runs TCL commands for testing the C#-SQLite port.
   **
-  ** $Header: TCL/src/csTCL.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+  ** $Header$
   */
   public static void Main(string[] args)
   {

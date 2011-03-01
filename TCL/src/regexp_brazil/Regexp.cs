@@ -10,9 +10,10 @@
 * SCCS: %Z% %M% %I% %E% %U%
 */
 // Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-//$Header: TCL/src/regexp_brazil/Regexp.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+//$Header$
 
 using System;
+using System.Text;
 namespace sunlabs.brazil.util.regexp
 {
 	
@@ -158,8 +159,8 @@ namespace sunlabs.brazil.util.regexp
 	/// 
 	/// s = "GET http://a.b.com:1234/index.html HTTP/1.1";
 	/// 
-	/// re = new Regexp("^([A-Z]+)[ \t]+([^ \t]+)[ \t]+(HTTP/1\\.[01])$");
-	/// matches = new String[4];
+	/// var re = new Regexp("^([A-Z]+)[ \t]+([^ \t]+)[ \t]+(HTTP/1\\.[01])$");
+	/// var matches = new String[4];
 	/// if (re.match(s, matches)) {
 	/// System.out.println("METHOD  " + matches[1]);
 	/// System.out.println("URL     " + matches[2]);
@@ -173,7 +174,7 @@ namespace sunlabs.brazil.util.regexp
 	/// 
 	/// s = "abc,def,ghi,klm,nop,pqr";
 	/// 
-	/// re = new Regexp("^([^,]+),([^,]+),([^,]+),(.*)");
+  /// var re = new Regexp("^([^,]+),([^,]+),([^,]+),(.*)");
 	/// System.out.println(re.sub(s, "\\3,\\1,\\4"));
 	/// }
 	/// </pre>
@@ -198,7 +199,7 @@ namespace sunlabs.brazil.util.regexp
     //  else if ((args.Length == 3) && (args[0].Equals("match")))
     //  {
     //    Regexp r = new Regexp(args[1]);
-    //    string[] substrs = new string[r.subspecs()];
+    //    var substrs = new string[r.subspecs()];
     //    bool match = r.match(args[2], substrs);
     //    System.Diagnostics.Debug.WriteLine("match:\t" + match);
     //    for (int i = 0; i < substrs.Length; i++)
@@ -256,7 +257,7 @@ namespace sunlabs.brazil.util.regexp
 		/*	OPEN+1 is number 1, etc. */
 		internal static readonly char CLOSE = (char) (OPEN + NSUBEXP);
 		/* no	Analogous to OPEN. */
-		internal static readonly string[] opnames = new string[]{"END", "BOL", "EOL", "ANY", "ANYOF", "ANYBUT", "BRANCH", "BACK", "EXACTLY", "NOTHING", "STAR", "PLUS"};
+    internal static readonly string[] opnames = new string[] { "END", "BOL", "EOL", "ANY", "ANYOF", "ANYBUT", "BRANCH", "BACK", "EXACTLY", "NOTHING", "STAR", "PLUS" };
 		
 		/*
 		* A node is one char of opcode followed by one char of "next" pointer.
@@ -563,10 +564,10 @@ namespace sunlabs.brazil.util.regexp
 		/// </returns>
 		public  string sub(string str, string subspec)
 		{
-			Regsub rs = new Regsub(this, str);
+			var rs = new Regsub(this, str);
 			if (rs.nextMatch())
 			{
-				System.Text.StringBuilder sb = new System.Text.StringBuilder(rs.skipped());
+				var sb = new StringBuilder(rs.skipped());
 				applySubspec(rs, subspec, sb);
 				sb.Append(rs.rest());
 				
@@ -621,7 +622,7 @@ namespace sunlabs.brazil.util.regexp
 		/// <param name="">sb
 		/// StringBuffer to which the generated string is appended.
 		/// </param>
-		public static void  applySubspec(Regsub rs, string subspec, System.Text.StringBuilder sb)
+    public static void applySubspec( Regsub rs, string subspec, StringBuilder sb )
 		{
 			try
 			{
@@ -672,13 +673,13 @@ namespace sunlabs.brazil.util.regexp
 		
 		public  string sub(string str, Filter rf)
 		{
-			Regsub rs = new Regsub(this, str);
+			var rs = new Regsub(this, str);
 			if (rs.nextMatch() == false)
 			{
 				return str;
 			}
 			
-			System.Text.StringBuilder sb = new System.Text.StringBuilder();
+			var sb = new StringBuilder();
 			do 
 			{
 				sb.Append(rs.skipped());
@@ -750,7 +751,7 @@ namespace sunlabs.brazil.util.regexp
 				/// <code>Regexp</code> to continue looking for further
 				/// matches.
 				/// </returns>
-				bool filter(Regsub rs, System.Text.StringBuilder sb);
+      bool filter( Regsub rs, StringBuilder sb );
 			}
 		
 		private class SubspecFilter : Filter
@@ -763,8 +764,8 @@ namespace sunlabs.brazil.util.regexp
 				this.subspec = subspec;
 				this.all = all;
 			}
-			
-			public  bool filter(Regsub rs, System.Text.StringBuilder sb)
+
+      public bool filter( Regsub rs, StringBuilder sb )
 			{
 				sunlabs.brazil.util.regexp.Regexp.applySubspec(rs, subspec, sb);
 				return all;
@@ -780,7 +781,7 @@ namespace sunlabs.brazil.util.regexp
 		/// </returns>
 		public override string ToString()
 		{
-			System.Text.StringBuilder sb = new System.Text.StringBuilder();
+			var sb = new StringBuilder();
 			
 			sb.Append("# subs:  " + npar + "\n");
 			sb.Append("anchor:  " + anchored + "\n");
@@ -837,11 +838,11 @@ namespace sunlabs.brazil.util.regexp
 		
 		private void  compile(string exp)
 		{
-			Compiler rcstate = new Compiler();
+			var rcstate = new Compiler();
 			rcstate.parse = exp.ToCharArray();
 			rcstate.off = 0;
 			rcstate.npar = 1;
-			rcstate.code = new System.Text.StringBuilder();
+			rcstate.code = new StringBuilder();
 			
 			rcstate.reg(false);
 			
@@ -908,7 +909,7 @@ namespace sunlabs.brazil.util.regexp
 				str = str.ToLower();
 			}
 			
-			Match match = new Match();
+			var match = new Match();
 			
 			match.program = program;
 			
@@ -964,7 +965,7 @@ namespace sunlabs.brazil.util.regexp
 			internal char[] parse;
 			internal int off;
 			internal int npar;
-			internal System.Text.StringBuilder code;
+      internal StringBuilder code;
 			internal int flagp;
 			
 			
@@ -1346,7 +1347,7 @@ namespace sunlabs.brazil.util.regexp
 			*/
 			internal  void  reginsert(char op, int pos)
 			{
-				char[] tmp = new char[]{op, '\x0000'};
+				var tmp = new char[]{op, '\x0000'};
 				code.Insert(pos, tmp);
 			}
 			

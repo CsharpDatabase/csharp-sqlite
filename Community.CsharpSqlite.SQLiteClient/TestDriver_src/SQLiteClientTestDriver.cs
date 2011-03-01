@@ -156,6 +156,67 @@ namespace SQLiteClientTests
 
       Console.WriteLine("Test1 Done.");
     }
+    public void Test3()
+    {
+      Console.WriteLine("Test3 (Date Paramaters) Start.");
+
+      Console.WriteLine("Create connection...");
+      SqliteConnection con = new SqliteConnection();
+
+      string dbFilename = @"SqliteTest3.db";
+      string cs = string.Format("Version=3,uri=file:{0}", dbFilename);
+
+      Console.WriteLine("Set connection String: {0}", cs);
+
+      if (File.Exists(dbFilename))
+        File.Delete(dbFilename);
+
+      con.ConnectionString = cs;
+
+      Console.WriteLine("Open database...");
+      con.Open();
+
+      Console.WriteLine("create command...");
+      SqliteCommand cmd = con.CreateCommand();
+
+      Console.WriteLine("create table TEST_TABLE...");
+      cmd.CommandText = "CREATE TABLE TBL ( ID NUMBER, DATE_TEXT REAL)";
+      cmd.ExecuteNonQuery();
+
+      Console.WriteLine("insert ...");
+      cmd.CommandText = "INSERT INTO TBL  ( ID, DATE_TEXT) VALUES ( 1,  @DATETEXT)";
+      cmd.Parameters.Add(
+        new SQLiteParameter      {
+        ParameterName =          "@DATETEXT",        Value = DateTime.Now      }
+        );
+
+      cmd.ExecuteNonQuery();
+
+
+      Console.WriteLine("SELECT data from TBL...");
+      cmd.CommandText = "SELECT * FROM tbl";
+      SqliteDataReader reader = cmd.ExecuteReader();
+      int r = 0;
+      Console.WriteLine("Read the data...");
+      while (reader.Read())
+      {
+        Console.WriteLine("  Row: {0}", r);
+        int i = reader.GetInt32(reader.GetOrdinal("ID"));
+        Console.WriteLine("    ID: {0}", i);
+
+        string s = reader.GetString(reader.GetOrdinal("DATE_TEXT"));
+        Console.WriteLine("    DATE_TEXT: {0}", s);
+        r++;
+      }
+      Console.WriteLine("Rows retrieved: {0}", r);
+
+
+      Console.WriteLine("Close and cleanup...");
+      con.Close();
+      con = null;
+
+      Console.WriteLine("Test3 Done.");
+    }
     public void Issue_65()
     {
       string datasource = "file://" + TempDirectory.ToString() + "myBigDb.s3db";
@@ -233,13 +294,15 @@ namespace SQLiteClientTests
     {
       SQLiteClientTestDriver tests = new SQLiteClientTestDriver();
 
-      int Test = 65;
+      int Test = 3;
       switch (Test)
       {
         case 1:
           tests.Test1(); break;
         case 2:
           tests.Test2(); break;
+        case 3:
+          tests.Test3(); break;
         case 65:
           tests.Issue_65(); break;
       }

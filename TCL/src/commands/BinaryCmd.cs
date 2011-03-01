@@ -11,11 +11,12 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/commands/BinaryCmd.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: BinaryCmd.java,v 1.2 2002/05/07 06:58:06 mdejong Exp $
 *
 */
 using System;
+using System.Text;
 namespace tcl.lang
 {
 
@@ -253,7 +254,6 @@ namespace tcl.lang
             // number of bytes and filling with nulls.
 
             TclObject resultObj = TclByteArray.newInstance();
-            resultObj._typePtr = "bytearray";
             byte[] resultBytes = TclByteArray.setLength( interp, resultObj, length );
             interp.setResult( resultObj );
 
@@ -632,7 +632,7 @@ namespace tcl.lang
                         break;
                       }
                     }
-                    System.Text.StringBuilder s = new System.Text.StringBuilder( count );
+                    var s = new StringBuilder( count );
                     int thisOffset = offset;
 
                     if ( cmd == 'b' )
@@ -694,7 +694,7 @@ namespace tcl.lang
                         break;
                       }
                     }
-                    System.Text.StringBuilder s = new System.Text.StringBuilder( count );
+                    var s = new StringBuilder( count );
                     int thisOffset = offset;
 
                     if ( cmd == 'h' )
@@ -922,8 +922,8 @@ namespace tcl.lang
       if ( type == 'd' )
       {
         double dvalue = TclDouble.get( interp, src );
-        System.IO.MemoryStream ms = new System.IO.MemoryStream( resultBytes, cursor, 8 );
-        System.IO.BinaryWriter writer = new System.IO.BinaryWriter( ms );
+        var ms = new System.IO.MemoryStream( resultBytes, cursor, 8 );
+        var writer = new System.IO.BinaryWriter( ms );
         writer.Write( dvalue );
         cursor += 8;
         writer.Close();
@@ -932,8 +932,8 @@ namespace tcl.lang
       else if ( type == 'f' )
       {
         float fvalue = (float)TclDouble.get( interp, src );
-        System.IO.MemoryStream ms = new System.IO.MemoryStream( resultBytes, cursor, 4 );
-        System.IO.BinaryWriter writer = new System.IO.BinaryWriter( ms );
+        var ms = new System.IO.MemoryStream( resultBytes, cursor, 4 );
+        var writer = new System.IO.BinaryWriter( ms );
         writer.Write( fvalue );
         cursor += 4;
         writer.Close();
@@ -1009,8 +1009,8 @@ namespace tcl.lang
           }
         case 'f':
           {
-            System.IO.MemoryStream ms = new System.IO.MemoryStream( src, pos, 4, false );
-            System.IO.BinaryReader reader = new System.IO.BinaryReader( ms );
+            var ms = new System.IO.MemoryStream( src, pos, 4, false );
+            var reader = new System.IO.BinaryReader( ms );
             double fvalue = reader.ReadSingle();
             reader.Close();
             ms.Close();
@@ -1018,8 +1018,8 @@ namespace tcl.lang
           }
         case 'd':
           {
-            System.IO.MemoryStream ms = new System.IO.MemoryStream( src, pos, 8, false );
-            System.IO.BinaryReader reader = new System.IO.BinaryReader( ms );
+            var ms = new System.IO.MemoryStream( src, pos, 8, false );
+            var reader = new System.IO.BinaryReader( ms );
             double dvalue = reader.ReadDouble();
             reader.Close();
             ms.Close();

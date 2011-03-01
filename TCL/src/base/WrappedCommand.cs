@@ -10,11 +10,11 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/base/WrappedCommand.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: WrappedCommand.java,v 1.2 1999/08/05 03:42:05 mo Exp $
 */
-using System;
 using System.Collections;
+using System.Text;
 
 namespace tcl.lang
 {
@@ -66,7 +66,7 @@ namespace tcl.lang
 		
 		public override string ToString()
 		{
-			System.Text.StringBuilder sb = new System.Text.StringBuilder();
+			var sb = new StringBuilder();
 			
 			sb.Append("Wrapper for ");
 			if (ns != null)

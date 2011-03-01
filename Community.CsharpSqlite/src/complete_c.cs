@@ -28,7 +28,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2010-03-09 19:31:43 4ae453ea7be69018d8c16eb8dabe05617397dc4d
+    **  SQLITE_SOURCE_ID: 2010-08-23 18:52:01 42537b60566f288167f1b5864a5435986838e3a3
     **
     **  $Header$
     *************************************************************************
@@ -129,7 +129,7 @@ namespace Community.CsharpSqlite
 /* A complex statement machine used to detect the end of a CREATE TRIGGER
 ** statement.  This is the normal case.
 */
-      u8[][] trans = new u8[][]       {
+      var trans = new u8[][]       {
                      /* Token:                                                */
      /* State:       **  SEMI  WS  OTHER  EXPLAIN  CREATE  TEMP  TRIGGER  END */
      /* 0 INVALID: */ new u8[]{    1,  0,     2,       3,      4,    2,       2,   2, },
@@ -145,7 +145,7 @@ namespace Community.CsharpSqlite
       /* If triggers are not supported by this compile then the statement machine
   ** used to detect the end of a statement is much simplier
   */
-      u8[][] trans = new u8[][]   {
+      var trans = new u8[][]   {
      /* Token:           */
      /* State:       **  SEMI  WS  OTHER */
      /* 0 INVALID: */new u8[]  {    1,  0,     2, },

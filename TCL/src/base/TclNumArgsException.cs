@@ -8,11 +8,11 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/base/TclNumArgsException.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: TclNumArgsException.java,v 1.3 2003/01/12 02:44:28 mdejong Exp $
 *
 */
-using System;
+using System.Text;
 namespace tcl.lang
 {
 	
@@ -50,7 +50,7 @@ namespace tcl.lang
 			
 			if (interp != null)
 			{
-				System.Text.StringBuilder buff = new System.Text.StringBuilder(50);
+				var buff = new StringBuilder(50);
 				buff.Append("wrong # args: should be \"");
 				
 				for (int i = 0; i < argc; i++)

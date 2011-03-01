@@ -17,9 +17,17 @@ set testdir [file dirname $argv0]
 source $testdir/tester.tcl
 
 # Do not use a codec for tests in this file, as the database file is
-# manipulated directly using tcl scripts. See proc [set_file_format].
+# manipulated directly using tcl scripts (using the [hexio_write] command).
 #
 do_not_use_codec
+
+# Only works with a mode-2 pcache where all pcaches share a single set
+# of pages.
+#
+ifcapable {!memorymanage && threadsafe} {
+  finish_test
+  return
+}
 
 # The pcache module limits the number of pages available to purgeable
 # caches to the sum of the 'cache_size' values for the set of open
@@ -32,8 +40,8 @@ do_test pcache-1.1 {
 } {current 0 max 0 min 0 recyclable 0}
 
 do_test pcache-1.2 {
-    sqlite3 db test.db 
-    execsql {
+  sqlite3 db test.db
+  execsql {
     PRAGMA cache_size=12;
     PRAGMA auto_vacuum=0;
   }

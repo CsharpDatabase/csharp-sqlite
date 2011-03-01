@@ -20,7 +20,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2010 Noah B Hart, Diego Torres
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  $Header: Community.CsharpSqlite/src/crypto.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+    **  $Header$
     *************************************************************************
     */
 
@@ -91,7 +91,7 @@ static void CODEC_TRACE( string T, params object[] ap ) { if ( sqlite3PagerTrace
 
       public cipher_ctx Copy( )
       {
-        cipher_ctx c = new cipher_ctx();
+        var c = new cipher_ctx();
         c.derive_key = derive_key;
         c.pass = pass;
         c.pass_sz = pass_sz;
@@ -128,7 +128,7 @@ static void CODEC_TRACE( string T, params object[] ap ) { if ( sqlite3PagerTrace
 
       public codec_ctx Copy(  )
       {
-        codec_ctx c = new codec_ctx();
+        var c = new codec_ctx();
         c.mode_rekey = mode_rekey;
         c.buffer = sqlite3MemMalloc( buffer.Length );
         c.pBt = pBt;
@@ -328,7 +328,7 @@ static void CODEC_TRACE( string T, params object[] ap ) { if ( sqlite3PagerTrace
         {
           CODEC_TRACE( "codec_key_derive: deriving key using AES256\n" );
 
-          Rfc2898DeriveBytes k1 = new Rfc2898DeriveBytes( c_ctx.pass, c_ctx.iv, 2010 );
+          var k1 = new Rfc2898DeriveBytes( c_ctx.pass, c_ctx.iv, 2010 );
           c_ctx.key_sz = 32;
           c_ctx.key = k1.GetBytes( c_ctx.key_sz );
         }
@@ -362,7 +362,7 @@ static void CODEC_TRACE( string T, params object[] ap ) { if ( sqlite3PagerTrace
         return SQLITE_OK;
       }
 
-      MemoryStream dataStream = new MemoryStream();
+      var dataStream = new MemoryStream();
       CryptoStream encryptionStream;
       if ( mode == CIPHER_ENCRYPT )
       {
@@ -564,12 +564,16 @@ static void CODEC_TRACE( string T, params object[] ap ) { if ( sqlite3PagerTrace
         // If we are reopening an existing database, redo the header information setup 
         //
         BtShared pBt = db.aDb[0].pBt.pBt;
-        byte[] zDbHeader = sqlite3MemMalloc(pBt.pageSize);// pBt.pPager.pCodec.buffer;
+        byte[] zDbHeader = sqlite3MemMalloc((int)pBt.pageSize);// pBt.pPager.pCodec.buffer;
         sqlite3PagerReadFileheader( pBt.pPager, zDbHeader.Length, zDbHeader );
         if ( sqlite3Get4byte( zDbHeader ) > 0 ) // Existing Database, need to reset some values
         {
           CODEC2( pBt.pPager, zDbHeader, 2, SQLITE_DECRYPT, ref zDbHeader );
           byte nReserve = zDbHeader[20];
+          pBt.pageSize = (uint)( ( zDbHeader[16] << 8 ) | ( zDbHeader[17] << 16 ) );
+          if ( pBt.pageSize < 512 || pBt.pageSize > SQLITE_MAX_PAGE_SIZE
+          || ( ( pBt.pageSize - 1 ) & pBt.pageSize ) != 0 )
+            pBt.pageSize = 0;
           pBt.pageSizeFixed = true;
 #if !SQLITE_OMIT_AUTOVACUUM
           pBt.autoVacuum = sqlite3Get4byte( zDbHeader, 36 + 4 * 4 ) != 0;
@@ -648,7 +652,7 @@ static void CODEC_TRACE( string T, params object[] ap ) { if ( sqlite3PagerTrace
           ** note: don't deallocate rekey since it may be used in a subsequent iteration
           */
           rc = sqlite3BtreeBeginTrans( pDb.pBt, 1 ); /* begin write transaction */
-          rc = sqlite3PagerPagecount( pPager, ref page_count );
+          sqlite3PagerPagecount( pPager, ref page_count );
           for ( pgno = 1; rc == SQLITE_OK && pgno <= page_count; pgno++ )
           { /* pgno's start at 1 see pager.c:pagerAcquire */
             if ( 0 == sqlite3pager_is_mj_pgno( pPager, pgno ) )

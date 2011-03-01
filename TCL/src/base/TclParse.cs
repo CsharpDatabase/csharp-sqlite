@@ -11,7 +11,7 @@
 * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 *
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/base/TclParse.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: TclParse.java,v 1.2 1999/05/09 01:33:45 dejong Exp $
 */
 using System;
@@ -167,7 +167,7 @@ namespace tcl.lang
 		
 		internal static void  init(Interp interp)
 		{
-			TclToken[] TOKEN_CACHE = new TclToken[MAX_CACHED_TOKENS];
+			var TOKEN_CACHE = new TclToken[MAX_CACHED_TOKENS];
 			for (int i = 0; i < MAX_CACHED_TOKENS; i++)
 			{
 				TOKEN_CACHE[i] = new TclToken();
@@ -222,7 +222,7 @@ namespace tcl.lang
 				tokensAvailable *= 2;
 			}
 			
-			TclToken[] newList = new TclToken[tokensAvailable];
+			var newList = new TclToken[tokensAvailable];
 			Array.Copy((System.Array) tokenList, 0, (System.Array) newList, 0, tokenList.Length);
 			tokenList = newList;
 		}

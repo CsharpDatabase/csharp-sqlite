@@ -2,7 +2,7 @@ using System.Diagnostics;
 
 namespace Community.CsharpSqlite
 {
-#if !NO_TCL
+#if TCLSH
   using tcl.lang;
   using Tcl_Interp = tcl.lang.Interp;
 #endif
@@ -30,13 +30,13 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2010-03-09 19:31:43 4ae453ea7be69018d8c16eb8dabe05617397dc4d
+    **  SQLITE_SOURCE_ID: 2010-12-07 20:14:09 a586a4deeb25330037a49df295b36aaf624d0f45
     **
     **  $Header$
     *************************************************************************
     */
 
-#if !NO_TCL
+#if TCLSH
     //#include "sqliteLimit.h"
 
     //#include "sqliteInt.h"
@@ -59,9 +59,7 @@ namespace Community.CsharpSqlite
     static void set_options( Tcl_Interp interp )
     {
 
-      TCL.Tcl_SetVar2(interp, "sqlite_options", "malloc", "0", TCL.TCL_GLOBAL_ONLY);
-
-
+      TCL.Tcl_SetVar2( interp, "sqlite_options", "malloc", "0", TCL.TCL_GLOBAL_ONLY );
 
 #if SQLITE_32BIT_ROWID
 TCL.Tcl_SetVar2( interp, "sqlite_options", "rowid32", "1", TCL.TCL_GLOBAL_ONLY );
@@ -153,6 +151,18 @@ TCL.Tcl_SetVar2(interp, "sqlite_options", "autoinc", "0", TCL.TCL_GLOBAL_ONLY);
       TCL.Tcl_SetVar2( interp, "sqlite_options", "autoinc", "1", TCL.TCL_GLOBAL_ONLY );
 #endif
 
+#if SQLITE_OMIT_AUTOMATIC_INDEX
+TCL.Tcl_SetVar2(interp, "sqlite_options", "autoindex", "0", TCL.TCL_GLOBAL_ONLY);
+#else
+      TCL.Tcl_SetVar2( interp, "sqlite_options", "autoindex", "1", TCL.TCL_GLOBAL_ONLY );
+#endif
+
+#if SQLITE_OMIT_AUTORESET
+Tcl_SetVar2(interp, "sqlite_options", "autoreset", "0", TCL_GLOBAL_ONLY);
+#else
+      TCL.Tcl_SetVar2( interp, "sqlite_options", "autoreset", "1", TCL.TCL_GLOBAL_ONLY );
+#endif
+
 #if SQLITE_OMIT_AUTOVACUUM
 TCL.Tcl_SetVar2( interp, "sqlite_options", "autovacuum", "0", TCL.TCL_GLOBAL_ONLY );
 #else
@@ -210,9 +220,9 @@ TCL.TCL_GLOBAL_ONLY);
 #endif
 
 #if SQLITE_OMIT_COMPILEOPTION_DIAGS
-  TCL.Tcl_SetVar2(interp, "sqlite_options", "compileoption_diags", "0", TCL.TCL_GLOBAL_ONLY);
+TCL.Tcl_SetVar2(interp, "sqlite_options", "compileoption_diags", "0", TCL.TCL_GLOBAL_ONLY);
 #else
-  TCL.Tcl_SetVar2(interp, "sqlite_options", "compileoption_diags", "1", TCL.TCL_GLOBAL_ONLY);
+      TCL.Tcl_SetVar2( interp, "sqlite_options", "compileoption_diags", "1", TCL.TCL_GLOBAL_ONLY );
 #endif
 
 #if SQLITE_OMIT_COMPLETE
@@ -252,9 +262,9 @@ TCL.Tcl_SetVar2(interp, "sqlite_options", "decltype", "0", TCL.TCL_GLOBAL_ONLY);
 #endif
 
 #if SQLITE_OMIT_DEPRECATED
-TCL.Tcl_SetVar2(interp, "sqlite_options", "deprecated", "0", TCL.TCL_GLOBAL_ONLY);
+      TCL.Tcl_SetVar2( interp, "sqlite_options", "deprecated", "0", TCL.TCL_GLOBAL_ONLY );
 #else
-      TCL.Tcl_SetVar2( interp, "sqlite_options", "deprecated", "1", TCL.TCL_GLOBAL_ONLY );
+TCL.Tcl_SetVar2( interp, "sqlite_options", "deprecated", "1", TCL.TCL_GLOBAL_ONLY );
 #endif
 
 #if SQLITE_OMIT_DISKIO
@@ -303,12 +313,6 @@ TCL.Tcl_SetVar2(interp, "sqlite_options", "fts3", "1", TCL.TCL_GLOBAL_ONLY);
       TCL.Tcl_SetVar2( interp, "sqlite_options", "gettable", "0", TCL.TCL_GLOBAL_ONLY );
 #else
 TCL.Tcl_SetVar2(interp, "sqlite_options", "gettable", "1", TCL.TCL_GLOBAL_ONLY);
-#endif
-
-#if SQLITE_OMIT_GLOBALRECOVER
-TCL.Tcl_SetVar2(interp, "sqlite_options", "globalrecover", "0", TCL.TCL_GLOBAL_ONLY);
-#else
-      TCL.Tcl_SetVar2( interp, "sqlite_options", "globalrecover", "1", TCL.TCL_GLOBAL_ONLY );
 #endif
 
 #if SQLITE_ENABLE_ICU
@@ -364,7 +368,7 @@ TCL.Tcl_SetVar2(interp, "sqlite_options", "lookaside", "1", TCL.TCL_GLOBAL_ONLY)
       //TCL.TCL_GLOBAL_ONLY);
 
 #if SQLITE_OMIT_MEMORYDB
-      TCL.Tcl_SetVar2(interp, "sqlite_options", "memorydb", "0", TCL.TCL_GLOBAL_ONLY);
+TCL.Tcl_SetVar2(interp, "sqlite_options", "memorydb", "0", TCL.TCL_GLOBAL_ONLY);
 #else
       TCL.Tcl_SetVar2( interp, "sqlite_options", "memorydb", "1", TCL.TCL_GLOBAL_ONLY );
 #endif
@@ -425,9 +429,9 @@ TCL.Tcl_SetVar2(interp, "sqlite_options", "schema_version", "0", TCL.TCL_GLOBAL_
 #endif
 
 #if SQLITE_ENABLE_STAT2
-  TCL.Tcl_SetVar2(interp, "sqlite_options", "stat2", "1", TCL.TCL_GLOBAL_ONLY);
+      TCL.Tcl_SetVar2( interp, "sqlite_options", "stat2", "1", TCL.TCL_GLOBAL_ONLY );
 #else
-      TCL.Tcl_SetVar2( interp, "sqlite_options", "stat2", "0", TCL.TCL_GLOBAL_ONLY );
+TCL.Tcl_SetVar2( interp, "sqlite_options", "stat2", "0", TCL.TCL_GLOBAL_ONLY );
 #endif
 
 #if !(SQLITE_ENABLE_LOCKING_STYLE)
@@ -488,7 +492,7 @@ TCL.Tcl_SetVar2(interp, "sqlite_options", "trigger", "0", TCL.TCL_GLOBAL_ONLY);
       TCL.Tcl_SetVar2( interp, "sqlite_options", "trigger", "1", TCL.TCL_GLOBAL_ONLY );
 #endif
 
-#if SQLITE_OMIT_TRUCATE_OPTIMIZATION
+#if SQLITE_OMIT_TRUNCATE_OPTIMIZATION
 TCL.Tcl_SetVar2(interp, "sqlite_options", "truncate_opt", "0", TCL.TCL_GLOBAL_ONLY);
 #else
       TCL.Tcl_SetVar2( interp, "sqlite_options", "truncate_opt", "1", TCL.TCL_GLOBAL_ONLY );
@@ -518,6 +522,12 @@ TCL.Tcl_SetVar2(interp, "sqlite_options", "view", "0", TCL.TCL_GLOBAL_ONLY);
 TCL.Tcl_SetVar2(interp, "sqlite_options", "vtab", "1", TCL.TCL_GLOBAL_ONLY);
 #endif
 
+#if SQLITE_OMIT_WAL
+      TCL.Tcl_SetVar2( interp, "sqlite_options", "wal", "0", TCL.TCL_GLOBAL_ONLY );
+#else
+TCL.Tcl_SetVar2(interp, "sqlite_options", "wal", "1", TCL.TCL_GLOBAL_ONLY);
+#endif
+
 #if SQLITE_OMIT_WSD
 TCL.Tcl_SetVar2(interp, "sqlite_options", "wsd", "0", TCL.TCL_GLOBAL_ONLY);
 #else
@@ -540,6 +550,12 @@ TCL.Tcl_SetVar2(interp, "sqlite_options", "unlock_notify", "1", TCL.TCL_GLOBAL_O
 TCL.Tcl_SetVar2(interp, "sqlite_options", "secure_delete", "1", TCL.TCL_GLOBAL_ONLY);
 #else
       TCL.Tcl_SetVar2( interp, "sqlite_options", "secure_delete", "0", TCL.TCL_GLOBAL_ONLY );
+#endif
+
+#if SQLITE_MULTIPLEX_EXT_OVWR
+TCL.Tcl_SetVar2(interp, "sqlite_options", "multiplex_ext_overwrite", "1", TCL.TCL_GLOBAL_ONLY);
+#else
+      TCL.Tcl_SetVar2( interp, "sqlite_options", "multiplex_ext_overwrite", "0", TCL.TCL_GLOBAL_ONLY );
 #endif
 
 #if YYTRACKMAXSTACKDEPTH

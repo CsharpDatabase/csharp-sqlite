@@ -17,11 +17,12 @@
 * WARRANTIES.
 *
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/commands/NamespaceCmd.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: NamespaceCmd.java,v 1.12 2001/05/05 22:38:13 mdejong Exp $
 */
 using System;
 using System.Collections;
+using System.Text;
 
 namespace tcl.lang
 {
@@ -311,7 +312,7 @@ namespace tcl.lang
 			Namespace parent;
 			Namespace globalNs = getGlobalNamespace(interp);
 			string simpleName;
-			System.Text.StringBuilder buffer1, buffer2;
+      StringBuilder buffer1, buffer2;
 			
 			// If there is no active namespace, the interpreter is being
 			// initialized. 
@@ -343,9 +344,9 @@ namespace tcl.lang
 				
 				// Java does not support passing an address so we pass
 				// an array of size 1 and then assign arr[0] to the value
-				Namespace[] parentArr = new Namespace[1];
-				Namespace[] dummyArr = new Namespace[1];
-				string[] simpleArr = new string[1];
+				var parentArr = new Namespace[1];
+				var dummyArr = new Namespace[1];
+				var simpleArr = new string[1];
 				
 				getNamespaceForQualName(interp, name, null, (TCL.VarFlag.CREATE_NS_IF_UNKNOWN | TCL.VarFlag.LEAVE_ERR_MSG), parentArr, dummyArr, dummyArr, simpleArr);
 				
@@ -425,8 +426,8 @@ namespace tcl.lang
 			
 			// Build the fully qualified name for this namespace.
 			
-			buffer1 = new System.Text.StringBuilder();
-			buffer2 = new System.Text.StringBuilder();
+			buffer1 = new StringBuilder();
+			buffer2 = new StringBuilder();
 			for (ancestor = ns; ancestor != null; ancestor = ancestor.parent)
 			{
 				if (ancestor != globalNs)
@@ -777,9 +778,9 @@ namespace tcl.lang
 			
 			// Java does not support passing an address so we pass
 			// an array of size 1 and then assign arr[0] to the value
-			Namespace[] exportNsArr = new Namespace[1];
-			Namespace[] dummyArr = new Namespace[1];
-			string[] simplePatternArr = new string[1];
+			var exportNsArr = new Namespace[1];
+			var dummyArr = new Namespace[1];
+			var simplePatternArr = new string[1];
 			
 			getNamespaceForQualName(interp, pattern, ns, TCL.VarFlag.LEAVE_ERR_MSG, exportNsArr, dummyArr, dummyArr, simplePatternArr);
 			
@@ -806,7 +807,7 @@ namespace tcl.lang
 			else if (neededElems > ns.maxExportPatterns)
 			{
 				int numNewElems = 2 * ns.maxExportPatterns;
-				string[] newArray = new string[numNewElems];
+				var newArray = new string[numNewElems];
 				Array.Copy((System.Array) ns.exportArray, 0, (System.Array) newArray, 0, ns.numExportPatterns);
 				ns.exportArray = newArray;
 				ns.maxExportPatterns = numNewElems;
@@ -926,7 +927,7 @@ namespace tcl.lang
 			
 			if (autoCmd != null)
 			{
-				TclObject[] objv = new TclObject[2];
+				var objv = new TclObject[2];
 				
 				objv[0] = TclString.newInstance("auto_import");
 				objv[0].preserve();
@@ -959,9 +960,9 @@ namespace tcl.lang
 			
 			// Java does not support passing an address so we pass
 			// an array of size 1 and then assign arr[0] to the value
-			Namespace[] importNsArr = new Namespace[1];
-			Namespace[] dummyArr = new Namespace[1];
-			string[] simplePatternArr = new string[1];
+			var importNsArr = new Namespace[1];
+			var dummyArr = new Namespace[1];
+			var simplePatternArr = new string[1];
 			
 			getNamespaceForQualName(interp, pattern, ns, TCL.VarFlag.LEAVE_ERR_MSG, importNsArr, dummyArr, dummyArr, simplePatternArr);
 			
@@ -1022,10 +1023,10 @@ namespace tcl.lang
 						// Create the imported command and its client data.
 						// To create the new command in the current namespace, 
 						// generate a fully qualified name for it.
+
+            StringBuilder ds;
 						
-						System.Text.StringBuilder ds;
-						
-						ds = new System.Text.StringBuilder();
+						ds = new StringBuilder();
 						ds.Append(ns.fullName);
 						if (ns != interp.globalNs)
 						{
@@ -1125,10 +1126,10 @@ namespace tcl.lang
 			
 			// Java does not support passing an address so we pass
 			// an array of size 1 and then assign arr[0] to the value
-			Namespace[] importNsArr = new Namespace[1];
-			Namespace[] dummyArr = new Namespace[1];
-			Namespace[] actualCtxArr = new Namespace[1];
-			string[] simplePatternArr = new string[1];
+			var importNsArr = new Namespace[1];
+			var dummyArr = new Namespace[1];
+			var actualCtxArr = new Namespace[1];
+			var simplePatternArr = new string[1];
 			
 			getNamespaceForQualName(interp, pattern, ns, TCL.VarFlag.LEAVE_ERR_MSG, importNsArr, dummyArr, actualCtxArr, simplePatternArr);
 			
@@ -1645,9 +1646,9 @@ namespace tcl.lang
 			
 			// Java does not support passing an address so we pass
 			// an array of size 1 and then assign arr[0] to the value
-			Namespace[] nsArr = new Namespace[1];
-			Namespace[] dummy1Arr = new Namespace[1];
-			string[] dummy2Arr = new string[1];
+			var nsArr = new Namespace[1];
+			var dummy1Arr = new Namespace[1];
+			var dummy2Arr = new string[1];
 			
 			// Find the namespace(s) that contain the specified namespace name.
 			// Add the TCL.VarFlag.FIND_ONLY_NS flag to resolve the name all the way down
@@ -1701,7 +1702,7 @@ namespace tcl.lang
 		{
 			Interp.ResolverScheme res;
 			Namespace cxtNs;
-			Namespace[] ns = new Namespace[2];
+			var ns = new Namespace[2];
 			string simpleName;
 			int search;
 			//int result;
@@ -1762,10 +1763,10 @@ namespace tcl.lang
 			
 			// Java does not support passing an address so we pass
 			// an array of size 1 and then assign arr[0] to the value
-			Namespace[] ns0Arr = new Namespace[1];
-			Namespace[] ns1Arr = new Namespace[1];
-			Namespace[] cxtNsArr = new Namespace[1];
-			string[] simpleNameArr = new string[1];
+			var ns0Arr = new Namespace[1];
+			var ns1Arr = new Namespace[1];
+			var cxtNsArr = new Namespace[1];
+			var simpleNameArr = new string[1];
 			
 			
 			// Find the namespace(s) that contain the command.
@@ -1831,7 +1832,7 @@ namespace tcl.lang
 		{
 			Interp.ResolverScheme res;
 			Namespace cxtNs;
-			Namespace[] ns = new Namespace[2];
+			var ns = new Namespace[2];
 			string simpleName;
 			int search;
 			//int result;
@@ -1891,10 +1892,10 @@ namespace tcl.lang
 			
 			// Java does not support passing an address so we pass
 			// an array of size 1 and then assign arr[0] to the value
-			Namespace[] ns0Arr = new Namespace[1];
-			Namespace[] ns1Arr = new Namespace[1];
-			Namespace[] cxtNsArr = new Namespace[1];
-			string[] simpleNameArr = new string[1];
+			var ns0Arr = new Namespace[1];
+			var ns1Arr = new Namespace[1];
+			var cxtNsArr = new Namespace[1];
+			var simpleNameArr = new string[1];
 			
 			
 			// Find the namespace(s) that contain the variable.
@@ -2123,8 +2124,8 @@ namespace tcl.lang
 		*  This method's side effects depend on whatever that subcommand does.
 		*----------------------------------------------------------------------
 		*/
-		
-		private static readonly string[] validCmds = new string[]{"children", "code", "current", "delete", "eval", "export", "forget", "import", "inscope", "origin", "parent", "qualifiers", "tail", "which"};
+
+    private static readonly string[] validCmds = new string[] { "children", "code", "current", "delete", "eval", "export", "forget", "import", "inscope", "origin", "parent", "qualifiers", "tail", "which" };
 		
 		private const int OPT_CHILDREN = 0;
 		private const int OPT_CODE = 1;
@@ -2258,7 +2259,7 @@ namespace tcl.lang
 			Namespace ns;
 			Namespace globalNs = getGlobalNamespace(interp);
 			string pattern = null;
-			System.Text.StringBuilder buffer;
+      StringBuilder buffer;
 			IEnumerator search;
 			TclObject list, elem;
 			
@@ -2284,7 +2285,7 @@ namespace tcl.lang
 			
 			// Get the glob-style pattern, if any, used to narrow the search.
 			
-			buffer = new System.Text.StringBuilder();
+			buffer = new StringBuilder();
 			if (objv.Length == 4)
 			{
 				
@@ -2938,7 +2939,7 @@ namespace tcl.lang
 				}
 				else
 				{
-					TclObject[] concatObjv = new TclObject[2];
+					var concatObjv = new TclObject[2];
 					TclObject list;
 					string cmd;
 					
@@ -3439,9 +3440,9 @@ namespace tcl.lang
 			
 			// Java does not support passing an address so we pass
 			// an array of size 1 and then assign arr[0] to the value
-			Namespace[] nsArr = new Namespace[1];
-			Namespace[] dummy1Arr = new Namespace[1];
-			string[] dummy2Arr = new string[1];
+			var nsArr = new Namespace[1];
+			var dummy1Arr = new Namespace[1];
+			var dummy2Arr = new string[1];
 			
 			// Get the string representation.
 			
@@ -3483,7 +3484,7 @@ namespace tcl.lang
 			// this is confusing because it seems like the C code uses
 			// a ResolvedNsName like it is the InternalRep.
 			
-			NamespaceCmd wrap = new NamespaceCmd();
+			var wrap = new NamespaceCmd();
 			wrap.otherValue = resName;
 			tobj.InternalRep = wrap;
 			

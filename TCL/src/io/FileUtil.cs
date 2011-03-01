@@ -11,11 +11,12 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/io/FileUtil.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: FileUtil.java,v 1.6 2003/02/02 00:59:16 mdejong Exp $
 *
 */
 using System;
+using System.Text;
 namespace tcl.lang
 {
 	
@@ -54,8 +55,8 @@ namespace tcl.lang
 		*
 		*-----------------------------------------------------------------------------
 		*/
-		
-		private static int getWinHomePath(string path, bool stopEarly, System.Text.StringBuilder absBuf)
+
+    private static int getWinHomePath( string path, bool stopEarly, StringBuilder absBuf )
 		// Buffer to store side effect.
 		{
 			int pIndex, oldIndex, firstNonSlash;
@@ -154,7 +155,7 @@ namespace tcl.lang
 			}
 			return 0;
 		}
-		private static int getWinAbsPath(string path, System.Text.StringBuilder absBuf)
+    private static int getWinAbsPath( string path, StringBuilder absBuf )
 		// Buffer to store side effect.
 		{
 			absBuf.Length = 0;
@@ -276,7 +277,7 @@ namespace tcl.lang
 					}
 					if (c == '/')
 					{
-						System.Text.StringBuilder absBuf = new System.Text.StringBuilder(0);
+						var absBuf = new StringBuilder(0);
 						if (getWinHomePath(path, true, absBuf) > 0)
 						{
 							return PATH_ABSOLUTE;
@@ -362,7 +363,7 @@ namespace tcl.lang
 					
 					// We can not use the joinPath() method because joing("D:/", "/f.txt")
 					// returns "/f.txt" for some wacky reason. Just do it ourselves.
-					System.Text.StringBuilder buff = new System.Text.StringBuilder();
+					var buff = new StringBuilder();
 					buff.Append(cwd.Substring(0, (2) - (0)));
 					buff.Append('\\');
 					for (int i = 0; i < fileName.Length; i++)
@@ -391,7 +392,7 @@ namespace tcl.lang
 				
 			}
 		}
-		private static void  appendComponent(string component, int compIndex, int compSize, System.Text.StringBuilder buf)
+    private static void appendComponent( string component, int compIndex, int compSize, StringBuilder buf )
 		// Buffer to append the component.
 		{
 			for (; compIndex < component.Length; compIndex++)
@@ -423,7 +424,7 @@ namespace tcl.lang
 		}
 		internal static string joinPath(Interp interp, TclObject[] argv, int startIndex, int endIndex)
 		{
-			System.Text.StringBuilder result = new System.Text.StringBuilder(10);
+			var result = new StringBuilder(10);
 			
 			switch (JACL.PLATFORM)
 			{
@@ -443,7 +444,7 @@ namespace tcl.lang
 							continue;
 						}
 						
-						System.Text.StringBuilder absBuf = new System.Text.StringBuilder(0);
+						var absBuf = new StringBuilder(0);
 						pIndex = getWinAbsPath(p, absBuf);
 						if (pIndex > 0)
 						{
@@ -668,7 +669,7 @@ namespace tcl.lang
 				case JACL.PLATFORM_WINDOWS: 
 					tmpPath = path.Replace('\\', '/');
 					
-					System.Text.StringBuilder absBuf = new System.Text.StringBuilder(0);
+					var absBuf = new StringBuilder(0);
 					int absIndex = getWinAbsPath(tmpPath, absBuf);
 					if (absIndex > 0)
 					{
@@ -904,7 +905,7 @@ namespace tcl.lang
 			if ((path.Length == 0) || (path[0] != '~'))
 			{
 				// 	    fileName = path;
-				TclObject[] joinArrayObj = new TclObject[1];
+				var joinArrayObj = new TclObject[1];
 				joinArrayObj[0] = TclString.newInstance(path);
 				fileName = joinPath(interp, joinArrayObj, 0, 1);
 			}

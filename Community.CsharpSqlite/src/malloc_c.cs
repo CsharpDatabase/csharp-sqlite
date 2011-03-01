@@ -28,63 +28,13 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2009-12-07 16:39:13 1ed88e9d01e9eda5cbc622e7614277f29bcc551c
+    **  SQLITE_SOURCE_ID: 2011-01-28 17:03:50 ed759d5a9edb3bba5f48f243df47be29e3fe8cd7
     **
     **  $Header$
     *************************************************************************
     */
     //#include "sqliteInt.h"
     //#include <stdarg.h>
-
-    /*
-    ** This routine runs when the memory allocator sees that the
-    ** total memory allocation is about to exceed the soft heap
-    ** limit.
-    */
-
-    static void softHeapLimitEnforcer(
-      object NotUsed,
-      sqlite3_int64 NotUsed2,
-      int allocSize
-    )
-    {
-      UNUSED_PARAMETER2( NotUsed, NotUsed2 );
-      sqlite3_release_memory( allocSize );
-    }
-
-    /*
-    ** Set the soft heap-size limit for the library. Passing a zero or 
-    ** negative value indicates no limit.
-    */
-    void sqlite3_soft_heap_limit( int n )
-    {
-      int iLimit;
-      int overage;
-      if ( n < 0 )
-      {
-        iLimit = 0;
-      }
-      else
-      {
-        iLimit = n;
-      }
-#if !SQLITE_OMIT_AUTOINIT
-      sqlite3_initialize();
-#endif
-      if ( iLimit > 0 )
-      {
-        sqlite3MemoryAlarm( softHeapLimitEnforcer, 0, iLimit );
-      }
-      else
-      {
-        sqlite3MemoryAlarm( null, null, 0 );
-      }
-      overage = (int)( sqlite3_memory_used() - (i64)n );
-      if ( overage > 0 )
-      {
-        sqlite3_release_memory( overage );
-      }
-    }
 
     /*
     ** Attempt to release up to n bytes of non-essential memory currently
@@ -94,9 +44,9 @@ namespace Community.CsharpSqlite
     static int sqlite3_release_memory( int n )
     {
 #if SQLITE_ENABLE_MEMORY_MANAGEMENT
-  int nRet = 0;
-  nRet += sqlite3PcacheReleaseMemory(n-nRet);
-  return nRet;
+int nRet = 0;
+nRet += sqlite3PcacheReleaseMemory(n-nRet);
+return nRet;
 #else
       UNUSED_PARAMETER( n );
       return SQLITE_OK;
@@ -129,6 +79,13 @@ namespace Community.CsharpSqlite
       ** sqlite3GlobalConfig.pPage to a block of memory that records
       ** which pages are available.
       */
+      //u32 *aScratchFree;
+      /*
+      ** True if heap is nearly "full" where "full" is defined by the
+      ** sqlite3_soft_heap_limit() setting.
+      */
+      public bool nearlyFull;
+
       public byte[][][] aByte;
       public int[] aByteSize;
       public int[] aByte_used;
@@ -166,16 +123,83 @@ namespace Community.CsharpSqlite
         this.aByteSize = new int[] { 32, 256, 1024, 8192, 0 };
         this.aByte_used = new int[] { -1, -1, -1, -1, -1 };
         this.aByte = new byte[this.aByteSize.Length][][];
-        for ( int i = 0; i < this.aByteSize.Length; i++ ) this.aByte[i] = new byte[Byte_Allocation][];
+        for ( int i = 0; i < this.aByteSize.Length; i++ )
+          this.aByte[i] = new byte[Byte_Allocation][];
         this.aInt = new int[Int_Allocation][];
         this.aMem = new Mem[Mem_Allocation <= 4 ? 4 : Mem_Allocation];
         this.aBtCursor = new BtCursor[BtCursor_Allocation <= 4 ? 4 : BtCursor_Allocation];
+        this.nearlyFull = false;
       }
     }
     //mem0 = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
     //#define mem0 GLOBAL(struct Mem0Global, mem0)
-    static Mem0Global mem0 = new Mem0Global( );
+    static Mem0Global mem0 = new Mem0Global();
+
+    /*
+    ** This routine runs when the memory allocator sees that the
+    ** total memory allocation is about to exceed the soft heap
+    ** limit.
+    */
+    static void softHeapLimitEnforcer(
+    object NotUsed,
+    sqlite3_int64 NotUsed2,
+    int allocSize
+    )
+    {
+      UNUSED_PARAMETER2( NotUsed, NotUsed2 );
+      sqlite3_release_memory( allocSize );
+    }
+
+#if !SQLITE_OMIT_DEPRECATED
+/*
+** Deprecated external interface.  Internal/core SQLite code
+** should call sqlite3MemoryAlarm.
+*/
+int sqlite3_memory_alarm(
+void(*xCallback)(void *pArg, sqlite3_int64 used,int N),
+void *pArg,
+sqlite3_int64 iThreshold
+){
+return sqlite3MemoryAlarm(xCallback, pArg, iThreshold);
+}
+#endif
+
+    /*
+** Set the soft heap-size limit for the library. Passing a zero or 
+** negative value indicates no limit.
+*/
+    static sqlite3_int64 sqlite3_soft_heap_limit64( sqlite3_int64 n )
+    {
+      sqlite3_int64 priorLimit;
+      sqlite3_int64 excess;
+#if !SQLITE_OMIT_AUTOINIT
+      sqlite3_initialize();
+#endif
+      sqlite3_mutex_enter( mem0.mutex );
+      priorLimit = mem0.alarmThreshold;
+      sqlite3_mutex_leave( mem0.mutex );
+      if ( n < 0 )
+        return priorLimit;
+      if ( n > 0 )
+      {
+        sqlite3MemoryAlarm( softHeapLimitEnforcer, 0, n );
+      }
+      else
+      {
+        sqlite3MemoryAlarm( null, 0, 0 );
+      }
+      excess = sqlite3_memory_used() - n;
+      if ( excess > 0 )
+        sqlite3_release_memory( (int)( excess & 0x7fffffff ) );
+      return priorLimit;
+    }
+    void sqlite3_soft_heap_limit( int n )
+    {
+      if ( n < 0 )
+        n = 0;
+      sqlite3_soft_heap_limit64( n );
+    }
 
     /*
     ** Initialize the memory allocation subsystem.
@@ -186,13 +210,13 @@ namespace Community.CsharpSqlite
       {
         sqlite3MemSetDefault();
       }
-      mem0 = new Mem0Global(0, 0, null, 0, null, null, 1, 1, 8, 8);  //memset(&mem0, 0, sizeof(mem0));
+      mem0 = new Mem0Global( 0, 0, null, 0, null, null, 1, 1, 8, 8 );  //memset(&mem0, 0, sizeof(mem0));
       if ( sqlite3GlobalConfig.bCoreMutex )
       {
         mem0.mutex = sqlite3MutexAlloc( SQLITE_MUTEX_STATIC_MEM );
       }
       if ( sqlite3GlobalConfig.pScratch != null && sqlite3GlobalConfig.szScratch >= 100
-          && sqlite3GlobalConfig.nScratch >= 0 )
+      && sqlite3GlobalConfig.nScratch >= 0 )
       {
         int i;
         sqlite3GlobalConfig.szScratch = ROUNDDOWN8( sqlite3GlobalConfig.szScratch - 4 );
@@ -206,26 +230,24 @@ namespace Community.CsharpSqlite
         sqlite3GlobalConfig.pScratch = null;
         sqlite3GlobalConfig.szScratch = 0;
       }
-      if ( sqlite3GlobalConfig.pPage != null && sqlite3GlobalConfig.szPage >= 512
-          && sqlite3GlobalConfig.nPage >= 1 )
-      {
-        int i;
-        int overhead;
-        int sz = ROUNDDOWN8( sqlite3GlobalConfig.szPage );
-        int n = sqlite3GlobalConfig.nPage;
-        overhead = ( 4 * n + sz - 1 ) / sz;
-        sqlite3GlobalConfig.nPage -= overhead;
-        //mem0.aPageFree = (u32*)&((char*)sqlite3GlobalConfig.pPage)
-        //[sqlite3GlobalConfig.szPage*sqlite3GlobalConfig.nPage];
-        //for(i=0; i<sqlite3GlobalConfig.nPage; i++){ mem0.aPageFree[i] = i; }
-        //mem0.nPageFree = sqlite3GlobalConfig.nPage;
-      }
-      else
+      if ( sqlite3GlobalConfig.pPage == null || sqlite3GlobalConfig.szPage < 512
+      || sqlite3GlobalConfig.nPage < 1 )
       {
         sqlite3GlobalConfig.pPage = null;
+        sqlite3GlobalConfig.szPage = 0;
         sqlite3GlobalConfig.nPage = 0;
       }
       return sqlite3GlobalConfig.m.xInit( sqlite3GlobalConfig.m.pAppData );
+    }
+
+    /*
+    ** Return true if the heap is currently under memory pressure - in other
+    ** words if the amount of heap used is close to the limit set by
+    ** sqlite3_soft_heap_limit().
+    */
+    static bool sqlite3HeapNearlyFull()
+    {
+      return mem0.nearlyFull;
     }
 
     /*
@@ -270,15 +292,18 @@ namespace Community.CsharpSqlite
     ** Change the alarm callback
     */
     static int sqlite3MemoryAlarm(
-        dxalarmCallback xCallback, //void(*xCallback)(void pArg, sqlite3_int64 used,int N),
-        object pArg,
-      sqlite3_int64 iThreshold
+    dxalarmCallback xCallback, //void(*xCallback)(void pArg, sqlite3_int64 used,int N),
+    object pArg,
+    sqlite3_int64 iThreshold
     )
     {
+      int nUsed;
       sqlite3_mutex_enter( mem0.mutex );
       mem0.alarmCallback = xCallback;
       mem0.alarmArg = pArg;
       mem0.alarmThreshold = iThreshold;
+      nUsed = sqlite3StatusValue( SQLITE_STATUS_MEMORY_USED );
+      mem0.nearlyFull = ( iThreshold > 0 && iThreshold <= nUsed );
       sqlite3_mutex_leave( mem0.mutex );
       return SQLITE_OK;
     }
@@ -291,7 +316,8 @@ namespace Community.CsharpSqlite
       dxalarmCallback xCallback;//void (*xCallback)(void*,sqlite3_int64,int);
       sqlite3_int64 nowUsed;
       object pArg;// void* pArg;
-      if ( mem0.alarmCallback == null ) return;
+      if ( mem0.alarmCallback == null )
+        return;
       xCallback = mem0.alarmCallback;
       nowUsed = sqlite3StatusValue( SQLITE_STATUS_MEMORY_USED );
       pArg = mem0.alarmArg;
@@ -319,14 +345,21 @@ namespace Community.CsharpSqlite
         int nUsed = sqlite3StatusValue( SQLITE_STATUS_MEMORY_USED );
         if ( nUsed + nFull >= mem0.alarmThreshold )
         {
+          mem0.nearlyFull = true;
           sqlite3MallocAlarm( nFull );
+        }
+        else
+        {
+          mem0.nearlyFull = false;
         }
       }
       p = sqlite3GlobalConfig.m.xMallocInt( nFull );
-      //if( p==null && mem0.alarmCallback!=null ){
-      //  sqlite3MallocAlarm(nFull);
-      //  p = sqlite3GlobalConfig.m.xMalloc(nFull);
-      //}
+#if SQLITE_ENABLE_MEMORY_MANAGEMENT
+if( p==null && mem0.alarmCallback!=null ){
+sqlite3MallocAlarm(nFull);
+p = sqlite3GlobalConfig.m.xMalloc(nFull);
+}
+#endif
       if ( p != null )
       {
         nFull = sqlite3MallocSize( p );
@@ -360,6 +393,7 @@ namespace Community.CsharpSqlite
       {
         nFull = sqlite3MallocSize( p );
         sqlite3StatusAdd( SQLITE_STATUS_MEMORY_USED, nFull );
+        sqlite3StatusAdd( SQLITE_STATUS_MALLOC_COUNT, 1 );
       }
       pp = p;
       return nFull;
@@ -373,6 +407,9 @@ namespace Community.CsharpSqlite
     {
       return sqlite3GlobalConfig.m.xMallocMem( pMem );
     }
+    static int[] sqlite3Malloc( int[] pInt, u32 n )
+    { return sqlite3Malloc( pInt, (int)n ); }
+
     static int[] sqlite3Malloc( int[] pInt, int n )
     {
       int[] p = null;
@@ -396,6 +433,11 @@ namespace Community.CsharpSqlite
         p = sqlite3GlobalConfig.m.xMallocInt( n );
       }
       return p;
+    }
+
+    static byte[] sqlite3Malloc( u32 n )
+    {
+      return sqlite3Malloc( (int)n );
     }
     static byte[] sqlite3Malloc( int n )
     {
@@ -430,7 +472,8 @@ namespace Community.CsharpSqlite
     static byte[] sqlite3_malloc( int n )
     {
 #if !SQLITE_OMIT_AUTOINIT
-      if ( sqlite3_initialize() != 0 ) return null;
+      if ( sqlite3_initialize() != 0 )
+        return null;
 #endif
       return sqlite3Malloc( n );
     }
@@ -457,8 +500,10 @@ static int scratchAllocOut = 0;
     static byte[][] sqlite3ScratchMalloc( byte[][] apCell, int n )
     {
       apCell = sqlite3GlobalConfig.pScratch2;
-      if ( apCell == null ) apCell = new byte[n < 200 ? 200 : n][];
-      else if ( apCell.Length < n ) Array.Resize( ref apCell, n );
+      if ( apCell == null )
+        apCell = new byte[n < 200 ? 200 : n][];
+      else if ( apCell.Length < n )
+        Array.Resize( ref apCell, n );
       sqlite3GlobalConfig.pScratch2 = null;
       return apCell;
     }
@@ -469,11 +514,11 @@ static int scratchAllocOut = 0;
       Debug.Assert( n > 0 );
 
 #if SQLITE_THREADSAFE && !(NDEBUG)
-  /* Verify that no more than one scratch allocation per thread
-  ** is outstanding at one time.  (This is only checked in the
-  ** single-threaded case since checking in the multi-threaded case
-  ** would be much more complicated.) */
-  assert( scratchAllocOut==0 );
+      /* Verify that no more than two scratch allocation per thread
+** is outstanding at one time.  (This is only checked in the
+** single-threaded case since checking in the multi-threaded case
+** would be much more complicated.) */
+      Debug.Assert( scratchAllocOut <= 1 );
 #endif
 
       if ( sqlite3GlobalConfig.szScratch < n )
@@ -495,39 +540,43 @@ static int scratchAllocOut = 0;
           //i *= sqlite3GlobalConfig.szScratch;
           for ( i = 0; i < sqlite3GlobalConfig.pScratch.Length; i++ )
           {
-            if ( sqlite3GlobalConfig.pScratch[i] == null || sqlite3GlobalConfig.pScratch[i].Length < n ) continue;
+            if ( sqlite3GlobalConfig.pScratch[i] == null || sqlite3GlobalConfig.pScratch[i].Length < n )
+              continue;
             p = sqlite3GlobalConfig.pScratch[i];// (void*)&((char*)sqlite3GlobalConfig.pScratch)[i];
             sqlite3GlobalConfig.pScratch[i] = null;
             break;
           }
           sqlite3_mutex_leave( mem0.mutex );
-          if ( p == null ) goto scratch_overflow;
+          if ( p == null )
+            goto scratch_overflow;
           sqlite3StatusAdd( SQLITE_STATUS_SCRATCH_USED, 1 );
           sqlite3StatusSet( SQLITE_STATUS_SCRATCH_SIZE, n );
           //assert(  (((u8*)p - (u8*)0) & 7)==0 );
         }
       }
 #if SQLITE_THREADSAFE && !(NDEBUG)
-  scratchAllocOut = p!=0;
+      scratchAllocOut = ( p != null ? 1 : 0 );
 #endif
 
       return p;
 
-    scratch_overflow:
+scratch_overflow:
       if ( sqlite3GlobalConfig.bMemstat )
       {
         sqlite3_mutex_enter( mem0.mutex );
         sqlite3StatusSet( SQLITE_STATUS_SCRATCH_SIZE, n );
         n = mallocWithAlarm( n, ref p );
-        if ( p != null ) sqlite3StatusAdd( SQLITE_STATUS_SCRATCH_OVERFLOW, n );
+        if ( p != null )
+          sqlite3StatusAdd( SQLITE_STATUS_SCRATCH_OVERFLOW, n );
         sqlite3_mutex_leave( mem0.mutex );
       }
       else
       {
         p = sqlite3GlobalConfig.m.xMalloc( n );
       }
+      sqlite3MemdebugSetType( p, MEMTYPE_SCRATCH );
 #if SQLITE_THREADSAFE && !(NDEBUG)
-  scratchAllocOut = p!=0;
+      scratchAllocOut = (p != null) ? 1 : 0;
 #endif
       return p;
     }
@@ -536,23 +585,18 @@ static int scratchAllocOut = 0;
       if ( p != null )
       {
 
-#if SQLITE_THREADSAFE && !(NDEBUG)
-    /* Verify that no more than one scratch allocation per thread
-    ** is outstanding at one time.  (This is only checked in the
-    ** single-threaded case since checking in the multi-threaded case
-    ** would be much more complicated.) */
-    assert( scratchAllocOut==1 );
-    scratchAllocOut = 0;
-#endif
-
         if ( sqlite3GlobalConfig.pScratch2 == null || sqlite3GlobalConfig.pScratch2.Length < p.Length )
         {
+          Debug.Assert( sqlite3MemdebugHasType( p, MEMTYPE_SCRATCH ) );
+          Debug.Assert( sqlite3MemdebugNoType( p, ~MEMTYPE_SCRATCH ) );
+          sqlite3MemdebugSetType( p, MEMTYPE_HEAP );
           if ( sqlite3GlobalConfig.bMemstat )
           {
             int iSize = sqlite3MallocSize( p );
             sqlite3_mutex_enter( mem0.mutex );
             sqlite3StatusAdd( SQLITE_STATUS_SCRATCH_OVERFLOW, -iSize );
             sqlite3StatusAdd( SQLITE_STATUS_MEMORY_USED, -iSize );
+            sqlite3StatusAdd( SQLITE_STATUS_MALLOC_COUNT, -1 );
             sqlite3GlobalConfig.pScratch2 = p;// sqlite3GlobalConfig.m.xFree(ref p);
             sqlite3_mutex_leave( mem0.mutex );
           }
@@ -572,6 +616,14 @@ static int scratchAllocOut = 0;
           //mem0.aScratchFree[mem0.nScratchFree++] = i;
           //sqlite3StatusAdd(SQLITE_STATUS_SCRATCH_USED, -1);
           //sqlite3_mutex_leave(mem0.mutex);
+#if SQLITE_THREADSAFE && !(NDEBUG)
+/* Verify that no more than two scratch allocation per thread
+** is outstanding at one time.  (This is only checked in the
+** single-threaded case since checking in the multi-threaded case
+** would be much more complicated.) */
+          Debug.Assert( scratchAllocOut >= 1 && scratchAllocOut <= 2 );
+          scratchAllocOut = 0;
+#endif
         }
         p = null;
       }
@@ -582,7 +634,7 @@ static int scratchAllocOut = 0;
     */
 #if !SQLITE_OMIT_LOOKASIDE
 static int isLookaside(sqlite3 *db, void *p){
-  return db && p && p>=db->lookaside.pStart && p<db->lookaside.pEnd;
+return p && p>=db.lookaside.pStart && p<db.lookaside.pEnd;
 }
 #else
     //#define isLookaside(A,B) 0
@@ -596,6 +648,12 @@ static int isLookaside(sqlite3 *db, void *p){
 ** Return the size of a memory allocation previously obtained from
 ** sqlite3Malloc() or sqlite3_malloc().
 */
+    //int sqlite3MallocSize(void* p)
+    //{
+    //  assert(sqlite3MemdebugHasType(p, MEMTYPE_HEAP));
+    //  assert( sqlite3MemdebugNoType(p, MEMTYPE_DB) );
+    //  return sqlite3GlobalConfig.m.xSize(p);
+    //}
     static int sqlite3MallocSize( byte[][] p )
     {
       return p.Length * p[0].Length;
@@ -614,12 +672,15 @@ static int isLookaside(sqlite3 *db, void *p){
     static int sqlite3DbMallocSize( sqlite3 db, byte[] p )
     {
       Debug.Assert( db == null || sqlite3_mutex_held( db.mutex ) );
-      if ( isLookaside( db, p ) )
+      if ( db != null && isLookaside( db, p ) )
       {
         return db.lookaside.sz;
       }
       else
       {
+        Debug.Assert( sqlite3MemdebugHasType( p, MEMTYPE_DB ) );
+        Debug.Assert( sqlite3MemdebugHasType( p, MEMTYPE_LOOKASIDE | MEMTYPE_HEAP ) );
+        Debug.Assert( db != null || sqlite3MemdebugNoType( p, MEMTYPE_LOOKASIDE ) );
         return sqlite3GlobalConfig.m.xSize( p );
       }
     }
@@ -629,11 +690,15 @@ static int isLookaside(sqlite3 *db, void *p){
     */
     static void sqlite3_free( ref byte[] p )
     {
-      if ( p == null ) return;
+      if ( p == null )
+        return;
+      Debug.Assert( sqlite3MemdebugNoType( p, MEMTYPE_DB ) );
+      Debug.Assert( sqlite3MemdebugHasType( p, MEMTYPE_HEAP ) );
       if ( sqlite3GlobalConfig.bMemstat )
       {
         sqlite3_mutex_enter( mem0.mutex );
         sqlite3StatusAdd( SQLITE_STATUS_MEMORY_USED, -sqlite3MallocSize( p ) );
+        sqlite3StatusAdd( SQLITE_STATUS_MALLOC_COUNT, -1 );
         sqlite3GlobalConfig.m.xFree( ref p );
         sqlite3_mutex_leave( mem0.mutex );
       }
@@ -645,7 +710,8 @@ static int isLookaside(sqlite3 *db, void *p){
     }
     static void sqlite3_free( ref Mem p )
     {
-      if ( p == null ) return;
+      if ( p == null )
+        return;
       if ( sqlite3GlobalConfig.bMemstat )
       {
         sqlite3_mutex_enter( mem0.mutex );
@@ -667,16 +733,32 @@ static int isLookaside(sqlite3 *db, void *p){
     static void sqlite3DbFree( sqlite3 db, ref byte[] p )
     {
       Debug.Assert( db == null || sqlite3_mutex_held( db.mutex ) );
-#if !SQLITE_OMIT_LOOKASIDE
-  if( isLookaside(db, p) ){
-  LookasideSlot *pBuf = (LookasideSlot*)p;
-    pBuf.pNext = db.lookaside.pFree;
-    db.lookaside.pFree = pBuf;
-    db.lookaside.nOut--;
-  }else
-#endif
+      if ( db != null )
       {
-        sqlite3_free( ref p );
+        //if ( db.pnBytesFreed != 0 )
+        //{
+#if SQLITE_OMIT_LOOKASIDE
+        //db.pnBytesFreed += 1;
+#else
+db.pnBytesFreed += sqlite3DbMallocSize( db, p );
+#endif
+        return;
+        //}
+#if !SQLITE_OMIT_LOOKASIDE
+if( isLookaside(db, p) ){
+LookasideSlot *pBuf = (LookasideSlot*)p;
+pBuf.pNext = db.lookaside.pFree;
+db.lookaside.pFree = pBuf;
+db.lookaside.nOut--;
+}else
+#endif
+        {
+          Debug.Assert( sqlite3MemdebugHasType( p, MEMTYPE_DB ) );
+          Debug.Assert( sqlite3MemdebugHasType( p, MEMTYPE_LOOKASIDE | MEMTYPE_HEAP ) );
+          Debug.Assert( db != null || sqlite3MemdebugNoType( p, MEMTYPE_LOOKASIDE ) );
+          sqlite3MemdebugSetType( p, MEMTYPE_HEAP );
+          sqlite3_free( ref p );
+        }
       }
     }
 
@@ -713,10 +795,12 @@ static int isLookaside(sqlite3 *db, void *p){
         sqlite3_mutex_enter( mem0.mutex );
         sqlite3StatusSet( SQLITE_STATUS_MALLOC_SIZE, nBytes );
         if ( sqlite3StatusValue( SQLITE_STATUS_MEMORY_USED ) + nNew - nOld >=
-              mem0.alarmThreshold )
+        mem0.alarmThreshold )
         {
           sqlite3MallocAlarm( nNew - nOld );
         }
+        Debug.Assert( sqlite3MemdebugHasType( pOld, MEMTYPE_HEAP ) );
+        Debug.Assert( sqlite3MemdebugNoType( pOld, ~MEMTYPE_HEAP ) );
         pNew = sqlite3GlobalConfig.m.xRealloc( pOld, nNew );
         if ( pNew == null && mem0.alarmCallback != null )
         {
@@ -744,7 +828,8 @@ static int isLookaside(sqlite3 *db, void *p){
     static byte[] sqlite3_realloc( byte[] pOld, int n )
     {
 #if !SQLITE_OMIT_AUTOINIT
-      if ( sqlite3_initialize() != 0 ) return null;
+      if ( sqlite3_initialize() != 0 )
+        return null;
 #endif
       return sqlite3Realloc( pOld, n );
     }
@@ -804,22 +889,29 @@ static int isLookaside(sqlite3 *db, void *p){
     {
       byte[] p;
       Debug.Assert( db == null || sqlite3_mutex_held( db.mutex ) );
+      Debug.Assert( db == null || db.pnBytesFreed == 0 );
 #if !SQLITE_OMIT_LOOKASIDE
-  if( db ){
-    LookasideSlot *pBuf;
-    if( db->mallocFailed ){
-      return 0;
-    }
-    if( db->lookaside.bEnabled && n<=db->lookaside.sz
-         && (pBuf = db->lookaside.pFree)!=0 ){
-      db->lookaside.pFree = pBuf->pNext;
-      db->lookaside.nOut++;
-      if( db->lookaside.nOut>db->lookaside.mxOut ){
-        db->lookaside.mxOut = db->lookaside.nOut;
-      }
-      return (void*)pBuf;
-    }
-  }
+if( db ){
+LookasideSlot *pBuf;
+if( db->mallocFailed ){
+return 0;
+}
+if( db->lookaside.bEnabled ){
+if( n>db->lookaside.sz ){
+db->lookaside.anStat[1]++;
+}else if( (pBuf = db->lookaside.pFree)==0 ){
+db->lookaside.anStat[2]++;
+}else{
+db->lookaside.pFree = pBuf->pNext;
+db->lookaside.nOut++;
+db->lookaside.anStat[0]++;
+if( db->lookaside.nOut>db->lookaside.mxOut ){
+db->lookaside.mxOut = db->lookaside.nOut;
+}
+return (void*)pBuf;
+}
+}
+}
 #else
       //if( db && db->mallocFailed ){
       //  return 0;
@@ -829,6 +921,10 @@ static int isLookaside(sqlite3 *db, void *p){
       //if( !p && db ){
       //  db->mallocFailed = 1;
       //}
+#if !SQLITE_OMIT_LOOKASIDE
+sqlite3MemdebugSetType(p, MEMTYPE_DB |
+((db !=null && db.lookaside.bEnabled) ? MEMTYPE_LOOKASIDE : MEMTYPE_HEAP));
+#endif
       return p;
     }
 
@@ -847,24 +943,32 @@ static int isLookaside(sqlite3 *db, void *p){
         return sqlite3DbMallocRaw( db, n );
       }
 #if !SQLITE_OMIT_LOOKASIDE
-    if( isLookaside(db, p) ){
-      if( n<=db->lookaside.sz ){
-        return p;
-      }
-      pNew = sqlite3DbMallocRaw(db, n);
-      if( pNew ){
-        memcpy(pNew, p, db->lookaside.sz);
-        sqlite3DbFree(db, ref p);
-      }
-    }else
+if( isLookaside(db, p) ){
+if( n<=db->lookaside.sz ){
+return p;
+}
+pNew = sqlite3DbMallocRaw(db, n);
+if( pNew ){
+memcpy(pNew, p, db->lookaside.sz);
+sqlite3DbFree(db, ref p);
+}
+}else
 #else
       {
         {
 #endif
+          Debug.Assert( sqlite3MemdebugHasType( p, MEMTYPE_DB ) );
+          Debug.Assert( sqlite3MemdebugHasType( p, MEMTYPE_LOOKASIDE | MEMTYPE_HEAP ) );
+          sqlite3MemdebugSetType( p, MEMTYPE_HEAP );
           pNew = sqlite3_realloc( p, n );
           //if( !pNew ){
+          //sqlite3MemdebugSetType(p, MEMTYPE_DB|MEMTYPE_HEAP);
           //  db->mallocFailed = 1;
           //}
+#if !SQLITE_OMIT_LOOKASIDE
+sqlite3MemdebugSetType(pNew, MEMTYPE_DB | 
+(db.lookaside.bEnabled ? MEMTYPE_LOOKASIDE : MEMTYPE_HEAP));
+#endif
         }
       }
       return pNew;

@@ -15,10 +15,10 @@
 * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 *
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/base/TclToken.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: TclToken.java,v 1.2 1999/05/09 01:34:50 dejong Exp $
 */
-using System;
+using System.Text;
 namespace tcl.lang
 {
 	
@@ -81,7 +81,7 @@ namespace tcl.lang
 		}
 		public override string ToString()
 		{
-			System.Text.StringBuilder sbuf = new System.Text.StringBuilder();
+      var sbuf = new StringBuilder();
 			switch (type)
 			{
 				

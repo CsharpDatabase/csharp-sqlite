@@ -8,7 +8,7 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/commands/SeekCmd.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: SeekCmd.java,v 1.3 2003/03/08 03:42:44 mdejong Exp $
 *
 */
@@ -20,8 +20,8 @@ namespace tcl.lang
 	
 	class SeekCmd : Command
 	{
-		
-		private static readonly string[] validOrigins = new string[]{"start", "current", "end"};
+
+    private static readonly string[] validOrigins = new string[] { "start", "current", "end" };
 		
 		internal const int OPT_START = 0;
 		internal const int OPT_CURRENT = 1;

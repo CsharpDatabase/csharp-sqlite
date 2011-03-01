@@ -5,7 +5,7 @@
 **
 ** The author disclaims copyright to this source code.  
 *************************************************************************
-**  $Header: Community.CsharpSqlite.SQLiteClient/src/SqliteError.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+**  $Header$
 *************************************************************************
 */
 

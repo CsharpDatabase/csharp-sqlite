@@ -11,7 +11,7 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/commands/LsearchCmd.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: LsearchCmd.java,v 1.2 2000/08/21 04:12:51 mo Exp $
 *
 */
@@ -25,8 +25,8 @@ namespace tcl.lang
 	
 	class LsearchCmd : Command
 	{
-		
-		private static readonly string[] options = new string[]{"-ascii", "-decreasing", "-dictionary", "-exact", "-increasing", "-integer", "-glob", "-real", "-regexp", "-sorted"};
+
+    private static readonly string[] options = new string[] { "-ascii", "-decreasing", "-dictionary", "-exact", "-increasing", "-integer", "-glob", "-real", "-regexp", "-sorted" };
 		internal const int LSEARCH_ASCII = 0;
 		internal const int LSEARCH_DECREASING = 1;
 		internal const int LSEARCH_DICTIONARY = 2;

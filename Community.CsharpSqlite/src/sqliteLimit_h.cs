@@ -19,7 +19,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2009-12-07 16:39:13 1ed88e9d01e9eda5cbc622e7614277f29bcc551c
+    **  SQLITE_SOURCE_ID: 2010-08-23 18:52:01 42537b60566f288167f1b5864a5435986838e3a3
     **
     **  $Header$
     *************************************************************************
@@ -119,6 +119,16 @@ namespace Community.CsharpSqlite
     const int SQLITE_DEFAULT_TEMP_CACHE_SIZE = 500;
 #endif
 
+/*
+** The default number of frames to accumulate in the log file before
+** checkpointing the database in WAL mode.
+*/
+#if !SQLITE_DEFAULT_WAL_AUTOCHECKPOINT
+    const int SQLITE_DEFAULT_WAL_AUTOCHECKPOINT = 1000;
+//# define SQLITE_DEFAULT_WAL_AUTOCHECKPOINT  1000
+#endif
+
+    
     /*
 ** The maximum number of attached databases.  This must be between 0
 ** and 30.  The upper bound on 30 is because a 32-bit integer bitmap
@@ -136,20 +146,23 @@ namespace Community.CsharpSqlite
     const int SQLITE_MAX_VARIABLE_NUMBER = 999;
 #endif
 
-    /* Maximum page size.  The upper bound on this value is 32768.  This a limit
-** imposed by the necessity of storing the value in a 2-byte unsigned integer
-** and the fact that the page size must be a power of 2.
+/* Maximum page size.  The upper bound on this value is 65536.  This a limit
+** imposed by the use of 16-bit offsets within each page.
 **
-** If this limit is changed, then the compiled library is technically
-** incompatible with an SQLite library compiled with a different limit. If
-** a process operating on a database with a page-size of 65536 bytes
-** crashes, then an instance of SQLite compiled with the default page-size
-** limit will not be able to rollback the aborted transaction. This could
-** lead to database corruption.
+**
+** Earlier versions of SQLite allowed the user to change this value at
+** compile time. This is no longer permitted, on the grounds that it creates
+** a library that is technically incompatible with an SQLite library 
+** compiled with a different limit. If a process operating on a database 
+** with a page-size of 65536 bytes crashes, then an instance of SQLite 
+** compiled with the default page-size limit will not be able to rollback 
+** the aborted transaction. This could lead to database corruption.
 */
-#if !SQLITE_MAX_PAGE_SIZE
-    const int SQLITE_MAX_PAGE_SIZE = 32768;
-#endif
+//#ifdef SQLITE_MAX_PAGE_SIZE
+//# undef SQLITE_MAX_PAGE_SIZE
+//#endif
+    //#define SQLITE_MAX_PAGE_SIZE 65536
+    const int SQLITE_MAX_PAGE_SIZE = 65535;
 
 
     /*

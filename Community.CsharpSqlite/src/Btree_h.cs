@@ -20,7 +20,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2010-03-09 19:31:43 4ae453ea7be69018d8c16eb8dabe05617397dc4d
+    **  SQLITE_SOURCE_ID: 2010-12-07 20:14:09 a586a4deeb25330037a49df295b36aaf624d0f45
     **
     **  $Header$
     *************************************************************************
@@ -80,20 +80,25 @@ namespace Community.CsharpSqlite
     ** NOTE:  These values must match the corresponding PAGER_ values in
     ** pager.h.
     */
-    const int BTREE_OMIT_JOURNAL = 1; /* Do not use journal.  No argument */
-    const int BTREE_NO_READLOCK = 2; /* Omit readlocks on readonly files */
-    const int BTREE_MEMORY = 4; /* In-memory DB.  No argument */
-    const int BTREE_READONLY = 8; /* Open the database in read-only mode */
-    const int BTREE_READWRITE = 16; /* Open for both reading and writing */
-    const int BTREE_CREATE = 32; /* Create the database if it does not exist */
+    //#define BTREE_OMIT_JOURNAL  1  /* Do not create or use a rollback journal */
+    //#define BTREE_NO_READLOCK   2  /* Omit readlocks on readonly files */
+    //#define BTREE_MEMORY        4  /* This is an in-memory DB */
+    //#define BTREE_SINGLE        8  /* The file contains at most 1 b-tree */
+    //#define BTREE_UNORDERED    16  /* Use of a hash implementation is OK */
+    const int BTREE_OMIT_JOURNAL = 1; /* Do not create or use a rollback journal */
+    const int BTREE_NO_READLOCK = 2;  /* Omit readlocks on readonly files */
+    const int BTREE_MEMORY = 4;       /* This is an in-memory DB */
+    const int BTREE_SINGLE = 8;       /* The file contains at most 1 b-tree */
+    const int BTREE_UNORDERED = 16;   /* Use of a hash implementation is OK */
 
     //int sqlite3BtreeClose(Btree*);
     //int sqlite3BtreeSetCacheSize(Btree*,int);
-    //int sqlite3BtreeSetSafetyLevel(Btree*,int,int);
+    //int sqlite3BtreeSetSafetyLevel(Btree*,int,int,int);
     //int sqlite3BtreeSyncDisabled(Btree*);
     //int sqlite3BtreeSetPageSize(Btree *p, int nPagesize, int nReserve, int eFix);
     //int sqlite3BtreeGetPageSize(Btree*);
     //int sqlite3BtreeMaxPageCount(Btree*,int);
+    //u32 sqlite3BtreeLastPage(Btree*);
     //int sqlite3BtreeSecureDelete(Btree*,int);
     //int sqlite3BtreeGetReserve(Btree*);
     //int sqlite3BtreeSetAutoVacuum(Btree , int);
@@ -120,11 +125,19 @@ namespace Community.CsharpSqlite
     //int sqlite3BtreeIncrVacuum(Btree );
 
     /* The flags parameter to sqlite3BtreeCreateTable can be the bitwise OR
-    ** of the following flags:
+    ** of the flags shown below.
+    **
+    ** Every SQLite table must have either BTREE_INTKEY or BTREE_BLOBKEY set.
+    ** With BTREE_INTKEY, the table key is a 64-bit integer and arbitrary data
+    ** is stored in the leaves.  (BTREE_INTKEY is used for SQL tables.)  With
+    ** BTREE_BLOBKEY, the key is an arbitrary BLOB and no content is stored
+    ** anywhere - the key is the content.  (BTREE_BLOBKEY is used for SQL
+    ** indices.)
     */
-    const int BTREE_INTKEY = 1;   /* Table has only 64-bit signed integer keys */
-    const int BTREE_ZERODATA = 2;   /* Table has keys only - no data */
-    const int BTREE_LEAFDATA = 4; /* Data stored in leaves only.  Implies INTKEY */
+    //#define BTREE_INTKEY     1    /* Table has only 64-bit signed integer keys */
+    //#define BTREE_BLOBKEY    2    /* Table has keys only - no data */
+    const int BTREE_INTKEY = 1;
+    const int BTREE_BLOBKEY = 2;
 
     //int sqlite3BtreeDropTable(Btree*, int, int*);
     //int sqlite3BtreeClearTable(Btree*, int, int*);
@@ -207,6 +220,8 @@ namespace Community.CsharpSqlite
     //void sqlite3BtreeCacheOverflow(BtCursor );
     //void sqlite3BtreeClearCursor(BtCursor *);
 
+    //int sqlite3BtreeSetVersion(Btree *pBt, int iVersion);
+
     //#if !NDEBUG
     //int sqlite3BtreeCursorIsValid(BtCursor*);
     //#endif
@@ -220,6 +235,15 @@ namespace Community.CsharpSqlite
     //void sqlite3BtreeCursorList(Btree*);
     //#endif
 
+#if !SQLITE_OMIT_WAL
+//int sqlite3BtreeCheckpoint(Btree*);
+#endif
+
+    /*
+** If we are not using shared cache, then there is no need to
+** use mutexes to access the BtShared structures.  So make the
+** Enter and Leave procedures no-ops.
+*/
 #if !SQLITE_OMIT_SHARED_CACHE
 //void sqlite3BtreeEnter(Btree*);
 //void sqlite3BtreeEnterAll(sqlite3*);
@@ -273,8 +297,6 @@ int sqlite3BtreeHoldsAllMutexes(sqlite3*);
     static bool sqlite3BtreeHoldsAllMutexes( sqlite3 X ) { return true; }
 #endif
 
-
     //#endif // * _BTREE_H_ */
-
   }
 }

@@ -22,7 +22,14 @@ namespace Community.CsharpSqlite
     *************************************************************************
     ** This file contains code used by the compiler to add foreign key
     ** support to compiled SQL statements.
-    */
+    *************************************************************************
+    **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
+    **  C#-SQLite is an independent reimplementation of the SQLite software library
+    **
+    **  SQLITE_SOURCE_ID: 2010-12-07 20:14:09 a586a4deeb25330037a49df295b36aaf624d0f45
+    **
+    **  $Header$
+    *************************************************************************    */
     //#include "sqliteInt.h"
 
 #if !SQLITE_OMIT_FOREIGN_KEY
@@ -419,7 +426,7 @@ namespace Community.CsharpSqlite
           sqlite3VdbeChangeP4( v, -1, pKey, P4_KEYINFO_HANDOFF );
           for ( i = 0; i < nCol; i++ )
           {
-            sqlite3VdbeAddOp2( v, OP_SCopy, aiCol[i] + 1 + regData, regTemp + i );
+            sqlite3VdbeAddOp2( v, OP_Copy, aiCol[i] + 1 + regData, regTemp + i );
           }
 
           /* If the parent table is the same as the child table, and we are about
@@ -550,7 +557,8 @@ namespace Community.CsharpSqlite
           {
             Column pCol;
             iCol = pIdx.aiColumn[i];
-            pCol = pIdx.pTable.aCol[iCol];
+            pCol = pTab.aCol[iCol];
+            if ( pTab.iPKey == iCol ) iCol = -1;
             pLeft.iTable = regData + iCol + 1;
             pLeft.affinity = pCol.affinity;
             pLeft.pColl = sqlite3LocateCollSeq( pParse, pCol.zColl );
@@ -638,7 +646,7 @@ namespace Community.CsharpSqlite
     static FKey sqlite3FkReferences( Table pTab )
     {
       int nName = sqlite3Strlen30( pTab.zName );
-      return (FKey)sqlite3HashFind( pTab.pSchema.fkeyHash, pTab.zName, nName );
+      return sqlite3HashFind( pTab.pSchema.fkeyHash, pTab.zName, nName, (FKey)null );
     }
 
     /*
@@ -1075,10 +1083,10 @@ namespace Community.CsharpSqlite
 
         for ( i = 0; i < pFKey.nCol; i++ )
         {
-          Token tOld = new Token( "old", 3 );  /* Literal "old" token */
-          Token tNew = new Token( "new", 3 );  /* Literal "new" token */
-          Token tFromCol = new Token();        /* Name of column in child table */
-          Token tToCol = new Token();          /* Name of column in parent table */
+          var tOld = new Token( "old", 3 );  /* Literal "old" token */
+          var tNew = new Token( "new", 3 );  /* Literal "new" token */
+          var tFromCol = new Token();        /* Name of column in child table */
+          var tToCol = new Token();          /* Name of column in parent table */
           int iFromCol;               /* Idx of column in child table */
           Expr pEq;                  /* tFromCol = OLD.tToCol */
 
@@ -1160,7 +1168,7 @@ namespace Community.CsharpSqlite
 
         if ( action == OE_Restrict )
         {
-          Token tFrom = new Token();
+          var tFrom = new Token();
           Expr pRaise;
 
           tFrom.z = zFrom;
@@ -1179,11 +1187,7 @@ namespace Community.CsharpSqlite
           pWhere = null;
         }
 
-        /* In the current implementation, pTab.dbMem==0 for all tables except
-        ** for temporary tables used to describe subqueries.  And temporary
-        ** tables do not have foreign key constraints.  Hence, pTab.dbMem
-        ** should always be 0 there.
-        */
+        /* Disable lookaside memory allocation */
         enableLookaside = db.lookaside.bEnabled;
         db.lookaside.bEnabled = 0;
 
@@ -1286,7 +1290,7 @@ namespace Community.CsharpSqlite
 ** table pTab. Remove the deleted foreign keys from the Schema.fkeyHash
 ** hash table.
 */
-    static void sqlite3FkDelete( Table pTab )
+    static void sqlite3FkDelete( sqlite3 db, Table pTab )
     {
       FKey pFKey;                    /* Iterator variable */
       FKey pNext;                    /* Copy of pFKey.pNextFrom */
@@ -1295,34 +1299,37 @@ namespace Community.CsharpSqlite
       {
 
         /* Remove the FK from the fkeyHash hash table. */
-        if ( pFKey.pPrevTo != null )
+        //if ( null == db || db.pnBytesFreed == 0 )
         {
-          pFKey.pPrevTo.pNextTo = pFKey.pNextTo;
-        }
-        else
-        {
-          FKey data = pFKey.pNextTo;
-          string z = ( data != null ? pFKey.pNextTo.zTo : pFKey.zTo );
-          sqlite3HashInsert( ref pTab.pSchema.fkeyHash, z, sqlite3Strlen30( z ), data );
-        }
-        if ( pFKey.pNextTo != null )
-        {
-          pFKey.pNextTo.pPrevTo = pFKey.pPrevTo;
-        }
+          if ( pFKey.pPrevTo != null )
+          {
+            pFKey.pPrevTo.pNextTo = pFKey.pNextTo;
+          }
+          else
+          {
+            FKey p = pFKey.pNextTo;
+            string z = ( p != null ? pFKey.pNextTo.zTo : pFKey.zTo );
+            sqlite3HashInsert( ref pTab.pSchema.fkeyHash, z, sqlite3Strlen30( z ), p );
+          }
+          if ( pFKey.pNextTo != null )
+          {
+            pFKey.pNextTo.pPrevTo = pFKey.pPrevTo;
+          }
+         }
 
-        /* Delete any triggers created to implement actions for this FK. */
-#if !SQLITE_OMIT_TRIGGER
-        fkTriggerDelete( pTab.dbMem, pFKey.apTrigger[0] );
-        fkTriggerDelete( pTab.dbMem, pFKey.apTrigger[1] );
-#endif
-
-        /* EV: R-30323-21917 Each foreign key constraint in SQLite is
+    /* EV: R-30323-21917 Each foreign key constraint in SQLite is
     ** classified as either immediate or deferred.
     */
         Debug.Assert( pFKey.isDeferred == 0 || pFKey.isDeferred == 1 );
 
+    /* Delete any triggers created to implement actions for this FK. */
+#if !SQLITE_OMIT_TRIGGER
+    fkTriggerDelete(db, pFKey.apTrigger[0]);
+    fkTriggerDelete(db, pFKey.apTrigger[1]);
+#endif
+
         pNext = pFKey.pNextFrom;
-        sqlite3DbFree( pTab.dbMem, ref pFKey );
+        sqlite3DbFree(db, ref pFKey );
       }
     }
 #endif //* ifndef SQLITE_OMIT_FOREIGN_KEY */

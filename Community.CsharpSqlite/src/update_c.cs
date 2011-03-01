@@ -27,7 +27,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2009-12-07 16:39:13 1ed88e9d01e9eda5cbc622e7614277f29bcc551c
+    **  SQLITE_SOURCE_ID: 2010-12-07 20:14:09 a586a4deeb25330037a49df295b36aaf624d0f45
     **
     **  $Header$
     *************************************************************************
@@ -82,7 +82,7 @@ namespace Community.CsharpSqlite
       Debug.Assert( pTab != null );
       if ( null == pTab.pSelect )
       {
-        sqlite3_value pValue = new sqlite3_value();
+        var pValue = new sqlite3_value();
         int enc = ENC( sqlite3VdbeDb( v ) );
         Column pCol = pTab.aCol[i];
 #if SQLITE_DEBUG
@@ -252,6 +252,7 @@ const bool isView = false;
           else
           {
             sqlite3ErrorMsg( pParse, "no such column: %s", pChanges.a[i].zName );
+            pParse.checkSchema = 1;
             goto update_cleanup;
           }
         }
@@ -466,8 +467,7 @@ goto update_cleanup;
         {
           if ( aXRef[i] < 0 || oldmask == 0xffffffff || ( oldmask & ( 1 << i ) ) != 0 )
           {
-            sqlite3VdbeAddOp3( v, OP_Column, iCur, i, regOld + i );
-            sqlite3ColumnDefault( v, pTab, i, regOld + i );
+            sqlite3ExprCodeGetColumnOfTable(v, pTab, iCur, i, regOld + i);
           }
           else
           {
@@ -735,6 +735,7 @@ pSelect = sqlite3SelectNew(pParse, pEList, pSrc, pWhere, 0, 0, 0, 0, 0, 0);
 Debug.Assert( v );
 ephemTab = pParse.nTab++;
 sqlite3VdbeAddOp2(v, OP_OpenEphemeral, ephemTab, pTab.nCol+1+(pRowid!=0));
+sqlite3VdbeChangeP5(v, BTREE_UNORDERED);
 
 /* fill the ephemeral table
 */

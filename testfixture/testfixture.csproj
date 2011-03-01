@@ -76,7 +76,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\x86\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRUE WIN32 _MSC_VER SQLITE_ASCII SQLITE_DEBUG SQLITE_DISABLE_LFS  SQLITE_HAS_CODEC SQLITE_MUTEX_OMIT SQLITE_OMIT_AUTHORIZATION SQLITE_OMIT_DEPRECATED SQLITE_OMIT_GET_TABLE SQLITE_OMIT_INCRBLOB SQLITE_OMIT_LOOKASIDE SQLITE_OMIT_SHARED_CACHE SQLITE_OMIT_UTF16 SQLITE_OMIT_VIRTUALTABLE SQLITE_OS_WIN SQLITE_TEST VDBE_PROFILE_OFF  SQLITE_POOL_MEM SQLITE_ENABLE_OVERSIZE_CELL_CHECK NET_35</DefineConstants>
+    <DefineConstants>DEBUG;TRUE _MSC_VER WIN32 NET_35 SQLITE_ASCII SQLITE_DEBUG SQLITE_DISABLE_LFS  SQLITE_HAS_CODEC SQLITE_MUTEX_OMIT SQLITE_OMIT_AUTHORIZATION SQLITE_OMIT_DEPRECATED SQLITE_OMIT_GET_TABLE SQLITE_OMIT_INCRBLOB SQLITE_OMIT_LOOKASIDE SQLITE_OMIT_SHARED_CACHE SQLITE_OMIT_UTF16 SQLITE_OMIT_VIRTUALTABLE SQLITE_OMIT_WAL SQLITE_OS_WIN SQLITE_THREADSAFE SQLITE_TEST VDBE_PROFILE_OFF  SQLITE_POOL_MEM SQLITE_ENABLE_OVERSIZE_CELL_CHECK SQLITE_ENABLE_STAT2 TCLSH</DefineConstants>
     <NoWarn>0168 ; 0169; 0414; 0618; 0649</NoWarn>
     <DebugType>full</DebugType>
     <PlatformTarget>x86</PlatformTarget>
@@ -122,14 +122,14 @@
     <Compile Include="..\Community.CsharpSqlite\src\btmutex_c.cs">
       <Link>Community.CsharpSqlite\btmutex_c.cs</Link>
     </Compile>
-    <Compile Include="..\Community.CsharpSqlite\src\BtreeInt_h.cs">
+    <Compile Include="..\Community.CsharpSqlite\src\btreeInt_h.cs">
       <Link>Community.CsharpSqlite\BtreeInt_h.cs</Link>
     </Compile>
     <Compile Include="..\Community.CsharpSqlite\src\btree_c.cs">
       <Link>Community.CsharpSqlite\btree_c.cs</Link>
     </Compile>
-    <Compile Include="..\Community.CsharpSqlite\src\Btree_h.cs">
-      <Link>Community.CsharpSqlite\Btree_h.cs</Link>
+    <Compile Include="..\Community.CsharpSqlite\src\btree_h.cs">
+      <Link>Community.CsharpSqlite\btree_h.cs</Link>
     </Compile>
     <Compile Include="..\Community.CsharpSqlite\src\build_c.cs">
       <Link>Community.CsharpSqlite\build_c.cs</Link>
@@ -143,8 +143,8 @@
     <Compile Include="..\Community.CsharpSqlite\src\crypto.cs">
       <Link>Community.CsharpSqlite\crypto.cs</Link>
     </Compile>
-    <Compile Include="..\Community.CsharpSqlite\src\ctime_cs.cs">
-      <Link>Community.CsharpSqlite\ctime_cs.cs</Link>
+    <Compile Include="..\Community.CsharpSqlite\src\ctime_c.cs">
+      <Link>Community.CsharpSqlite\ctime_c.cs</Link>
     </Compile>
     <Compile Include="..\Community.CsharpSqlite\src\date_c.cs">
       <Link>Community.CsharpSqlite\date_c.cs</Link>
@@ -218,9 +218,6 @@
     <Compile Include="..\Community.CsharpSqlite\src\mutex_w32.cs">
       <Link>Community.CsharpSqlite\mutex_w32.cs</Link>
     </Compile>
-    <Compile Include="..\Community.CsharpSqlite\src\notify_c.cs">
-      <Link>Community.CsharpSqlite\notify_c.cs</Link>
-    </Compile>
     <Compile Include="..\Community.CsharpSqlite\src\opcodes_c.cs">
       <Link>Community.CsharpSqlite\opcodes_c.cs</Link>
     </Compile>
@@ -281,14 +278,8 @@
     <Compile Include="..\Community.CsharpSqlite\src\select_c.cs">
       <Link>Community.CsharpSqlite\select_c.cs</Link>
     </Compile>
-    <Compile Include="..\Community.CsharpSqlite\src\sqlite3ext_h.cs">
-      <Link>Community.CsharpSqlite\sqlite3ext_h.cs</Link>
-    </Compile>
     <Compile Include="..\Community.CsharpSqlite\src\sqlite3_h.cs">
       <Link>Community.CsharpSqlite\sqlite3_h.cs</Link>
-    </Compile>
-    <Compile Include="..\Community.CsharpSqlite\src\sqliteicu_h.cs">
-      <Link>Community.CsharpSqlite\sqliteicu_h.cs</Link>
     </Compile>
     <Compile Include="..\Community.CsharpSqlite\src\sqliteInt_h.cs">
       <Link>Community.CsharpSqlite\sqliteInt_h.cs</Link>
@@ -329,8 +320,8 @@
     <Compile Include="..\Community.CsharpSqlite\src\vdbeblob_c.cs">
       <Link>Community.CsharpSqlite\vdbeblob_c.cs</Link>
     </Compile>
-    <Compile Include="..\Community.CsharpSqlite\src\VdbeInt_h.cs">
-      <Link>Community.CsharpSqlite\VdbeInt_h.cs</Link>
+    <Compile Include="..\Community.CsharpSqlite\src\vdbeInt_h.cs">
+      <Link>Community.CsharpSqlite\vdbeInt_h.cs</Link>
     </Compile>
     <Compile Include="..\Community.CsharpSqlite\src\vdbemem_c.cs">
       <Link>Community.CsharpSqlite\vdbemem_c.cs</Link>
@@ -341,14 +332,20 @@
     <Compile Include="..\Community.CsharpSqlite\src\vdbe_c.cs">
       <Link>Community.CsharpSqlite\vdbe_c.cs</Link>
     </Compile>
-    <Compile Include="..\Community.CsharpSqlite\src\Vdbe_h.cs">
-      <Link>Community.CsharpSqlite\Vdbe_h.cs</Link>
+    <Compile Include="..\Community.CsharpSqlite\src\vdbe_h.cs">
+      <Link>Community.CsharpSqlite\vdbe_h.cs</Link>
     </Compile>
     <Compile Include="..\Community.CsharpSqlite\src\vtab_c.cs">
       <Link>Community.CsharpSqlite\vtab_c.cs</Link>
     </Compile>
     <Compile Include="..\Community.CsharpSqlite\src\walker_c.cs">
       <Link>Community.CsharpSqlite\walker_c.cs</Link>
+    </Compile>
+    <Compile Include="..\Community.CsharpSqlite\src\wal_c.cs">
+      <Link>Community.CsharpSqlite\wal_c.cs</Link>
+    </Compile>
+    <Compile Include="..\Community.CsharpSqlite\src\wal_h.cs">
+      <Link>Community.CsharpSqlite\wal_h.cs</Link>
     </Compile>
     <Compile Include="..\Community.CsharpSqlite\src\where_c.cs">
       <Link>Community.CsharpSqlite\where_c.cs</Link>
@@ -799,7 +796,6 @@
     <Compile Include="src\test1_c.cs" />
     <Compile Include="src\test2_c.cs" />
     <Compile Include="src\test3_c.cs" />
-    <Compile Include="src\test6_c.cs" />
     <Compile Include="src\test9_c.cs" />
     <Compile Include="src\testfixture.cs" />
     <Compile Include="src\test_autoext_c.cs" />
@@ -808,30 +804,10 @@
     <Compile Include="src\test_config_c.cs" />
     <Compile Include="src\test_func_c.cs" />
     <Compile Include="src\test_hexio_c.cs" />
-    <Compile Include="src\test_journal_c.cs" />
     <Compile Include="src\test_malloc_c.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="src\test_md5_c.cs" />
     <Compile Include="src\test_mutex_c.cs" />
-    <Compile Include="src\test_onefile_c.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="..\test\crashtest1.c">
-      <Link>test\crashtest1.c</Link>
-    </Content>
-    <Content Include="..\test\threadtest1.c">
-      <Link>test\threadtest1.c</Link>
-    </Content>
-    <Content Include="..\test\threadtest2.c">
-      <Link>test\threadtest2.c</Link>
-    </Content>
-    <Content Include="..\test\^testscripts.txt">
-      <Link>test\^testscripts.txt</Link>
-    </Content>
-    <Content Include="..\test\_RunWorking.txt">
-      <Link>test\_RunWorking.txt</Link>
-    </Content>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\test\aggerror.test">
@@ -839,9 +815,6 @@
     </None>
     <None Include="..\test\alias.test">
       <Link>test\alias.test</Link>
-    </None>
-    <None Include="..\test\all.test">
-      <Link>test\all.test</Link>
     </None>
     <None Include="..\test\alter.test">
       <Link>test\alter.test</Link>
@@ -861,17 +834,23 @@
     <None Include="..\test\analyze2.test">
       <Link>test\analyze2.test</Link>
     </None>
+    <None Include="..\test\analyze3.test">
+      <Link>test\analyze3.test</Link>
+    </None>
+    <None Include="..\test\analyze4.test">
+      <Link>test\analyze4.test</Link>
+    </None>
     <None Include="..\test\async.test">
       <Link>test\async.test</Link>
     </None>
     <None Include="..\test\async2.test">
       <Link>test\async2.test</Link>
     </None>
-    <None Include="..\test\async3.test">
-      <Link>test\async3.test</Link>
-    </None>
     <None Include="..\test\async4.test">
       <Link>test\async4.test</Link>
+    </None>
+    <None Include="..\test\async5.test">
+      <Link>test\async5.test</Link>
     </None>
     <None Include="..\test\attach.test">
       <Link>test\attach.test</Link>
@@ -894,23 +873,23 @@
     <None Include="..\test\autoinc.test">
       <Link>test\autoinc.test</Link>
     </None>
+    <None Include="..\test\autoindex1.test">
+      <Link>test\autoindex1.test</Link>
+    </None>
     <None Include="..\test\autovacuum.test">
       <Link>test\autovacuum.test</Link>
     </None>
-    <None Include="..\test\autovacuum_ioerr2.test">
-      <Link>test\autovacuum_ioerr2.test</Link>
-    </None>
     <None Include="..\test\avtrans.test">
       <Link>test\avtrans.test</Link>
+    </None>
+    <None Include="..\test\backcompat.test">
+      <Link>test\backcompat.test</Link>
     </None>
     <None Include="..\test\backup.test">
       <Link>test\backup.test</Link>
     </None>
     <None Include="..\test\backup2.test">
       <Link>test\backup2.test</Link>
-    </None>
-    <None Include="..\test\backup_ioerr.test">
-      <Link>test\backup_ioerr.test</Link>
     </None>
     <None Include="..\test\badutf.test">
       <Link>test\badutf.test</Link>
@@ -981,11 +960,17 @@
     <None Include="..\test\capi3d.test">
       <Link>test\capi3d.test</Link>
     </None>
+    <None Include="..\test\capi3e.test">
+      <Link>test\capi3e.test</Link>
+    </None>
     <None Include="..\test\cast.test">
       <Link>test\cast.test</Link>
     </None>
     <None Include="..\test\check.test">
       <Link>test\check.test</Link>
+    </None>
+    <None Include="..\test\coalesce.test">
+      <Link>test\coalesce.test</Link>
     </None>
     <None Include="..\test\collate1.test">
       <Link>test\collate1.test</Link>
@@ -1143,6 +1128,12 @@
     <None Include="..\test\enc3.test">
       <Link>test\enc3.test</Link>
     </None>
+    <None Include="..\test\enc4.test">
+      <Link>test\enc4.test</Link>
+    </None>
+    <None Include="..\test\eqp.test">
+      <Link>test\eqp.test</Link>
+    </None>
     <None Include="..\test\eval.test">
       <Link>test\eval.test</Link>
     </None>
@@ -1158,8 +1149,44 @@
     <None Include="..\test\expr.test">
       <Link>test\expr.test</Link>
     </None>
+    <None Include="..\test\e_createtable.test">
+      <Link>test\e_createtable.test</Link>
+    </None>
+    <None Include="..\test\e_delete.test">
+      <Link>test\e_delete.test</Link>
+    </None>
+    <None Include="..\test\e_droptrigger.test">
+      <Link>test\e_droptrigger.test</Link>
+    </None>
+    <None Include="..\test\e_dropview.test">
+      <Link>test\e_dropview.test</Link>
+    </None>
+    <None Include="..\test\e_expr.test">
+      <Link>test\e_expr.test</Link>
+    </None>
     <None Include="..\test\e_fkey.test">
       <Link>test\e_fkey.test</Link>
+    </None>
+    <None Include="..\test\e_insert.test">
+      <Link>test\e_insert.test</Link>
+    </None>
+    <None Include="..\test\e_reindex.test">
+      <Link>test\e_reindex.test</Link>
+    </None>
+    <None Include="..\test\e_resolve.test">
+      <Link>test\e_resolve.test</Link>
+    </None>
+    <None Include="..\test\e_select.test">
+      <Link>test\e_select.test</Link>
+    </None>
+    <None Include="..\test\e_select2.test">
+      <Link>test\e_select2.test</Link>
+    </None>
+    <None Include="..\test\e_update.test">
+      <Link>test\e_update.test</Link>
+    </None>
+    <None Include="..\test\e_vacuum.test">
+      <Link>test\e_vacuum.test</Link>
     </None>
     <None Include="..\test\filectrl.test">
       <Link>test\filectrl.test</Link>
@@ -1181,6 +1208,12 @@
     </None>
     <None Include="..\test\func.test">
       <Link>test\func.test</Link>
+    </None>
+    <None Include="..\test\func2.test">
+      <Link>test\func2.test</Link>
+    </None>
+    <None Include="..\test\func3.test">
+      <Link>test\func3.test</Link>
     </None>
     <None Include="..\test\fuzz.test">
       <Link>test\fuzz.test</Link>
@@ -1218,17 +1251,11 @@
     <None Include="..\test\incrblob2.test">
       <Link>test\incrblob2.test</Link>
     </None>
-    <None Include="..\test\incrblob_err.test">
-      <Link>test\incrblob_err.test</Link>
-    </None>
     <None Include="..\test\incrvacuum.test">
       <Link>test\incrvacuum.test</Link>
     </None>
     <None Include="..\test\incrvacuum2.test">
       <Link>test\incrvacuum2.test</Link>
-    </None>
-    <None Include="..\test\incrvacuum_ioerr.test">
-      <Link>test\incrvacuum_ioerr.test</Link>
     </None>
     <None Include="..\test\index.test">
       <Link>test\index.test</Link>
@@ -1257,23 +1284,11 @@
     <None Include="..\test\insert5.test">
       <Link>test\insert5.test</Link>
     </None>
+    <None Include="..\test\intarray.test">
+      <Link>test\intarray.test</Link>
+    </None>
     <None Include="..\test\intpkey.test">
       <Link>test\intpkey.test</Link>
-    </None>
-    <None Include="..\test\ioerr.test">
-      <Link>test\ioerr.test</Link>
-    </None>
-    <None Include="..\test\ioerr2.test">
-      <Link>test\ioerr2.test</Link>
-    </None>
-    <None Include="..\test\ioerr3.test">
-      <Link>test\ioerr3.test</Link>
-    </None>
-    <None Include="..\test\ioerr4.test">
-      <Link>test\ioerr4.test</Link>
-    </None>
-    <None Include="..\test\ioerr5.test">
-      <Link>test\ioerr5.test</Link>
     </None>
     <None Include="..\test\join.test">
       <Link>test\join.test</Link>
@@ -1290,8 +1305,14 @@
     <None Include="..\test\join5.test">
       <Link>test\join5.test</Link>
     </None>
+    <None Include="..\test\join6.test">
+      <Link>test\join6.test</Link>
+    </None>
     <None Include="..\test\journal1.test">
       <Link>test\journal1.test</Link>
+    </None>
+    <None Include="..\test\journal3.test">
+      <Link>test\journal3.test</Link>
     </None>
     <None Include="..\test\jrnlmode.test">
       <Link>test\jrnlmode.test</Link>
@@ -1329,20 +1350,20 @@
     <None Include="..\test\lock.test">
       <Link>test\lock.test</Link>
     </None>
-    <None Include="..\test\lock2.test">
-      <Link>test\lock2.test</Link>
-    </None>
     <None Include="..\test\lock3.test">
       <Link>test\lock3.test</Link>
-    </None>
-    <None Include="..\test\lock4.test">
-      <Link>test\lock4.test</Link>
     </None>
     <None Include="..\test\lock5.test">
       <Link>test\lock5.test</Link>
     </None>
     <None Include="..\test\lock6.test">
       <Link>test\lock6.test</Link>
+    </None>
+    <None Include="..\test\lock7.test">
+      <Link>test\lock7.test</Link>
+    </None>
+    <None Include="..\test\lock_common.tcl">
+      <Link>test\lock_common.tcl</Link>
     </None>
     <None Include="..\test\lookaside.test">
       <Link>test\lookaside.test</Link>
@@ -1416,6 +1437,9 @@
     <None Include="..\test\notify2.test">
       <Link>test\notify2.test</Link>
     </None>
+    <None Include="..\test\notify3.test">
+      <Link>test\notify3.test</Link>
+    </None>
     <None Include="..\test\notnull.test">
       <Link>test\notnull.test</Link>
     </None>
@@ -1424,6 +1448,9 @@
     </None>
     <None Include="..\test\openv2.test">
       <Link>test\openv2.test</Link>
+    </None>
+    <None Include="..\test\pager3.test">
+      <Link>test\pager3.test</Link>
     </None>
     <None Include="..\test\pageropt.test">
       <Link>test\pageropt.test</Link>
@@ -1455,9 +1482,6 @@
     <None Include="..\test\ptrchng.test">
       <Link>test\ptrchng.test</Link>
     </None>
-    <None Include="..\test\quick.test">
-      <Link>test\quick.test</Link>
-    </None>
     <None Include="..\test\quote.test">
       <Link>test\quote.test</Link>
     </None>
@@ -1482,12 +1506,6 @@
     <None Include="..\test\rowid.test">
       <Link>test\rowid.test</Link>
     </None>
-    <None Include="..\test\rtree.test">
-      <Link>test\rtree.test</Link>
-    </None>
-    <None Include="..\test\safety.test">
-      <Link>test\safety.test</Link>
-    </None>
     <None Include="..\test\savepoint.test">
       <Link>test\savepoint.test</Link>
     </None>
@@ -1511,6 +1529,9 @@
     </None>
     <None Include="..\test\schema2.test">
       <Link>test\schema2.test</Link>
+    </None>
+    <None Include="..\test\schema4.test">
+      <Link>test\schema4.test</Link>
     </None>
     <None Include="..\test\securedel.test">
       <Link>test\securedel.test</Link>
@@ -1572,6 +1593,9 @@
     <None Include="..\test\shared7.test">
       <Link>test\shared7.test</Link>
     </None>
+    <None Include="..\test\sharedlock.test">
+      <Link>test\sharedlock.test</Link>
+    </None>
     <None Include="..\test\shared_err.test">
       <Link>test\shared_err.test</Link>
     </None>
@@ -1617,6 +1641,9 @@
     <None Include="..\test\sqllimits1.test">
       <Link>test\sqllimits1.test</Link>
     </None>
+    <None Include="..\test\stat.test">
+      <Link>test\stat.test</Link>
+    </None>
     <None Include="..\test\stmt.test">
       <Link>test\stmt.test</Link>
     </None>
@@ -1638,9 +1665,6 @@
     <None Include="..\test\tableapi.test">
       <Link>test\tableapi.test</Link>
     </None>
-    <None Include="..\test\tclsqlite.test">
-      <Link>test\tclsqlite.test</Link>
-    </None>
     <None Include="..\test\tempdb.test">
       <Link>test\tempdb.test</Link>
     </None>
@@ -1653,32 +1677,26 @@
     <None Include="..\test\tester.tcl">
       <Link>test\tester.tcl</Link>
     </None>
-    <None Include="..\test\thread001.test">
-      <Link>test\thread001.test</Link>
-    </None>
-    <None Include="..\test\thread002.test">
-      <Link>test\thread002.test</Link>
-    </None>
-    <None Include="..\test\thread003.test">
-      <Link>test\thread003.test</Link>
-    </None>
-    <None Include="..\test\thread004.test">
-      <Link>test\thread004.test</Link>
-    </None>
-    <None Include="..\test\thread005.test">
-      <Link>test\thread005.test</Link>
-    </None>
-    <None Include="..\test\thread1.test">
-      <Link>test\thread1.test</Link>
-    </None>
-    <None Include="..\test\thread2.test">
-      <Link>test\thread2.test</Link>
-    </None>
     <None Include="..\test\thread_common.tcl">
       <Link>test\thread_common.tcl</Link>
     </None>
+    <None Include="..\test\tkt-02a8e81d44.test">
+      <Link>test\tkt-02a8e81d44.test</Link>
+    </None>
+    <None Include="..\test\tkt-26ff0c2d1e.test">
+      <Link>test\tkt-26ff0c2d1e.test</Link>
+    </None>
     <None Include="..\test\tkt-2ea2425d34.test">
       <Link>test\tkt-2ea2425d34.test</Link>
+    </None>
+    <None Include="..\test\tkt-31338dca7e.test">
+      <Link>test\tkt-31338dca7e.test</Link>
+    </None>
+    <None Include="..\test\tkt-38cb5df375.test">
+      <Link>test\tkt-38cb5df375.test</Link>
+    </None>
+    <None Include="..\test\tkt-3998683a16.test">
+      <Link>test\tkt-3998683a16.test</Link>
     </None>
     <None Include="..\test\tkt-3fe897352e.test">
       <Link>test\tkt-3fe897352e.test</Link>
@@ -1686,20 +1704,44 @@
     <None Include="..\test\tkt-4a03edc4c8.test">
       <Link>test\tkt-4a03edc4c8.test</Link>
     </None>
+    <None Include="..\test\tkt-5e10420e8d.test">
+      <Link>test\tkt-5e10420e8d.test</Link>
+    </None>
     <None Include="..\test\tkt-5ee23731f.test">
       <Link>test\tkt-5ee23731f.test</Link>
     </None>
     <None Include="..\test\tkt-78e04e52ea.test">
       <Link>test\tkt-78e04e52ea.test</Link>
     </None>
+    <None Include="..\test\tkt-80ba201079.test">
+      <Link>test\tkt-80ba201079.test</Link>
+    </None>
+    <None Include="..\test\tkt-80e031a00f.test">
+      <Link>test\tkt-80e031a00f.test</Link>
+    </None>
+    <None Include="..\test\tkt-8454a207b9.test">
+      <Link>test\tkt-8454a207b9.test</Link>
+    </None>
     <None Include="..\test\tkt-94c04eaadb.test">
       <Link>test\tkt-94c04eaadb.test</Link>
+    </None>
+    <None Include="..\test\tkt-b351d95f9.test">
+      <Link>test\tkt-b351d95f9.test</Link>
+    </None>
+    <None Include="..\test\tkt-cbd054fa6b.test">
+      <Link>test\tkt-cbd054fa6b.test</Link>
+    </None>
+    <None Include="..\test\tkt-d11f09d36e.test">
+      <Link>test\tkt-d11f09d36e.test</Link>
     </None>
     <None Include="..\test\tkt-d82e3f3721.test">
       <Link>test\tkt-d82e3f3721.test</Link>
     </None>
     <None Include="..\test\tkt-f777251dc7a.test">
       <Link>test\tkt-f777251dc7a.test</Link>
+    </None>
+    <None Include="..\test\tkt-f973c7ac31.test">
+      <Link>test\tkt-f973c7ac31.test</Link>
     </None>
     <None Include="..\test\tkt1435.test">
       <Link>test\tkt1435.test</Link>
@@ -1772,9 +1814,6 @@
     </None>
     <None Include="..\test\tkt2450.test">
       <Link>test\tkt2450.test</Link>
-    </None>
-    <None Include="..\test\tkt2565.test">
-      <Link>test\tkt2565.test</Link>
     </None>
     <None Include="..\test\tkt2640.test">
       <Link>test\tkt2640.test</Link>
@@ -1854,9 +1893,6 @@
     <None Include="..\test\tkt3461.test">
       <Link>test\tkt3461.test</Link>
     </None>
-    <None Include="..\test\tkt3472.test">
-      <Link>test\tkt3472.test</Link>
-    </None>
     <None Include="..\test\tkt3493.test">
       <Link>test\tkt3493.test</Link>
     </None>
@@ -1908,6 +1944,9 @@
     <None Include="..\test\tkt3793.test">
       <Link>test\tkt3793.test</Link>
     </None>
+    <None Include="..\test\tkt3810.test">
+      <Link>test\tkt3810.test</Link>
+    </None>
     <None Include="..\test\tkt3824.test">
       <Link>test\tkt3824.test</Link>
     </None>
@@ -1938,6 +1977,9 @@
     <None Include="..\test\tkt3929.test">
       <Link>test\tkt3929.test</Link>
     </None>
+    <None Include="..\test\tkt3935.test">
+      <Link>test\tkt3935.test</Link>
+    </None>
     <None Include="..\test\tkt3992.test">
       <Link>test\tkt3992.test</Link>
     </None>
@@ -1949,6 +1991,9 @@
     </None>
     <None Include="..\test\trace.test">
       <Link>test\trace.test</Link>
+    </None>
+    <None Include="..\test\trace2.test">
+      <Link>test\trace2.test</Link>
     </None>
     <None Include="..\test\trans.test">
       <Link>test\trans.test</Link>
@@ -2031,11 +2076,11 @@
     <None Include="..\test\varint.test">
       <Link>test\varint.test</Link>
     </None>
-    <None Include="..\test\veryquick.test">
-      <Link>test\veryquick.test</Link>
-    </None>
     <None Include="..\test\view.test">
       <Link>test\view.test</Link>
+    </None>
+    <None Include="..\test\wal_common.tcl">
+      <Link>test\wal_common.tcl</Link>
     </None>
     <None Include="..\test\where.test">
       <Link>test\where.test</Link>
@@ -2112,6 +2157,17 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\test\crashtest1.c">
+      <Link>test\crashtest1.c</Link>
+    </Content>
+    <Content Include="..\test\^testscripts.txt">
+      <Link>test\^testscripts.txt</Link>
+    </Content>
+    <Content Include="..\test\_C#SQLite.txt">
+      <Link>test\_C#SQLite.txt</Link>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

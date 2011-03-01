@@ -8,11 +8,11 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/base/TclString.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: TclString.java,v 1.5 2003/03/08 03:42:56 mdejong Exp $
 *
 */
-using System;
+using System.Text;
 namespace tcl.lang
 {
 	
@@ -56,15 +56,15 @@ namespace tcl.lang
 		// sbuf.toString() will contain the latest value of the string and
 		// tobj.stringRep will be set to null. This field is not private
 		// since it will need to be accessed directly by Jacl's IO code.
-		
-		internal System.Text.StringBuilder sbuf;
+
+    internal StringBuilder sbuf;
 
     private TclString()
 		{
 			sbuf = null;
 		}
-		
-		private TclString(System.Text.StringBuilder sb)
+
+    private TclString( StringBuilder sb )
 		{
 			sbuf = sb;
 		}
@@ -115,7 +115,7 @@ namespace tcl.lang
 		/// object. The passed in StringBuffer should not be modified after
 		/// it is passed to this method.
 		/// </summary>
-		internal static TclObject newInstance(System.Text.StringBuilder sb)
+    internal static TclObject newInstance( StringBuilder sb )
 		{
 			return new TclObject(new TclString(sb));
 		}
@@ -134,7 +134,7 @@ namespace tcl.lang
 		
 		internal static TclObject newInstance(char c)
 		{
-			char[] charArray = new char[1];
+			var charArray = new char[1];
 			charArray[0] = c;
 			return newInstance(new string(charArray));
 		}
@@ -155,7 +155,7 @@ namespace tcl.lang
 			TclString tstr = (TclString) tobj.InternalRep;
 			if (tstr.sbuf == null)
 			{
-				tstr.sbuf = new System.Text.StringBuilder(tobj.ToString());
+				tstr.sbuf = new StringBuilder(tobj.ToString());
 			}
 			tobj.invalidateStringRep();
       tstr.sbuf.Append( toAppend );
@@ -180,7 +180,7 @@ namespace tcl.lang
 			TclString tstr = (TclString) tobj.InternalRep;
 			if (tstr.sbuf == null)
 			{
-				tstr.sbuf = new System.Text.StringBuilder(tobj.ToString());
+				tstr.sbuf = new StringBuilder(tobj.ToString());
 			}
 			tobj.invalidateStringRep();
 			tstr.sbuf.Append(charArr, offset, length);
@@ -209,7 +209,7 @@ namespace tcl.lang
 			TclString tstr = (TclString) tobj.InternalRep;
 			if (tstr.sbuf == null)
 			{
-				tstr.sbuf = new System.Text.StringBuilder();
+				tstr.sbuf = new StringBuilder();
 			}
 			else
 			{

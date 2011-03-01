@@ -44,7 +44,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2010-03-09 19:31:43 4ae453ea7be69018d8c16eb8dabe05617397dc4d
+    **  SQLITE_SOURCE_ID: 2010-08-23 18:52:01 42537b60566f288167f1b5864a5435986838e3a3
     **
     **  $Header$
     *************************************************************************
@@ -188,7 +188,7 @@ namespace Community.CsharpSqlite
       /* Same as READ_UTF8() above but without the zTerm parameter.
       ** For this routine, we assume the UTF8 string is always zero-terminated.
       */
-      if ( zIn == null || zIn.Length == 0 ) return 0;
+      if ( String.IsNullOrEmpty(zIn)) return 0;
       //c = *( zIn++ );
       //if ( c >= 0xc0 )
       //{
@@ -206,10 +206,10 @@ namespace Community.CsharpSqlite
       int c = zIn[zIndex++];
       if ( c >= 0xc0 )
       {
-        if ( c > 0xff ) c = 0;
-        else
+        //if ( c > 0xff ) c = 0;
+        //else
         {
-          c = sqlite3Utf8Trans1[c - 0xc0];
+          //c = sqlite3Utf8Trans1[c - 0xc0];
           while ( zIndex != zIn.Length && ( zIn[zIndex] & 0xc0 ) == 0x80 )
           {
             c = ( c << 6 ) + ( 0x3f & zIn[zIndex++] );

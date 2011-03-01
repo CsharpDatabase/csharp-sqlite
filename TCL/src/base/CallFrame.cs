@@ -9,12 +9,12 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/base/CallFrame.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: CallFrame.java,v 1.10 2003/01/08 02:10:17 mdejong Exp $
 *
 */
-using System;
 using System.Collections;
+using System.Text;
 
 namespace tcl.lang
 {
@@ -34,7 +34,7 @@ namespace tcl.lang
 			
 			get
 			{
-				ArrayList vector = new ArrayList(10);
+				var vector = new ArrayList(10);
 				
 				if (varTable == null)
 				{
@@ -62,7 +62,7 @@ namespace tcl.lang
 			
 			get
 			{
-				ArrayList vector = new ArrayList(10);
+				var vector = new ArrayList(10);
 				
 				if (varTable == null)
 				{
@@ -250,7 +250,7 @@ namespace tcl.lang
 		private string wrongNumProcArgs(TclObject name, Procedure proc)
 		{
 			int i;
-			System.Text.StringBuilder sbuf = new System.Text.StringBuilder(200);
+			var sbuf = new StringBuilder(200);
 			sbuf.Append("wrong # args: should be \"");
 			
 			sbuf.Append(name.ToString());

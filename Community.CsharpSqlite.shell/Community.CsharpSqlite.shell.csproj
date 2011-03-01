@@ -22,7 +22,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRUE WIN32 _MSC_VER NDEBUG NO_TCL SQLITE_ASCII SQLITE_DISABLE_LFS SQLITE_HAS_CODEC SQLITE_MEM_POOL SQLITE_MUTEX_OMIT SQLITE_OMIT_AUTHORIZATION SQLITE_OMIT_DEPRECATED SQLITE_OMIT_GET_TABLE SQLITE_OMIT_INCRBLOB SQLITE_OMIT_LOOKASIDE SQLITE_OMIT_SHARED_CACHE SQLITE_OMIT_UTF16 SQLITE_OMIT_VIRTUALTABLE SQLITE_OS_WIN SQLITE_SYSTEM_MALLOC VDBE_PROFILE_OFF </DefineConstants>
+    <DefineConstants>TRUE WIN32 _MSC_VER NDEBUG NO_TCL SQLITE_ASCII SQLITE_DISABLE_LFS SQLITE_HAS_CODEC SQLITE_MEM_POOL SQLITE_MUTEX_OMIT SQLITE_OMIT_AUTHORIZATION SQLITE_OMIT_DEPRECATED SQLITE_OMIT_GET_TABLE SQLITE_OMIT_INCRBLOB SQLITE_OMIT_LOOKASIDE SQLITE_OMIT_SHARED_CACHE SQLITE_OMIT_UTF16 SQLITE_OMIT_VIRTUALTABLE SQLITE_OMIT_WAL SQLITE_OS_WIN SQLITE_SYSTEM_MALLOC VDBE_PROFILE_OFF </DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <NoWarn>0168 ; 0169; 0414; 0618; 0649</NoWarn>
@@ -32,7 +32,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;TRUE WIN32 _MSC_VER NDEBUG NO_TCL SQLITE_ASCII SQLITE_DISABLE_LFS SQLITE_ENABLE_OVERSIZE_CELL_CHECK SQLITE_MUTEX_OMIT SQLITE_OMIT_AUTHORIZATION SQLITE_OMIT_DEPRECATED SQLITE_OMIT_GET_TABLE SQLITE_OMIT_INCRBLOB SQLITE_OMIT_LOOKASIDE SQLITE_OMIT_SHARED_CACHE SQLITE_OMIT_UTF16 SQLITE_OMIT_VIRTUALTABLE SQLITE_OS_WIN SQLITE_SYSTEM_MALLOC VDBE_PROFILE_OFF </DefineConstants>
+    <DefineConstants>TRACE;TRUE WIN32 _MSC_VER NDEBUG NO_TCL SQLITE_ASCII SQLITE_DISABLE_LFS SQLITE_ENABLE_OVERSIZE_CELL_CHECK SQLITE_MUTEX_OMIT SQLITE_OMIT_AUTHORIZATION SQLITE_OMIT_DEPRECATED SQLITE_OMIT_GET_TABLE SQLITE_OMIT_INCRBLOB SQLITE_OMIT_LOOKASIDE SQLITE_OMIT_SHARED_CACHE SQLITE_OMIT_UTF16 SQLITE_OMIT_VIRTUALTABLE SQLITE_OMIT_WAL SQLITE_OS_WIN SQLITE_SYSTEM_MALLOC VDBE_PROFILE_OFF </DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>x86</PlatformTarget>
@@ -89,8 +89,8 @@
     <Compile Include="..\Community.CsharpSqlite\src\crypto.cs">
       <Link>Community.CsharpSqlite\crypto.cs</Link>
     </Compile>
-    <Compile Include="..\Community.CsharpSqlite\src\ctime_cs.cs">
-      <Link>Community.CsharpSqlite\ctime_cs.cs</Link>
+    <Compile Include="..\Community.CsharpSqlite\src\ctime_c.cs">
+      <Link>Community.CsharpSqlite\ctime_c.cs</Link>
     </Compile>
     <Compile Include="..\Community.CsharpSqlite\src\date_c.cs">
       <Link>Community.CsharpSqlite\date_c.cs</Link>
@@ -227,14 +227,8 @@
     <Compile Include="..\Community.CsharpSqlite\src\select_c.cs">
       <Link>Community.CsharpSqlite\select_c.cs</Link>
     </Compile>
-    <Compile Include="..\Community.CsharpSqlite\src\sqlite3ext_h.cs">
-      <Link>Community.CsharpSqlite\sqlite3ext_h.cs</Link>
-    </Compile>
     <Compile Include="..\Community.CsharpSqlite\src\sqlite3_h.cs">
       <Link>Community.CsharpSqlite\sqlite3_h.cs</Link>
-    </Compile>
-    <Compile Include="..\Community.CsharpSqlite\src\sqliteicu_h.cs">
-      <Link>Community.CsharpSqlite\sqliteicu_h.cs</Link>
     </Compile>
     <Compile Include="..\Community.CsharpSqlite\src\sqliteInt_h.cs">
       <Link>Community.CsharpSqlite\sqliteInt_h.cs</Link>
@@ -295,6 +289,12 @@
     </Compile>
     <Compile Include="..\Community.CsharpSqlite\src\walker_c.cs">
       <Link>Community.CsharpSqlite\walker_c.cs</Link>
+    </Compile>
+    <Compile Include="..\Community.CsharpSqlite\src\wal_c.cs">
+      <Link>Community.CsharpSqlite\wal_c.cs</Link>
+    </Compile>
+    <Compile Include="..\Community.CsharpSqlite\src\wal_h.cs">
+      <Link>Community.CsharpSqlite\wal_h.cs</Link>
     </Compile>
     <Compile Include="..\Community.CsharpSqlite\src\where_c.cs">
       <Link>Community.CsharpSqlite\where_c.cs</Link>

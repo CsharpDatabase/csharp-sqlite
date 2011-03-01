@@ -78,6 +78,7 @@
 #      wal_set_journal_mode   ?DB?
 #      wal_check_journal_mode TESTNAME?DB?
 #      permutation
+#      presql
 #
 
 # Set the precision of FP arithmatic used by the interpreter. And 
@@ -113,11 +114,13 @@ if {[info command sqlite_orig]==""} {
       }
 
       set res [uplevel 1 sqlite_orig $args]
-
       if {[info exists ::G(perm:presql)]} {
         [lindex $args 0] eval $::G(perm:presql)
       }
-
+      if {[info exists ::G(perm:dbconfig)]} {
+        set ::dbhandle [lindex $args 0]
+        uplevel #0 $::G(perm:dbconfig)
+      }
       set res
     } else {
       # This command is not opening a new database connection. Pass the 
@@ -125,6 +128,13 @@ if {[info command sqlite_orig]==""} {
       #
       uplevel 1 sqlite_orig $args
     }
+  }
+}
+
+proc execpresql {handle args} {
+  trace remove execution $handle enter [list execpresql $handle]
+  if {[info exists ::G(perm:presql)]} {
+    $handle eval $::G(perm:presql)
   }
 }
 
@@ -204,7 +214,11 @@ if {[info exists cmdlinearg]==0} {
   # extensions. This only needs to be done once for the process.
   #
   sqlite3_shutdown 
+################################
+# not implemented in C#-SQLite #
+################################
 #  install_malloc_faultsim 1 
+################################
   sqlite3_initialize
   autoinstall_test_functions
 
@@ -246,6 +260,10 @@ reset_db
 # Abort early if this script has been run before.
 #
 if {[info exists TC(count)]} return
+
+# Make sure memory statistics are enabled.
+#
+sqlite3_config_memstatus 1
 
 # Initialize the test counters and set up commands to access them.
 # Or, if this is a slave interpreter, set up aliases to write the
@@ -301,23 +319,24 @@ proc do_test {name cmd expected} {
 
   global argv cmdlinearg
 
+  fix_testname name
+
   sqlite3_memdebug_settitle $name
 
-  if {[llength $argv]==0} { 
-    set go 1
-  } else {
-    set go 0
-    foreach pattern $argv {
-      if {[string match $pattern $name]} {
-        set go 1
-        break
-      }
-    }
-  }
-  if {!$go} return
+#  if {[llength $argv]==0} { 
+#    set go 1
+#  } else {
+#    set go 0
+#    foreach pattern $argv {
+#      if {[string match $pattern $name]} {
+#        set go 1
+#        break
+#      }
+#    }
+#  }
 
-  if {[info exists ::G(perm:name)]} {
-    set name "$::G(perm:name)$name"
+  if {[info exists ::G(perm:prefix)]} {
+    set name "$::G(perm:prefix)$name"
   }
 
   incr_ntest
@@ -326,22 +345,122 @@ proc do_test {name cmd expected} {
   if {[catch {uplevel #0 "$cmd;\n"} result]} {
     puts "\nError: $result"
     fail_test $name
-  } elseif {[string compare $result $expected] && [string compare $result \{$expected\}]} {
-    puts "\nExpected: \[$expected\]\n     Got: \[$result\]"
-    fail_test $name
+  } elseif {[string compare $result $expected]} {
+	  set WHITESPACE "{} \t\r\n"					;# white space & Extra braces
+    set REPLACE "(\[$WHITESPACE])"
+    regsub -all $REPLACE $expected "" testEXP
+    regsub -all $REPLACE $result   "" testRES
+    if { [string compare $testRES $testEXP]} {
+      puts "\nExpected: \[$expected\]\n     Got: \[$result\]"
+      fail_test $name
+    } else {
+      puts " Ok"
+    }
   } else {
     puts " Ok"
   }
   flush stdout
 }
+
+proc fix_testname {varname} {
+  upvar $varname testname
+  if {[info exists ::testprefix] 
+   && [string is digit [string range $testname 0 0]]
+  } {
+    set testname "${::testprefix}-$testname"
+  }
+}
     
-proc do_execsql_test {testname sql result} {
-  uplevel do_test $testname [list "execsql {$sql}"] [list $result]
+proc do_execsql_test {testname sql {result {}}} {
+  fix_testname testname
+#  uplevel do_test $testname [list "execsql {$sql}"] [list [list {*}$result]]
+  uplevel do_test $testname [list "execsql {$sql}"] [list [concat $result]]
 }
 proc do_catchsql_test {testname sql result} {
+  fix_testname testname
+#  uplevel do_test $testname [list "catchsql {$sql}"] [list {*}$result]
   uplevel do_test $testname [list "catchsql {$sql}"] [list $result]
 }
+proc do_eqp_test {name sql res} {
+#  uplevel do_execsql_test $name [list "EXPLAIN QUERY PLAN $sql"] [list {*}$res]
+  uplevel do_execsql_test $name [list "EXPLAIN QUERY PLAN $sql"] [list $res]
+}
 
+#-------------------------------------------------------------------------
+#   Usage: do_select_tests PREFIX ?SWITCHES? TESTLIST
+#
+# Where switches are:
+#
+#   -errorformat FMTSTRING
+#   -count
+#   -query SQL
+#   -tclquery TCL
+#   -repair TCL
+#
+proc do_select_tests {prefix args} {
+
+  set testlist [lindex $args end]
+  set switches [lrange $args 0 end-1]
+
+  set errfmt ""
+  set countonly 0
+  set tclquery ""
+  set repair ""
+
+  for {set i 0} {$i < [llength $switches]} {incr i} {
+    set s [lindex $switches $i]
+    set n [string length $s]
+    if {$n>=2 && [string equal -length $n $s "-query"]} {
+      set tclquery [list execsql [lindex $switches [incr i]]]
+    } elseif {$n>=2 && [string equal -length $n $s "-tclquery"]} {
+      set tclquery [lindex $switches [incr i]]
+    } elseif {$n>=2 && [string equal -length $n $s "-errorformat"]} {
+      set errfmt [lindex $switches [incr i]]
+    } elseif {$n>=2 && [string equal -length $n $s "-repair"]} {
+      set repair [lindex $switches [incr i]]
+    } elseif {$n>=2 && [string equal -length $n $s "-count"]} {
+      set countonly 1
+    } else {
+      error "unknown switch: $s"
+    }
+  }
+
+  if {$countonly && $errfmt!=""} {
+    error "Cannot use -count and -errorformat together"
+  }
+  set nTestlist [llength $testlist]
+  if {$nTestlist%3 || $nTestlist==0 } {
+    error "SELECT test list contains [llength $testlist] elements"
+  }
+
+  eval $repair
+  foreach {tn sql res} $testlist {
+    if {$tclquery != ""} {
+      execsql $sql
+#      uplevel do_test ${prefix}.$tn [list $tclquery] [list [list {*}$res]]
+      uplevel do_test ${prefix}.$tn [list $tclquery] [list [concat $res]]
+    } elseif {$countonly} {
+      set nRow 0
+      db eval $sql {incr nRow}
+      uplevel do_test ${prefix}.$tn [list [list set {} $nRow]] [list $res]
+    } elseif {$errfmt==""} {
+#      uplevel do_execsql_test ${prefix}.${tn} [list $sql] [list [list {*}$res]]
+      uplevel do_execsql_test ${prefix}.${tn} [list $sql] [list [concat $res]]
+    } else {
+#     set res [list 1 [string trim [format $errfmt {*}$res]]]
+     set res [list 1 [string trim [eval format [list $errfmt] $res]]] 
+      uplevel do_catchsql_test ${prefix}.${tn} [list $sql] [list $res]
+    }
+    eval $repair
+  }
+
+}
+
+proc delete_all_data {} {
+  db eval {SELECT tbl_name AS t FROM sqlite_master WHERE type = 'table'} {
+    db eval "DELETE FROM '[string map {' ''} $t]'"
+  }
+}
 
 # Run an SQL script.  
 # Return the number of microseconds per statement.
@@ -360,6 +479,7 @@ proc speed_trial {name numstmt units sql} {
   puts [format {%12d uS %s %s} $tm $rate $u2]
   global total_time
   set total_time [expr {$total_time+$tm}]
+  lappend ::speed_trial_times $name $tm
 }
 proc speed_trial_tcl {name numstmt units script} {
   puts -nonewline [format {%-21.21s } $name...]
@@ -375,14 +495,30 @@ proc speed_trial_tcl {name numstmt units script} {
   puts [format {%12d uS %s %s} $tm $rate $u2]
   global total_time
   set total_time [expr {$total_time+$tm}]
+  lappend ::speed_trial_times $name $tm
 }
 proc speed_trial_init {name} {
   global total_time
   set total_time 0
+  set ::speed_trial_times [list]
+  sqlite3 versdb :memory:
+  set vers [versdb one {SELECT sqlite_source_id()}]
+  versdb close
+  puts "SQLite $vers"
 }
 proc speed_trial_summary {name} {
   global total_time
   puts [format {%-21.21s %12d uS TOTAL} $name $total_time]
+
+  if { 0 } {
+    sqlite3 versdb :memory:
+    set vers [lindex [versdb one {SELECT sqlite_source_id()}] 0]
+    versdb close
+    puts "CREATE TABLE IF NOT EXISTS time(version, script, test, us);"
+    foreach {test us} $::speed_trial_times {
+      puts "INSERT INTO time VALUES('$vers', '$name', '$test', $us);"
+    }
+  }
 }
 
 # Run this routine last
@@ -442,8 +578,10 @@ proc finalize_testing {} {
     incr nErr
   }
  ifcapable malloc {
-   if {[sqlite3_memory_used]>0} {
-    puts "Unfreed memory: [sqlite3_memory_used] bytes"
+  if {[lindex [sqlite3_status SQLITE_STATUS_MALLOC_COUNT 0] 1]>0 ||
+              [sqlite3_memory_used]>0} {
+    puts "Unfreed memory: [sqlite3_memory_used] bytes in\
+         [lindex [sqlite3_status SQLITE_STATUS_MALLOC_COUNT 0] 1] allocations"
     incr nErr
     ifcapable memdebug||mem5||(mem3&&debug) {
       puts "Writing unfreed memory log to \"./memleak.txt\""
@@ -476,7 +614,7 @@ proc finalize_testing {} {
  } else {
   puts "Memory usage not being tracked" 
  }
-  
+
   foreach f [glob -nocomplain test.db-*-journal] {
     file delete -force $f
   }
@@ -495,6 +633,9 @@ proc show_memstats {} {
   set val [format {now %10d  max %10d  max-size %10d} \
               [lindex $x 1] [lindex $x 2] [lindex $y 2]]
   puts "Memory used:          $val"
+  set x [sqlite3_status SQLITE_STATUS_MALLOC_COUNT 0]
+  set val [format {now %10d  max %10d} [lindex $x 1] [lindex $x 2]]
+  puts "Allocation count:     $val"
   set x [sqlite3_status SQLITE_STATUS_PAGECACHE_USED 0]
   set y [sqlite3_status SQLITE_STATUS_PAGECACHE_SIZE 0]
   set val [format {now %10d  max %10d  max-size %10d} \
@@ -511,7 +652,7 @@ proc show_memstats {} {
   set val [format {now %10d  max %10d  max-size %10d} \
                [lindex $x 1] [lindex $x 2] [lindex $y 2]]
   puts "Scratch overflow:     $val"
-   ifcapable yytrackmaxstackdepth {
+  ifcapable yytrackmaxstackdepth {
     set x [sqlite3_status SQLITE_STATUS_PARSER_STACK 0]
     set val [format {               max %10d} [lindex $x 2]]
     puts "Parser stack depth:    $val"
@@ -596,9 +737,25 @@ proc stepsql {dbptr sql} {
 
 # Delete a file or directory
 #
-proc forcedelete {filename} {
-  if {[catch {file delete -force $filename}]} {
-    exec rm -rf $filename
+proc forcedelete {args} {
+  foreach filename $args {
+    # On windows, sometimes even a [file delete -force] can fail just after
+    # a file is closed. The cause is usually "tag-alongs" - programs like
+    # anti-virus software, automatic backup tools and various explorer
+    # extensions that keep a file open a little longer than we expect, causing
+    # the delete to fail.
+    #
+    # The solution is to wait a short amount of time before retrying the 
+    # delete.
+    #
+    set nRetry  50                  ;# Maximum number of retries.
+    set nDelay 100                  ;# Delay in ms before retrying.
+    for {set i 0} {$i<$nRetry} {incr i} {
+      set rc [catch {file delete -force $filename} msg]
+      if {$rc==0} break
+      after $nDelay
+    }
+    if {$rc} { error $msg }
   }
 }
 
@@ -660,9 +817,6 @@ proc ifcapable {expr code {else ""} {elsecode ""}} {
 #   crashsql -delay CRASHDELAY -file CRASHFILE ?-blocksize BLOCKSIZE? $sql
 #
 proc crashsql {args} {
-  if {$::tcl_platform(platform)!="unix"} {
-    error "crashsql should only be used on unix"
-  }
 
   set blocksize ""
   set crashdelay 1
@@ -690,7 +844,10 @@ proc crashsql {args} {
     error "Compulsory option -file missing"
   }
 
-  set cfile [file join [pwd] $crashfile]
+  # $crashfile gets compared to the native filename in 
+  # cfSync(), which can be different then what TCL uses by
+  # default, so here we force it to the "nativename" format.
+  set cfile [string map {\\ \\\\} [file nativename [file join [pwd] $crashfile]]]
 
   set f [open crash.tcl w]
   puts $f "sqlite3_crash_enable 1"
@@ -719,10 +876,20 @@ proc crashsql {args} {
     puts $f "}"
   }
   close $f
-
   set r [catch {
     exec [info nameofexec] crash.tcl >@stdout
   } msg]
+  
+  # Windows/ActiveState TCL returns a slightly different
+  # error message.  We map that to the expected message
+  # so that we don't have to change all of the test
+  # cases.
+  if {$::tcl_platform(platform)=="windows"} {
+    if {$msg=="child killed: unknown signal"} {
+      set msg "child process exited abnormally"
+    }
+  }
+  
   lappend r $msg
 }
 
@@ -1090,9 +1257,9 @@ proc drop_all_tables {{db db}} {
     }
     foreach {t type} [$db eval "
       SELECT name, type FROM $master
-      WHERE type IN('table', 'view') AND name NOT like 'sqlite_%'
+      WHERE type IN('table', 'view') AND name NOT LIKE 'sqliteX_%' ESCAPE 'X'
     "] {
-      $db eval "DROP $type $t"
+      $db eval "DROP $type \"$t\""
     }
   }
   ifcapable trigger&&foreignkey {
@@ -1141,6 +1308,11 @@ proc permutation {} {
   catch {set perm $::G(perm:name)}
   set perm
 }
+proc presql {} {
+  set presql ""
+  catch {set presql $::G(perm:presql)}
+  set presql
+}
 
 #-------------------------------------------------------------------------
 #
@@ -1173,6 +1345,11 @@ proc slave_test_script {script} {
   # Run the test script.
   interp eval tinterp $script
 
+  # Check if the interpreter call [run_thread_tests]
+  if { [interp eval tinterp {info exists ::run_thread_tests_called}] } {
+    set ::run_thread_tests_called 1
+  }
+
   # Delete the interpreter used to run the test script.
   interp delete tinterp
 }
@@ -1180,20 +1357,26 @@ proc slave_test_script {script} {
 proc slave_test_file {zFile} {
   set tail [file tail $zFile]
 
-  ifcapable shared_cache { 
-    set scs [sqlite3_enable_shared_cache] 
-  }
+  # Remember the value of the shared-cache setting. So that it is possible
+  # to check afterwards that it was not modified by the test script.
+  #
+  ifcapable shared_cache { set scs [sqlite3_enable_shared_cache] }
 
+  # Run the test script in a slave interpreter.
+  #
+  unset -nocomplain ::run_thread_tests_called
   reset_prng_state
   set ::sqlite_open_file_count 0
   set time [time { slave_test_script [list source $zFile] }]
   set ms [expr [lindex $time 0] / 1000]
 
-  # Test that all files opened by the test script were closed.
+  # Test that all files opened by the test script were closed. Omit this
+  # if the test script has "thread" in its name. The open file counter
+  # is not thread-safe.
   #
-  do_test ${tail}-closeallfiles {
-    expr {$::sqlite_open_file_count>0}
-  } {0}
+  if {[info exists ::run_thread_tests_called]==0} {
+    do_test ${tail}-closeallfiles { expr {$::sqlite_open_file_count>0} } {0}
+  }
   set ::sqlite_open_file_count 0
 
   # Test that the global "shared-cache" setting was not altered by 
@@ -1204,19 +1387,63 @@ proc slave_test_file {zFile} {
     do_test ${tail}-sharedcachesetting [list set {} $res] 1
   }
 
-  if {$::sqlite_open_file_count>0} {
-    puts "$tail did not close all files: $::sqlite_open_file_count"
-    fail_test "$tail-closeallfiles"
-    set ::sqlite_open_file_count 0
-  }
+  # Add some info to the output.
+  #
   puts "Time: $tail $ms ms"
-
   show_memstats
 }
 
+# Open a new connection on database test.db and execute the SQL script
+# supplied as an argument. Before returning, close the new conection and
+# restore the 4 byte fields starting at header offsets 28, 92 and 96
+# to the values they held before the SQL was executed. This simulates
+# a write by a pre-3.7.0 client.
+#
+proc sql36231 {sql} {
+  set B [hexio_read test.db 92 8]
+  set A [hexio_read test.db 28 4]
+  sqlite3 db36231 test.db
+  catch { db36231 func a_string a_string }
+  execsql $sql db36231
+  db36231 close
+  hexio_write test.db 28 $A
+  hexio_write test.db 92 $B
+  return ""
+}
+
+proc db_save {} {
+  foreach f [glob -nocomplain sv_test.db*] { forcedelete $f }
+  foreach f [glob -nocomplain test.db*] {
+    set f2 "sv_$f"
+    file copy -force $f $f2
+  }
+}
+proc db_save_and_close {} {
+  db_save
+  catch { db close }
+  return ""
+}
+proc db_restore {} {
+  foreach f [glob -nocomplain test.db*] { forcedelete $f }
+  foreach f2 [glob -nocomplain sv_test.db*] {
+    set f [string range $f2 3 end]
+    file copy -force $f2 $f
+  }
+}
+proc db_restore_and_reopen {{dbfile test.db}} {
+  catch { db close }
+  db_restore
+  sqlite3 db $dbfile
+}
+proc db_delete_and_reopen {{file test.db}} {
+  catch { db close }
+  foreach f [glob -nocomplain test.db*] { file delete -force $f }
+  sqlite3 db $file
+}
 
 # If the library is compiled with the SQLITE_DEFAULT_AUTOVACUUM macro set
 # to non-zero, then set the global variable $AUTOVACUUM to 1.
 set AUTOVACUUM $sqlite_options(default_autovacuum)
 
 source $testdir/thread_common.tcl
+source $testdir/malloc_common.tcl

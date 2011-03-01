@@ -41,6 +41,7 @@ using System.Data;
 using System.Data.Common;
 #endif
 using Community.CsharpSqlite;
+using System.Globalization;
 
 namespace Community.CsharpSqlite.SQLiteClient 
 {
@@ -305,11 +306,12 @@ namespace Community.CsharpSqlite.SQLiteClient
 				else if (ptype.Equals (typeof (DateTime))) 
 				{
 					DateTime dt = (DateTime)param.Value;
-                    err =(SqliteError)Sqlite3.sqlite3_bind_text(pStmt,i,dt.ToString("yyyy-MM-dd  HH:mm:ss"),-1,null);
+                    err =(SqliteError)Sqlite3.sqlite3_bind_text(pStmt,i,dt.ToString("yyyy-MM-dd HH:mm:ss.fff"),-1,null);
         }
         else if (ptype.Equals(typeof(Decimal)))
         {
-          err = (SqliteError)Sqlite3.sqlite3_bind_double(pStmt, i, Decimal.ToDouble((Decimal)param.Value));
+          string val =((Decimal)param.Value).ToString(CultureInfo.InvariantCulture);
+          err =(SqliteError)Sqlite3.sqlite3_bind_text(pStmt, i, val, val.Length,null);
         }
         else if (ptype.Equals(typeof(Double))) 
 				{
@@ -568,7 +570,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 						
 					} finally {
 						//if (parent_conn.Version == 3) 
-							Sqlite3.sqlite3_finalize (ref pStmt);
+							Sqlite3.sqlite3_finalize (pStmt);
 						//else
 						//	Sqlite.sqlite_finalize (pStmt, out errMsgPtr);
 					}

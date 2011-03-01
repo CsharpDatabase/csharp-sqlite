@@ -1,4 +1,4 @@
-//  $Header: Community.CsharpSqlite.Benchmark/Classes/SQLiteDatabase.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+//  $Header$
 using System;
 using System.Collections;
 using System.Data;

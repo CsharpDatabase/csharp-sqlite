@@ -10,7 +10,7 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/base/Notifier.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: Notifier.java,v 1.8 2003/03/11 02:21:14 mdejong Exp $
 *
 */
@@ -418,7 +418,7 @@ namespace tcl.lang
 					
 					if (h.atTime <= sysTime)
 					{
-						TimerEvent Tevent = new TimerEvent();
+						var Tevent = new TimerEvent();
 						Tevent.notifier = this;
             queueEvent( Tevent, TCL.QUEUE_TAIL );
 						timerPending = true;

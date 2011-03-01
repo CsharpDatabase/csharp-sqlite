@@ -9,7 +9,7 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/io/TclOutputStream.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: TclOutputStream.java,v 1.1 2003/03/08 03:42:44 mdejong Exp $
 */
 
@@ -17,6 +17,7 @@
 // a Writer. The class supports writing raw bytes as well as
 // encoded characters.
 using System;
+using System.IO;
 using System.Text;
 
 namespace tcl.lang
@@ -243,7 +244,7 @@ namespace tcl.lang
 			{
 				encodingEnd = true;
 				// FIXME : Make sure this flushes the CharToByteConverter
-				char[] empty = new char[0];
+				var empty = new char[0];
 				writeChars(empty, 0, 0);
 			}
 			
@@ -340,10 +341,10 @@ namespace tcl.lang
 				{
 					output.WriteByte((byte) eofChar);
 				}
-				catch (System.IO.IOException ex)
+				catch (IOException ex)
 				{
 					// FIXME: How can we recover here??
-					SupportClass.WriteStackTrace(ex, System.Console.Error);
+					SupportClass.WriteStackTrace(ex, Console.Error);
 				}
 			}
 			
@@ -1123,7 +1124,8 @@ namespace tcl.lang
 			ChannelBuffer buf;
 			byte[] dstArray;
 			int dst, src, dstMax, sawLF, total, savedLF;
-			IntPtr dstLen = new IntPtr(this), toWrite = new IntPtr(this);
+      var dstLen = new IntPtr( this );
+      var toWrite = new IntPtr( this );
 			
 			total = 0;
 			sawLF = 0;
@@ -1273,9 +1275,11 @@ namespace tcl.lang
 			int endEncoding, result;
 			bool consumedSomething;
 			//Tcl_Encoding encoding;
-			byte[] safe = new byte[ChannelBuffer.BUFFER_PADDING];
-			IntPtr stageLen = new IntPtr(this), toWrite = new IntPtr(this);
-			IntPtr stageRead = new IntPtr(this), dstWrote = new IntPtr(this);
+			var safe = new byte[ChannelBuffer.BUFFER_PADDING];
+      var stageLen = new IntPtr( this );
+      var toWrite = new IntPtr( this );
+      var stageRead = new IntPtr( this );
+      var dstWrote = new IntPtr( this );
 			
 			total = 0;
 			sawLF = 0;

@@ -18,6 +18,8 @@
 set testdir [file dirname $argv0]
 source $testdir/tester.tcl
 
+do_not_use_codec
+
 ifcapable !trigger||!view { finish_test ; return }
 
 # Fill a database with test data.
@@ -61,7 +63,7 @@ set cksum [dbcksum db main]
 do_test backup2-2 {
   file delete -force bu1.db
   db backup bu1.db
-  sqlite3 db2 bu1.db 
+  sqlite3 db2 bu1.db
   dbcksum db2 main
 } $cksum
 
@@ -71,7 +73,7 @@ do_test backup2-2 {
 do_test backup2-3.1 {
   db close
   file delete -force test.db test.db-journal
-  sqlite3 db test.db 
+  sqlite3 db test.db
   db2 eval {BEGIN EXCLUSIVE}
   set rc [catch {db restore bu1.db} res]
   lappend rc $res
@@ -81,7 +83,7 @@ do_test backup2-3.1 {
 do_test backup2-3.2 {
   db close
   file delete -force test.db test.db-journal
-  sqlite3 db test.db 
+  sqlite3 db test.db
   db restore bu1.db
   dbcksum db main
 } $cksum
@@ -89,7 +91,6 @@ do_test backup2-3.2 {
 # Use alternative databases - other than "main".
 #
 do_test backup2-4 {
-  sqlite3 db test.db 
   db restore temp bu1.db
   dbcksum db temp
 } $cksum
@@ -97,7 +98,7 @@ do_test backup2-5 {
   db2 close
   file delete -force bu1.db bu2.db
   db backup temp bu2.db
-  sqlite3 db2 bu2.db 
+  sqlite3 db2 bu2.db
   dbcksum db2 main
 } $cksum
 

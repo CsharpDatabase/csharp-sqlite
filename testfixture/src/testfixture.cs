@@ -1,6 +1,11 @@
 using System;
+using System.Text;
 using Community.CsharpSqlite;
 using tcl.lang;
+using ClientData = System.Object;
+using Tcl_Interp = tcl.lang.Interp;
+using Tcl_Obj = tcl.lang.TclObject;
+
 
   class Testing
   {
@@ -18,7 +23,7 @@ using tcl.lang;
     ** This file contains code to implement the "sqlite" test harness
     ** which runs TCL commands for testing the C#-SQLite port.
     **
-    ** $Header: testfixture/src/testfixture.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+    ** $Header$
     */
     public static void Main(string[] args)
     {
@@ -29,7 +34,7 @@ using tcl.lang;
         // Create the interpreter. This will also create the built-in
         // Tcl commands.
 
-        Interp interp = new Interp();
+        var interp = new Interp();
 
         // Make command-line arguments available in the Tcl variables "argc"
         // and "argv".  If the first argument doesn't start with a "-" then
@@ -75,21 +80,9 @@ using tcl.lang;
           argv.release();
         }
 
-        // Setup SQLIte specific object for routines
-        Sqlite3.Sqlite3_Init(interp);
-        Sqlite3.Sqlitetestbackup_Init(interp);
-        Sqlite3.Sqliteconfig_Init(interp);
-        Sqlite3.Sqlitetest_autoext_Init(interp);
-        Sqlite3.Sqlitetest_func_Init(interp);
-        Sqlite3.Sqlitetest_hexio_Init(interp);
-        Sqlite3.Sqlitetest_malloc_Init(interp);
-        Sqlite3.Sqlitetest_mutex_Init(interp);
-        Sqlite3.Sqlitetest1_Init(interp);
-        Sqlite3.Sqlitetest2_Init(interp);
-        Sqlite3.Sqlitetest3_Init(interp);
-        Sqlite3.Sqlitetest6_Init(interp);
-        Sqlite3.Sqlitetest9_Init(interp);
-        Sqlite3.Md5_Init(interp);
+        init_all( interp );
+        TCL.Tcl_CreateObjCommand( interp, "load_testfixture_extensions", init_all_cmd, 0, null );
+
 
         // Normally we would do application specific initialization here.
         // However, that feature is not currently supported.
@@ -155,7 +148,7 @@ using tcl.lang;
           // We are running in interactive mode. Start the ConsoleThread
           // that loops, grabbing stdin and passing it to the interp.
 
-          ConsoleThread consoleThread = new ConsoleThread(interp);
+          var consoleThread = new ConsoleThread(interp);
           consoleThread.IsBackground = true;
           consoleThread.Start();
 
@@ -171,6 +164,49 @@ using tcl.lang;
         }
       }
     }
+#if SQLITE_TEST
+    //static void init_all(Tcl_Interp *);
+    static int init_all_cmd(
+    ClientData cd,
+    Tcl_Interp interp,
+    int objc,
+    Tcl_Obj[] objv
+    )
+    {
+      Tcl_Interp slave;
+      if ( objc != 2 )
+      {
+        TCL.Tcl_WrongNumArgs( interp, 1, objv, "SLAVE" );
+        return TCL.TCL_ERROR;
+      }
+
+      slave = TCL.Tcl_GetSlave( interp, TCL.Tcl_GetString( objv[1] ) );
+      if ( slave == null )
+      {
+        return TCL.TCL_ERROR;
+      }
+
+      init_all( slave );
+      return TCL.TCL_OK;
+    }
+#endif
+    // Setup SQLIte specific object for routines
+        static void init_all(Interp interp){
+        Sqlite3.Sqlite3_Init(interp);
+        Sqlite3.Sqlitetestbackup_Init(interp);
+        Sqlite3.Sqliteconfig_Init(interp);
+        Sqlite3.Sqlitetest_autoext_Init(interp);
+        Sqlite3.Sqlitetest_func_Init(interp);
+        Sqlite3.Sqlitetest_hexio_Init(interp);
+        Sqlite3.Sqlitetest_malloc_Init(interp);
+        Sqlite3.Sqlitetest_mutex_Init(interp);
+        Sqlite3.Sqlitetest1_Init(interp);
+        Sqlite3.Sqlitetest2_Init(interp);
+        Sqlite3.Sqlitetest3_Init(interp);
+        Sqlite3.Sqlitetest9_Init(interp);
+        Sqlite3.Md5_Init(interp);
+  }
+
   }
 
 namespace tcl.lang
@@ -360,7 +396,7 @@ namespace tcl.lang
     // Collect the user input in this buffer until it forms a complete Tcl
     // command.
 
-    internal System.Text.StringBuilder sbuf;
+    internal StringBuilder sbuf;
 
     // Used to for interactive input/output
 
@@ -377,7 +413,7 @@ namespace tcl.lang
     {
       Name = "ConsoleThread";
       interp = i;
-      sbuf = new System.Text.StringBuilder(100);
+      sbuf = new StringBuilder(100);
 
       out_Renamed = TclIO.getStdChannel(StdChannel.STDOUT);
       err = TclIO.getStdChannel(StdChannel.STDERR);
@@ -422,7 +458,7 @@ namespace tcl.lang
         // to create an event and add it to the thread
         // safe event queue.
 
-        TclEvent Tevent = new AnonymousClassTclEvent(command, this); // end TclEvent innerclass
+        var Tevent = new AnonymousClassTclEvent(command, this); // end TclEvent innerclass
 
         // Add the event to the thread safe event queue
         interp.getNotifier().queueEvent(Tevent, TCL.QUEUE_TAIL);
@@ -514,6 +550,6 @@ namespace tcl.lang
           WriteLine("sysInAvailableWorks = " + sysInAvailableWorks);
         }
       }
-    }
+    }  
   } // end of class ConsoleThread
 }

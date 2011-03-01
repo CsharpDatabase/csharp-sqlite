@@ -25,7 +25,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2010-03-09 19:31:43 4ae453ea7be69018d8c16eb8dabe05617397dc4d
+    **  SQLITE_SOURCE_ID: 2010-12-07 20:14:09 a586a4deeb25330037a49df295b36aaf624d0f45
     **
     **  $Header$
     *************************************************************************
@@ -63,7 +63,7 @@ namespace Community.CsharpSqlite
       string zTableName = sqlite3_value_text( argv[1] );
 
       int token = 0;
-      Token tname = new Token();
+      var tname = new Token();
       int zCsr = 0;
       int zLoc = 0;
       int len = 0;
@@ -198,7 +198,7 @@ namespace Community.CsharpSqlite
       string zTableName = sqlite3_value_text( argv[1] );
 
       int token = 0;
-      Token tname = new Token();
+      var tname = new Token();
       int dist = 3;
       int zCsr = 0;
       int zLoc = 0;
@@ -269,18 +269,29 @@ namespace Community.CsharpSqlite
     /*
 ** Register built-in functions used to help implement ALTER TABLE
 */
-    static void sqlite3AlterFunctions( sqlite3 db )
-    {
-      sqlite3CreateFunc( db, "sqlite_rename_table", 2, SQLITE_UTF8, 0,
-      renameTableFunc, null, null );
+    static FuncDef[] aAlterTableFuncs;
+    static void sqlite3AlterFunctions(){
+  aAlterTableFuncs = new FuncDef[] {
+    FUNCTION("sqlite_rename_table",   2, 0, 0, renameTableFunc),
 #if !SQLITE_OMIT_TRIGGER
-      sqlite3CreateFunc( db, "sqlite_rename_trigger", 2, SQLITE_UTF8, 0,
-      renameTriggerFunc, null, null );
+    FUNCTION("sqlite_rename_trigger", 2, 0, 0, renameTriggerFunc),
 #endif
 #if !SQLITE_OMIT_FOREIGN_KEY
-      sqlite3CreateFunc( db, "sqlite_rename_parent", 3, SQLITE_UTF8, 0,
-                             renameParentFunc, null, null );
+    FUNCTION("sqlite_rename_parent",  3, 0, 0, renameParentFunc),
 #endif
+  };
+  int i;
+#if SQLITE_OMIT_WSD
+  FuncDefHash pHash = GLOBAL(FuncDefHash, sqlite3GlobalFunctions);
+  FuncDef[] aFunc = GLOBAL(FuncDef, aAlterTableFuncs);
+#else
+  FuncDefHash pHash = sqlite3GlobalFunctions;
+  FuncDef[] aFunc = aAlterTableFuncs;
+#endif
+
+  for(i=0; i<ArraySize(aAlterTableFuncs); i++){
+    sqlite3FuncDefInsert(pHash, aFunc[i]);
+  }
     }
 
     /*
@@ -359,6 +370,12 @@ static string whereForeignKeys(Parse pParse, Table pTab){
           }
         }
       }
+      if ( !String.IsNullOrEmpty(zWhere) )
+      {
+        zWhere = sqlite3MPrintf( pParse.db, "type='trigger' AND (%s)", zWhere );
+        //sqlite3DbFree( pParse.db, ref zWhere );
+        //zWhere = zNew;
+      }
       return zWhere;
     }
 
@@ -436,6 +453,9 @@ static string whereForeignKeys(Parse pParse, Table pTab){
       string zWhere = "";       /* Where clause to locate temp triggers */
 #endif
       VTable pVTab = null;         /* Non-zero if this is a v-tab with an xRename() */
+      int savedDbFlags;         /* Saved value of db->flags */
+
+      savedDbFlags = db.flags;  
 
       //if ( NEVER( db.mallocFailed != 0 ) ) goto exit_rename_table;
       Debug.Assert( pSrc.nSrc == 1 );
@@ -444,6 +464,7 @@ static string whereForeignKeys(Parse pParse, Table pTab){
       if ( pTab == null ) goto exit_rename_table;
       iDb = sqlite3SchemaToIndex( pParse.db, pTab.pSchema );
       zDb = db.aDb[iDb].zName;
+      db.flags |= SQLITE_PreferBuiltin;
 
       /* Get a NULL terminated version of the new table name. */
       zName = sqlite3NameFromToken( db, pName );
@@ -619,6 +640,7 @@ sqlite3MayAbort(pParse);
     exit_rename_table:
       sqlite3SrcListDelete( db, ref pSrc );
       sqlite3DbFree( db, ref zName );
+      db.flags = savedDbFlags;
     }
 
     /*
@@ -748,10 +770,12 @@ return;
       if ( zCol != null )
       {
         //  char zEnd = zCol[pColDef.n-1];
+        int savedDbFlags = db.flags;
         //      while( zEnd>zCol && (*zEnd==';' || sqlite3Isspace(*zEnd)) ){
         //    zEnd-- = '\0';
         //  }
-        sqlite3NestedParse( pParse,
+        db.flags |= SQLITE_PreferBuiltin;
+        sqlite3NestedParse(pParse,
         "UPDATE \"%w\".%s SET " +
         "sql = substr(sql,1,%d) || ', ' || %Q || substr(sql,%d) " +
         "WHERE type = 'table' AND name = %Q",
@@ -759,6 +783,7 @@ return;
         zTab
         );
         sqlite3DbFree( db, ref zCol );
+        db.flags = savedDbFlags;
       }
 
       /* If the default value of the new column is NULL, then set the file
@@ -830,7 +855,6 @@ return;
       if ( pNew == null ) goto exit_begin_add_column;
       pParse.pNewTable = pNew;
       pNew.nRef = 1;
-      pNew.dbMem = pTab.dbMem;
       pNew.nCol = pTab.nCol;
       Debug.Assert( pNew.nCol > 0 );
       nAlloc = ( ( ( pNew.nCol - 1 ) / 8 ) * 8 ) + 8;

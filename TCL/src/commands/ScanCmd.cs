@@ -8,7 +8,7 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header: TCL/src/commands/ScanCmd.cs,v 47be2d23056c 2011/02/28 18:04:55 Noah $
+* $Header$
 * RCS @(#) $Id: ScanCmd.java,v 1.2 1999/05/09 01:22:09 dejong Exp $
 *
 */
@@ -314,7 +314,7 @@ namespace tcl.lang
 									
 									if (!discardFlag)
 									{
-										string str = new string(scanArr, tempIndex, scanIndex - tempIndex);
+										var str = new string(scanArr, tempIndex, scanIndex - tempIndex);
 										testAndSetVar(interp, argv, argIndex++, TclString.newInstance(str));
 									}
 								}
@@ -471,7 +471,7 @@ namespace tcl.lang
 								
 								if (!discardFlag)
 								{
-									string str = new string(scanArr, startIndex, endIndex);
+									var str = new string(scanArr, startIndex, endIndex);
 									testAndSetVar(interp, argv, argIndex++, TclString.newInstance(str));
 								}
 								break;

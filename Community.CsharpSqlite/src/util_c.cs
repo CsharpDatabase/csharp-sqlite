@@ -38,7 +38,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2010-03-09 19:31:43 4ae453ea7be69018d8c16eb8dabe05617397dc4d
+    **  SQLITE_SOURCE_ID: 2010-12-07 20:14:09 a586a4deeb25330037a49df295b36aaf624d0f45
     **
     **  $Header$
     *************************************************************************
@@ -67,7 +67,7 @@ dummy += x;
 ** Use the math library isnan() function if compiled with SQLITE_HAVE_ISNAN.
 ** Otherwise, we have our own implementation that works on most systems.
 */
-    static bool sqlite3IsNaN(double x)
+    static bool sqlite3IsNaN( double x )
     {
       bool rc;   /* The value return */
 #if !(SQLITE_HAVE_ISNAN)
@@ -99,11 +99,11 @@ dummy += x;
 #endif
       double y = x;
       double z = y;
-      rc = (y != z);
+      rc = ( y != z );
 #else  //* if defined(SQLITE_HAVE_ISNAN) */
 rc = isnan(x);
 #endif //* SQLITE_HAVE_ISNAN */
-      testcase(rc);
+      testcase( rc );
       return rc;
     }
 #endif //* SQLITE_OMIT_FLOATING_POINT */
@@ -116,22 +116,24 @@ rc = isnan(x);
 ** than the actual length of the string.  For very long strings (greater
 ** than 1GiB) the value returned might be less than the true string length.
 */
-    static int sqlite3Strlen30(int z)
+    static int sqlite3Strlen30( int z )
     {
       return 0x3fffffff & z;
     }
-    static int sqlite3Strlen30(StringBuilder z)
+    static int sqlite3Strlen30( StringBuilder z )
     {
       //const char *z2 = z;
-      if (z == null) return 0;
+      if ( z == null )
+        return 0;
       //while( *z2 ){ z2++; }
       //return 0x3fffffff & (int)(z2 - z);
       return 0x3fffffff & z.Length;
     }
-    static int sqlite3Strlen30(string z)
+    static int sqlite3Strlen30( string z )
     {
       //const char *z2 = z;
-      if (z == null) return 0;
+      if ( z == null )
+        return 0;
       //while( *z2 ){ z2++; }
       //return 0x3fffffff & (int)(z2 - z);
       return 0x3fffffff & z.Length;
@@ -160,25 +162,25 @@ rc = isnan(x);
     ** to NULL.
     */
     //Overloads
-    static void sqlite3Error(sqlite3 db, int err_code, int noString)
-    { sqlite3Error(db, err_code, err_code == 0 ? null : ""); }
+    static void sqlite3Error( sqlite3 db, int err_code, int noString )
+    { sqlite3Error( db, err_code, err_code == 0 ? null : "" ); }
 
-    static void sqlite3Error(sqlite3 db, int err_code, string zFormat, params object[] ap)
+    static void sqlite3Error( sqlite3 db, int err_code, string zFormat, params object[] ap )
     {
-      if (db != null && (db.pErr != null || (db.pErr = sqlite3ValueNew(db)) != null))
+      if ( db != null && ( db.pErr != null || ( db.pErr = sqlite3ValueNew( db ) ) != null ) )
       {
         db.errCode = err_code;
-        if (zFormat != null)
+        if ( zFormat != null )
         {
           string z;
-          va_start(ap, zFormat);
-          z = sqlite3VMPrintf(db, zFormat, ap);
-          va_end(ap);
-          sqlite3ValueSetStr(db.pErr, -1, z, SQLITE_UTF8, (dxDel)SQLITE_DYNAMIC);
+          va_start( ap, zFormat );
+          z = sqlite3VMPrintf( db, zFormat, ap );
+          va_end( ap );
+          sqlite3ValueSetStr( db.pErr, -1, z, SQLITE_UTF8, (dxDel)SQLITE_DYNAMIC );
         }
         else
         {
-          sqlite3ValueSetStr(db.pErr, 0, null, SQLITE_UTF8, SQLITE_STATIC);
+          sqlite3ValueSetStr( db.pErr, 0, null, SQLITE_UTF8, SQLITE_STATIC );
         }
       }
     }
@@ -200,22 +202,22 @@ rc = isnan(x);
     ** Function sqlite3Error() should be used during statement execution
     ** (sqlite3_step() etc.).
     */
-    static void sqlite3ErrorMsg(Parse pParse, string zFormat, params object[] ap)
+    static void sqlite3ErrorMsg( Parse pParse, string zFormat, params object[] ap )
     {
       string zMsg;
       //va_list ap;
       sqlite3 db = pParse.db;
-      va_start(ap, zFormat);
-      zMsg = sqlite3VMPrintf(db, zFormat, ap);
-      va_end(ap);
-      if (db.suppressErr != 0)
+      va_start( ap, zFormat );
+      zMsg = sqlite3VMPrintf( db, zFormat, ap );
+      va_end( ap );
+      if ( db.suppressErr != 0 )
       {
-        sqlite3DbFree(db, ref zMsg);
+        sqlite3DbFree( db, ref zMsg );
       }
       else
       {
         pParse.nErr++;
-        sqlite3DbFree(db, ref pParse.zErrMsg);
+        sqlite3DbFree( db, ref pParse.zErrMsg );
         pParse.zErrMsg = zMsg;
         pParse.rc = SQLITE_ERROR;
       }
@@ -238,28 +240,35 @@ rc = isnan(x);
     ** brackets from around identifers.  For example:  "[a-b-c]" becomes
     ** "a-b-c".
     */
-    static int sqlite3Dequote(ref string z)
+    static int sqlite3Dequote( ref string z )
     {
       char quote;
       int i;
-      if (z == null || z == "") return -1;
+      if ( z == null || z == "" )
+        return -1;
       quote = z[0];
-      switch (quote)
+      switch ( quote )
       {
-        case '\'': break;
-        case '"': break;
-        case '`': break;                /* For MySQL compatibility */
-        case '[': quote = ']'; break;  /* For MS SqlServer compatibility */
-        default: return -1;
+        case '\'':
+          break;
+        case '"':
+          break;
+        case '`':
+          break;                /* For MySQL compatibility */
+        case '[':
+          quote = ']';
+          break;  /* For MS SqlServer compatibility */
+        default:
+          return -1;
       }
-      StringBuilder sbZ = new StringBuilder(z.Length);
-      for (i = 1; i < z.Length; i++) //z[i] != 0; i++)
+      var sbZ = new StringBuilder( z.Length );
+      for ( i = 1; i < z.Length; i++ ) //z[i] != 0; i++)
       {
-        if (z[i] == quote)
+        if ( z[i] == quote )
         {
-          if (i < z.Length - 1 && (z[i + 1] == quote))
+          if ( i < z.Length - 1 && ( z[i + 1] == quote ) )
           {
-            sbZ.Append(quote);
+            sbZ.Append( quote );
             i++;
           }
           else
@@ -269,7 +278,7 @@ rc = isnan(x);
         }
         else
         {
-          sbZ.Append(z[i]);
+          sbZ.Append( z[i] );
         }
       }
       z = sbZ.ToString();
@@ -283,9 +292,15 @@ rc = isnan(x);
     /*
     ** Some systems have stricmp().  Others have strcasecmp().  Because
     ** there is no consistency, we will define our own.
+    **
+    ** IMPLEMENTATION-OF: R-20522-24639 The sqlite3_strnicmp() API allows
+    ** applications and extensions to compare the contents of two buffers
+    ** containing UTF-8 strings in a case-independent fashion, using the same
+    ** definition of case independence that SQLite uses internally when
+    ** comparing identifiers.
     */
 
-    static int sqlite3StrICmp(string zLeft, string zRight)
+    static int sqlite3StrICmp( string zLeft, string zRight )
     {
       //register unsigned char *a, *b;
       //a = (unsigned char *)zLeft;
@@ -293,108 +308,81 @@ rc = isnan(x);
       //while( *a!=0 && UpperToLower[*a]==UpperToLower[*b]){ a++; b++; }
       //return UpperToLower[*a] - UpperToLower[*b];
       int a = 0, b = 0;
-      if (zRight == null) return 0;
-      while (a < zLeft.Length && b < zRight.Length && UpperToLower[zLeft[a]] == UpperToLower[zRight[b]]) { a++; b++; }
-      if (a == zLeft.Length && b == zRight.Length) return 0;
+      if ( zRight == null )
+        return 0;
+      while ( a < zLeft.Length && b < zRight.Length && UpperToLower[zLeft[a]] == UpperToLower[zRight[b]] ) { a++; b++; }
+      if ( a == zLeft.Length && b == zRight.Length )
+        return 0;
       else
       {
-        if (a == zLeft.Length) return -UpperToLower[zRight[b]];
-        if (b == zRight.Length) return UpperToLower[zLeft[a]];
+        if ( a == zLeft.Length )
+          return -UpperToLower[zRight[b]];
+        if ( b == zRight.Length )
+          return UpperToLower[zLeft[a]];
         return UpperToLower[zLeft[a]] - UpperToLower[zRight[b]];
       }
     }
 
-    static int sqlite3_strnicmp(string zLeft, int offsetLeft, string zRight, int N)
-    { return sqlite3StrNICmp(zLeft, offsetLeft, zRight, N); }
+    static int sqlite3_strnicmp( string zLeft, int offsetLeft, string zRight, int N )
+    { return sqlite3StrNICmp( zLeft, offsetLeft, zRight, N ); }
 
-    static int sqlite3StrNICmp(string zLeft, int offsetLeft, string zRight, int N)
+    static int sqlite3StrNICmp( string zLeft, int offsetLeft, string zRight, int N )
     {
       //register unsigned char *a, *b;
       //a = (unsigned char *)zLeft;
       //b = (unsigned char *)zRight;
       int a = 0, b = 0;
-      while (N-- > 0 && a < zLeft.Length - offsetLeft && b < zRight.Length && zLeft[a + offsetLeft] != 0 && UpperToLower[zLeft[a + offsetLeft]] == UpperToLower[zRight[b]]) { a++; b++; }
-      return N < 0 ? 0 : ((a < zLeft.Length - offsetLeft)?UpperToLower[zLeft[a + offsetLeft]]:0) - UpperToLower[zRight[b]];
+      while ( N-- > 0 && a < zLeft.Length - offsetLeft && b < zRight.Length && zLeft[a + offsetLeft] != 0 && UpperToLower[zLeft[a + offsetLeft]] == UpperToLower[zRight[b]] ) { a++; b++; }
+      return N < 0 ? 0 : ( ( a < zLeft.Length - offsetLeft ) ? UpperToLower[zLeft[a + offsetLeft]] : 0 ) - UpperToLower[zRight[b]];
     }
 
-    static int sqlite3StrNICmp(string zLeft, string zRight, int N)
+    static int sqlite3StrNICmp( string zLeft, string zRight, int N )
     {
       //register unsigned char *a, *b;
       //a = (unsigned char *)zLeft;
       //b = (unsigned char *)zRight;
       int a = 0, b = 0;
-      while (N-- > 0 && a < zLeft.Length && b < zRight.Length && (zLeft[a] == zRight[b] || (zLeft[a] != 0 && zLeft[a] < 256 && zRight[b] < 256 && UpperToLower[zLeft[a]] == UpperToLower[zRight[b]]))) { a++; b++; }
-      if (N < 0) return 0;
-      if (a == zLeft.Length && b == zRight.Length) return 0;
-      if (a == zLeft.Length) return -UpperToLower[zRight[b]];
-      if (b == zRight.Length) return UpperToLower[zLeft[a]];
-      return (zLeft[a] < 256 ? UpperToLower[zLeft[a]] : zLeft[a]) - (zRight[b] < 256 ? UpperToLower[zRight[b]] : zRight[b]);
-    }
-
-    /*
-    ** Return TRUE if z is a pure numeric string.  Return FALSE and leave
-    ** *realnum unchanged if the string contains any character which is not
-    ** part of a number.
-    **
-    ** If the string is pure numeric, set *realnum to TRUE if the string
-    ** contains the '.' character or an "E+000" style exponentiation suffix.
-    ** Otherwise set *realnum to FALSE.  Note that just becaue *realnum is
-    ** false does not mean that the number can be successfully converted into
-    ** an integer - it might be too big.
-    **
-    ** An empty string is considered non-numeric.
-    */
-    static int sqlite3IsNumber(string z, ref int realnum, int enc)
-    {
-      if (String.IsNullOrEmpty(z)) return 0;
-      int incr = (enc == SQLITE_UTF8 ? 1 : 2);
-      int zIndex = 0;
-      if (enc == SQLITE_UTF16BE) zIndex++;// z++;
-      if (z[zIndex] == '-' || z[zIndex] == '+') zIndex += incr;//z += incr;
-      if (zIndex == z.Length || !sqlite3Isdigit(z[zIndex]))
-      {
+      while ( N-- > 0 && a < zLeft.Length && b < zRight.Length && ( zLeft[a] == zRight[b] || ( zLeft[a] != 0 && zLeft[a] < 256 && zRight[b] < 256 && UpperToLower[zLeft[a]] == UpperToLower[zRight[b]] ) ) ) { a++; b++; }
+      if ( N < 0 )
         return 0;
-      }
-      zIndex += incr;//z += incr;
-      realnum = 0;
-      while (zIndex < z.Length && sqlite3Isdigit(z[zIndex])) { zIndex += incr; }//z += incr; }
-#if !SQLITE_OMIT_FLOATING_POINT
-      if (zIndex < z.Length && z[zIndex] == '.')
-      {
-        zIndex += incr;//z += incr;
-        if (!sqlite3Isdigit(z[zIndex])) return 0;
-        while (zIndex < z.Length && sqlite3Isdigit(z[zIndex])) { zIndex += incr; }//z += incr; }
-        realnum = 1;
-      }
-      if (zIndex < z.Length && (z[zIndex] == 'e' || z[zIndex] == 'E'))
-      {
-        zIndex += incr;//z += incr;
-        if (zIndex < z.Length && (z[zIndex] == '+' || z[zIndex] == '-')) zIndex += incr;//z += incr;
-        if (zIndex == z.Length || !sqlite3Isdigit(z[zIndex])) return 0;
-        while (zIndex < z.Length && sqlite3Isdigit(z[zIndex])) { zIndex += incr; }//z += incr; }
-        realnum = 1;
-      }
-#endif
-      return zIndex == z.Length ? 1 : 0;// z[zIndex] == 0;
+      if ( a == zLeft.Length && b == zRight.Length )
+        return 0;
+      if ( a == zLeft.Length )
+        return -UpperToLower[zRight[b]];
+      if ( b == zRight.Length )
+        return UpperToLower[zLeft[a]];
+      return ( zLeft[a] < 256 ? UpperToLower[zLeft[a]] : zLeft[a] ) - ( zRight[b] < 256 ? UpperToLower[zRight[b]] : zRight[b] );
     }
 
+
     /*
-    ** The string z[] is an ASCII representation of a real number.
-    ** Convert this string to a double.
+    ** The string z[] is an text representation of a real number.
+    ** Convert this string to a double and write it into *pResult.
     **
-    ** This routine assumes that z[] really is a valid number.  If it
-    ** is not, the result is undefined.
+    ** The string z[] is length bytes in length (bytes, not characters) and
+    ** uses the encoding enc.  The string is not necessarily zero-terminated.
     **
-    ** This routine is used instead of the library atof() function because
-    ** the library atof() might want to use "," as the decimal point instead
-    ** of "." depending on how locale is set.  But that would cause problems
-    ** for SQL.  So this routine always uses "." regardless of locale.
+    ** Return TRUE if the result is a valid real number (or integer) and FALSE
+    ** if the string is empty or contains extraneous text.  Valid numbers
+    ** are in one of these formats:
+    **
+    **    [+-]digits[E[+-]digits]
+    **    [+-]digits.[digits][E[+-]digits]
+    **    [+-].digits[E[+-]digits]
+    **
+    ** Leading and trailing whitespace is ignored for the purpose of determining
+    ** validity.
+    **
+    ** If some prefix of the input string is a valid number, this routine
+    ** returns FALSE but it still converts the prefix and writes the result
+    ** into *pResult.
     */
-    static int sqlite3AtoF(string z, ref double pResult)
+    static bool sqlite3AtoF( string z, ref double pResult, int length, u8 enc )
     {
 #if !SQLITE_OMIT_FLOATING_POINT
-      if (String.IsNullOrEmpty(z)) { pResult = 0; return 0; }
-      z = z.Trim() + " ";//const char *zBegin = z;
+      if ( String.IsNullOrEmpty( z ) ) { pResult = 0; return false; }
+      int incr = ( enc == SQLITE_UTF8 ? 1 : 2 );
+      //const char* zEnd = z + length;
 
       /* sign * significand * (10 ^ (esign * exponent)) */
       int sign = 1;   /* sign of significand */
@@ -402,77 +390,110 @@ rc = isnan(x);
       int d = 0;      /* adjust exponent for shifting decimal point */
       int esign = 1;  /* sign of exponent */
       int e = 0;      /* exponent */
+      int eValid = 1;  /* True exponent is either not used or is well-formed */
       double result = 0;
       int nDigits = 0;
 
+      pResult = 0.0;   /* Default return value, in case of an error */
+
       int zDx = 0;
-      while (sqlite3Isspace(z[zDx])) zDx++;
+      if ( enc == SQLITE_UTF16BE )
+        zDx++;
+
+      while ( zDx < length && sqlite3Isspace( z[zDx] ) )
+        zDx++;
+      if ( zDx >= length )
+        return false;
+
       /* get sign of significand */
-      if (z[zDx] == '-')
+      if ( z[zDx] == '-' )
       {
         sign = -1;
-        zDx++;
+        zDx += incr;
       }
-      else if (z[zDx] == '+')
+      else if ( z[zDx] == '+' )
       {
-        zDx++;
+        zDx += incr;
       }
       /* skip leading zeroes */
-      while (z[zDx] == '0')
+      while ( zDx < z.Length && z[zDx] == '0' )
       {
-        zDx++;
+        zDx += incr;
         nDigits++;
       }
       /* copy max significant digits to significand */
-      while (sqlite3Isdigit(z[zDx]) && s < ((LARGEST_INT64 - 9) / 10))
+      while ( zDx < length && sqlite3Isdigit( z[zDx] ) && s < ( ( LARGEST_INT64 - 9 ) / 10 ) )
       {
-        s = s * 10 + (z[zDx] - '0');
-        zDx++; nDigits++;
+        s = s * 10 + ( z[zDx] - '0' );
+        zDx += incr;
+        nDigits++;
       }
       /* skip non-significant significand digits
       ** (increase exponent by d to shift decimal left) */
-      while (sqlite3Isdigit(z[zDx])) { zDx++; nDigits++; d++; }
+      while ( zDx < length && sqlite3Isdigit( z[zDx] ) ) { zDx += incr; nDigits++; d++; }
+      if ( zDx >= length )
+        goto do_atof_calc;
 
       /* if decimal point is present */
-      if (z[zDx] == '.')
+      if ( z[zDx] == '.' )
       {
-        zDx++;
+        zDx += incr;
         /* copy digits from after decimal to significand
         ** (decrease exponent by d to shift decimal right) */
-        while (sqlite3Isdigit(z[zDx]) && s < ((LARGEST_INT64 - 9) / 10))
+        while ( zDx < length && sqlite3Isdigit( z[zDx] ) && s < ( ( LARGEST_INT64 - 9 ) / 10 ) )
         {
-          s = s * 10 + (z[zDx] - '0');
-          zDx++; nDigits++; d--;
+          s = s * 10 + ( z[zDx] - '0' );
+          zDx += incr;
+          nDigits++;
+          d--;
         }
+
         /* skip non-significant digits */
-        while (sqlite3Isdigit(z[zDx])) { zDx++; nDigits++; }
+        while ( zDx < length && sqlite3Isdigit( z[zDx] ) ) { zDx += incr; nDigits++; }
+        if ( zDx >= length )
+          goto do_atof_calc;
       }
 
       /* if exponent is present */
-      if (z[zDx] == 'e' || z[zDx] == 'E')
+      if ( z[zDx] == 'e' || z[zDx] == 'E' )
       {
-        zDx++;
+        zDx += incr;
+        eValid = 0;
+        if ( zDx >= length )
+          goto do_atof_calc;
+
         /* get sign of exponent */
-        if (z[zDx] == '-')
+        if ( z[zDx] == '-' )
         {
           esign = -1;
-          zDx++;
+          zDx += incr;
         }
-        else if (z[zDx] == '+')
+        else if ( z[zDx] == '+' )
         {
-          zDx++;
+          zDx += incr;
         }
+
         /* copy digits to exponent */
-        while (sqlite3Isdigit(z[zDx]))
+        while ( zDx < length && sqlite3Isdigit( z[zDx] ) )
         {
-          e = e * 10 + (z[zDx] - '0');
-          zDx++;
+          e = e * 10 + ( z[zDx] - '0' );
+          zDx += incr;
+          eValid = 1;
         }
       }
 
+      /* skip trailing spaces */
+      if ( nDigits > 0 && eValid > 0 )
+      {
+        while ( zDx < length && sqlite3Isspace( z[zDx] ) )
+          zDx += incr;
+      }
+
+do_atof_calc:
+
       /* adjust exponent by d, and update sign */
-      e = (e * esign) + d;
-      if (e < 0)
+      e = ( e * esign ) + d;
+      if ( e < 0 )
       {
         esign = -1;
         e *= -1;
@@ -483,24 +504,25 @@ rc = isnan(x);
       }
 
       /* if 0 significand */
-      if (0 == s)
+      if ( 0 == s )
       {
         /* In the IEEE 754 standard, zero is signed.
         ** Add the sign if we've seen at least one digit */
-        result = (sign < 0 && nDigits != 0) ? -(double)0 : (double)0;
+        result = ( sign < 0 && nDigits != 0 ) ? -(double)0 : (double)0;
       }
       else
       {
         /* attempt to reduce exponent */
-        if (esign > 0)
+        if ( esign > 0 )
         {
-          while (s < (LARGEST_INT64 / 10) && e > 0) { e--; s *= 10; }
+          while ( s < ( LARGEST_INT64 / 10 ) && e > 0 ) { e--; s *= 10; }
         }
         else
         {
-          while (0 == (s % 10) && e > 0)
+          while ( 0 == ( s % 10 ) && e > 0 )
           {
-            e--; s /= 10;
+            e--;
+            s /= 10;
           }
         }
 
@@ -509,14 +531,14 @@ rc = isnan(x);
 
         /* if exponent, scale significand as appropriate
         ** and store in result. */
-        if (e != 0)
+        if ( e != 0 )
         {
           double scale = 1.0;
           /* attempt to handle extremely small/large numbers better */
-          if (e > 307 && e < 342)
+          if ( e > 307 && e < 342 )
           {
-            while ((e % 308) != 0) { scale *= 1.0e+1; e -= 1; }
-            if (esign < 0)
+            while ( ( e % 308 ) != 0 ) { scale *= 1.0e+1; e -= 1; }
+            if ( esign < 0 )
             {
               result = s / scale;
               result /= 1.0e+308;
@@ -531,9 +553,9 @@ rc = isnan(x);
           {
             /* 1.0e+22 is the largest power of 10 than can be 
             ** represented exactly. */
-            while ((e % 22) != 0) { scale *= 1.0e+1; e -= 1; }
-            while (e > 0) { scale *= 1.0e+22; e -= 22; }
-            if (esign < 0)
+            while ( ( e % 22 ) != 0 ) { scale *= 1.0e+1; e -= 1; }
+            while ( e > 0 ) { scale *= 1.0e+22; e -= 22; }
+            if ( esign < 0 )
             {
               result = s / scale;
             }
@@ -551,10 +573,10 @@ rc = isnan(x);
       /* store the result */
       pResult = result;
 
-      /* return number of characters used */
-      return (int)(zDx);
+      /* return true if number and no extra non-whitespace chracters after */
+      return zDx >= length && nDigits > 0 && eValid != 0;
 #else
-return sqlite3Atoi64(z, pResult);
+return !sqlite3Atoi64(z, pResult, length, enc);
 #endif //* SQLITE_OMIT_FLOATING_POINT */
     }
 
@@ -562,142 +584,115 @@ return sqlite3Atoi64(z, pResult);
     ** Compare the 19-character string zNum against the text representation
     ** value 2^63:  9223372036854775808.  Return negative, zero, or positive
     ** if zNum is less than, equal to, or greater than the string.
+    ** Note that zNum must contain exactly 19 characters.
     **
     ** Unlike memcmp() this routine is guaranteed to return the difference
     ** in the values of the last digit if the only difference is in the
     ** last digit.  So, for example,
     **
-    **      compare2pow63("9223372036854775800")
+    **      compare2pow63("9223372036854775800", 1)
     **
     ** will return -8.
     */
-    static int compare2pow63(string zNum)
+    static int compare2pow63( string zNum, int incr )
     {
-      int c;
-      if (zNum.Length <= 18)
-        c = string.Compare(zNum, "922337203685477580");
-      else
+      int c = 0;
+      int i;
+      /* 012345678901234567 */
+      string pow63 = "922337203685477580";
+      for ( i = 0; c == 0 && i < 18; i++ )
       {
-        c = (string.Compare(zNum.Substring(0, 18), "922337203685477580") == 1) ? 10 : 0;
-        if (c == 0)
-        {
-          c = zNum[18] - '8';
-          testcase(c == (-1));
-          testcase(c == 0);
-          testcase(c == (+1));
-        }
+        c = ( zNum[i * incr] - pow63[i] ) * 10;
+      }
+
+      if ( c == 0 )
+      {
+        c = zNum[18 * incr] - '8';
+        testcase( c == ( -1 ) );
+        testcase( c == 0 );
+        testcase( c == ( +1 ) );
       }
       return c;
     }
 
 
     /*
-    ** Return TRUE if zNum is a 64-bit signed integer and write
-    ** the value of the integer into pNum.  If zNum is not an integer
-    ** or is an integer that is too large to be expressed with 64 bits,
-    ** then return false.
+    ** Convert zNum to a 64-bit signed integer and write
+    ** the value of the integer into *pNum.
+    ** If zNum is exactly 9223372036854665808, return 2.
+    ** This is a special case as the context will determine
+    ** if it is too big (used as a negative).
+    ** If zNum is not an integer or is an integer that 
+    ** is too large to be expressed with 64 bits,
+    ** then return 1.  Otherwise return 0.
     **
-    ** When this routine was originally written it dealt with only
-    ** 32-bit numbers.  At that time, it was much faster than the
-    ** atoi() library routine in RedHat 7.2.
+    ** length is the number of bytes in the string (bytes, not characters).
+    ** The string is not necessarily zero-terminated.  The encoding is
+    ** given by enc.
     */
-    static bool sqlite3Atoi64(string zNum, ref i64 pNum)
+    static int sqlite3Atoi64( string zNum, ref i64 pNum, int length, u8 enc )
     {
-      zNum = zNum.Trim() + " ";
+      if ( zNum == null ) { pNum = 0; return 1; }
+      int incr = ( enc == SQLITE_UTF8 ? 1 : 2 );
+      i64 v = 0;
+      int neg = 0; /* assume positive */
       int i;
-      for (i = 1; i < zNum.Length; i++) if (!sqlite3Isdigit(zNum[i])) break;
-      bool c = Int64.TryParse(zNum.Substring(0, i), out pNum);
-      if (i < zNum.Length - 1) c = false;
-      return c;
-      //i64 v = 0;
-      //int neg;
-      //int i, c;
-      //const char *zStart;
-      //while( sqlite3Isspace(*(u8*)zNum) ) zNum++;
-      //if( *zNum=='-' ){
-      //  neg = 1;
-      //  zNum++;
-      //}else if( *zNum=='+' ){
-      //  neg = 0;
-      //  zNum++;
-      //}else{
-      //  neg = 0;
-      //}
+      int c = 0;
+      int zDx = 0;//  const char *zStart;
+      //const char *zEnd = zNum + length;
+
+      if ( enc == SQLITE_UTF16BE )
+        zDx++;
+      while ( zDx < length && sqlite3Isspace( zNum[zDx] ) )
+        zDx += incr;
+      if ( zDx >= length )
+        goto do_atoi_calc;
+      if ( zNum[zDx] == '-' )
+      {
+        neg = 1;
+        zDx += incr;
+      }
+      else if ( zNum[zDx] == '+' )
+      {
+        zDx += incr;
+      }
+do_atoi_calc:
       //zStart = zNum;
-      //while( zNum[0]=='0' ){ zNum++; } /* Skip over leading zeros. Ticket #2454 */
-      //for(i=0; (c=zNum[i])>='0' && c<='9'; i++){
-      //  v = v*10 + c - '0';
-      //}
-      //*pNum = neg ? -v : v;
-      //testcase(i == 18);
-      //testcase(i == 19);
-      //testcase(i == 20);
-      //if( c!=0 || (i==0 && zStart==zNum) || i>19 ){
-      //  /* zNum is empty or contains non-numeric text or is longer
-      //  ** than 19 digits (thus guaranting that it is too large) */
-      //  return 0;
-      //}else if( i<19 ){
-      //  /* Less than 19 digits, so we know that it fits in 64 bits */
-      //  return 1;
-      //}else{
-      //  /* 19-digit numbers must be no larger than 9223372036854775807 if positive
-      //  ** or 9223372036854775808 if negative.  Note that 9223372036854665808
-      //  ** is 2^63. */
-      //  return compare2pow63(zNum)<neg;
-      //}
+      if ( length >zNum.Length )
+        length = zNum.Length;
+      while ( zDx < length - 1 && zNum[zDx] == '0' ) { zDx += incr; } /* Skip leading zeros. */
+      for ( i = zDx; i < length &&  ( c = zNum[i] ) >= '0' && c <= '9'; i += incr )
+      {
+        v = v * 10 + c - '0';
+      }
+      pNum = neg != 0 ? -v : v;
+      testcase( i - zDx == 18 );
+      testcase( i - zDx == 19 );
+      testcase( i - zDx == 20 );
+      if ( ( c != 0 && i < length ) || i == zDx || i-zDx  > 19 * incr )
+      {
+        /* zNum is empty or contains non-numeric text or is longer
+        ** than 19 digits (thus guaranteeing that it is too large) */
+        return 1;
+      }
+      else if ( i - zDx < 19 * incr )
+      {
+        /* Less than 19 digits, so we know that it fits in 64 bits */
+        return 0;
+      }
+      else
+      {
+        /* 19-digit numbers must be no larger than 9223372036854775807 if positive
+        ** or 9223372036854775808 if negative.  Note that 9223372036854665808
+        ** is 2^63. Return 1 if to large */
+        c = compare2pow63( zNum.Substring(zDx+neg), incr );
+        if ( c == 0 && neg == 0 )
+          return 2; /* too big, exactly 9223372036854665808 */
+        return c < neg ? 0 : 1;
+      }
+
     }
 
-    /*
-    ** The string zNum represents an unsigned integer.  The zNum string
-    ** consists of one or more digit characters and is terminated by
-    ** a zero character.  Any stray characters in zNum result in undefined
-    ** behavior.
-    **
-    ** If the unsigned integer that zNum represents will fit in a
-    ** 64-bit signed integer, return TRUE.  Otherwise return FALSE.
-    **
-    ** If the negFlag parameter is true, that means that zNum really represents
-    ** a negative number.  (The leading "-" is omitted from zNum.)  This
-    ** parameter is needed to determine a boundary case.  A string
-    ** of "9223373036854775808" returns false if negFlag is false or true
-    ** if negFlag is true.
-    **
-    ** Leading zeros are ignored.
-    */
-    static bool sqlite3FitsIn64Bits(string zNum, bool negFlag)
-    {
-      Int64 pNum;
-      Debug.Assert(zNum[0] >= '0' && zNum[0] <= '9'); /* zNum is an unsigned number */
-      bool result = negFlag ? Int64.TryParse("-" + zNum, out pNum) : Int64.TryParse(zNum, out pNum);
-      // if ( result && negFlag && pNum == Int64.MaxValue  ) result = false;
-      return result;
-      //int i;
-      //int neg = 0;
-      //if (negFlag != 0) neg = 1 - neg;
-      //while (*zNum == '0')
-      //{
-      //  zNum++;   /* Skip leading zeros.  Ticket #2454 */
-      //}
-      //for (i = 0;  zNum[i]; i++){ assert( zNum[i]>='0' && zNum[i]<='9' ); }
-      //testcase(i == 18);
-      //testcase(i == 19);
-      //testcase(i == 20);
-      //if (i < 19)
-      //{
-      /* Guaranteed to fit if less than 19 digits */
-      //  return 1;
-      //}
-      //else if (i > 19)
-      //{
-      /* Guaranteed to be too big if greater than 19 digits */
-      //  return 0;
-      //}
-      //else
-      //{
-      /* Compare against 2^63. */
-      //  if (compare2pow63(new string(zNum)) < neg) return 1; else return 0;
-      //}
-    }
 
     /*
     ** If zNum represents an integer that will fit in 32-bits, then set
@@ -707,24 +702,25 @@ return sqlite3Atoi64(z, pResult);
     ** This is different from sqlite3Atoi64() which requires the
     ** input number to be zero-terminated.
     */
-    static bool sqlite3GetInt32(string zNum, ref int pValue)
-    { return sqlite3GetInt32(zNum, 0, ref pValue); }
-    static bool sqlite3GetInt32(string zNum, int iZnum, ref int pValue)
+    static bool sqlite3GetInt32( string zNum, ref int pValue )
+    { return sqlite3GetInt32( zNum, 0, ref pValue ); }
+    static bool sqlite3GetInt32( string zNum, int iZnum, ref int pValue )
     {
       sqlite_int64 v = 0;
       int i, c;
       int neg = 0;
-      if (zNum[iZnum] == '-')
+      if ( zNum[iZnum] == '-' )
       {
         neg = 1;
         iZnum++;
       }
-      else if (zNum[iZnum] == '+')
+      else if ( zNum[iZnum] == '+' )
       {
         iZnum++;
       }
-      while (iZnum < zNum.Length && zNum[iZnum] == '0') iZnum++;
-      for (i = 0; i < 11 && i + iZnum < zNum.Length && (c = zNum[iZnum + i] - '0') >= 0 && c <= 9; i++)
+      while ( iZnum < zNum.Length && zNum[iZnum] == '0' )
+        iZnum++;
+      for ( i = 0; i < 11 && i + iZnum < zNum.Length && ( c = zNum[iZnum + i] - '0' ) >= 0 && c <= 9; i++ )
       {
         v = v * 10 + c;
       }
@@ -734,17 +730,17 @@ return sqlite3Atoi64(z, pResult);
       **             1234567890
       **     2^31 . 2147483648
       */
-      testcase(i == 10);
-      if (i > 10)
+      testcase( i == 10 );
+      if ( i > 10 )
       {
         return false;
       }
-      testcase(v - neg == 2147483647);
-      if (v - neg > 2147483647)
+      testcase( v - neg == 2147483647 );
+      if ( v - neg > 2147483647 )
       {
         return false;
       }
-      if (neg != 0)
+      if ( neg != 0 )
       {
         v = -v;
       }
@@ -753,6 +749,18 @@ return sqlite3Atoi64(z, pResult);
     }
 
     /*
+    ** Return a 32-bit integer value extracted from a string.  If the
+    ** string is not an integer, just return 0.
+    */
+    static int sqlite3Atoi( string z )
+    {
+      int x = 0;
+      if ( !String.IsNullOrEmpty( z ) )
+        sqlite3GetInt32( z, ref x );
+      return x;
+    }
+
+  /*
     ** The variable-length integer encoding is as follows:
     **
     ** KEY:
@@ -781,37 +789,41 @@ return sqlite3Atoi64(z, pResult);
     ** bit clear.  Except, if we get to the 9th byte, it stores the full
     ** 8 bits and is the last byte.
     */
-    static int getVarint(byte[] p, ref u32 v)
+    static int getVarint( byte[] p, ref u32 v )
     {
       v = p[0];
-      if (v <= 0x7F) return 1;
+      if ( v <= 0x7F )
+        return 1;
       u64 u64_v = 0;
-      int result = sqlite3GetVarint(p, 0, ref u64_v);
+      int result = sqlite3GetVarint( p, 0, ref u64_v );
       v = (u32)u64_v;
       return result;
     }
-    static int getVarint(byte[] p, int offset, ref u32 v)
+    static int getVarint( byte[] p, int offset, ref u32 v )
     {
       v = p[offset + 0];
-      if (v <= 0x7F) return 1;
+      if ( v <= 0x7F )
+        return 1;
       u64 u64_v = 0;
-      int result = sqlite3GetVarint(p, offset, ref u64_v);
+      int result = sqlite3GetVarint( p, offset, ref u64_v );
       v = (u32)u64_v;
       return result;
     }
-    static int getVarint(byte[] p, int offset, ref int v)
+    static int getVarint( byte[] p, int offset, ref int v )
     {
       v = p[offset + 0];
-      if (v <= 0x7F) return 1;
+      if ( v <= 0x7F )
+        return 1;
       u64 u64_v = 0;
-      int result = sqlite3GetVarint(p, offset, ref u64_v);
+      int result = sqlite3GetVarint( p, offset, ref u64_v );
       v = (int)u64_v;
       return result;
     }
-    static int getVarint(byte[] p, int offset, ref i64 v)
+    static int getVarint( byte[] p, int offset, ref i64 v )
     {
       v = offset >= p.Length ? 0 : (int)p[offset + 0];
-      if ( v <= 0x7F ) return 1;
+      if ( v <= 0x7F )
+        return 1;
       if ( offset + 1 >= p.Length )
       { v = 65535; return 2; }
       else
@@ -822,83 +834,90 @@ return sqlite3Atoi64(z, pResult);
         return result;
       }
     }
-    static int getVarint(byte[] p, int offset, ref u64 v)
+    static int getVarint( byte[] p, int offset, ref u64 v )
     {
       v = p[offset + 0];
-      if (v <= 0x7F) return 1;
-      int result = sqlite3GetVarint(p, offset, ref v);
+      if ( v <= 0x7F )
+        return 1;
+      int result = sqlite3GetVarint( p, offset, ref v );
       return result;
     }
-    static int getVarint32(byte[] p, ref u32 v)
+    static int getVarint32( byte[] p, ref u32 v )
     { //(*B=*(A))<=0x7f?1:sqlite3GetVarint32(A,B))
       v = p[0];
-      if (v <= 0x7F) return 1;
-      return sqlite3GetVarint32(p, 0, ref v);
+      if ( v <= 0x7F )
+        return 1;
+      return sqlite3GetVarint32( p, 0, ref v );
     }
     static byte[] pByte4 = new byte[4];
-    static int getVarint32(string s, u32 offset, ref int v)
+    static int getVarint32( string s, u32 offset, ref int v )
     { //(*B=*(A))<=0x7f?1:sqlite3GetVarint32(A,B))
       v = s[(int)offset];
-      if (v <= 0x7F) return 1;
+      if ( v <= 0x7F )
+        return 1;
       pByte4[0] = (u8)s[(int)offset + 0];
       pByte4[1] = (u8)s[(int)offset + 1];
       pByte4[2] = (u8)s[(int)offset + 2];
       pByte4[3] = (u8)s[(int)offset + 3];
       u32 u32_v = 0;
-      int result = sqlite3GetVarint32(pByte4, 0, ref u32_v);
+      int result = sqlite3GetVarint32( pByte4, 0, ref u32_v );
       v = (int)u32_v;
-      return sqlite3GetVarint32(pByte4, 0, ref v);
+      return sqlite3GetVarint32( pByte4, 0, ref v );
     }
-    static int getVarint32(string s, u32 offset, ref u32 v)
+    static int getVarint32( string s, u32 offset, ref u32 v )
     { //(*B=*(A))<=0x7f?1:sqlite3GetVarint32(A,B))
       v = s[(int)offset];
-      if (v <= 0x7F) return 1;
+      if ( v <= 0x7F )
+        return 1;
       pByte4[0] = (u8)s[(int)offset + 0];
       pByte4[1] = (u8)s[(int)offset + 1];
       pByte4[2] = (u8)s[(int)offset + 2];
       pByte4[3] = (u8)s[(int)offset + 3];
-      return sqlite3GetVarint32(pByte4, 0, ref v);
+      return sqlite3GetVarint32( pByte4, 0, ref v );
     }
-    static int getVarint32(byte[] p, u32 offset, ref u32 v)
+    static int getVarint32( byte[] p, u32 offset, ref u32 v )
     { //(*B=*(A))<=0x7f?1:sqlite3GetVarint32(A,B))
       v = p[offset];
-      if (v <= 0x7F) return 1;
-      return sqlite3GetVarint32(p, (int)offset, ref v);
+      if ( v <= 0x7F )
+        return 1;
+      return sqlite3GetVarint32( p, (int)offset, ref v );
     }
-    static int getVarint32(byte[] p, int offset, ref u32 v)
+    static int getVarint32( byte[] p, int offset, ref u32 v )
     { //(*B=*(A))<=0x7f?1:sqlite3GetVarint32(A,B))
       v = offset >= p.Length ? 0 : (u32)p[offset];
-      if ( v <= 0x7F ) return 1;
-      return sqlite3GetVarint32(p, offset, ref v);
+      if ( v <= 0x7F )
+        return 1;
+      return sqlite3GetVarint32( p, offset, ref v );
     }
-    static int getVarint32(byte[] p, int offset, ref int v)
+    static int getVarint32( byte[] p, int offset, ref int v )
     { //(*B=*(A))<=0x7f?1:sqlite3GetVarint32(A,B))
       v = p[offset + 0];
-      if (v <= 0x7F) return 1;
+      if ( v <= 0x7F )
+        return 1;
       u32 u32_v = 0;
-      int result = sqlite3GetVarint32(p, offset, ref u32_v);
+      int result = sqlite3GetVarint32( p, offset, ref u32_v );
       v = (int)u32_v;
       return result;
     }
-    static int putVarint(byte[] p, int offset, int v)
-    { return putVarint(p, offset, (u64)v); }
-    static int putVarint(byte[] p, int offset, u64 v)
+    static int putVarint( byte[] p, int offset, int v )
+    { return putVarint( p, offset, (u64)v ); }
+    static int putVarint( byte[] p, int offset, u64 v )
     {
-      return sqlite3PutVarint(p, offset, v);
+      return sqlite3PutVarint( p, offset, v );
     }
-    static int sqlite3PutVarint(byte[] p, int offset, int v)
-    { return sqlite3PutVarint(p, offset, (u64)v); }
+    static int sqlite3PutVarint( byte[] p, int offset, int v )
+    { return sqlite3PutVarint( p, offset, (u64)v ); }
     static u8[] bufByte10 = new u8[10];
-    static int sqlite3PutVarint(byte[] p, int offset, u64 v)
+    static int sqlite3PutVarint( byte[] p, int offset, u64 v )
     {
       int i, j, n;
-      if ((v & (((u64)0xff000000) << 32)) != 0)
+      if ( ( v & ( ( (u64)0xff000000 ) << 32 ) ) != 0 )
       {
         p[offset + 8] = (byte)v;
         v >>= 8;
-        for (i = 7; i >= 0; i--)
+        for ( i = 7; i >= 0; i-- )
         {
-          p[offset + i] = (byte)((v & 0x7f) | 0x80);
+          p[offset + i] = (byte)( ( v & 0x7f ) | 0x80 );
           v >>= 7;
         }
         return 9;
@@ -906,12 +925,12 @@ return sqlite3Atoi64(z, pResult);
       n = 0;
       do
       {
-        bufByte10[n++] = (byte)((v & 0x7f) | 0x80);
+        bufByte10[n++] = (byte)( ( v & 0x7f ) | 0x80 );
         v >>= 7;
-      } while (v != 0);
+      } while ( v != 0 );
       bufByte10[0] &= 0x7f;
-      Debug.Assert(n <= 9);
-      for (i = 0, j = n - 1; j >= 0; j--, i++)
+      Debug.Assert( n <= 9 );
+      for ( i = 0, j = n - 1; j >= 0; j--, i++ )
       {
         p[offset + i] = bufByte10[j];
       }
@@ -923,40 +942,40 @@ return sqlite3Atoi64(z, pResult);
     ** works for 32-bit positive integers and which is optimized for
     ** the common case of small integers.
     */
-    static int putVarint32(byte[] p, int offset, int v)
+    static int putVarint32( byte[] p, int offset, int v )
     {
 #if !putVarint32
-      if ((v & ~0x7f) == 0)
+      if ( ( v & ~0x7f ) == 0 )
       {
         p[offset] = (byte)v;
         return 1;
       }
 #endif
-      if ((v & ~0x3fff) == 0)
+      if ( ( v & ~0x3fff ) == 0 )
       {
-        p[offset] = (byte)((v >> 7) | 0x80);
-        p[offset + 1] = (byte)(v & 0x7f);
+        p[offset] = (byte)( ( v >> 7 ) | 0x80 );
+        p[offset + 1] = (byte)( v & 0x7f );
         return 2;
       }
-      return sqlite3PutVarint(p, offset, v);
+      return sqlite3PutVarint( p, offset, v );
     }
 
-    static int putVarint32(byte[] p, int v)
+    static int putVarint32( byte[] p, int v )
     {
-      if ((v & ~0x7f) == 0)
+      if ( ( v & ~0x7f ) == 0 )
       {
         p[0] = (byte)v;
         return 1;
       }
-      else if ((v & ~0x3fff) == 0)
+      else if ( ( v & ~0x3fff ) == 0 )
       {
-        p[0] = (byte)((v >> 7) | 0x80);
-        p[1] = (byte)(v & 0x7f);
+        p[0] = (byte)( ( v >> 7 ) | 0x80 );
+        p[1] = (byte)( v & 0x7f );
         return 2;
       }
       else
       {
-        return sqlite3PutVarint(p, 0, v);
+        return sqlite3PutVarint( p, 0, v );
       }
     }
 
@@ -976,13 +995,13 @@ return sqlite3Atoi64(z, pResult);
     ** Read a 64-bit variable-length integer from memory starting at p[0].
     ** Return the number of bytes read.  The value is stored in *v.
     */
-    static u8 sqlite3GetVarint(byte[] p, int offset, ref u64 v)
+    static u8 sqlite3GetVarint( byte[] p, int offset, ref u64 v )
     {
       u32 a, b, s;
 
       a = p[offset + 0];
       /* a: p0 (unmasked) */
-      if ( 0 == ( a & 0x80 )  )
+      if ( 0 == ( a & 0x80 ) )
       {
         v = a;
         return 1;
@@ -991,7 +1010,7 @@ return sqlite3Atoi64(z, pResult);
       //p++;
       b = p[offset + 1];
       /* b: p1 (unmasked) */
-      if (0 == (b & 0x80))
+      if ( 0 == ( b & 0x80 ) )
       {
         a &= 0x7f;
         a = a << 7;
@@ -1001,13 +1020,13 @@ return sqlite3Atoi64(z, pResult);
       }
 
       /* Verify that constants are precomputed correctly */
-      Debug.Assert(SLOT_2_0 == ((0x7f << 14) | (0x7f)));
-      Debug.Assert(SLOT_4_2_0 == ((0xfU << 28) | (0x7f << 14) | (0x7f)));
+      Debug.Assert( SLOT_2_0 == ( ( 0x7f << 14 ) | ( 0x7f ) ) );
+      Debug.Assert( SLOT_4_2_0 == ( ( 0xfU << 28 ) | ( 0x7f << 14 ) | ( 0x7f ) ) );
       //p++;
       a = a << 14;
       a |= p[offset + 2];
       /* a: p0<<14 | p2 (unmasked) */
-      if (0 == (a & 0x80))
+      if ( 0 == ( a & 0x80 ) )
       {
         a &= SLOT_2_0;
         b &= 0x7f;
@@ -1023,7 +1042,7 @@ return sqlite3Atoi64(z, pResult);
       b = b << 14;
       b |= p[offset + 3];
       /* b: p1<<14 | p3 (unmasked) */
-      if (0 == (b & 0x80))
+      if ( 0 == ( b & 0x80 ) )
       {
         b &= SLOT_2_0;
         /* moved CSE1 up */
@@ -1047,7 +1066,7 @@ return sqlite3Atoi64(z, pResult);
       a = a << 14;
       a |= p[offset + 4];
       /* a: p0<<28 | p2<<14 | p4 (unmasked) */
-      if (0 == (a & 0x80))
+      if ( 0 == ( a & 0x80 ) )
       {
         /* we can skip these cause they were (effectively) done above in calc'ing s */
         /* a &= (0x1f<<28)|(0x7f<<14)|(0x7f); */
@@ -1055,7 +1074,7 @@ return sqlite3Atoi64(z, pResult);
         b = b << 7;
         a |= b;
         s = s >> 18;
-        v = ((u64)s) << 32 | a;
+        v = ( (u64)s ) << 32 | a;
         return 5;
       }
 
@@ -1068,7 +1087,7 @@ return sqlite3Atoi64(z, pResult);
       b = b << 14;
       b |= p[offset + 5];
       /* b: p1<<28 | p3<<14 | p5 (unmasked) */
-      if (0 == (b & 0x80))
+      if ( 0 == ( b & 0x80 ) )
       {
         /* we can skip this cause it was (effectively) done above in calc'ing s */
         /* b &= (0x1f<<28)|(0x7f<<14)|(0x7f); */
@@ -1076,7 +1095,7 @@ return sqlite3Atoi64(z, pResult);
         a = a << 7;
         a |= b;
         s = s >> 18;
-        v = ((u64)s) << 32 | a;
+        v = ( (u64)s ) << 32 | a;
         return 6;
       }
 
@@ -1084,14 +1103,14 @@ return sqlite3Atoi64(z, pResult);
       a = a << 14;
       a |= p[offset + 6];
       /* a: p2<<28 | p4<<14 | p6 (unmasked) */
-      if (0 == (a & 0x80))
+      if ( 0 == ( a & 0x80 ) )
       {
         a &= SLOT_4_2_0;
         b &= SLOT_2_0;
         b = b << 7;
         a |= b;
         s = s >> 11;
-        v = ((u64)s) << 32 | a;
+        v = ( (u64)s ) << 32 | a;
         return 7;
       }
 
@@ -1101,7 +1120,7 @@ return sqlite3Atoi64(z, pResult);
       b = b << 14;
       b |= p[offset + 7];
       /* b: p3<<28 | p5<<14 | p7 (unmasked) */
-      if (0 == (b & 0x80))
+      if ( 0 == ( b & 0x80 ) )
       {
         b &= SLOT_4_2_0;
         /* moved CSE2 up */
@@ -1109,7 +1128,7 @@ return sqlite3Atoi64(z, pResult);
         a = a << 7;
         a |= b;
         s = s >> 4;
-        v = ((u64)s) << 32 | a;
+        v = ( (u64)s ) << 32 | a;
         return 8;
       }
 
@@ -1130,7 +1149,7 @@ return sqlite3Atoi64(z, pResult);
       b = b >> 3;
       s |= b;
 
-      v = ((u64)s) << 32 | a;
+      v = ( (u64)s ) << 32 | a;
 
       return 9;
     }
@@ -1147,23 +1166,23 @@ return sqlite3Atoi64(z, pResult);
     ** single-byte case.  All code should use the MACRO version as
     ** this function assumes the single-byte case has already been handled.
     */
-    static u8 sqlite3GetVarint32(byte[] p, ref int v)
+    static u8 sqlite3GetVarint32( byte[] p, ref int v )
     {
       u32 u32_v = 0;
-      u8 result = sqlite3GetVarint32(p, 0, ref u32_v);
+      u8 result = sqlite3GetVarint32( p, 0, ref u32_v );
       v = (int)u32_v;
       return result;
     }
-    static u8 sqlite3GetVarint32(byte[] p, int offset, ref int v)
+    static u8 sqlite3GetVarint32( byte[] p, int offset, ref int v )
     {
       u32 u32_v = 0;
-      u8 result = sqlite3GetVarint32(p, offset, ref u32_v);
+      u8 result = sqlite3GetVarint32( p, offset, ref u32_v );
       v = (int)u32_v;
       return result;
     }
-    static u8 sqlite3GetVarint32(byte[] p, ref u32 v)
-    { return sqlite3GetVarint32(p, 0, ref v); }
-    static u8 sqlite3GetVarint32(byte[] p, int offset, ref u32 v)
+    static u8 sqlite3GetVarint32( byte[] p, ref u32 v )
+    { return sqlite3GetVarint32( p, 0, ref v ); }
+    static u8 sqlite3GetVarint32( byte[] p, int offset, ref u32 v )
     {
       u32 a, b;
 
@@ -1184,7 +1203,7 @@ return sqlite3Atoi64(z, pResult);
       //p++;
       b = p[offset + 1];
       /* b: p1 (unmasked) */
-      if (0 == (b & 0x80))
+      if ( 0 == ( b & 0x80 ) )
       {
         /* Values between 128 and 16383 */
         a &= 0x7f;
@@ -1198,10 +1217,10 @@ return sqlite3Atoi64(z, pResult);
       a = a << 14;
       a |= p[offset + 2];
       /* a: p0<<14 | p2 (unmasked) */
-      if (0 == (a & 0x80))
+      if ( 0 == ( a & 0x80 ) )
       {
         /* Values between 16384 and 2097151 */
-        a &= (0x7f << 14) | (0x7f);
+        a &= ( 0x7f << 14 ) | ( 0x7f );
         b &= 0x7f;
         b = b << 7;
         v = a | b;
@@ -1223,16 +1242,17 @@ return sqlite3Atoi64(z, pResult);
         u8 n;
 
         //p -= 2;
-        n = sqlite3GetVarint(p, offset, ref v64);
-        Debug.Assert(n > 3 && n <= 9);
-        if ((v64 & SQLITE_MAX_U32) != v64)
+        n = sqlite3GetVarint( p, offset, ref v64 );
+        Debug.Assert( n > 3 && n <= 9 );
+        if ( ( v64 & SQLITE_MAX_U32 ) != v64 )
         {
           v = 0xffffffff;
         }
         else
         {
           v = (u32)v64;
-        } return n;
+        }
+        return n;
       }
 #else
 /* For following code (kept for historical record only) shows an
@@ -1289,14 +1309,14 @@ return n;
     ** Return the number of bytes that will be needed to store the given
     ** 64-bit integer.
     */
-    static int sqlite3VarintLen(u64 v)
+    static int sqlite3VarintLen( u64 v )
     {
       int i = 0;
       do
       {
         i++;
         v >>= 7;
-      } while (v != 0 && ALWAYS(i < 9));
+      } while ( v != 0 && ALWAYS( i < 9 ) );
       return i;
     }
 
@@ -1304,57 +1324,57 @@ return n;
     /*
     ** Read or write a four-byte big-endian integer value.
     */
-    static u32 sqlite3Get4byte(u8[] p, int p_offset, int offset)
+    static u32 sqlite3Get4byte( u8[] p, int p_offset, int offset )
     {
       offset += p_offset;
-      return (offset +3> p.Length )? 0 : ( u32 )( ( p[0 + offset] << 24 ) | ( p[1 + offset] << 16 ) | ( p[2 + offset] << 8 ) | p[3 + offset] );
+      return ( offset + 3 > p.Length ) ? 0 : (u32)( ( p[0 + offset] << 24 ) | ( p[1 + offset] << 16 ) | ( p[2 + offset] << 8 ) | p[3 + offset] );
     }
-    static u32 sqlite3Get4byte(u8[] p, int offset)
+    static u32 sqlite3Get4byte( u8[] p, int offset )
     {
       return ( offset + 3 > p.Length ) ? 0 : (u32)( ( p[0 + offset] << 24 ) | ( p[1 + offset] << 16 ) | ( p[2 + offset] << 8 ) | p[3 + offset] );
     }
-    static u32 sqlite3Get4byte(u8[] p, u32 offset)
+    static u32 sqlite3Get4byte( u8[] p, u32 offset )
     {
       return ( offset + 3 > p.Length ) ? 0 : (u32)( ( p[0 + offset] << 24 ) | ( p[1 + offset] << 16 ) | ( p[2 + offset] << 8 ) | p[3 + offset] );
     }
-    static u32 sqlite3Get4byte(u8[] p)
+    static u32 sqlite3Get4byte( u8[] p )
     {
-      return (u32)((p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3]);
+      return (u32)( ( p[0] << 24 ) | ( p[1] << 16 ) | ( p[2] << 8 ) | p[3] );
     }
-    static void sqlite3Put4byte(byte[] p, int v)
+    static void sqlite3Put4byte( byte[] p, int v )
     {
-      p[0] = (byte)(v >> 24 & 0xFF);
-      p[1] = (byte)(v >> 16 & 0xFF);
-      p[2] = (byte)(v >> 8 & 0xFF);
-      p[3] = (byte)(v & 0xFF);
+      p[0] = (byte)( v >> 24 & 0xFF );
+      p[1] = (byte)( v >> 16 & 0xFF );
+      p[2] = (byte)( v >> 8 & 0xFF );
+      p[3] = (byte)( v & 0xFF );
     }
-    static void sqlite3Put4byte(byte[] p, int offset, int v)
+    static void sqlite3Put4byte( byte[] p, int offset, int v )
     {
-      p[0 + offset] = (byte)(v >> 24 & 0xFF);
-      p[1 + offset] = (byte)(v >> 16 & 0xFF);
-      p[2 + offset] = (byte)(v >> 8 & 0xFF);
-      p[3 + offset] = (byte)(v & 0xFF);
+      p[0 + offset] = (byte)( v >> 24 & 0xFF );
+      p[1 + offset] = (byte)( v >> 16 & 0xFF );
+      p[2 + offset] = (byte)( v >> 8 & 0xFF );
+      p[3 + offset] = (byte)( v & 0xFF );
     }
-    static void sqlite3Put4byte(byte[] p, u32 offset, u32 v)
+    static void sqlite3Put4byte( byte[] p, u32 offset, u32 v )
     {
-      p[0 + offset] = (byte)(v >> 24 & 0xFF);
-      p[1 + offset] = (byte)(v >> 16 & 0xFF);
-      p[2 + offset] = (byte)(v >> 8 & 0xFF);
-      p[3 + offset] = (byte)(v & 0xFF);
+      p[0 + offset] = (byte)( v >> 24 & 0xFF );
+      p[1 + offset] = (byte)( v >> 16 & 0xFF );
+      p[2 + offset] = (byte)( v >> 8 & 0xFF );
+      p[3 + offset] = (byte)( v & 0xFF );
     }
-    static void sqlite3Put4byte(byte[] p, int offset, u64 v)
+    static void sqlite3Put4byte( byte[] p, int offset, u64 v )
     {
-      p[0 + offset] = (byte)(v >> 24 & 0xFF);
-      p[1 + offset] = (byte)(v >> 16 & 0xFF);
-      p[2 + offset] = (byte)(v >> 8 & 0xFF);
-      p[3 + offset] = (byte)(v & 0xFF);
+      p[0 + offset] = (byte)( v >> 24 & 0xFF );
+      p[1 + offset] = (byte)( v >> 16 & 0xFF );
+      p[2 + offset] = (byte)( v >> 8 & 0xFF );
+      p[3 + offset] = (byte)( v & 0xFF );
     }
-    static void sqlite3Put4byte(byte[] p, u64 v)
+    static void sqlite3Put4byte( byte[] p, u64 v )
     {
-      p[0] = (byte)(v >> 24 & 0xFF);
-      p[1] = (byte)(v >> 16 & 0xFF);
-      p[2] = (byte)(v >> 8 & 0xFF);
-      p[3] = (byte)(v & 0xFF);
+      p[0] = (byte)( v >> 24 & 0xFF );
+      p[1] = (byte)( v >> 16 & 0xFF );
+      p[2] = (byte)( v >> 8 & 0xFF );
+      p[3] = (byte)( v & 0xFF );
     }
 
 
@@ -1365,11 +1385,11 @@ return n;
 ** This routine only works if h really is a valid hexadecimal
 ** character:  0..9a..fA..F
 */
-    static int hexToInt(int h)
+    static int hexToInt( int h )
     {
-      Debug.Assert((h >= '0' && h <= '9') || (h >= 'a' && h <= 'f') || (h >= 'A' && h <= 'F'));
+      Debug.Assert( ( h >= '0' && h <= '9' ) || ( h >= 'a' && h <= 'f' ) || ( h >= 'A' && h <= 'F' ) );
 #if SQLITE_ASCII
-      h += 9 * (1 & (h >> 6));
+      h += 9 * ( 1 & ( h >> 6 ) );
 #endif
 #if SQLITE_EBCDIC
 h += 9*(1&~(h>>4));
@@ -1385,22 +1405,22 @@ h += 9*(1&~(h>>4));
 ** binary value has been obtained from malloc and must be freed by
 ** the calling routine.
 */
-    static byte[] sqlite3HexToBlob(sqlite3 db, string z, int n)
+    static byte[] sqlite3HexToBlob( sqlite3 db, string z, int n )
     {
       StringBuilder zBlob;
       int i;
 
-      zBlob = new StringBuilder(n / 2 + 1);// (char*)sqlite3DbMallocRaw(db, n / 2 + 1);
+      zBlob = new StringBuilder( n / 2 + 1 );// (char*)sqlite3DbMallocRaw(db, n / 2 + 1);
       n--;
-      if (zBlob != null)
+      if ( zBlob != null )
       {
-        for (i = 0; i < n; i += 2)
+        for ( i = 0; i < n; i += 2 )
         {
-          zBlob.Append(Convert.ToChar((hexToInt(z[i]) << 4) | hexToInt(z[i + 1])));
+          zBlob.Append( Convert.ToChar( ( hexToInt( z[i] ) << 4 ) | hexToInt( z[i + 1] ) ) );
         }
         //zBlob[i / 2] = '\0'; ;
       }
-      return Encoding.UTF8.GetBytes(zBlob.ToString());
+      return Encoding.UTF8.GetBytes( zBlob.ToString() );
     }
 #endif // * !SQLITE_OMIT_BLOB_LITERAL || SQLITE_HAS_CODEC */
 
@@ -1410,9 +1430,9 @@ h += 9*(1&~(h>>4));
 ** not have been used.  The "type" of connection pointer is given as the
 ** argument.  The zType is a word like "NULL" or "closed" or "invalid".
 */
-    static void logBadConnection(string zType)
+    static void logBadConnection( string zType )
     {
-      sqlite3_log(SQLITE_MISUSE,
+      sqlite3_log( SQLITE_MISUSE,
       "API call with %s database connection pointer",
       zType
       );
@@ -1432,21 +1452,21 @@ h += 9*(1&~(h>>4));
     ** open properly and is not fit for general use but which can be
     ** used as an argument to sqlite3_errmsg() or sqlite3_close().
     */
-    static bool sqlite3SafetyCheckOk(sqlite3 db)
+    static bool sqlite3SafetyCheckOk( sqlite3 db )
     {
       u32 magic;
-      if (db == null)
+      if ( db == null )
       {
-        logBadConnection("NULL");
+        logBadConnection( "NULL" );
         return false;
       }
       magic = db.magic;
-      if (magic != SQLITE_MAGIC_OPEN)
+      if ( magic != SQLITE_MAGIC_OPEN )
       {
-        if (sqlite3SafetyCheckSickOrOk(db))
+        if ( sqlite3SafetyCheckSickOrOk( db ) )
         {
-          testcase(sqlite3GlobalConfig.xLog != null);
-          logBadConnection("unopened");
+          testcase( sqlite3GlobalConfig.xLog != null );
+          logBadConnection( "unopened" );
         }
         return false;
       }
@@ -1455,16 +1475,16 @@ h += 9*(1&~(h>>4));
         return true;
       }
     }
-    static bool sqlite3SafetyCheckSickOrOk(sqlite3 db)
+    static bool sqlite3SafetyCheckSickOrOk( sqlite3 db )
     {
       u32 magic;
       magic = db.magic;
-      if (magic != SQLITE_MAGIC_SICK &&
+      if ( magic != SQLITE_MAGIC_SICK &&
       magic != SQLITE_MAGIC_OPEN &&
-      magic != SQLITE_MAGIC_BUSY)
+      magic != SQLITE_MAGIC_BUSY )
       {
-        testcase(sqlite3GlobalConfig.xLog != null);
-        logBadConnection("invalid");
+        testcase( sqlite3GlobalConfig.xLog != null );
+        logBadConnection( "invalid" );
         return false;
       }
       else
