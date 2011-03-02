@@ -48,7 +48,7 @@ namespace tcl.lang
       * Check for a leading "-keepnewline" argument.
       */
 
-      for ( firstWord = 1 ; firstWord < argLen ; firstWord++ )
+      for ( firstWord = 1; firstWord < argLen; firstWord++ )
       {
         argStr = argv[firstWord].ToString();
         if ( ( argStr.Length > 0 ) && ( argStr[0] == '-' ) )
@@ -62,8 +62,7 @@ namespace tcl.lang
           {
             firstWord++;
             break;
-          }
-          else
+          } else
           {
             throw new TclException( interp, "bad switch \"" + argStr + "\": must be -keepnewline or --" );
           }
@@ -100,16 +99,13 @@ namespace tcl.lang
         if ( execMethod != null )
         {
           p = execReflection( interp, argv, firstWord, argLen );
-        }
-        else if ( Util.Unix )
+        } else if ( Util.Unix )
         {
           p = execUnix( interp, argv, firstWord, argLen );
-        }
-        else if ( Util.Windows )
+        } else if ( Util.Windows )
         {
           p = execWin( interp, argv, firstWord, argLen );
-        }
-        else
+        } else
         {
           p = execDefault( interp, argv, firstWord, argLen );
         }
@@ -246,7 +242,7 @@ namespace tcl.lang
       char[] arr = str.ToCharArray();
       var sb = new StringBuilder( 50 );
 
-      for ( int i = 0 ; i < arr.Length ; i++ )
+      for ( int i = 0; i < arr.Length; i++ )
       {
         if ( arr[i] == '%' )
         {
@@ -267,7 +263,7 @@ namespace tcl.lang
     private System.Diagnostics.Process execWin( Interp interp, TclObject[] argv, int first, int last )
     {
       var sb = new StringBuilder();
-      for ( int i = ( first + 1 ) ; i < last ; i++ )
+      for ( int i = ( first + 1 ); i < last; i++ )
       {
         sb.Append( '"' );
         sb.Append( escapeWinString( argv[i].ToString() ) );
@@ -296,7 +292,7 @@ namespace tcl.lang
 
       var strv = new string[last - first];
 
-      for ( int i = first, j = 0 ; i < last ; j++, i++ )
+      for ( int i = first, j = 0; i < last; j++, i++ )
       {
 
         strv[j] = argv[i].ToString();
@@ -321,17 +317,15 @@ namespace tcl.lang
       }
       catch ( System.Reflection.TargetInvocationException ex )
       {
-                System.Exception t = ex.GetBaseException();
+        System.Exception t = ex.GetBaseException();
 
         if ( t is System.ApplicationException )
         {
           throw (System.ApplicationException)t;
-        }
-        else if ( t is System.IO.IOException )
+        } else if ( t is System.IO.IOException )
         {
           throw (System.IO.IOException)t;
-        }
-        else
+        } else
         {
           throw new TclRuntimeError( "unexected exception in execReflection" );
         }

@@ -17,58 +17,56 @@
 using System;
 namespace tcl.lang
 {
-	
-	/*
-	* This class implements the built-in "update" command in Tcl.
-	*/
-	
-	class UpdateCmd : Command
-	{
-		
-		/*
-		* Valid command options.
-		*/
+
+  /*
+  * This class implements the built-in "update" command in Tcl.
+  */
+
+  class UpdateCmd : Command
+  {
+
+    /*
+    * Valid command options.
+    */
 
     private static readonly string[] validOpts = new string[] { "idletasks" };
-		
-		internal const int OPT_IDLETASKS = 0;
-		
-		public TCL.CompletionCode cmdProc(Interp interp, TclObject[] argv)
-		{
-			int flags;
-			
-			if (argv.Length == 1)
-			{
-				flags = TCL.ALL_EVENTS | TCL.DONT_WAIT;
-			}
-			else if (argv.Length == 2)
-			{
-				TclIndex.get(interp, argv[1], validOpts, "option", 0);
-				
-				/*
-				* Since we just have one valid option, if the above call returns
-				* without an exception, we've got "idletasks" (or abreviations).
-				*/
-				
-				flags = TCL.IDLE_EVENTS | TCL.DONT_WAIT;
-			}
-			else
-			{
-				throw new TclNumArgsException(interp, 1, argv, "?idletasks?");
-			}
-			
-			while (interp.getNotifier().doOneEvent(flags) != 0)
-			{
-				/* Empty loop body */
-			}
-			
-			/*
-			* Must clear the interpreter's result because event handlers could
-			* have executed commands.
-			*/
-			
-			interp.resetResult();
+
+    internal const int OPT_IDLETASKS = 0;
+
+    public TCL.CompletionCode cmdProc( Interp interp, TclObject[] argv )
+    {
+      int flags;
+
+      if ( argv.Length == 1 )
+      {
+        flags = TCL.ALL_EVENTS | TCL.DONT_WAIT;
+      } else if ( argv.Length == 2 )
+      {
+        TclIndex.get( interp, argv[1], validOpts, "option", 0 );
+
+        /*
+        * Since we just have one valid option, if the above call returns
+        * without an exception, we've got "idletasks" (or abreviations).
+        */
+
+        flags = TCL.IDLE_EVENTS | TCL.DONT_WAIT;
+      } else
+      {
+        throw new TclNumArgsException( interp, 1, argv, "?idletasks?" );
+      }
+
+      while ( interp.getNotifier().doOneEvent( flags ) != 0 )
+      {
+        /* Empty loop body */
+      }
+
+      /*
+      * Must clear the interpreter's result because event handlers could
+      * have executed commands.
+      */
+
+      interp.resetResult();
       return TCL.CompletionCode.RETURN;
     }
-	} // end UpdateCmd
+  } // end UpdateCmd
 }

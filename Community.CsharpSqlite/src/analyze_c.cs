@@ -104,8 +104,7 @@ new _aTable( "sqlite_stat2", "tbl,idx,sampleno,sample" ),
           );
           aRoot[i] = pParse.regRoot;
           aCreateTbl[i] = 1;
-        }
-        else
+        } else
         {
           /* The table already exists. If zWhere is not NULL, delete all entries 
           ** associated with the table zWhere. If zWhere is NULL, delete the
@@ -117,8 +116,7 @@ new _aTable( "sqlite_stat2", "tbl,idx,sampleno,sample" ),
             sqlite3NestedParse( pParse,
             "DELETE FROM %Q.%s WHERE tbl=%Q", pDb.zName, zTab, zWhere
             );
-          }
-          else
+          } else
           {
             /* The sqlite_stat[12] table already exists.  Delete all rows. */
             sqlite3VdbeAddOp2( v, OP_Clear, aRoot[i], iDb );
@@ -324,7 +322,7 @@ return;
           Debug.Assert( pIdx.azColl[i] != null );
           pColl = sqlite3LocateCollSeq( pParse, pIdx.azColl[i] );
           sqlite3VdbeAddOp4( v, OP_Ne, regCol, 0, iMem + nCol + i + 1,
-             pColl, P4_COLLSEQ );
+          pColl, P4_COLLSEQ );
           sqlite3VdbeChangeP5( v, SQLITE_NULLEQ );
         }
         //if( db.mallocFailed ){
@@ -400,8 +398,7 @@ return;
         VdbeComment( v, "%s", pTab.zName );
         sqlite3VdbeAddOp2( v, OP_Count, iIdxCur, regSampleno );
         sqlite3VdbeAddOp1( v, OP_Close, iIdxCur );
-      }
-      else
+      } else
       {
         Debug.Assert( jZeroRows > 0 );
         addr = sqlite3VdbeAddOp0( v, OP_Goto );
@@ -492,7 +489,9 @@ return;
     */
     // OVERLOADS, so I don't need to rewrite parse.c
     static void sqlite3Analyze( Parse pParse, int null_2, int null_3 )
-    { sqlite3Analyze( pParse, null, null ); }
+    {
+      sqlite3Analyze( pParse, null, null );
+    }
     static void sqlite3Analyze( Parse pParse, Token pName1, Token pName2 )
     {
       sqlite3 db = pParse.db;
@@ -520,16 +519,14 @@ return;
             continue;  /* Do not analyze the TEMP database */
           analyzeDatabase( pParse, i );
         }
-      }
-      else if ( pName2.n == 0 )
+      } else if ( pName2.n == 0 )
       {
         /* Form 2:  Analyze the database or table named */
         iDb = sqlite3FindDb( db, pName1 );
         if ( iDb >= 0 )
         {
           analyzeDatabase( pParse, iDb );
-        }
-        else
+        } else
         {
           z = sqlite3NameFromToken( db, pName1 );
           if ( z != null )
@@ -542,8 +539,7 @@ return;
             }
           }
         }
-      }
-      else
+      } else
       {
         /* Form 3: Analyze the fully qualified table name */
         iDb = sqlite3TwoPartName( pParse, pName1, pName2, ref  pTableName );
@@ -610,8 +606,7 @@ return;
       if ( !String.IsNullOrEmpty( argv[1] ) )
       {
         pIndex = sqlite3FindIndex( pInfo.db, argv[1], pInfo.zDatabase );
-      }
-      else
+      } else
       {
         pIndex = null;
       }
@@ -720,8 +715,7 @@ UNUSED_PARAMETER( pIdx );
       if ( zSql == null )
       {
         rc = SQLITE_NOMEM;
-      }
-      else
+      } else
       {
         rc = sqlite3_exec( db, zSql, (dxCallback)analysisLoader, sInfo, 0 );
         sqlite3DbFree( db, ref zSql );
@@ -783,8 +777,7 @@ UNUSED_PARAMETER( pIdx );
                   if ( eType == SQLITE_INTEGER || eType == SQLITE_FLOAT )
                   {
                     pSample.u.r = sqlite3_column_double( pStmt, 2 );
-                  }
-                  else if ( eType == SQLITE_TEXT || eType == SQLITE_BLOB )
+                  } else if ( eType == SQLITE_TEXT || eType == SQLITE_BLOB )
                   {
                     string z = null;
                     byte[] zBLOB = null;
@@ -806,8 +799,7 @@ UNUSED_PARAMETER( pIdx );
                     if ( n < 1 )
                     {
                       pSample.u.z = "";
-                    }
-                    else
+                    } else
                     {
                       pSample.u.z = z;
                       pSample.u.zBLOB = zBLOB;

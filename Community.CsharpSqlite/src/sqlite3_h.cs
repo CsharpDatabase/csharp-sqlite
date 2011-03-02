@@ -551,6 +551,8 @@ namespace Community.CsharpSqlite
     //#define SQLITE_OPEN_SHAREDCACHE      0x00020000  /* Ok for sqlite3_open_v2() */
     //#define SQLITE_OPEN_PRIVATECACHE     0x00040000  /* Ok for sqlite3_open_v2() */
     //#define SQLITE_OPEN_WAL              0x00080000  /* VFS only */
+
+    /* Reserved:                           0x00F00000 */
     const int SQLITE_OPEN_READONLY = 0x00000001;
     const int SQLITE_OPEN_READWRITE = 0x00000002;
     const int SQLITE_OPEN_CREATE = 0x00000004;
@@ -1140,7 +1142,9 @@ namespace Community.CsharpSqlite
       /* New fields may be appended in figure versions.  The iVersion
       ** value will increment whenever this happens. */
 
-      public sqlite3_vfs() { }
+      public sqlite3_vfs()
+      {
+      }
 
       public sqlite3_vfs( int iVersion,
       int szOsFile,
@@ -6374,7 +6378,8 @@ namespace Community.CsharpSqlite
       public dxPC_Destroy xDestroy;//public void (*xDestroy)(sqlite3_pcache*);
 
       public sqlite3_pcache_methods()
-      { }
+      {
+      }
 
       public sqlite3_pcache_methods( object pArg, dxPC_Init xInit, dxPC_Shutdown xShutdown, dxPC_Create xCreate, dxPC_Cachesize xCachesize, dxPC_Pagecount xPagecount, dxPC_Fetch xFetch, dxPC_Unpin xUnpin, dxPC_Rekey xRekey, dxPC_Truncate xTruncate, dxPC_Destroy xDestroy )
       {

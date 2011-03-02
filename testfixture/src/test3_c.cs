@@ -50,22 +50,54 @@ namespace Community.CsharpSqlite
       string zName;
       switch ( rc )
       {
-        case SQLITE_OK: zName = "SQLITE_OK"; break;
-        case SQLITE_ERROR: zName = "SQLITE_ERROR"; break;
-        case SQLITE_PERM: zName = "SQLITE_PERM"; break;
-        case SQLITE_ABORT: zName = "SQLITE_ABORT"; break;
-        case SQLITE_BUSY: zName = "SQLITE_BUSY"; break;
-        case SQLITE_NOMEM: zName = "SQLITE_NOMEM"; break;
-        case SQLITE_READONLY: zName = "SQLITE_READONLY"; break;
-        case SQLITE_INTERRUPT: zName = "SQLITE_INTERRUPT"; break;
-        case SQLITE_IOERR: zName = "SQLITE_IOERR"; break;
-        case SQLITE_CORRUPT: zName = "SQLITE_CORRUPT"; break;
-        case SQLITE_FULL: zName = "SQLITE_FULL"; break;
-        case SQLITE_CANTOPEN: zName = "SQLITE_CANTOPEN"; break;
-        case SQLITE_PROTOCOL: zName = "SQLITE_PROTOCOL"; break;
-        case SQLITE_EMPTY: zName = "SQLITE_EMPTY"; break;
-        case SQLITE_LOCKED: zName = "SQLITE_LOCKED"; break;
-        default: zName = "SQLITE_Unknown"; break;
+        case SQLITE_OK:
+          zName = "SQLITE_OK";
+          break;
+        case SQLITE_ERROR:
+          zName = "SQLITE_ERROR";
+          break;
+        case SQLITE_PERM:
+          zName = "SQLITE_PERM";
+          break;
+        case SQLITE_ABORT:
+          zName = "SQLITE_ABORT";
+          break;
+        case SQLITE_BUSY:
+          zName = "SQLITE_BUSY";
+          break;
+        case SQLITE_NOMEM:
+          zName = "SQLITE_NOMEM";
+          break;
+        case SQLITE_READONLY:
+          zName = "SQLITE_READONLY";
+          break;
+        case SQLITE_INTERRUPT:
+          zName = "SQLITE_INTERRUPT";
+          break;
+        case SQLITE_IOERR:
+          zName = "SQLITE_IOERR";
+          break;
+        case SQLITE_CORRUPT:
+          zName = "SQLITE_CORRUPT";
+          break;
+        case SQLITE_FULL:
+          zName = "SQLITE_FULL";
+          break;
+        case SQLITE_CANTOPEN:
+          zName = "SQLITE_CANTOPEN";
+          break;
+        case SQLITE_PROTOCOL:
+          zName = "SQLITE_PROTOCOL";
+          break;
+        case SQLITE_EMPTY:
+          zName = "SQLITE_EMPTY";
+          break;
+        case SQLITE_LOCKED:
+          zName = "SQLITE_LOCKED";
+          break;
+        default:
+          zName = "SQLITE_Unknown";
+          break;
       }
       return zName;
     }
@@ -99,7 +131,8 @@ namespace Community.CsharpSqlite
         " FILENAME NCACHE\"", "" );
         return TCL.TCL_ERROR;
       }
-      if ( TCL.Tcl_GetInt( interp, argv[2], ref nCache ) ) return TCL.TCL_ERROR;
+      if ( TCL.Tcl_GetInt( interp, argv[2], ref nCache ) )
+        return TCL.TCL_ERROR;
       nRefSqlite3++;
       if ( nRefSqlite3 == 1 )
       {
@@ -119,8 +152,7 @@ namespace Community.CsharpSqlite
       if ( TCL.Tcl_CreateCommandPointer( interp, zBuf, pBt ) )
       {
         return TCL.TCL_ERROR;
-      }
-      else
+      } else
         TCL.Tcl_AppendResult( interp, zBuf, null );
       return TCL.TCL_OK;
     }
@@ -190,7 +222,8 @@ namespace Community.CsharpSqlite
       sqlite3BtreeLeave( pBt );
       if ( rc != SQLITE_OK )
       {
-        TCL.Tcl_AppendResult( interp, errorName( rc ), null ); ;
+        TCL.Tcl_AppendResult( interp, errorName( rc ), null );
+        ;
         return TCL.TCL_ERROR;
       }
       return TCL.TCL_OK;
@@ -231,7 +264,7 @@ namespace Community.CsharpSqlite
 
       sqlite3BtreeEnter( pBt );
       a = sqlite3PagerStats( sqlite3BtreePager( pBt ) );
-      for ( i = 0 ; i < 11 ; i++ )
+      for ( i = 0; i < 11; i++ )
       {
         var zName = new string[]{
 "ref", "page", "max", "size", "state", "err",
@@ -274,13 +307,15 @@ namespace Community.CsharpSqlite
         return TCL.TCL_ERROR;
       }
       pBt = (Btree)sqlite3TestTextToPtr( interp, argv[1].ToString() );
-      if ( TCL.Tcl_GetInt( interp, argv[2], ref  iTable ) ) return TCL.TCL_ERROR;
-      if ( TCL.Tcl_GetBoolean( interp, argv[3], ref wrFlag ) ) return TCL.TCL_ERROR;
+      if ( TCL.Tcl_GetInt( interp, argv[2], ref  iTable ) )
+        return TCL.TCL_ERROR;
+      if ( TCL.Tcl_GetBoolean( interp, argv[3], ref wrFlag ) )
+        return TCL.TCL_ERROR;
       //pCur = (BtCursor )ckalloc(sqlite3BtreeCursorSize());
       pCur = new BtCursor();// memset( pCur, 0, sqlite3BtreeCursorSize() );
       sqlite3BtreeEnter( pBt );
 #if !SQLITE_OMIT_SHARED_CACHE
-      rc = sqlite3BtreeLockTable( pBt, iTable, wrFlag );
+rc = sqlite3BtreeLockTable( pBt, iTable, wrFlag );
 #endif
       if ( rc == SQLITE_OK )
       {
@@ -290,15 +325,15 @@ namespace Community.CsharpSqlite
       if ( rc != 0 )
       {
         pCur = null;// ckfree( pCur );
-        TCL.Tcl_AppendResult( interp, errorName( rc ), null ); ;
+        TCL.Tcl_AppendResult( interp, errorName( rc ), null );
+        ;
         return TCL.TCL_ERROR;
       }
-      sqlite3_snprintf( 30,  zBuf, "->%p", pCur );
+      sqlite3_snprintf( 30, zBuf, "->%p", pCur );
       if ( TCL.Tcl_CreateCommandPointer( interp, zBuf, pCur ) )
       {
         return TCL.TCL_ERROR;
-      }
-      else
+      } else
         TCL.Tcl_AppendResult( interp, zBuf );
       return SQLITE_OK;
     }
@@ -333,7 +368,8 @@ namespace Community.CsharpSqlite
       pCur = null;//ckfree( (char*)pCur );
       if ( rc != 0 )
       {
-        TCL.Tcl_AppendResult( interp, errorName( rc ), null ); ;
+        TCL.Tcl_AppendResult( interp, errorName( rc ), null );
+        ;
         return TCL.TCL_ERROR;
       }
       return SQLITE_OK;
@@ -356,7 +392,7 @@ namespace Community.CsharpSqlite
       BtCursor pCur;
       int rc;
       int res = 0;
-      StringBuilder zBuf = new StringBuilder (100);
+      StringBuilder zBuf = new StringBuilder( 100 );
 
       if ( argc != 2 )
       {
@@ -374,7 +410,8 @@ namespace Community.CsharpSqlite
 #endif
       if ( rc != 0 )
       {
-        TCL.Tcl_AppendResult( interp, errorName( rc ), null ); ;
+        TCL.Tcl_AppendResult( interp, errorName( rc ), null );
+        ;
         return TCL.TCL_ERROR;
       }
       sqlite3_snprintf( 100, zBuf, "%d", res );
@@ -416,7 +453,8 @@ namespace Community.CsharpSqlite
 #endif
       if ( rc != 0 )
       {
-        TCL.Tcl_AppendResult( interp, errorName( rc ), null ); ;
+        TCL.Tcl_AppendResult( interp, errorName( rc ), null );
+        ;
         return TCL.TCL_ERROR;
       }
       sqlite3_snprintf( 100, zBuf, "%d", res );
@@ -469,7 +507,7 @@ namespace Community.CsharpSqlite
       BtCursor pCur;
       i64 n1 = 0;
       u32 n2 = 0;
-      StringBuilder zBuf = new StringBuilder(50);
+      StringBuilder zBuf = new StringBuilder( 50 );
 
       if ( argc != 2 )
       {
@@ -482,14 +520,13 @@ namespace Community.CsharpSqlite
       sqlite3BtreeEnter( pCur.pBtree );
 #endif
 
-  /* The cursor may be in "require-seek" state. If this is the case, the
-  ** call to BtreeDataSize() will fix it. */
+      /* The cursor may be in "require-seek" state. If this is the case, the
+** call to BtreeDataSize() will fix it. */
       sqlite3BtreeDataSize( pCur, ref n2 );
       if ( pCur.apPage[pCur.iPage].intKey != 0 )
       {
         n1 = 0;
-      }
-      else
+      } else
       {
         sqlite3BtreeKeySize( pCur, ref n1 );
       }
@@ -531,13 +568,17 @@ namespace Community.CsharpSqlite
         " START MULTIPLIER COUNT incrEMENT\"", 0 );
         return TCL.TCL_ERROR;
       }
-      if ( TCL.Tcl_GetInt( interp, argv[1], ref start ) ) return TCL.TCL_ERROR;
-      if ( TCL.Tcl_GetInt( interp, argv[2], ref mult ) ) return TCL.TCL_ERROR;
-      if ( TCL.Tcl_GetInt( interp, argv[3], ref count ) ) return TCL.TCL_ERROR;
-      if ( TCL.Tcl_GetInt( interp, argv[4], ref incr ) ) return TCL.TCL_ERROR;
+      if ( TCL.Tcl_GetInt( interp, argv[1], ref start ) )
+        return TCL.TCL_ERROR;
+      if ( TCL.Tcl_GetInt( interp, argv[2], ref mult ) )
+        return TCL.TCL_ERROR;
+      if ( TCL.Tcl_GetInt( interp, argv[3], ref count ) )
+        return TCL.TCL_ERROR;
+      if ( TCL.Tcl_GetInt( interp, argv[4], ref incr ) )
+        return TCL.TCL_ERROR;
       _in = start;
       _in *= mult;
-      for ( i = 0 ; i < count ; i++ )
+      for ( i = 0; i < count; i++ )
       {
         StringBuilder zErr = new StringBuilder( 200 );
         n1 = putVarint( zBuf, 0, _in );
@@ -585,7 +626,7 @@ namespace Community.CsharpSqlite
         ** This is because getVar_int is called ab_out 20 times more often
         ** than putVarint.
         */
-        for ( j = 0 ; j < 19 ; j++ )
+        for ( j = 0; j < 19; j++ )
         {
           getVarint( zBuf, 0, ref _out );
         }
@@ -610,7 +651,7 @@ namespace Community.CsharpSqlite
     TclObject[] argv      /* Text of each argument */
     )
     {
-      StringBuilder zBuf = new StringBuilder (100);
+      StringBuilder zBuf = new StringBuilder( 100 );
       WrappedCommand info = null;
       sqlite3 db;
       Btree pBt;
@@ -637,12 +678,11 @@ namespace Community.CsharpSqlite
       Debug.Assert( db != null );
 
       pBt = db.aDb[iDb].pBt;
-      sqlite3_snprintf( 50,  zBuf, "->%p", pBt );
+      sqlite3_snprintf( 50, zBuf, "->%p", pBt );
       if ( TCL.Tcl_CreateCommandPointer( interp, zBuf, pBt ) )
       {
         return TCL.TCL_ERROR;
-      }
-      else
+      } else
         TCL.Tcl_SetResult( interp, zBuf, TCL.TCL_VOLATILE );
       return TCL.TCL_OK;
     }
@@ -747,7 +787,7 @@ new _aCmd( "btree_ismemdb",        (Tcl_CmdProc)btree_ismemdb       ),
 };
       int i;
 
-      for ( i = 0 ; i < aCmd.Length ; i++ )
+      for ( i = 0; i < aCmd.Length; i++ )
       { //sizeof(aCmd)/sizeof(aCmd[0]); i++){
         TCL.Tcl_CreateCommand( interp, aCmd[i].zName, aCmd[i].xProc, null, null );
       }

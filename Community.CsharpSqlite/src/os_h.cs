@@ -238,10 +238,10 @@ namespace Community.CsharpSqlite
     */
 #if SQLITE_OMIT_WSD
 //# define PENDING_BYTE     (0x40000000)
-    static int PENDING_BYTE = 0x40000000; 
+static int PENDING_BYTE = 0x40000000; 
 #else
     //# define PENDING_BYTE      sqlite3PendingByte
-    static int PENDING_BYTE = 0x40000000; 
+    static int PENDING_BYTE = 0x40000000;
 #endif
 
     static int RESERVED_BYTE = ( PENDING_BYTE + 1 );

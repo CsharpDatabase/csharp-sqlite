@@ -127,16 +127,13 @@ namespace Community.CsharpSqlite
       if ( z[0] >= '0' && z[0] <= '2' )
       {
         return z[0] - '0';
-      }
-      else if ( sqlite3StrICmp( z, "file" ) == 0 )
+      } else if ( sqlite3StrICmp( z, "file" ) == 0 )
       {
         return 1;
-      }
-      else if ( sqlite3StrICmp( z, "memory" ) == 0 )
+      } else if ( sqlite3StrICmp( z, "memory" ) == 0 )
       {
         return 2;
-      }
-      else
+      } else
       {
         return 0;
       }
@@ -276,8 +273,7 @@ new sPragmaType( "foreign_keys",             SQLITE_ForeignKeys ),
             if ( null == zRight )
             {
               returnSingleInt( pParse, p.zName, ( ( db.flags & p.mask ) != 0 ) ? 1 : 0 );
-            }
-            else
+            } else
             {
               int mask = p.mask;          /* Mask of bits to set or clear. */
               if ( db.autoCommit == 0 )
@@ -289,8 +285,7 @@ new sPragmaType( "foreign_keys",             SQLITE_ForeignKeys ),
               if ( getBoolean( zRight ) != 0 )
               {
                 db.flags |= mask;
-              }
-              else
+              } else
               {
                 db.flags &= ~mask;
               }
@@ -395,7 +390,9 @@ new sPragmaType( "foreign_keys",             SQLITE_ForeignKeys ),
 
     // OVERLOADS, so I don't need to rewrite parse.c
     static void sqlite3Pragma( Parse pParse, Token pId1, Token pId2, int null_4, int minusFlag )
-    { sqlite3Pragma( pParse, pId1, pId2, null, minusFlag ); }
+    {
+      sqlite3Pragma( pParse, pId1, pId2, null, minusFlag );
+    }
     static void sqlite3Pragma(
     Parse pParse,
     Token pId1,        /* First part of [database.]id field */
@@ -438,8 +435,7 @@ new sPragmaType( "foreign_keys",             SQLITE_ForeignKeys ),
       if ( minusFlag != 0 )
       {
         zRight = ( pValue == null ) ? "" : sqlite3MPrintf( db, "-%T", pValue );
-      }
-      else
+      } else
       {
         zRight = sqlite3NameFromToken( db, pValue );
       }
@@ -494,8 +490,7 @@ new VdbeOpList( OP_ResultRow,   1, 1,        0),
           sqlite3VdbeChangeP1( v, addr, iDb );
           sqlite3VdbeChangeP1( v, addr + 1, iDb );
           sqlite3VdbeChangeP1( v, addr + 6, SQLITE_DEFAULT_CACHE_SIZE );
-        }
-        else
+        } else
         {
           int size = sqlite3Atoi( zRight );
           if ( size < 0 )
@@ -506,8 +501,7 @@ new VdbeOpList( OP_ResultRow,   1, 1,        0),
           pDb.pSchema.cache_size = size;
           sqlite3BtreeSetCacheSize( pDb.pBt, pDb.pSchema.cache_size );
         }
-      }
-      else
+      } else
 
         /*
         **  PRAGMA [database.]page_size
@@ -526,8 +520,7 @@ new VdbeOpList( OP_ResultRow,   1, 1,        0),
           {
             int size = ALWAYS( pBt ) ? sqlite3BtreeGetPageSize( pBt ) : 0;
             returnSingleInt( pParse, "page_size", size );
-          }
-          else
+          } else
           {
             /* Malloc may fail when setting the page-size, as there is an internal
             ** buffer that the pager module resizes using sqlite3_realloc().
@@ -538,8 +531,7 @@ new VdbeOpList( OP_ResultRow,   1, 1,        0),
               ////        db.mallocFailed = 1;
             }
           }
-        }
-        else
+        } else
 
           /*
           **  PRAGMA [database.]secure_delete
@@ -568,9 +560,7 @@ new VdbeOpList( OP_ResultRow,   1, 1,        0),
             }
             b = sqlite3BtreeSecureDelete( pBt, b );
             returnSingleInt( pParse, "secure_delete", b );
-          }
-
-          else
+          } else
             /*
             **  PRAGMA [database.]max_page_count
             **  PRAGMA [database.]max_page_count=N
@@ -596,16 +586,14 @@ new VdbeOpList( OP_ResultRow,   1, 1,        0),
               if ( zLeft[0] == 'p' )
               {
                 sqlite3VdbeAddOp2( v, OP_Pagecount, iDb, iReg );
-              }
-              else
+              } else
               {
                 sqlite3VdbeAddOp3( v, OP_MaxPgcnt, iDb, iReg, sqlite3Atoi( zRight ) );
               }
               sqlite3VdbeAddOp2( v, OP_ResultRow, iReg, 1 );
               sqlite3VdbeSetNumCols( v, 1 );
               sqlite3VdbeSetColName( v, 0, COLNAME_NAME, zLeft, SQLITE_TRANSIENT );
-            }
-            else
+            } else
 
               /*
               **  PRAGMA [database.]page_count
@@ -625,8 +613,7 @@ new VdbeOpList( OP_ResultRow,   1, 1,        0),
                 sqlite3VdbeAddOp2( _v, OP_ResultRow, iReg, 1 );
                 sqlite3VdbeSetNumCols( _v, 1 );
                 sqlite3VdbeSetColName( _v, 0, COLNAME_NAME, "page_count", SQLITE_STATIC );
-              }
-              else
+              } else
 
                 /*
                 **  PRAGMA [database.]locking_mode
@@ -644,8 +631,7 @@ new VdbeOpList( OP_ResultRow,   1, 1,        0),
                     ** the locking-mode of the main database).
                     */
                     eMode = db.dfltLockMode;
-                  }
-                  else
+                  } else
                   {
                     Pager pPager;
                     if ( pId2.n == 0 )
@@ -680,8 +666,7 @@ new VdbeOpList( OP_ResultRow,   1, 1,        0),
                   sqlite3VdbeSetColName( v, 0, COLNAME_NAME, "locking_mode", SQLITE_STATIC );
                   sqlite3VdbeAddOp4( v, OP_String8, 0, 1, 0, zRet, 0 );
                   sqlite3VdbeAddOp2( v, OP_ResultRow, 1, 1 );
-                }
-                else
+                } else
                   /*
                   **  PRAGMA [database.]journal_mode
                   **  PRAGMA [database.]journal_mode =
@@ -706,8 +691,7 @@ new VdbeOpList( OP_ResultRow,   1, 1,        0),
                       /* If there is no "=MODE" part of the pragma, do a query for the
                       ** current mode */
                       eMode = PAGER_JOURNALMODE_QUERY;
-                    }
-                    else
+                    } else
                     {
                       string zMode;
                       int n = sqlite3Strlen30( zRight );
@@ -738,8 +722,7 @@ new VdbeOpList( OP_ResultRow,   1, 1,        0),
                       }
                     }
                     sqlite3VdbeAddOp2( v, OP_ResultRow, 1, 1 );
-                  }
-                  else
+                  } else
 
                     /*
                     **  PRAGMA [database.]journal_size_limit
@@ -759,8 +742,7 @@ new VdbeOpList( OP_ResultRow,   1, 1,        0),
                       }
                       iLimit = sqlite3PagerJournalSizeLimit( pPager, iLimit );
                       returnSingleInt( pParse, "journal_size_limit", iLimit );
-                    }
-                    else
+                    } else
 
 #endif // * SQLITE_OMIT_PAGER_PRAGMAS */
 
@@ -786,14 +768,12 @@ new VdbeOpList( OP_ResultRow,   1, 1,        0),
                           if ( ALWAYS( pBt ) )
                           {
                             auto_vacuum = sqlite3BtreeGetAutoVacuum( pBt );
-                          }
-                          else
+                          } else
                           {
                             auto_vacuum = SQLITE_DEFAULT_AUTOVACUUM;
                           }
                           returnSingleInt( pParse, "auto_vacuum", auto_vacuum );
-                        }
-                        else
+                        } else
                         {
                           int eAuto = getAutoVacuum( zRight );
                           Debug.Assert( eAuto >= 0 && eAuto <= 2 );
@@ -832,8 +812,7 @@ new VdbeOpList( OP_SetCookie,      0,               BTREE_INCR_VACUUM, 1),    /*
                             }
                           }
                         }
-                      }
-                      else
+                      } else
 #endif
 
                         /*
@@ -860,8 +839,7 @@ new VdbeOpList( OP_SetCookie,      0,               BTREE_INCR_VACUUM, 1),    /*
                           sqlite3VdbeAddOp2( v, OP_AddImm, 1, -1 );
                           sqlite3VdbeAddOp2( v, OP_IfPos, 1, addr );
                           sqlite3VdbeJumpHere( v, addr );
-                        }
-                        else
+                        } else
 #endif
 
 #if !SQLITE_OMIT_PAGER_PRAGMAS
@@ -886,8 +864,7 @@ new VdbeOpList( OP_SetCookie,      0,               BTREE_INCR_VACUUM, 1),    /*
                             if ( null == zRight )
                             {
                               returnSingleInt( pParse, "cache_size", pDb.pSchema.cache_size );
-                            }
-                            else
+                            } else
                             {
                               int size = sqlite3Atoi( zRight );
                               if ( size < 0 )
@@ -895,8 +872,7 @@ new VdbeOpList( OP_SetCookie,      0,               BTREE_INCR_VACUUM, 1),    /*
                               pDb.pSchema.cache_size = size;
                               sqlite3BtreeSetCacheSize( pDb.pBt, pDb.pSchema.cache_size );
                             }
-                          }
-                          else
+                          } else
 
                             /*
                             **   PRAGMA temp_store
@@ -914,13 +890,11 @@ new VdbeOpList( OP_SetCookie,      0,               BTREE_INCR_VACUUM, 1),    /*
                               if ( zRight == null )
                               {
                                 returnSingleInt( pParse, "temp_store", db.temp_store );
-                              }
-                              else
+                              } else
                               {
                                 changeTempStorage( pParse, zRight );
                               }
-                            }
-                            else
+                            } else
 
                               /*
                               **   PRAGMA temp_store_directory
@@ -940,12 +914,11 @@ new VdbeOpList( OP_SetCookie,      0,               BTREE_INCR_VACUUM, 1),    /*
                                   {
                                     sqlite3VdbeSetNumCols( v, 1 );
                                     sqlite3VdbeSetColName( v, 0, COLNAME_NAME,
-                                        "temp_store_directory", SQLITE_STATIC );
+                                    "temp_store_directory", SQLITE_STATIC );
                                     sqlite3VdbeAddOp4( v, OP_String8, 0, 1, 0, sqlite3_temp_directory, 0 );
                                     sqlite3VdbeAddOp2( v, OP_ResultRow, 1, 1 );
                                   }
-                                }
-                                else
+                                } else
                                 {
 #if !SQLITE_OMIT_WSD
                                   if ( zRight.Length > 0 )
@@ -960,8 +933,8 @@ new VdbeOpList( OP_SetCookie,      0,               BTREE_INCR_VACUUM, 1),    /*
                                     }
                                   }
                                   if ( SQLITE_TEMP_STORE == 0
-                                   || ( SQLITE_TEMP_STORE == 1 && db.temp_store <= 1 )
-                                   || ( SQLITE_TEMP_STORE == 2 && db.temp_store == 1 )
+                                  || ( SQLITE_TEMP_STORE == 1 && db.temp_store <= 1 )
+                                  || ( SQLITE_TEMP_STORE == 2 && db.temp_store == 1 )
                                   )
                                   {
                                     invalidateTempStorage( pParse );
@@ -970,15 +943,13 @@ new VdbeOpList( OP_SetCookie,      0,               BTREE_INCR_VACUUM, 1),    /*
                                   if ( zRight.Length > 0 )
                                   {
                                     sqlite3_temp_directory = zRight;//sqlite3_mprintf("%s", zRight);
-                                  }
-                                  else
+                                  } else
                                   {
                                     sqlite3_temp_directory = "";
                                   }
 #endif //* SQLITE_OMIT_WSD */
                                 }
-                              }
-                              else
+                              } else
 
 #if !(SQLITE_ENABLE_LOCKING_STYLE)
 #  if (__APPLE__)
@@ -1058,21 +1029,18 @@ else
                                   if ( null == zRight )
                                   {
                                     returnSingleInt( pParse, "synchronous", pDb.safety_level - 1 );
-                                  }
-                                  else
+                                  } else
                                   {
                                     if ( 0 == db.autoCommit )
                                     {
                                       sqlite3ErrorMsg( pParse,
-                                        "Safety level may not be changed inside a transaction" );
-                                    }
-                                    else
+                                      "Safety level may not be changed inside a transaction" );
+                                    } else
                                     {
                                       pDb.safety_level = (byte)( getSafetyLevel( zRight ) + 1 );
                                     }
                                   }
-                                }
-                                else
+                                } else
 #endif // * SQLITE_OMIT_PAGER_PRAGMAS */
 
 #if !SQLITE_OMIT_FLAG_PRAGMAS
@@ -1080,8 +1048,7 @@ else
                                   {
                                     /* The flagPragma() subroutine also generates any necessary code
                                     ** there is nothing more to do here */
-                                  }
-                                  else
+                                  } else
 #endif // * SQLITE_OMIT_FLAG_PRAGMAS */
 
 #if !SQLITE_OMIT_SCHEMA_PRAGMAS
@@ -1128,13 +1095,12 @@ else
                                           sqlite3VdbeAddOp2( v, OP_Integer, i - nHidden, 1 );
                                           sqlite3VdbeAddOp4( v, OP_String8, 0, 2, 0, pCol.zName, 0 );
                                           sqlite3VdbeAddOp4( v, OP_String8, 0, 3, 0,
-                                             pCol.zType != null ? pCol.zType : "", 0 );
+                                          pCol.zType != null ? pCol.zType : "", 0 );
                                           sqlite3VdbeAddOp2( v, OP_Integer, ( pCol.notNull != 0 ? 1 : 0 ), 4 );
                                           if ( pCol.zDflt != null )
                                           {
                                             sqlite3VdbeAddOp4( v, OP_String8, 0, 5, 0, pCol.zDflt, 0 );
-                                          }
-                                          else
+                                          } else
                                           {
                                             sqlite3VdbeAddOp2( v, OP_Null, 0, 5 );
                                           }
@@ -1142,8 +1108,7 @@ else
                                           sqlite3VdbeAddOp2( v, OP_ResultRow, 1, 6 );
                                         }
                                       }
-                                    }
-                                    else
+                                    } else
 
                                       if ( sqlite3StrICmp( zLeft, "index_info" ) == 0 && zRight != null )
                                       {
@@ -1171,8 +1136,7 @@ else
                                             sqlite3VdbeAddOp2( v, OP_ResultRow, 1, 3 );
                                           }
                                         }
-                                      }
-                                      else
+                                      } else
 
                                         if ( sqlite3StrICmp( zLeft, "index_list" ) == 0 && zRight != null )
                                         {
@@ -1204,8 +1168,7 @@ else
                                               }
                                             }
                                           }
-                                        }
-                                        else
+                                        } else
 
                                           if ( sqlite3StrICmp( zLeft, "database_list" ) == 0 )
                                           {
@@ -1225,11 +1188,10 @@ else
                                               sqlite3VdbeAddOp2( v, OP_Integer, i, 1 );
                                               sqlite3VdbeAddOp4( v, OP_String8, 0, 2, 0, db.aDb[i].zName, 0 );
                                               sqlite3VdbeAddOp4( v, OP_String8, 0, 3, 0,
-                                                   sqlite3BtreeGetFilename( db.aDb[i].pBt ), 0 );
+                                              sqlite3BtreeGetFilename( db.aDb[i].pBt ), 0 );
                                               sqlite3VdbeAddOp2( v, OP_ResultRow, 1, 3 );
                                             }
-                                          }
-                                          else
+                                          } else
 
                                             if ( sqlite3StrICmp( zLeft, "collation_list" ) == 0 )
                                             {
@@ -1246,8 +1208,7 @@ else
                                                 sqlite3VdbeAddOp4( v, OP_String8, 0, 2, 0, pColl.zName, 0 );
                                                 sqlite3VdbeAddOp2( v, OP_ResultRow, 1, 2 );
                                               }
-                                            }
-                                            else
+                                            } else
 #endif // * SQLITE_OMIT_SCHEMA_PRAGMAS */
 
 #if !SQLITE_OMIT_FOREIGN_KEY
@@ -1287,7 +1248,7 @@ else
                                                         sqlite3VdbeAddOp2( v, OP_Integer, j, 2 );
                                                         sqlite3VdbeAddOp4( v, OP_String8, 0, 3, 0, pFK.zTo, 0 );
                                                         sqlite3VdbeAddOp4( v, OP_String8, 0, 4, 0,
-                                                                          pTab.aCol[pFK.aCol[j].iFrom].zName, 0 );
+                                                        pTab.aCol[pFK.aCol[j].iFrom].zName, 0 );
                                                         sqlite3VdbeAddOp4( v, zCol != null ? OP_String8 : OP_Null, 0, 5, 0, zCol, 0 );
                                                         sqlite3VdbeAddOp4( v, OP_String8, 0, 6, 0, zOnUpdate, 0 );
                                                         sqlite3VdbeAddOp4( v, OP_String8, 0, 7, 0, zOnDelete, 0 );
@@ -1299,8 +1260,7 @@ else
                                                     }
                                                   }
                                                 }
-                                              }
-                                              else
+                                              } else
 #endif // * !SQLITE_OMIT_FOREIGN_KEY) */
 
 #if !NDEBUG
@@ -1311,14 +1271,12 @@ else
                                                     if ( getBoolean( zRight ) != 0 )
                                                     {
                                                       sqlite3ParserTrace( Console.Out, "parser: " );
-                                                    }
-                                                    else
+                                                    } else
                                                     {
                                                       sqlite3ParserTrace( null, "" );
                                                     }
                                                   }
-                                                }
-                                                else
+                                                } else
 #endif
 
                                                   /* Reinstall the LIKE and GLOB functions.  The variant of LIKE
@@ -1330,8 +1288,7 @@ else
                                                     {
                                                       sqlite3RegisterLikeFunctions( db, getBoolean( zRight ) );
                                                     }
-                                                  }
-                                                  else
+                                                  } else
 
 #if !SQLITE_INTEGRITY_CHECK_ERROR_MAX
                                                     //const int SQLITE_INTEGRITY_CHECK_ERROR_MAX = 100;
@@ -1343,7 +1300,7 @@ else
 ** without most of the overhead of a full integrity-check.
 */
                                                     if ( sqlite3StrICmp( zLeft, "integrity_check" ) == 0
-                                                     || sqlite3StrICmp( zLeft, "quick_check" ) == 0
+                                                    || sqlite3StrICmp( zLeft, "quick_check" ) == 0
                                                     )
                                                     {
                                                       const int SQLITE_INTEGRITY_CHECK_ERROR_MAX = 100;
@@ -1426,8 +1383,8 @@ new  VdbeOpList( OP_ResultRow,   3, 1,        0),
                                                         sqlite3VdbeChangeP5( v, (u8)i );
                                                         addr = sqlite3VdbeAddOp1( v, OP_IsNull, 2 );
                                                         sqlite3VdbeAddOp4( v, OP_String8, 0, 3, 0,
-                                                           sqlite3MPrintf( db, "*** in database %s ***\n", db.aDb[i].zName ),
-                                                           P4_DYNAMIC );
+                                                        sqlite3MPrintf( db, "*** in database %s ***\n", db.aDb[i].zName ),
+                                                        P4_DYNAMIC );
                                                         sqlite3VdbeAddOp3( v, OP_Move, 2, 4, 1 );
                                                         sqlite3VdbeAddOp3( v, OP_Concat, 4, 3, 2 );
                                                         sqlite3VdbeAddOp2( v, OP_ResultRow, 2, 1 );
@@ -1503,7 +1460,7 @@ new VdbeOpList( OP_ResultRow,    2,  1,  0),
                                                             sqlite3VdbeChangeP2( v, addr + 3, addr + 2 );
                                                             sqlite3VdbeJumpHere( v, addr + 4 );
                                                             sqlite3VdbeChangeP4( v, addr + 6,
-                                                                       "wrong # of entries in index ", P4_STATIC );
+                                                            "wrong # of entries in index ", P4_STATIC );
                                                             sqlite3VdbeChangeP4( v, addr + 7, pIdx.zName, P4_STATIC );
                                                           }
                                                         }
@@ -1512,8 +1469,7 @@ new VdbeOpList( OP_ResultRow,    2,  1,  0),
                                                       sqlite3VdbeChangeP2( v, addr, -mxErr );
                                                       sqlite3VdbeJumpHere( v, addr + 1 );
                                                       sqlite3VdbeChangeP4( v, addr + 2, "ok", P4_STATIC );
-                                                    }
-                                                    else
+                                                    } else
 #endif // * SQLITE_OMIT_INTEGRITY_CHECK */
 
                                                       /*
@@ -1594,8 +1550,7 @@ sqlite3ErrorMsg( pParse, "unsupported encoding: %s", zRight );
 }
 }
 #endif
-                                                      }
-                                                      else
+                                                      } else
 
 #if !SQLITE_OMIT_SCHEMA_VERSION_PRAGMAS
                                                         /*
@@ -1624,8 +1579,8 @@ sqlite3ErrorMsg( pParse, "unsupported encoding: %s", zRight );
 ** applications for any purpose.
 */
                                                         if ( sqlite3StrICmp( zLeft, "schema_version" ) == 0
-                                                         || sqlite3StrICmp( zLeft, "user_version" ) == 0
-                                                         || sqlite3StrICmp( zLeft, "freelist_count" ) == 0
+                                                        || sqlite3StrICmp( zLeft, "user_version" ) == 0
+                                                        || sqlite3StrICmp( zLeft, "freelist_count" ) == 0
                                                         )
                                                         {
                                                           int iCookie;   /* Cookie index. 1 for schema-cookie, 6 for user-cookie. */
@@ -1658,8 +1613,7 @@ new VdbeOpList( OP_SetCookie,      0,  0,  1),    /* 2 */
                                                             sqlite3VdbeChangeP1( v, addr + 1, sqlite3Atoi( zRight ) );
                                                             sqlite3VdbeChangeP1( v, addr + 2, iDb );
                                                             sqlite3VdbeChangeP2( v, addr + 2, iCookie );
-                                                          }
-                                                          else
+                                                          } else
                                                           {
                                                             /* Read the specified cookie value */
                                                             var readCookie = new VdbeOpList[]  {
@@ -1674,19 +1628,15 @@ new VdbeOpList( OP_ResultRow,       1,  1,  0)
                                                             sqlite3VdbeSetNumCols( v, 1 );
                                                             sqlite3VdbeSetColName( v, 0, COLNAME_NAME, zLeft, SQLITE_TRANSIENT );
                                                           }
-                                                        }
-                                                        else if ( sqlite3StrICmp( zLeft, "reload_schema" ) == 0 )
+                                                        } else if ( sqlite3StrICmp( zLeft, "reload_schema" ) == 0 )
                                                         {
                                                           /* force schema reloading*/
                                                           sqlite3ResetInternalSchema( db, 0 );
-                                                        }
-                                                        else if ( sqlite3StrICmp( zLeft, "file_format" ) == 0 )
+                                                        } else if ( sqlite3StrICmp( zLeft, "file_format" ) == 0 )
                                                         {
                                                           pDb.pSchema.file_format = (u8)atoi( zRight );
                                                           sqlite3ResetInternalSchema( db, 0 );
-                                                        }
-
-                                                        else
+                                                        } else
 #endif // * SQLITE_OMIT_SCHEMA_VERSION_PRAGMAS */
 
 #if !SQLITE_OMIT_COMPILEOPTION_DIAGS
@@ -1708,8 +1658,7 @@ new VdbeOpList( OP_ResultRow,       1,  1,  0)
                                                               sqlite3VdbeAddOp4( v, OP_String8, 0, 1, 0, zOpt, 0 );
                                                               sqlite3VdbeAddOp2( v, OP_ResultRow, 1, 1 );
                                                             }
-                                                          }
-                                                          else
+                                                          } else
 #endif //* SQLITE_OMIT_COMPILEOPTION_DIAGS */
 
 
@@ -1769,17 +1718,15 @@ SQLITE_PTR_TO_INT(db->pWalArg) : 0);
                                                                 if ( pBt == null || ( pPager = sqlite3BtreePager( pBt ) ) == null )
                                                                 {
                                                                   zState = "closed";
-                                                                }
-                                                                else if ( sqlite3_file_control( db, i != 0 ? db.aDb[i].zName : null,
-                                                         SQLITE_FCNTL_LOCKSTATE, ref j ) == SQLITE_OK )
+                                                                } else if ( sqlite3_file_control( db, i != 0 ? db.aDb[i].zName : null,
+                                                                SQLITE_FCNTL_LOCKSTATE, ref j ) == SQLITE_OK )
                                                                 {
                                                                   zState = azLockName[j];
                                                                 }
                                                                 sqlite3VdbeAddOp4( v, OP_String8, 0, 2, 0, zState, P4_STATIC );
                                                                 sqlite3VdbeAddOp2( v, OP_ResultRow, 1, 2 );
                                                               }
-                                                            }
-                                                            else
+                                                            } else
 #endif
 
 #if SQLITE_HAS_CODEC
@@ -1787,13 +1734,11 @@ SQLITE_PTR_TO_INT(db->pWalArg) : 0);
                                                               if ( sqlite3StrICmp( zLeft, "key" ) == 0 && !String.IsNullOrEmpty( zRight ) )
                                                               {
                                                                 sqlite3_key( db, zRight, sqlite3Strlen30( zRight ) );
-                                                              }
-                                                              else
+                                                              } else
                                                                 if ( sqlite3StrICmp( zLeft, "rekey" ) == 0 && !String.IsNullOrEmpty( zRight ) )
                                                                 {
                                                                   sqlite3_rekey( db, zRight, sqlite3Strlen30( zRight ) );
-                                                                }
-                                                                else
+                                                                } else
                                                                   if ( !String.IsNullOrEmpty( zRight ) && ( sqlite3StrICmp( zLeft, "hexkey" ) == 0 ||
                                                                   sqlite3StrICmp( zLeft, "hexrekey" ) == 0 ) )
                                                                   {
@@ -1814,13 +1759,11 @@ SQLITE_PTR_TO_INT(db->pWalArg) : 0);
                                                                     if ( ( zLeft[3] & 0xf ) == 0xb )
                                                                     {
                                                                       sqlite3_key( db, zKey.ToString(), zKey.Length );
-                                                                    }
-                                                                    else
+                                                                    } else
                                                                     {
                                                                       sqlite3_rekey( db, zKey.ToString(), zKey.Length );
                                                                     }
-                                                                  }
-                                                                  else
+                                                                  } else
 #endif
 #if SQLITE_HAS_CODEC || SQLITE_ENABLE_CEROD
                                                                     if ( sqlite3StrICmp( zLeft, "activate_extensions" ) == 0 )
@@ -1836,10 +1779,10 @@ if( sqlite3StrNICmp(zRight, "cerod-", 6)==0 ){
 sqlite3_activate_cerod(&zRight[6]);
 }
 #endif
-                                                                    }
-                                                                    else
+                                                                    } else
 #endif
-                                                                    { /* Empty ELSE clause */}
+                                                                    { /* Empty ELSE clause */
+                                                                    }
 
       /*
       ** Reset the safety level, in case the fullfsync flag or synchronous

@@ -37,172 +37,242 @@ using System.Data.Common;
 
 namespace Community.CsharpSqlite.SQLiteClient
 {
-	public class SqliteParameter :
+  public class SqliteParameter :
 #if NET_2_0
-		DbParameter
+DbParameter
 #else
-		IDbDataParameter
+ IDbDataParameter
 #endif
-	{
+  {
 
-		#region Fields
-		
-		private string name;
-		private DbType type;
-		private DbType originalType;
-		private bool typeSet;
-		private string source_column;
-		private ParameterDirection direction;
-		private DataRowVersion row_version;
-		private object param_value;
-		private byte precision;
-		private byte scale;
-		private int size;
-		private bool isNullable;
-		private bool sourceColumnNullMapping;
-		
-		#endregion
+    #region Fields
 
-		#region Constructors and destructors
-		
-		public SqliteParameter ()
-		{
-			type = DbType.String;
-			direction = ParameterDirection.Input;
-			isNullable = true;
-		}
-		
-		public SqliteParameter (string name, DbType type)
-		{
-			this.name = name;
-			this.type = type;
-			isNullable = true;
-		}
-		
-		public SqliteParameter (string name, object value)
-		{
-			this.name = name;
-			type = DbType.String;
-			param_value = value;
-			direction = ParameterDirection.Input;
-			isNullable = true;
-		}
-		
-		public SqliteParameter (string name, DbType type, int size) : this (name, type)
-		{
-			this.size = size;
-		}
-		
-		public SqliteParameter (string name, DbType type, int size, string src_column) : this (name ,type, size)
-		{
-			source_column = src_column;
-		}
-		
-		#endregion
+    private string name;
+    private DbType type;
+    private DbType originalType;
+    private bool typeSet;
+    private string source_column;
+    private ParameterDirection direction;
+    private DataRowVersion row_version;
+    private object param_value;
+    private byte precision;
+    private byte scale;
+    private int size;
+    private bool isNullable;
+    private bool sourceColumnNullMapping;
 
-		#region Properties
-		
-#if NET_2_0
-		override
-#endif
-		public DbType DbType {
-			get { return type; }
-			set {
-				if (!typeSet) {
-					originalType = type;
-					typeSet = true;
-				}
-				type = value;
-				if (!typeSet)
-					originalType = type;
-			}
-		}
-	
-#if NET_2_0
-		override
-#endif
-		public ParameterDirection Direction {
-			get { return direction; }
-			set { direction = value; }
-		}
-	
-#if NET_2_0
-		override
-#endif
-		public bool IsNullable {
-			get { return isNullable; }
-#if NET_2_0
-			set { isNullable = value; }
-#endif
-		}
+    #endregion
+
+    #region Constructors and destructors
+
+    public SqliteParameter()
+    {
+      type = DbType.String;
+      direction = ParameterDirection.Input;
+      isNullable = true;
+    }
+
+    public SqliteParameter( string name, DbType type )
+    {
+      this.name = name;
+      this.type = type;
+      isNullable = true;
+    }
+
+    public SqliteParameter( string name, object value )
+    {
+      this.name = name;
+      type = DbType.String;
+      param_value = value;
+      direction = ParameterDirection.Input;
+      isNullable = true;
+    }
+
+    public SqliteParameter( string name, DbType type, int size )
+      : this( name, type )
+    {
+      this.size = size;
+    }
+
+    public SqliteParameter( string name, DbType type, int size, string src_column )
+      : this( name, type, size )
+    {
+      source_column = src_column;
+    }
+
+    #endregion
+
+    #region Properties
 
 #if NET_2_0
-		override
+override
 #endif
-		public string ParameterName {
-			get { return name; }
-			set { name = value; }
-		}
-	
-		public byte Precision {
-			get { return precision; }
-			set { precision = value; }
-		}
-		
-		public byte Scale {
-			get { return scale; }
-			set { scale = value; }
-		}
+    public DbType DbType
+    {
+      get
+      {
+        return type;
+      }
+      set
+      {
+        if ( !typeSet )
+        {
+          originalType = type;
+          typeSet = true;
+        }
+        type = value;
+        if ( !typeSet )
+          originalType = type;
+      }
+    }
 
 #if NET_2_0
-		override
+override
 #endif
-		public int Size {
-			get { return size; }
-			set { size = value; }
-		}
-		
-#if NET_2_0
-		override
-#endif
-		public string SourceColumn {
-			get { return source_column; }
-			set { source_column = value; }
-		}
+    public ParameterDirection Direction
+    {
+      get
+      {
+        return direction;
+      }
+      set
+      {
+        direction = value;
+      }
+    }
 
 #if NET_2_0
-		public override bool SourceColumnNullMapping {
-			get { return sourceColumnNullMapping; }
-			set { sourceColumnNullMapping = value; }
-		}
+override
+#endif
+    public bool IsNullable
+    {
+      get
+      {
+        return isNullable;
+      }
+#if NET_2_0
+set { isNullable = value; }
+#endif
+    }
+
+#if NET_2_0
+override
+#endif
+    public string ParameterName
+    {
+      get
+      {
+        return name;
+      }
+      set
+      {
+        name = value;
+      }
+    }
+
+    public byte Precision
+    {
+      get
+      {
+        return precision;
+      }
+      set
+      {
+        precision = value;
+      }
+    }
+
+    public byte Scale
+    {
+      get
+      {
+        return scale;
+      }
+      set
+      {
+        scale = value;
+      }
+    }
+
+#if NET_2_0
+override
+#endif
+    public int Size
+    {
+      get
+      {
+        return size;
+      }
+      set
+      {
+        size = value;
+      }
+    }
+
+#if NET_2_0
+override
+#endif
+    public string SourceColumn
+    {
+      get
+      {
+        return source_column;
+      }
+      set
+      {
+        source_column = value;
+      }
+    }
+
+#if NET_2_0
+public override bool SourceColumnNullMapping {
+get { return sourceColumnNullMapping; }
+set { sourceColumnNullMapping = value; }
+}
 #endif
 
 #if NET_2_0
-		override
+override
 #endif
-		public DataRowVersion SourceVersion {
-			get { return row_version; }
-			set { row_version = value; }
-		}
-		
-#if NET_2_0
-		override
-#endif
-		public object Value {
-			get { return param_value; }
-			set { param_value = value; }
-		}
-		
-		#endregion
+    public DataRowVersion SourceVersion
+    {
+      get
+      {
+        return row_version;
+      }
+      set
+      {
+        row_version = value;
+      }
+    }
 
-		#region methods
 #if NET_2_0
-		public override void ResetDbType ()
-		{
-			type = originalType;
-		}
+override
 #endif
-		#endregion
-	}
-  public class SQLiteParameter : SqliteParameter { }
+    public object Value
+    {
+      get
+      {
+        return param_value;
+      }
+      set
+      {
+        param_value = value;
+      }
+    }
+
+    #endregion
+
+    #region methods
+#if NET_2_0
+public override void ResetDbType ()
+{
+type = originalType;
+}
+#endif
+    #endregion
+  }
+  public class SQLiteParameter : SqliteParameter
+  {
+  }
 }

@@ -92,7 +92,10 @@ return retval;
     ** of the debugging and testing utilities, but it should at
     ** least compile and run.
     */
-    static sqlite_u3264 sqlite3Hwtime() { return (sqlite_u3264)System.DateTime.Now.Ticks; }// (sqlite_u3264)0 ); }
+    static sqlite_u3264 sqlite3Hwtime()
+    {
+      return (sqlite_u3264)System.DateTime.Now.Ticks;
+    }// (sqlite_u3264)0 ); }
 
 #endif
 

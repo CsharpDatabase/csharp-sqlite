@@ -18,34 +18,33 @@
 using System;
 namespace tcl.lang
 {
-	
-	/*
-	* This class implements the built-in "lindex" command in Tcl.
-	*/
-	
-	class LindexCmd : Command
-	{
-		
-		public TCL.CompletionCode cmdProc(Interp interp, TclObject[] argv)
-		{
-			if (argv.Length != 3)
-			{
-				throw new TclNumArgsException(interp, 1, argv, "list index");
-			}
-			
-			int size = TclList.getLength(interp, argv[1]);
-			int index = Util.getIntForIndex(interp, argv[2], size - 1);
-			TclObject element = TclList.index(interp, argv[1], index);
-			
-			if (element != null)
-			{
-				interp.setResult(element);
-			}
-			else
-			{
-				interp.resetResult();
-			}
+
+  /*
+  * This class implements the built-in "lindex" command in Tcl.
+  */
+
+  class LindexCmd : Command
+  {
+
+    public TCL.CompletionCode cmdProc( Interp interp, TclObject[] argv )
+    {
+      if ( argv.Length != 3 )
+      {
+        throw new TclNumArgsException( interp, 1, argv, "list index" );
+      }
+
+      int size = TclList.getLength( interp, argv[1] );
+      int index = Util.getIntForIndex( interp, argv[2], size - 1 );
+      TclObject element = TclList.index( interp, argv[1], index );
+
+      if ( element != null )
+      {
+        interp.setResult( element );
+      } else
+      {
+        interp.resetResult();
+      }
       return TCL.CompletionCode.RETURN;
     }
-	} // end 
+  } // end 
 }

@@ -56,7 +56,9 @@ static bool sqlite3BtreeTrace=false;  /* True to enable tracing */
 static void TRACE(string X, params object[] ap) { if (sqlite3BtreeTrace)  printf(X, ap); }
 #else
     //# define TRACE(X)
-    static void TRACE( string X, params object[] ap ) { }
+    static void TRACE( string X, params object[] ap )
+    {
+    }
 #endif
 
 
@@ -71,7 +73,10 @@ static void TRACE(string X, params object[] ap) { if (sqlite3BtreeTrace)  printf
 ** This routine makes the necessary adjustment to 65536.
 */
     //#define get2byteNotZero(X)  (((((int)get2byte(X))-1)&0xffff)+1)
-    static int get2byteNotZero( byte[] X, int offset ) { return ( ( ( ( (int)get2byte( X, offset ) ) - 1 ) & 0xffff ) + 1 ); }
+    static int get2byteNotZero( byte[] X, int offset )
+    {
+      return ( ( ( ( (int)get2byte( X, offset ) ) - 1 ) & 0xffff ) + 1 );
+    }
 
 #if !SQLITE_OMIT_SHARED_CACHE
 /*
@@ -116,17 +121,30 @@ return SQLITE_OK;
 ** So define the lock related functions as no-ops.
 */
     //#define querySharedCacheTableLock(a,b,c) SQLITE_OK
-    static int querySharedCacheTableLock( Btree p, Pgno iTab, u8 eLock ) { return SQLITE_OK; }
+    static int querySharedCacheTableLock( Btree p, Pgno iTab, u8 eLock )
+    {
+      return SQLITE_OK;
+    }
 
     //#define setSharedCacheTableLock(a,b,c) SQLITE_OK
     //#define clearAllSharedCacheTableLocks(a)
-    static void clearAllSharedCacheTableLocks( Btree a ) { }
+    static void clearAllSharedCacheTableLocks( Btree a )
+    {
+    }
     //#define downgradeAllSharedCacheTableLocks(a)
-    static void downgradeAllSharedCacheTableLocks( Btree a ) { }
+    static void downgradeAllSharedCacheTableLocks( Btree a )
+    {
+    }
     //#define hasSharedCacheTableLock(a,b,c,d) 1
-    static bool hasSharedCacheTableLock( Btree a, Pgno b, int c, int d ) { return true; }
+    static bool hasSharedCacheTableLock( Btree a, Pgno b, int c, int d )
+    {
+      return true;
+    }
     //#define hasReadConflicts(a, b) 0
-    static bool hasReadConflicts( Btree a, Pgno b ) { return false; }
+    static bool hasReadConflicts( Btree a, Pgno b )
+    {
+      return false;
+    }
 #endif
 
 #if !SQLITE_OMIT_SHARED_CACHE
@@ -523,11 +541,17 @@ p.eState = CURSOR_INVALID;
 #else
     /* Stub functions when INCRBLOB is omitted */
     //#define invalidateOverflowCache(x)
-    static void invalidateOverflowCache( BtCursor pCur ) { }
+    static void invalidateOverflowCache( BtCursor pCur )
+    {
+    }
     //#define invalidateAllOverflowCache(x)
-    static void invalidateAllOverflowCache( BtShared pBt ) { }
+    static void invalidateAllOverflowCache( BtShared pBt )
+    {
+    }
     //#define invalidateIncrblobCursors(x,y,z)
-    static void invalidateIncrblobCursors( Btree x, i64 y, int z ) { }
+    static void invalidateIncrblobCursors( Btree x, i64 y, int z )
+    {
+    }
 #endif //* SQLITE_OMIT_INCRBLOB */
 
     /*
@@ -724,8 +748,7 @@ p.eState = CURSOR_INVALID;
         aSpace, 16 );//sizeof( aSpace ) );
         if ( pIdxKey == null )
           return SQLITE_NOMEM;
-      }
-      else
+      } else
       {
         pIdxKey = null;
       }
@@ -798,8 +821,7 @@ p.eState = CURSOR_INVALID;
       if ( pCur.eState != CURSOR_VALID || pCur.skipNext != 0 )
       {
         pHasMoved = 1;
-      }
-      else
+      } else
       {
         pHasMoved = 0;
       }
@@ -994,13 +1016,17 @@ ptrmap_exit:
     int iCell,            /* Pointer to the cell text. */
     ref CellInfo pInfo    /* Fill in this structure */
     )
-    { btreeParseCellPtr( pPage, pPage.aData, iCell, ref pInfo ); }
+    {
+      btreeParseCellPtr( pPage, pPage.aData, iCell, ref pInfo );
+    }
     static void btreeParseCellPtr(
     MemPage pPage,        /* Page containing the cell */
     byte[] pCell,         /* The actual data */
     ref CellInfo pInfo    /* Fill in this structure */
     )
-    { btreeParseCellPtr( pPage, pCell, 0, ref pInfo ); }
+    {
+      btreeParseCellPtr( pPage, pCell, 0, ref pInfo );
+    }
     static void btreeParseCellPtr(
     MemPage pPage,         /* Page containing the cell */
     u8[] pCell,            /* Pointer to the cell text. */
@@ -1024,15 +1050,13 @@ ptrmap_exit:
         if ( pPage.hasData != 0 )
         {
           n += (u16)getVarint32( pCell, iCell + n, ref nPayload );
-        }
-        else
+        } else
         {
           nPayload = 0;
         }
         n += (u16)getVarint( pCell, iCell + n, ref pInfo.nKey );
         pInfo.nData = nPayload;
-      }
-      else
+      } else
       {
         pInfo.nData = 0;
         n += (u16)getVarint32( pCell, iCell + n, ref nPayload );
@@ -1051,8 +1075,7 @@ ptrmap_exit:
           pInfo.nSize = 4;
         pInfo.nLocal = (u16)nPayload;
         pInfo.iOverflow = 0;
-      }
-      else
+      } else
       {
         /* If the payload will not fit completely on the local page, we have
         ** to decide how much to store locally and how much to spill onto
@@ -1075,8 +1098,7 @@ ptrmap_exit:
         if ( surplus <= maxLocal )
         {
           pInfo.nLocal = (u16)surplus;
-        }
-        else
+        } else
         {
           pInfo.nLocal = (u16)minLocal;
         }
@@ -1154,8 +1176,7 @@ CellInfo debuginfo = new CellInfo();
         if ( pPage.hasData != 0 )
         {
           _pIter += getVarint32( pCell, ref nSize );// pIter += getVarint32( pIter, ref nSize );
-        }
-        else
+        } else
         {
           nSize = 0;
         }
@@ -1166,8 +1187,7 @@ CellInfo debuginfo = new CellInfo();
         pEnd = _pIter + 9;//pEnd = &pIter[9];
         while ( ( ( pCell[_pIter++] ) & 0x80 ) != 0 && _pIter < pEnd )
           ;//while( (pIter++)&0x80 && pIter<pEnd );
-      }
-      else
+      } else
       {
         _pIter += getVarint32( pCell, _pIter, ref nSize ); //pIter += getVarint32( pIter, ref nSize );
       }
@@ -1385,8 +1405,7 @@ return SQLITE_CORRUPT_BKPT();
         if ( rc != 0 )
           return rc;
         top = get2byteNotZero( data, hdr + 5 );
-      }
-      else if ( gap + 2 <= top )
+      } else if ( gap + 2 <= top )
       {
         /* Search the freelist looking for a free slot big enough to satisfy
         ** the request. The allocation is made from the first free slot in
@@ -1413,12 +1432,10 @@ return SQLITE_CORRUPT_BKPT();
               data[addr + 0] = data[pc + 0];
               data[addr + 1] = data[pc + 1]; //memcpy( data[addr], ref data[pc], 2 );
               data[hdr + 7] = (u8)( nFrag + x );
-            }
-            else if ( size + pc > usableSize )
+            } else if ( size + pc > usableSize )
             {
               return SQLITE_CORRUPT_BKPT();
-            }
-            else
+            } else
             {
               /* The slot remains on the free-list. Reduce its size to account
               ** for the portion used by the new allocation. */
@@ -1541,8 +1558,7 @@ return SQLITE_CORRUPT_BKPT();
           put2byte( data, pbegin, x );
           x = pnext + get2byte( data, pnext + 2 ) - pbegin;
           put2byte( data, pbegin + 2, x );
-        }
-        else
+        } else
         {
           addr = pbegin;
         }
@@ -1590,15 +1606,13 @@ return SQLITE_CORRUPT_BKPT();
         pPage.hasData = pPage.leaf;
         pPage.maxLocal = pBt.maxLeaf;
         pPage.minLocal = pBt.minLeaf;
-      }
-      else if ( flagByte == PTF_ZERODATA )
+      } else if ( flagByte == PTF_ZERODATA )
       {
         pPage.intKey = 0;
         pPage.hasData = 0;
         pPage.maxLocal = pBt.maxLocal;
         pPage.minLocal = pBt.minLocal;
-      }
-      else
+      } else
       {
         return SQLITE_CORRUPT_BKPT();
       }
@@ -1869,8 +1883,7 @@ return SQLITE_CORRUPT_BKPT();
       if ( pgno > btreePagecount( pBt ) )
       {
         rc = SQLITE_CORRUPT_BKPT();
-      }
-      else
+      } else
       {
         rc = btreeGetPage( pBt, pgno, ref ppPage, 0 );
         if ( rc == SQLITE_OK )
@@ -1998,7 +2011,7 @@ return SQLITE_CORRUPT_BKPT();
 bool isMemdb = false;
 #else
       bool isMemdb = ( zFilename == ":memory:" )
-           || ( isTempDb && sqlite3TempInMemory( db ) );
+      || ( isTempDb && sqlite3TempInMemory( db ) );
 
 #endif
 
@@ -2150,8 +2163,7 @@ pBt.secureDelete = true;
           }
 #endif
           nReserve = 0;
-        }
-        else
+        } else
         {
           nReserve = zDbHeader[20];
           pBt.pageSizeFixed = true;
@@ -2232,8 +2244,7 @@ btree_open_out:
         pBt = null; //    sqlite3_free(ref pBt);
         p = null; //    sqlite3_free(ref p);
         ppBtree = null;
-      }
-      else
+      } else
       {
         /* If the B-Tree was successfully opened, set the pager-cache size to the
         ** default value. Except, when opening on an existing shared pager-cache,
@@ -2573,8 +2584,7 @@ return SQLITE_READONLY;
       if ( pBt.pageSizeFixed && ( av != 0 ) != pBt.autoVacuum )
       {
         rc = SQLITE_READONLY;
-      }
-      else
+      } else
       {
         pBt.autoVacuum = av != 0;
         pBt.incrVacuum = av == 2;
@@ -2946,8 +2956,7 @@ goto trans_begun;
           if ( pBt.readOnly )
           {
             rc = SQLITE_READONLY;
-          }
-          else
+          } else
           {
             rc = sqlite3PagerBegin( pBt.pPager, wrflag > 1, sqlite3TempInMemory( p.db ) ? 1 : 0 );
             if ( rc == SQLITE_OK )
@@ -3098,8 +3107,7 @@ set_child_ptrmaps_out:
           return SQLITE_CORRUPT_BKPT();
         }
         sqlite3Put4byte( pPage.aData, iTo );
-      }
-      else
+      } else
       {
         u8 isInitOrig = pPage.isInit;
         int i;
@@ -3123,8 +3131,7 @@ set_child_ptrmaps_out:
                 break;
               }
             }
-          }
-          else
+          } else
           {
             if ( sqlite3Get4byte( pPage.aData, pCell ) == iFrom )
             {
@@ -3203,8 +3210,7 @@ set_child_ptrmaps_out:
         {
           return rc;
         }
-      }
-      else
+      } else
       {
         Pgno nextOvfl = sqlite3Get4byte( pDbPage.aData );
         if ( nextOvfl != 0 )
@@ -3313,8 +3319,7 @@ set_child_ptrmaps_out:
             Debug.Assert( iFreePg == iLastPg );
             releasePage( pFreePg );
           }
-        }
-        else
+        } else
         {
           Pgno iFreePg = 0;             /* Index of free page to move pLastPg to */
           var pLastPg = new MemPage();
@@ -3404,8 +3409,7 @@ set_child_ptrmaps_out:
       if ( !pBt.autoVacuum )
       {
         rc = SQLITE_DONE;
-      }
-      else
+      } else
       {
         invalidateAllOverflowCache( pBt );
         rc = incrVacuumStep( pBt, 0, btreePagecount( pBt ) );
@@ -3572,8 +3576,7 @@ int nRef=0;
 
         downgradeAllSharedCacheTableLocks( p );
         p.inTrans = TRANS_READ;
-      }
-      else
+      } else
       {
         /* If the handle had any kind of transaction open, decrement the
         ** transaction count of the shared btree. If the transaction count
@@ -4036,8 +4039,7 @@ sqlite3BtreeTripAllCursors(p, rc);
         if ( pCur.pPrev != null )
         {
           pCur.pPrev.pNext = pCur.pNext;
-        }
-        else
+        } else
         {
           pBt.pCursor = pCur.pNext;
         }
@@ -4094,8 +4096,7 @@ static void assertCellInfo(BtCursor pCur) { }
         int iPage = pCur.iPage;
         btreeParseCell( pCur.apPage[iPage], pCur.aiIdx[iPage], ref pCur.info );
         pCur.validNKey = true;
-      }
-      else
+      } else
       {
         assertCellInfo( pCur );
       }
@@ -4145,8 +4146,7 @@ static bool sqlite3BtreeCursorIsValid(BtCursor pCur) { return true; }
       if ( pCur.eState != CURSOR_VALID )
       {
         pSize = 0;
-      }
-      else
+      } else
       {
         getCellInfo( pCur );
         pSize = pCur.info.nKey;
@@ -4253,8 +4253,7 @@ static bool sqlite3BtreeCursorIsValid(BtCursor pCur) { return true; }
       if ( ppPage != null )
       {
         ppPage = pPage;
-      }
-      else
+      } else
       {
         releasePage( pPage );
       }
@@ -4291,8 +4290,7 @@ static bool sqlite3BtreeCursorIsValid(BtCursor pCur) { return true; }
           return rc;
         }
         Buffer.BlockCopy( pBuf, (int)pBufOffset, pPayload, (int)payloadOffset, (int)nByte );// memcpy( pPayload, pBuf, nByte );
-      }
-      else
+      } else
       {
         /* Copy data from page to buffer (a read operation) */
         Buffer.BlockCopy( pPayload, (int)payloadOffset, pBuf, (int)pBufOffset, (int)nByte );//memcpy(pBuf, pPayload, nByte);
@@ -4393,8 +4391,7 @@ static bool sqlite3BtreeCursorIsValid(BtCursor pCur) { return true; }
         offset = 0;
         pBufOffset += (u32)a; //pBuf += a;
         amt -= (u32)a;
-      }
-      else
+      } else
       {
         offset -= pCur.info.nLocal;
       }
@@ -4462,8 +4459,7 @@ nextPage = pCur.aOverflow[iIdx+1];
 #endif
             rc = getOverflowPage( pBt, nextPage, ref  MemPageDummy, ref nextPage );
             offset -= ovflSize;
-          }
-          else
+          } else
           {
             /* Need to read this page properly. It contains some of the
             ** range of data that is being read (eOp==null) or written (eOp!=null).
@@ -4596,8 +4592,7 @@ return SQLITE_ABORT;
       if ( pPage.intKey != 0 )
       {
         nKey = 0;
-      }
-      else
+      } else
       {
         nKey = (u32)pCur.info.nKey;
       }
@@ -4607,8 +4602,7 @@ return SQLITE_ABORT;
         outOffset = (int)( pCur.info.iCell + pCur.info.nHeader + nKey );
         Buffer.BlockCopy( pCur.info.pCell, outOffset, aPayload, 0, (int)( pCur.info.nSize - pCur.info.nHeader - nKey ) );
         nLocal = pCur.info.nLocal - nKey;
-      }
-      else
+      } else
       {
         outOffset = (int)( pCur.info.iCell + pCur.info.nHeader );
         Buffer.BlockCopy( pCur.info.pCell, outOffset, aPayload, 0, pCur.info.nSize - pCur.info.nHeader );
@@ -4709,8 +4703,7 @@ return SQLITE_ABORT;
       if ( iIdx == pParent.nCell )
       {
         Debug.Assert( sqlite3Get4byte( pParent.aData, pParent.hdrOffset + 8 ) == iChild );
-      }
-      else
+      } else
       {
         Debug.Assert( sqlite3Get4byte( pParent.aData, findCell( pParent, iIdx ) ) == iChild );
       }
@@ -4795,8 +4788,7 @@ static void assertParentIndex(MemPage pParent, int iIdx, Pgno iChild) { }
           releasePage( pCur.apPage[i] );
         }
         pCur.iPage = 0;
-      }
-      else
+      } else
       {
         rc = getAndInitPage( pBt, pCur.pgnoRoot, ref pCur.apPage[0] );
         if ( rc != SQLITE_OK )
@@ -4840,8 +4832,7 @@ static void assertParentIndex(MemPage pParent, int iIdx, Pgno iChild) { }
         subpage = sqlite3Get4byte( pRoot.aData, pRoot.hdrOffset + 8 );
         pCur.eState = CURSOR_VALID;
         rc = moveToChild( pCur, subpage );
-      }
-      else
+      } else
       {
         pCur.eState = ( ( pRoot.nCell > 0 ) ? CURSOR_VALID : CURSOR_INVALID );
       }
@@ -4922,8 +4913,7 @@ static void assertParentIndex(MemPage pParent, int iIdx, Pgno iChild) { }
         {
           Debug.Assert( pCur.apPage[pCur.iPage].nCell == 0 );
           pRes = 1;
-        }
-        else
+        } else
         {
           Debug.Assert( pCur.apPage[pCur.iPage].nCell > 0 );
           pRes = 0;
@@ -4968,8 +4958,7 @@ static void assertParentIndex(MemPage pParent, int iIdx, Pgno iChild) { }
         {
           Debug.Assert( pCur.apPage[pCur.iPage].nCell == 0 );
           pRes = 1;
-        }
-        else
+        } else
         {
           Debug.Assert( pCur.eState == CURSOR_VALID );
           pRes = 0;
@@ -5076,8 +5065,7 @@ static void assertParentIndex(MemPage pParent, int iIdx, Pgno iChild) { }
         if ( biasRight != 0 )
         {
           pCur.aiIdx[pCur.iPage] = (u16)upr;
-        }
-        else
+        } else
         {
           pCur.aiIdx[pCur.iPage] = (u16)( ( upr + lwr ) / 2 );
         }
@@ -5100,20 +5088,17 @@ static void assertParentIndex(MemPage pParent, int iIdx, Pgno iChild) { }
             if ( nCellKey == intKey )
             {
               c = 0;
-            }
-            else if ( nCellKey < intKey )
+            } else if ( nCellKey < intKey )
             {
               c = -1;
-            }
-            else
+            } else
             {
               Debug.Assert( nCellKey > intKey );
               c = +1;
             }
             pCur.validNKey = true;
             pCur.info.nKey = nCellKey;
-          }
-          else
+          } else
           {
             /* The maximum supported page-size is 65536 bytes. This means that
             ** the maximum number of record bytes stored on an index B-Tree
@@ -5130,16 +5115,14 @@ static void assertParentIndex(MemPage pParent, int iIdx, Pgno iChild) { }
               ** single byte varint and the record fits entirely on the main
               ** b-tree page.  */
               c = sqlite3VdbeRecordCompare( nCell, pPage.aData, pCell + 1, pIdxKey ); //c = sqlite3VdbeRecordCompare( nCell, (void*)&pCell[1], pIdxKey );
-            }
-            else if ( 0 == ( pPage.aData[pCell + 1] & 0x80 )//!(pCell[1] & 0x80)
+            } else if ( 0 == ( pPage.aData[pCell + 1] & 0x80 )//!(pCell[1] & 0x80)
             && ( nCell = ( ( nCell & 0x7f ) << 7 ) + pPage.aData[pCell + 1] ) <= pPage.maxLocal//pCell[1])<=pPage.maxLocal
             )
             {
               /* The record-size field is a 2 byte varint and the record
               ** fits entirely on the main b-tree page.  */
               c = sqlite3VdbeRecordCompare( nCell, pPage.aData, pCell + 2, pIdxKey ); //c = sqlite3VdbeRecordCompare( nCell, (void*)&pCell[2], pIdxKey );
-            }
-            else
+            } else
             {
               /* The record flows over onto one or more overflow pages. In
               ** this case the whole cell needs to be parsed, a buffer allocated
@@ -5173,8 +5156,7 @@ static void assertParentIndex(MemPage pParent, int iIdx, Pgno iChild) { }
               lwr = idx;
               upr = lwr - 1;
               break;
-            }
-            else
+            } else
             {
               pRes = 0;
               rc = SQLITE_OK;
@@ -5184,8 +5166,7 @@ static void assertParentIndex(MemPage pParent, int iIdx, Pgno iChild) { }
           if ( c < 0 )
           {
             lwr = idx + 1;
-          }
-          else
+          } else
           {
             upr = idx - 1;
           }
@@ -5200,12 +5181,10 @@ static void assertParentIndex(MemPage pParent, int iIdx, Pgno iChild) { }
         if ( pPage.leaf != 0 )
         {
           chldPg = 0;
-        }
-        else if ( lwr >= pPage.nCell )
+        } else if ( lwr >= pPage.nCell )
         {
           chldPg = sqlite3Get4byte( pPage.aData, pPage.hdrOffset + 8 );
-        }
-        else
+        } else
         {
           chldPg = sqlite3Get4byte( pPage.aData, findCell( pPage, lwr ) );
         }
@@ -5309,8 +5288,7 @@ moveto_finish:
         if ( pPage.intKey != 0 )
         {
           rc = sqlite3BtreeNext( pCur, ref pRes );
-        }
-        else
+        } else
         {
           rc = SQLITE_OK;
         }
@@ -5368,8 +5346,7 @@ moveto_finish:
           return rc;
         }
         rc = moveToRightmost( pCur );
-      }
-      else
+      } else
       {
         while ( pCur.aiIdx[pCur.iPage] == 0 )
         {
@@ -5389,8 +5366,7 @@ moveto_finish:
         if ( pPage.intKey != 0 && 0 == pPage.leaf )
         {
           rc = sqlite3BtreePrevious( pCur, ref pRes );
-        }
-        else
+        } else
         {
           rc = SQLITE_OK;
         }
@@ -5491,8 +5467,7 @@ moveto_finish:
           if ( pPrevTrunk != null )
           {
             iTrunk = sqlite3Get4byte( pPrevTrunk.aData, 0 );
-          }
-          else
+          } else
           {
             iTrunk = sqlite3Get4byte( pPage1.aData, 32 );
           }
@@ -5500,8 +5475,7 @@ moveto_finish:
           if ( iTrunk > mxPage )
           {
             rc = SQLITE_CORRUPT_BKPT();
-          }
-          else
+          } else
           {
             rc = btreeGetPage( pBt, iTrunk, ref pTrunk, 0 );
           }
@@ -5528,15 +5502,13 @@ moveto_finish:
             ppPage = pTrunk;
             pTrunk = null;
             TRACE( "ALLOCATE: %d trunk - %d free pages left\n", pPgno, n - 1 );
-          }
-          else if ( k > (u32)( pBt.usableSize / 4 - 2 ) )
+          } else if ( k > (u32)( pBt.usableSize / 4 - 2 ) )
           {
             /* Value of k is out of range.  Database corruption */
             rc = SQLITE_CORRUPT_BKPT();
             goto end_allocate_page;
 #if !SQLITE_OMIT_AUTOVACUUM
-          }
-          else if ( searchList != 0 && nearby == iTrunk )
+          } else if ( searchList != 0 && nearby == iTrunk )
           {
             /* The list is being searched and this trunk page is the page
             ** to allocate, regardless of whether it has leaves.
@@ -5558,8 +5530,7 @@ moveto_finish:
                 pPage1.aData[32 + 1] = pTrunk.aData[0 + 1];
                 pPage1.aData[32 + 2] = pTrunk.aData[0 + 2];
                 pPage1.aData[32 + 3] = pTrunk.aData[0 + 3];
-              }
-              else
+              } else
               {
                 rc = sqlite3PagerWrite( pPrevTrunk.pDbPage );
                 if ( rc != SQLITE_OK )
@@ -5572,8 +5543,7 @@ moveto_finish:
                 pPrevTrunk.aData[0 + 2] = pTrunk.aData[0 + 2];
                 pPrevTrunk.aData[0 + 3] = pTrunk.aData[0 + 3];
               }
-            }
-            else
+            } else
             {
               /* The trunk page is required by the caller but it contains
               ** pointers to free-list leaves. The first leaf becomes a trunk
@@ -5610,8 +5580,7 @@ moveto_finish:
               {
                 Debug.Assert( sqlite3PagerIswriteable( pPage1.pDbPage ) );
                 sqlite3Put4byte( pPage1.aData, (u32)32, iNewTrunk );
-              }
-              else
+              } else
               {
                 rc = sqlite3PagerWrite( pPrevTrunk.pDbPage );
                 if ( rc != 0 )
@@ -5624,8 +5593,7 @@ moveto_finish:
             pTrunk = null;
             TRACE( "ALLOCATE: %d trunk - %d free pages left\n", pPgno, n - 1 );
 #endif
-          }
-          else if ( k > 0 )
+          } else if ( k > 0 )
           {
             /* Extract a leaf from the trunk */
             u32 closest;
@@ -5655,8 +5623,7 @@ moveto_finish:
                   dist = d2;
                 }
               }
-            }
-            else
+            } else
             {
               closest = 0;
             }
@@ -5698,8 +5665,7 @@ moveto_finish:
           releasePage( pPrevTrunk );
           pPrevTrunk = null;
         } while ( searchList != 0 );
-      }
-      else
+      } else
       {
         /* There are no pages on the freelist, so create a new page at the
         ** end of the file */
@@ -5729,7 +5695,10 @@ moveto_finish:
           if ( rc != 0 )
             return rc;
           pBt.nPage++;
-          if ( pBt.nPage == PENDING_BYTE_PAGE( pBt ) ) { pBt.nPage++; }
+          if ( pBt.nPage == PENDING_BYTE_PAGE( pBt ) )
+          {
+            pBt.nPage++;
+          }
         }
 #endif
         sqlite3Put4byte( pBt.pPage1.aData, (u32)28, pBt.nPage );
@@ -5760,8 +5729,7 @@ end_allocate_page:
           return SQLITE_CORRUPT_BKPT();
         }
         ( ppPage ).isInit = 0;
-      }
-      else
+      } else
       {
         ppPage = null;
       }
@@ -5797,8 +5765,7 @@ end_allocate_page:
       {
         pPage = pMemPage;
         sqlite3PagerRef( pPage.pDbPage );
-      }
-      else
+      } else
       {
         pPage = btreePageLookup( pBt, iPage );
       }
@@ -5988,8 +5955,7 @@ freepage_out:
           ** can be problematic.
           */
           rc = SQLITE_CORRUPT_BKPT();
-        }
-        else
+        } else
         {
           rc = freePage2( pBt, pOvfl, ovflPgno );
         }
@@ -6058,8 +6024,7 @@ freepage_out:
       if ( pPage.hasData != 0 )
       {
         nHeader += (int)putVarint( pCell, nHeader, (int)( nData + nZero ) ); //putVarint( pCell[nHeader], nData + nZero );
-      }
-      else
+      } else
       {
         nData = nZero = 0;
       }
@@ -6076,8 +6041,7 @@ freepage_out:
         pSrc = pData;
         nSrc = nData;
         nData = 0;
-      }
-      else
+      } else
       {
         if ( NEVER( nKey > 0x7fffffff || pKey == null ) )
         {
@@ -6180,8 +6144,7 @@ freepage_out:
             n = nSrc;
           Debug.Assert( pSrc != null );
           Buffer.BlockCopy( pSrc, pSrcIndex, pPayload, pPayloadIndex, n );//memcpy(pPayload, pSrc, n);
-        }
-        else
+        } else
         {
           byte[] pZeroBlob = sqlite3Malloc( n ); // memset(pPayload, 0, n);
           Buffer.BlockCopy( pZeroBlob, 0, pPayload, pPayloadIndex, n );
@@ -6319,8 +6282,7 @@ freepage_out:
         Debug.Assert( j < pPage.aOvfl.Length );//(int)(sizeof(pPage.aOvfl)/sizeof(pPage.aOvfl[0])) );
         pPage.aOvfl[j].pCell = pCell;
         pPage.aOvfl[j].idx = (u16)i;
-      }
-      else
+      } else
       {
         int rc = sqlite3PagerWrite( pPage.pDbPage );
         if ( rc != SQLITE_OK )
@@ -6334,7 +6296,11 @@ freepage_out:
         end = cellOffset + 2 * pPage.nCell;
         ins = cellOffset + 2 * i;
         rc = allocateSpace( pPage, sz, ref idx );
-        if ( rc != 0 ) { pRC = rc; return; }
+        if ( rc != 0 )
+        {
+          pRC = rc;
+          return;
+        }
         /* The allocateSpace() routine guarantees the following two properties
         ** if it returns success */
         Debug.Assert( idx >= end + 2 );
@@ -6844,19 +6810,16 @@ TRACE("BALANCE: begin page %d child of %d\n", pPage.pgno, pParent.pgno);
       {
         nxDiv = 0;
         nOld = i + 1;
-      }
-      else
+      } else
       {
         nOld = 3;
         if ( iParentIdx == 0 )
         {
           nxDiv = 0;
-        }
-        else if ( iParentIdx == i )
+        } else if ( iParentIdx == i )
         {
           nxDiv = i - 2;
-        }
-        else
+        } else
         {
           nxDiv = iParentIdx - 1;
         }
@@ -6865,8 +6828,7 @@ TRACE("BALANCE: begin page %d child of %d\n", pPage.pgno, pParent.pgno);
       if ( ( i + nxDiv - pParent.nOverflow ) == pParent.nCell )
       {
         pRight = pParent.hdrOffset + 8; //&pParent.aData[pParent.hdrOffset + 8];
-      }
-      else
+      } else
       {
         pRight = findCell( pParent, i + nxDiv - pParent.nOverflow );
       }
@@ -6889,8 +6851,7 @@ TRACE("BALANCE: begin page %d child of %d\n", pPage.pgno, pParent.pgno);
           pgno = sqlite3Get4byte( pParent.aOvfl[0].pCell, apDiv[i] );
           szNew[i] = cellSizePtr( pParent, apDiv[i] );
           pParent.nOverflow = 0;
-        }
-        else
+        } else
         {
           apDiv[i] = findCell( pParent, i + nxDiv - pParent.nOverflow );
           pgno = sqlite3Get4byte( pParent.aData, apDiv[i] );
@@ -7024,8 +6985,7 @@ TRACE("BALANCE: begin page %d child of %d\n", pPage.pgno, pParent.pgno);
             /* The right pointer of the child page pOld becomes the left
             ** pointer of the divider cell */
             Buffer.BlockCopy( pOld.aData, 8, apCell[nCell], 0, 4 );//memcpy( apCell[nCell], ref pOld.aData[8], 4 );
-          }
-          else
+          } else
           {
             Debug.Assert( leafCorrection == 4 );
             if ( szCell[nCell] < 4 )
@@ -7063,10 +7023,17 @@ TRACE("BALANCE: begin page %d child of %d\n", pPage.pgno, pParent.pgno);
         {
           szNew[k] = subtotal - szCell[i];
           cntNew[k] = i;
-          if ( leafData != 0 ) { i--; }
+          if ( leafData != 0 )
+          {
+            i--;
+          }
           subtotal = 0;
           k++;
-          if ( k > NB + 1 ) { rc = SQLITE_CORRUPT_BKPT(); goto balance_cleanup; }
+          if ( k > NB + 1 )
+          {
+            rc = SQLITE_CORRUPT_BKPT();
+            goto balance_cleanup;
+          }
         }
       }
       szNew[k] = subtotal;
@@ -7138,8 +7105,7 @@ TRACE("BALANCE: begin page %d child of %d\n", pPage.pgno, pParent.pgno);
           nNew++;
           if ( rc != 0 )
             goto balance_cleanup;
-        }
-        else
+        } else
         {
           Debug.Assert( i > 0 );
           rc = allocateBtreePage( pBt, ref pNew, ref pgno, pgno, 0 );
@@ -7256,8 +7222,7 @@ if (false)
           if ( 0 == pNew.leaf )
           {
             Buffer.BlockCopy( pCell, 0, pNew.aData, 8, 4 );//memcpy( pNew.aData[8], pCell, 4 );
-          }
-          else if ( leafData != 0 )
+          } else if ( leafData != 0 )
           {
             /* If the tree is a leaf-data tree, and the siblings are leaves,
             ** then there is no divider cell in apCell[]. Instead, the divider
@@ -7270,8 +7235,7 @@ if (false)
             pCell = pTemp;
             sz = 4 + putVarint( pCell, 4, (u64)info.nKey );
             pTemp = null;
-          }
-          else
+          } else
           {
             //------------ pCell -= 4;
             byte[] _pCell_4 = sqlite3Malloc( pCell.Length + 4 );
@@ -7338,8 +7302,7 @@ if (false)
         );
         copyNodeContent( apNew[0], pParent, ref rc );
         freePage( apNew[0], ref rc );
-      }
-      else
+      } else
 #if !SQLITE_OMIT_AUTOVACUUM //   if ( ISAUTOVACUUM )
         if ( pBt.autoVacuum )
 #else
@@ -7604,17 +7567,14 @@ int balance_deeper_called = 0;
               pCur.aiIdx[1] = 0;
               Debug.Assert( pCur.apPage[1].nOverflow != 0 );
             }
-          }
-          else
+          } else
           {
             break;
           }
-        }
-        else if ( pPage.nOverflow == 0 && pPage.nFree <= nMin )
+        } else if ( pPage.nOverflow == 0 && pPage.nFree <= nMin )
         {
           break;
-        }
-        else
+        } else
         {
           MemPage pParent = pCur.apPage[iPage - 1];
           int iIdx = pCur.aiIdx[iPage - 1];
@@ -7645,8 +7605,7 @@ int balance_deeper_called = 0;
               */
               Debug.Assert( ( balance_quick_called++ ) == 0 );
               rc = balance_quick( pParent, pPage, aBalanceQuickSpace );
-            }
-            else
+            } else
 #endif
             {
               /* In this case, call balance_nonroot() to redistribute cells
@@ -7828,13 +7787,11 @@ int balance_deeper_called = 0;
         dropCell( pPage, idx, szOld, ref rc );
         if ( rc != 0 )
           goto end_insert;
-      }
-      else if ( loc < 0 && pPage.nCell > 0 )
+      } else if ( loc < 0 && pPage.nCell > 0 )
       {
         Debug.Assert( pPage.leaf != 0 );
         idx = ++pCur.aiIdx[pCur.iPage];
-      }
-      else
+      } else
       {
         Debug.Assert( pPage.leaf != 0 );
       }
@@ -8129,8 +8086,7 @@ return rc;
             releasePage( pRoot );
             return rc;
           }
-        }
-        else
+        } else
         {
           pRoot = pPageMove;
         }
@@ -8155,8 +8111,7 @@ return rc;
           return rc;
         }
 
-      }
-      else
+      } else
       {
         rc = allocateBtreePage( pBt, ref pRoot, ref pgnoRoot, 1, 0 );
         if ( rc != 0 )
@@ -8167,8 +8122,7 @@ return rc;
       if ( ( createTabFlags & BTREE_INTKEY ) != 0 )
       {
         ptfFlags = PTF_INTKEY | PTF_LEAFDATA | PTF_LEAF;
-      }
-      else
+      } else
       {
         ptfFlags = PTF_ZERODATA | PTF_LEAF;
       }
@@ -8231,8 +8185,7 @@ return rc;
         rc = clearDatabasePage( pBt, sqlite3Get4byte( pPage.aData, 8 ), 1, ref pnChange );
         if ( rc != 0 )
           goto cleardatabasepage_out;
-      }
-      else //if (pnChange != 0)
+      } else //if (pnChange != 0)
       {
         //Debug.Assert(pPage.intKey != 0);
         pnChange += pPage.nCell;
@@ -8240,8 +8193,7 @@ return rc;
       if ( freePageFlag != 0 )
       {
         freePage( pPage, ref rc );
-      }
-      else if ( ( rc = sqlite3PagerWrite( pPage.pDbPage ) ) == 0 )
+      } else if ( ( rc = sqlite3PagerWrite( pPage.pDbPage ) ) == 0 )
       {
         zeroPage( pPage, pPage.aData[0] | PTF_LEAF );
       }
@@ -8363,8 +8315,7 @@ releasePage(pPage);
             {
               return rc;
             }
-          }
-          else
+          } else
           {
             /* The table being dropped does not have the largest root-page
             ** number in the database. So move the page that does into the
@@ -8408,15 +8359,13 @@ releasePage(pPage);
           Debug.Assert( maxRootPgno != PENDING_BYTE_PAGE( pBt ) );
 
           rc = sqlite3BtreeUpdateMeta( p, 4, maxRootPgno );
-        }
-        else
+        } else
         {
           freePage( pPage, ref rc );
           releasePage( pPage );
         }
 #endif
-      }
-      else
+      } else
       {
         /* If sqlite3BtreeDropTable was called on page 1.
         ** This really never should happen except in a corrupt
@@ -8569,8 +8518,7 @@ if( idx==BTREE_LARGEST_ROOT_PAGE && pMeta>0 ) pBt.readOnly = 1;
         if ( iIdx == pPage.nCell )
         {
           rc = moveToChild( pCur, sqlite3Get4byte( pPage.aData, pPage.hdrOffset + 8 ) );
-        }
-        else
+        } else
         {
           rc = moveToChild( pCur, sqlite3Get4byte( pPage.aData, findCell( pPage, iIdx ) ) );
         }
@@ -8595,11 +8543,11 @@ if( idx==BTREE_LARGEST_ROOT_PAGE && pMeta>0 ) pBt.readOnly = 1;
 ** Append a message to the error message string.
 */
     static void checkAppendMsg(
-   IntegrityCk pCheck,
-   string zMsg1,
-   string zFormat,
-   params object[] ap
-   )
+    IntegrityCk pCheck,
+    string zMsg1,
+    string zFormat,
+    params object[] ap
+    )
     {
       //va_list ap;
       if ( 0 == pCheck.mxErr )
@@ -8618,7 +8566,7 @@ if( idx==BTREE_LARGEST_ROOT_PAGE && pMeta>0 ) pBt.readOnly = 1;
       sqlite3VXPrintf( pCheck.errMsg, 1, zFormat, ap );
       va_end( ap );
     }
-    
+
     static void checkAppendMsg(
     IntegrityCk pCheck,
     StringBuilder zMsg1,
@@ -8636,7 +8584,7 @@ if( idx==BTREE_LARGEST_ROOT_PAGE && pMeta>0 ) pBt.readOnly = 1;
       {
         sqlite3StrAccumAppend( pCheck.errMsg, "\n", 1 );
       }
-      if ( zMsg1.Length>0 )
+      if ( zMsg1.Length > 0 )
       {
         sqlite3StrAccumAppend( pCheck.errMsg, zMsg1.ToString(), -1 );
       }
@@ -8757,8 +8705,7 @@ if( idx==BTREE_LARGEST_ROOT_PAGE && pMeta>0 ) pBt.readOnly = 1;
             checkAppendMsg( pCheck, zContext,
             "freelist leaf count too big on page %d", iPage );
             N--;
-          }
-          else
+          } else
           {
             for ( i = 0; i < n; i++ )
             {
@@ -8775,7 +8722,7 @@ if( idx==BTREE_LARGEST_ROOT_PAGE && pMeta>0 ) pBt.readOnly = 1;
           }
         }
 #if !SQLITE_OMIT_AUTOVACUUM
-        else
+ else
         {
           /* If this database supports auto-vacuum and iPage is not the last
           ** page in this overflow list, check that the pointer-map entry for
@@ -8974,8 +8921,7 @@ if( idx==BTREE_LARGEST_ROOT_PAGE && pMeta>0 ) pBt.readOnly = 1;
               "Rowid %lld out of order (max larger than parent min of %lld)",
               nMaxKey, pnParentMinKey );
             }
-          }
-          else
+          } else
           {
             if ( nMinKey <= pnParentMinKey )
             {
@@ -8992,8 +8938,7 @@ if( idx==BTREE_LARGEST_ROOT_PAGE && pMeta>0 ) pBt.readOnly = 1;
             pnParentMinKey = nMaxKey;
           }
           /* else if we're a right child page */
-        }
-        else if ( _pnParentMaxKey != null )
+        } else if ( _pnParentMaxKey != null )
         {
           if ( nMinKey <= pnParentMaxKey )
           {
@@ -9033,8 +8978,7 @@ if( idx==BTREE_LARGEST_ROOT_PAGE && pMeta>0 ) pBt.readOnly = 1;
           {
             checkAppendMsg( pCheck, "",
             "Corruption detected in cell %d on page %d", i, iPage );
-          }
-          else
+          } else
           {
             for ( j = (int)( pc + size - 1 ); j >= pc; j-- )
               hit[j]++;
@@ -9059,8 +9003,7 @@ if( idx==BTREE_LARGEST_ROOT_PAGE && pMeta>0 ) pBt.readOnly = 1;
           if ( hit[i] == 0 )
           {
             cnt++;
-          }
-          else if ( hit[i] > 1 )
+          } else if ( hit[i] > 1 )
           {
             checkAppendMsg( pCheck, "",
             "Multiple uses for byte %d of page %d", i, iPage );

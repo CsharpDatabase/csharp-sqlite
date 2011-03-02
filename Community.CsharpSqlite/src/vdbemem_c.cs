@@ -47,7 +47,10 @@ namespace Community.CsharpSqlite
     */
     //#define expandBlob(P) (((P)->flags&MEM_Zero)?sqlite3VdbeMemExpandBlob(P):0)
     static void expandBlob( Mem P )
-    { if ( ( P.flags & MEM_Zero ) != 0 ) sqlite3VdbeMemExpandBlob( P ); } // TODO -- Convert to inline for speed
+    {
+      if ( ( P.flags & MEM_Zero ) != 0 )
+        sqlite3VdbeMemExpandBlob( P );
+    } // TODO -- Convert to inline for speed
 
     /*
     ** If pMem is an object with a valid string representation, this routine
@@ -123,8 +126,7 @@ return rc;
         else
           pMem.z = pMem.z.Substring( 0, n );
         preserve = 0;
-      }
-      else
+      } else
       {
         //  sqlite3DbFree(pMem->db,ref pMem.zMalloc);
         pMem.z = "";//   sqlite3DbMallocRaw( pMem.db, n );
@@ -143,8 +145,7 @@ return rc;
       if ( pMem.z == null )
       {
         pMem.flags = MEM_Null;
-      }
-      else
+      } else
       {
         pMem.flags = (u16)( pMem.flags & ~( MEM_Ephem | MEM_Static ) );
       }
@@ -290,8 +291,7 @@ return SQLITE_OK;
       if ( ( fg & MEM_Int ) != 0 )
       {
         pMem.z = pMem.u.i.ToString(); //sqlite3_snprintf(nByte, pMem.z, "%lld", pMem->u.i);
-      }
-      else
+      } else
       {
         Debug.Assert( ( fg & MEM_Real ) != 0 );
         if ( Double.IsNegativeInfinity( pMem.r ) )
@@ -361,18 +361,15 @@ return SQLITE_OK;
           sqlite3VdbeMemFinalize( p, p.u.pDef );
           Debug.Assert( ( p.flags & MEM_Agg ) == 0 );
           sqlite3VdbeMemRelease( p );
-        }
-        else if ( ( p.flags & MEM_Dyn ) != 0 && p.xDel != null )
+        } else if ( ( p.flags & MEM_Dyn ) != 0 && p.xDel != null )
         {
           Debug.Assert( ( p.flags & MEM_RowSet ) == 0 );
           p.xDel( ref p.z );
           p.xDel = null;
-        }
-        else if ( ( p.flags & MEM_RowSet ) != 0 )
+        } else if ( ( p.flags & MEM_RowSet ) != 0 )
         {
           sqlite3RowSetClear( p.u.pRowSet );
-        }
-        else if ( ( p.flags & MEM_Frame ) != 0 )
+        } else if ( ( p.flags & MEM_Frame ) != 0 )
         {
           sqlite3VdbeMemSetNull( p );
         }
@@ -427,16 +424,14 @@ return r;
       if ( r < (double)minInt )
       {
         return minInt;
-      }
-      else if ( r > (double)maxInt )
+      } else if ( r > (double)maxInt )
       {
         /* minInt is correct here - not maxInt.  It turns out that assigning
         ** a very large positive number to an integer results in a very large
         ** negative integer.  This makes no sense, but it is what x86 hardware
         ** does so for compatibility we will do the same in software. */
         return minInt;
-      }
-      else
+      } else
       {
         return (i64)r;
       }
@@ -463,28 +458,24 @@ return r;
       if ( ( flags & MEM_Int ) != 0 )
       {
         return pMem.u.i;
-      }
-      else if ( ( flags & MEM_Real ) != 0 )
+      } else if ( ( flags & MEM_Real ) != 0 )
       {
         return doubleToInt64( pMem.r );
-      }
-      else if ( ( flags & ( MEM_Str  ) ) != 0 )
+      } else if ( ( flags & ( MEM_Str ) ) != 0 )
       {
         i64 value = 0;
         Debug.Assert( pMem.z != null || pMem.n == 0 );
         testcase( pMem.z == null );
         sqlite3Atoi64( pMem.z, ref value, pMem.n, pMem.enc );
         return value;
-      }
-      else if ( ( flags & (  MEM_Blob ) ) != 0 )
+      } else if ( ( flags & ( MEM_Blob ) ) != 0 )
       {
         i64 value = 0;
         Debug.Assert( pMem.zBLOB != null || pMem.n == 0 );
         testcase( pMem.zBLOB == null );
-        sqlite3Atoi64( Encoding.UTF8.GetString(pMem.zBLOB,0,pMem.n), ref value, pMem.n, pMem.enc );
+        sqlite3Atoi64( Encoding.UTF8.GetString( pMem.zBLOB, 0, pMem.n ), ref value, pMem.n, pMem.enc );
         return value;
-      }
-      else
+      } else
       {
         return 0;
       }
@@ -503,27 +494,23 @@ return r;
       if ( ( pMem.flags & MEM_Real ) != 0 )
       {
         return pMem.r;
-      }
-      else if ( ( pMem.flags & MEM_Int ) != 0 )
+      } else if ( ( pMem.flags & MEM_Int ) != 0 )
       {
         return (double)pMem.u.i;
-      }
-      else if ( ( pMem.flags & ( MEM_Str  ) ) != 0 )
+      } else if ( ( pMem.flags & ( MEM_Str ) ) != 0 )
       {
         /* (double)0 In case of SQLITE_OMIT_FLOATING_POINT... */
         double val = (double)0;
         sqlite3AtoF( pMem.z, ref val, pMem.n, pMem.enc );
         return val;
-      }
-      else if ( ( pMem.flags & (  MEM_Blob ) ) != 0 )
+      } else if ( ( pMem.flags & ( MEM_Blob ) ) != 0 )
       {
         /* (double)0 In case of SQLITE_OMIT_FLOATING_POINT... */
         double val = (double)0;
         Debug.Assert( pMem.zBLOB != null || pMem.n == 0 );
         sqlite3AtoF( Encoding.UTF8.GetString( pMem.zBLOB, 0, pMem.n ), ref val, pMem.n, pMem.enc );
         return val;
-      }
-      else
+      } else
       {
         /* (double)0 In case of SQLITE_OMIT_FLOATING_POINT... */
         return (double)0;
@@ -614,12 +601,10 @@ return r;
             MemSetTypeFlag( pMem, MEM_Real );
             sqlite3VdbeIntegerAffinity( pMem );
           }
-        }
-        else if ( 0 == sqlite3Atoi64( pMem.z, ref pMem.u.i, pMem.n, pMem.enc ) )
+        } else if ( 0 == sqlite3Atoi64( pMem.z, ref pMem.u.i, pMem.n, pMem.enc ) )
         {
           MemSetTypeFlag( pMem, MEM_Int );
-        }
-        else
+        } else
         {
           pMem.r = sqlite3VdbeRealValue( pMem );
           MemSetTypeFlag( pMem, MEM_Real );
@@ -699,8 +684,7 @@ return r;
       if ( sqlite3IsNaN( val ) )
       {
         sqlite3VdbeMemSetNull( pMem );
-      }
-      else
+      } else
       {
         sqlite3VdbeMemRelease( pMem );
         pMem.r = val;
@@ -873,7 +857,9 @@ return r;
     u8 enc,             /* 0 for BLOBs */
     dxDel xDel          /* Destructor function */
     )
-    { return sqlite3VdbeMemSetBlob( pMem, zBlob, 0, n >= 0 ? n : zBlob.Length, enc, xDel ); } // Call w/o offset
+    {
+      return sqlite3VdbeMemSetBlob( pMem, zBlob, 0, n >= 0 ? n : zBlob.Length, enc, xDel );
+    } // Call w/o offset
 
     static int sqlite3VdbeMemSetBlob(
     Mem pMem,           /* Memory cell to set to string value */
@@ -900,8 +886,7 @@ return r;
       if ( pMem.db != null )
       {
         iLimit = pMem.db.aLimit[SQLITE_LIMIT_LENGTH];
-      }
-      else
+      } else
       {
         iLimit = SQLITE_MAX_LENGTH;
       }
@@ -910,11 +895,14 @@ return r;
         Debug.Assert( enc != 0 );
         if ( enc == SQLITE_UTF8 )
         {
-          for ( nByte = 0; nByte <= iLimit && nByte < zBlob.Length - offset && zBlob[offset + nByte] != 0; nByte++ ) { }
-        }
-        else
+          for ( nByte = 0; nByte <= iLimit && nByte < zBlob.Length - offset && zBlob[offset + nByte] != 0; nByte++ )
+          {
+          }
+        } else
         {
-          for ( nByte = 0; nByte <= iLimit && zBlob[nByte + offset] != 0 || zBlob[offset + nByte + 1] != 0; nByte += 2 ) { }
+          for ( nByte = 0; nByte <= iLimit && zBlob[nByte + offset] != 0 || zBlob[offset + nByte + 1] != 0; nByte += 2 )
+          {
+          }
         }
       }
 
@@ -948,7 +936,9 @@ return r;
     u8 enc,             /* Encoding of z.  0 for BLOBs */
     dxDel xDel          /* Destructor function */
     )
-    { return sqlite3VdbeMemSetStr( pMem, z, 0, n, enc, xDel ); } // Call w/o offset
+    {
+      return sqlite3VdbeMemSetStr( pMem, z, 0, n, enc, xDel );
+    } // Call w/o offset
 
     static int sqlite3VdbeMemSetStr(
     Mem pMem,           /* Memory cell to set to string value */
@@ -976,8 +966,7 @@ return r;
       if ( pMem.db != null )
       {
         iLimit = pMem.db.aLimit[SQLITE_LIMIT_LENGTH];
-      }
-      else
+      } else
       {
         iLimit = SQLITE_MAX_LENGTH;
       }
@@ -987,11 +976,14 @@ return r;
         Debug.Assert( enc != 0 );
         if ( enc == SQLITE_UTF8 )
         {
-          for ( nByte = 0; nByte <= iLimit && nByte < z.Length - offset && z[offset + nByte] != 0; nByte++ ) { }
-        }
-        else
+          for ( nByte = 0; nByte <= iLimit && nByte < z.Length - offset && z[offset + nByte] != 0; nByte++ )
+          {
+          }
+        } else
         {
-          for ( nByte = 0; nByte <= iLimit && z[nByte + offset] != 0 || z[offset + nByte + 1] != 0; nByte += 2 ) { }
+          for ( nByte = 0; nByte <= iLimit && z[nByte + offset] != 0 || z[offset + nByte + 1] != 0; nByte += 2 )
+          {
+          }
         }
         flags |= MEM_Term;
       }
@@ -1024,14 +1016,12 @@ return r;
           pMem.zBLOB = sqlite3Malloc( n );
           for ( int i = 0; i < n && i < z.Length - offset; i++ )
             pMem.zBLOB[i] = (byte)z[offset + i];
-        }
-        else
+        } else
         {
           pMem.z = n > 0 && z.Length - offset > n ? z.Substring( offset, n ) : z.Substring( offset );//memcpy(pMem.z, z, nAlloc);
           sqlite3_free( ref pMem.zBLOB );
         }
-      }
-      else if ( xDel == SQLITE_DYNAMIC )
+      } else if ( xDel == SQLITE_DYNAMIC )
       {
         sqlite3VdbeMemRelease( pMem );
         //pMem.zMalloc = pMem.z = (char*)z;
@@ -1041,15 +1031,13 @@ return r;
           if ( pMem.zBLOB != null )
             sqlite3_free( ref pMem.zBLOB );
           pMem.zBLOB = Encoding.UTF8.GetBytes( offset == 0 ? z : z.Length + offset < n ? z.Substring( offset, n ) : z.Substring( offset ) );
-        }
-        else
+        } else
         {
           pMem.z = n > 0 && z.Length - offset > n ? z.Substring( offset, n ) : z.Substring( offset );//memcpy(pMem.z, z, nAlloc);
           sqlite3_free( ref pMem.zBLOB );
         }
         pMem.xDel = null;
-      }
-      else
+      } else
       {
         sqlite3VdbeMemRelease( pMem );
         if ( enc == 0 )
@@ -1058,8 +1046,7 @@ return r;
           if ( pMem.zBLOB != null )
             sqlite3_free( ref pMem.zBLOB );
           pMem.zBLOB = Encoding.UTF8.GetBytes( offset == 0 ? z : z.Length + offset < n ? z.Substring( offset, n ) : z.Substring( offset ) );
-        }
-        else
+        } else
         {
           pMem.z = n > 0 && z.Length - offset > n ? z.Substring( offset, n ) : z.Substring( offset );//memcpy(pMem.z, z, nAlloc);
           sqlite3_free( ref pMem.zBLOB );
@@ -1134,16 +1121,14 @@ return SQLITE_NOMEM;
           if ( ( f1 & MEM_Real ) == 0 )
           {
             r1 = (double)pMem1.u.i;
-          }
-          else
+          } else
           {
             r1 = pMem1.r;
           }
           if ( ( f2 & MEM_Real ) == 0 )
           {
             r2 = (double)pMem2.u.i;
-          }
-          else
+          } else
           {
             r2 = pMem2.r;
           }
@@ -1152,8 +1137,7 @@ return SQLITE_NOMEM;
           if ( r1 > r2 )
             return 1;
           return 0;
-        }
-        else
+        } else
         {
           Debug.Assert( ( f1 & MEM_Int ) != 0 );
           Debug.Assert( ( f2 & MEM_Int ) != 0 );
@@ -1196,8 +1180,7 @@ return SQLITE_NOMEM;
             /* The strings are already in the correct encoding.  Call the
             ** comparison function directly */
             return pColl.xCmp( pColl.pUser, pMem1.n, pMem1.z, pMem2.n, pMem2.z );
-          }
-          else
+          } else
           {
             string v1, v2;
             int n1, n2;
@@ -1272,8 +1255,7 @@ return SQLITE_NOMEM;
       if ( key )
       {
         zData = sqlite3BtreeKeyFetch( pCur, ref available, ref outOffset );
-      }
-      else
+      } else
       {
         zData = sqlite3BtreeDataFetch( pCur, ref available, ref outOffset );
       }
@@ -1285,8 +1267,7 @@ return SQLITE_NOMEM;
         pMem.zBLOB = sqlite3Malloc( amt );
         Buffer.BlockCopy( zData, offset, pMem.zBLOB, 0, amt );//pMem.z = &zData[offset];
         pMem.flags = MEM_Blob | MEM_Ephem;
-      }
-      else if ( SQLITE_OK == ( rc = sqlite3VdbeMemGrow( pMem, amt + 2, 0 ) ) )
+      } else if ( SQLITE_OK == ( rc = sqlite3VdbeMemGrow( pMem, amt + 2, 0 ) ) )
       {
         pMem.enc = 0;
         pMem.type = SQLITE_BLOB;
@@ -1296,8 +1277,7 @@ return SQLITE_NOMEM;
         if ( key )
         {
           rc = sqlite3BtreeKey( pCur, (u32)offset, (u32)amt, pMem.zBLOB );
-        }
-        else
+        } else
         {
           rc = sqlite3BtreeData( pCur, (u32)offset, (u32)amt, pMem.zBLOB );//pMem.z =  pMem_z ;
         }
@@ -1353,8 +1333,7 @@ return SQLITE_NOMEM;
           }
         }
         sqlite3VdbeMemNulTerminate( pVal ); /* IMP: R-59893-45467 */
-      }
-      else
+      } else
       {
         Debug.Assert( ( pVal.flags & MEM_Blob ) == 0 );
         sqlite3VdbeMemStringify( pVal, enc );
@@ -1366,8 +1345,7 @@ return SQLITE_NOMEM;
       if ( pVal.enc == ( enc & ~SQLITE_UTF16_ALIGNED ) )
       {
         return pVal.z;
-      }
-      else
+      } else
       {
         return null;
       }
@@ -1451,8 +1429,7 @@ if( NEVER(op==TK_REGISTER) ) op = pExpr.op2;
         if ( ExprHasProperty( pExpr, EP_IntValue ) )
         {
           sqlite3VdbeMemSetInt64( pVal, (i64)pExpr.u.iValue * negInt );
-        }
-        else
+        } else
         {
           zVal = sqlite3MPrintf( db, "%s%s", zNeg, pExpr.u.zToken );
           //if ( zVal == null ) goto no_mem;
@@ -1463,8 +1440,7 @@ if( NEVER(op==TK_REGISTER) ) op = pExpr.op2;
         if ( ( op == TK_INTEGER || op == TK_FLOAT ) && affinity == SQLITE_AFF_NONE )
         {
           sqlite3ValueApplyAffinity( pVal, SQLITE_AFF_NUMERIC, SQLITE_UTF8 );
-        }
-        else
+        } else
         {
           sqlite3ValueApplyAffinity( pVal, affinity, SQLITE_UTF8 );
         }
@@ -1478,8 +1454,7 @@ if( NEVER(op==TK_REGISTER) ) op = pExpr.op2;
       if ( enc != SQLITE_UTF8 )
       {
         sqlite3VdbeChangeEncoding( pVal, enc );
-      }
-      else if ( op == TK_UMINUS )
+      } else if ( op == TK_UMINUS )
       {
         /* This branch happens for multiple negative signs.  Ex: -(-5) */
         if ( SQLITE_OK == sqlite3ValueFromExpr( db, pExpr.pLeft, enc, affinity, ref pVal ) )
@@ -1489,10 +1464,15 @@ if( NEVER(op==TK_REGISTER) ) op = pExpr.op2;
           /* (double)-1 In case of SQLITE_OMIT_FLOATING_POINT... */
           pVal.r = (double)-1 * pVal.r;
           sqlite3ValueApplyAffinity( pVal, affinity, enc );
+        } else if ( op == TK_NULL )
+        {
+          pVal = sqlite3ValueNew( db );
+          if ( pVal == null )
+            goto no_mem;
         }
       }
 #if !SQLITE_OMIT_BLOB_LITERAL
-      else if ( op == TK_BLOB )
+ else if ( op == TK_BLOB )
       {
         int nVal;
         Debug.Assert( pExpr.u.zToken[0] == 'x' || pExpr.u.zToken[0] == 'X' );
@@ -1562,8 +1542,7 @@ no_mem:
         if ( ( p.flags & MEM_Zero ) != 0 )
         {
           return p.n + p.u.nZero;
-        }
-        else
+        } else
         {
           return p.z == null ? p.zBLOB.Length : p.n;
         }

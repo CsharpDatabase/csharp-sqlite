@@ -104,7 +104,7 @@ namespace Community.CsharpSqlite
 
       db = p.db;
       sqlite3StrAccumInit( _out, null, 100,
-            db.aLimit[SQLITE_LIMIT_LENGTH] );
+      db.aLimit[SQLITE_LIMIT_LENGTH] );
       _out.db = db;
       if ( db.vdbeExecCnt > 1 )
       {
@@ -116,8 +116,7 @@ namespace Community.CsharpSqlite
           sqlite3StrAccumAppend( _out, "-- ", 3 );
           sqlite3StrAccumAppend( _out, zRawSql, izRawSql );//zRawSql - zStart );
         }
-      }
-      else
+      } else
       {
         while ( izRawSql < zRawSql.Length )
         {
@@ -134,13 +133,11 @@ namespace Community.CsharpSqlite
             {
               Debug.Assert( sqlite3Isdigit( zRawSql[izRawSql + 1] ) );
               sqlite3GetInt32( zRawSql, izRawSql + 1, ref idx );
-            }
-            else
+            } else
             {
               idx = nextIndex;
             }
-          }
-          else
+          } else
           {
             Debug.Assert( zRawSql[izRawSql] == ':' || zRawSql[izRawSql] == '$' || zRawSql[izRawSql] == '@' );
             testcase( zRawSql[izRawSql] == ':' );
@@ -156,16 +153,13 @@ namespace Community.CsharpSqlite
           if ( ( pVar.flags & MEM_Null ) != 0 )
           {
             sqlite3StrAccumAppend( _out, "NULL", 4 );
-          }
-          else if ( ( pVar.flags & MEM_Int ) != 0 )
+          } else if ( ( pVar.flags & MEM_Int ) != 0 )
           {
             sqlite3XPrintf( _out, "%lld", pVar.u.i );
-          }
-          else if ( ( pVar.flags & MEM_Real ) != 0 )
+          } else if ( ( pVar.flags & MEM_Real ) != 0 )
           {
             sqlite3XPrintf( _out, "%!.15g", pVar.r );
-          }
-          else if ( ( pVar.flags & MEM_Str ) != 0 )
+          } else if ( ( pVar.flags & MEM_Str ) != 0 )
           {
 #if !SQLITE_OMIT_UTF16
 u8 enc = ENC(db);
@@ -182,12 +176,10 @@ sqlite3VdbeMemRelease(&utf8);
             {
               sqlite3XPrintf( _out, "'%.*q'", pVar.n, pVar.z );
             }
-          }
-          else if ( ( pVar.flags & MEM_Zero ) != 0 )
+          } else if ( ( pVar.flags & MEM_Zero ) != 0 )
           {
             sqlite3XPrintf( _out, "zeroblob(%d)", pVar.u.nZero );
-          }
-          else
+          } else
           {
             Debug.Assert( ( pVar.flags & MEM_Blob ) != 0 );
             sqlite3StrAccumAppend( _out, "x'", 2 );

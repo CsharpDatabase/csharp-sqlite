@@ -59,8 +59,9 @@ Sqlite3.sqlite3_prepare_v2
 Sqlite3.sqlite3_bind_int
 #endif
 ( vm, index, bInteger ) ) == Sqlite3.SQLITE_OK )
-      { LastError = ""; }
-      else
+      {
+        LastError = "";
+      } else
       {
         LastError = "Error " + LastError + "binding Integer [" + bInteger + "]";
       }
@@ -83,8 +84,9 @@ Sqlite3.sqlite3_bind_int
 Sqlite3.sqlite3_bind_int64
 #endif
 ( vm, index, bLong ) ) == Sqlite3.SQLITE_OK )
-      { LastError = ""; }
-      else
+      {
+        LastError = "";
+      } else
       {
         LastError = "Error " + LastError + "binding Long [" + bLong + "]";
       }
@@ -106,8 +108,9 @@ Sqlite3.sqlite3_bind_int64
 Sqlite3.sqlite3_bind_text
 #endif
 ( vm, index, bText, -1, null ) ) == Sqlite3.SQLITE_OK )
-      { LastError = ""; }
-      else
+      {
+        LastError = "";
+      } else
       {
         LastError = "Error " + LastError + "binding Text [" + bText + "]";
       }

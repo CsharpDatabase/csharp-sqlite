@@ -63,7 +63,7 @@ namespace tcl.lang
       bool sortIncreasing = true;
       bool unique = false;
 
-      for ( int i = 1 ; i < argv.Length - 1 ; i++ )
+      for ( int i = 1; i < argv.Length - 1; i++ )
       {
         int index = TclIndex.get( interp, argv[i], validOpts, "option", 0 );
 

@@ -153,7 +153,7 @@ namespace tcl.lang
       }
 
       interp.createCommand( argv[0].ToString(), cmd );
-      TCL.CompletionCode rc = cmd.cmdProc(interp, argv);
+      TCL.CompletionCode rc = cmd.cmdProc( interp, argv );
       return rc == TCL.CompletionCode.EXIT ? TCL.CompletionCode.EXIT : TCL.CompletionCode.RETURN;
     }
   }

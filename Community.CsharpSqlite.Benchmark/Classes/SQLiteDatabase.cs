@@ -86,8 +86,8 @@ Sqlite3.sqlite3_close
     {
       // executes query that select names of all tables in master table of the database
       String query = "SELECT name FROM sqlite_master " +
-              "WHERE type = 'table'" +
-              "ORDER BY 1";
+      "WHERE type = 'table'" +
+      "ORDER BY 1";
       DataTable table = ExecuteQuery( query );
 
       // Return all table names in the ArrayList
@@ -135,7 +135,9 @@ Sqlite3.sqlite3_errmsg
       table = new DataTable( "resultTable" );
 
       // reads rows
-      do { } while ( ReadNextRow( statement.VirtualMachine(), table ) == Sqlite3.SQLITE_ROW );
+      do
+      {
+      } while ( ReadNextRow( statement.VirtualMachine(), table ) == Sqlite3.SQLITE_ROW );
       // finalize executing this query
       statement.Close();
 
@@ -149,7 +151,8 @@ Sqlite3.sqlite3_errmsg
       int columnCount = table.Columns.Count;
       if ( columnCount == 0 )
       {
-        if ( ( columnCount = ReadColumnNames( vm, table ) ) == 0 ) return Sqlite3.SQLITE_ERROR;
+        if ( ( columnCount = ReadColumnNames( vm, table ) ) == 0 )
+          return Sqlite3.SQLITE_ERROR;
       }
 
       int resultType;

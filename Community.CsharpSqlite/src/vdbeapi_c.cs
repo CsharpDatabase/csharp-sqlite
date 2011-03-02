@@ -70,8 +70,7 @@ return ( p == null || p.expired ) ? 1 : 0;
       {
         sqlite3_log( SQLITE_MISUSE, "API called with finalized prepared statement" );
         return true;
-      }
-      else
+      } else
       {
         return false;
       }
@@ -82,8 +81,7 @@ return ( p == null || p.expired ) ? 1 : 0;
       {
         sqlite3_log( SQLITE_MISUSE, "API called with NULL prepared statement" );
         return true;
-      }
-      else
+      } else
       {
         return vdbeSafety( p );
       }
@@ -106,18 +104,17 @@ return ( p == null || p.expired ) ? 1 : 0;
         /* IMPLEMENTATION-OF: R-57228-12904 Invoking sqlite3_finalize() on a NULL
         ** pointer is a harmless no-op. */
         rc = SQLITE_OK;
-      }
-      else
+      } else
       {
         Vdbe v = pStmt;
         sqlite3 db = v.db;
 #if  SQLITE_THREADSAFE
-sqlite3_mutex mutex;
+        sqlite3_mutex mutex;
 #endif
         if ( vdbeSafety( v ) )
           return SQLITE_MISUSE_BKPT();
 #if SQLITE_THREADSAFE
-mutex = v.db.mutex;
+        mutex = v.db.mutex;
 #endif
         sqlite3_mutex_enter( mutex );
         rc = sqlite3VdbeFinalize( v );
@@ -141,8 +138,7 @@ mutex = v.db.mutex;
       if ( pStmt == null )
       {
         rc = SQLITE_OK;
-      }
-      else
+      } else
       {
         Vdbe v = (Vdbe)pStmt;
         sqlite3_mutex_enter( v.db.mutex );
@@ -164,7 +160,7 @@ mutex = v.db.mutex;
       int rc = SQLITE_OK;
       Vdbe p = (Vdbe)pStmt;
 #if  SQLITE_THREADSAFE
-sqlite3_mutex mutex = ( (Vdbe)pStmt ).db.mutex;
+      sqlite3_mutex mutex = ( (Vdbe)pStmt ).db.mutex;
 #endif
       sqlite3_mutex_enter( mutex );
       for ( i = 0; i < p.nVar; i++ )
@@ -198,7 +194,7 @@ sqlite3_mutex mutex = ( (Vdbe)pStmt ).db.mutex;
           else
           {
             p.zBLOB = sqlite3Malloc( p.z.Length );
-            Debug.Assert(p.zBLOB.Length == p.z.Length);
+            Debug.Assert( p.zBLOB.Length == p.z.Length );
             for ( int i = 0; i < p.zBLOB.Length; i++ )
               p.zBLOB[i] = (u8)p.z[i];
           }
@@ -207,8 +203,7 @@ sqlite3_mutex mutex = ( (Vdbe)pStmt ).db.mutex;
         p.flags = (u16)( p.flags & ~MEM_Str );
         p.flags |= MEM_Blob;
         return p.n > 0 ? p.zBLOB : null;
-      }
-      else
+      } else
       {
         return sqlite3_value_text( pVal ) == null ? null : Encoding.UTF8.GetBytes( sqlite3_value_text( pVal ) );
       }
@@ -370,8 +365,8 @@ return sqlite3ValueText(pVal, SQLITE_UTF16LE);
       Debug.Assert( sqlite3_mutex_held( pCtx.s.db.mutex ) );
       setResultStrOrError( pCtx, z.ToString(), n, SQLITE_UTF8, xDel );
     }
-    
-    
+
+
     public static void sqlite3_result_text(
     sqlite3_context pCtx,
     string z,
@@ -560,8 +555,7 @@ return SQLITE_MISUSE_BKPT();
       if ( p.explain != 0 )
       {
         rc = sqlite3VdbeList( p );
-      }
-      else
+      } else
 #endif // * SQLITE_OMIT_EXPLAIN */
       {
 
@@ -741,8 +735,7 @@ end_of_step:
           sqlite3VdbeMemReleaseExternal( pMem );
           pMem.flags = 0;
           pMem.z = null;
-        }
-        else
+        } else
         {
           sqlite3VdbeMemGrow( pMem, nByte, 0 );
           pMem.flags = MEM_Agg;
@@ -888,8 +881,7 @@ return p.pMem.n;
         sqlite3_mutex_enter( pVm.db.mutex );
         vals = sqlite3_data_count( pStmt );
         pOut = pVm.pResultSet[i];
-      }
-      else
+      } else
       {
         /* If the value passed as the second argument is out of range, return
         ** a pointer to the following public static Mem object which contains the
@@ -1320,8 +1312,7 @@ pStmt, N, (const void*(*)(Mem*))sqlite3_value_text16, COLNAME_COLUMN);
           rc = sqlite3ApiExit( p.db, rc );
         }
         sqlite3_mutex_leave( p.db.mutex );
-      }
-      else if ( xDel != SQLITE_STATIC && xDel != SQLITE_TRANSIENT )
+      } else if ( xDel != SQLITE_STATIC && xDel != SQLITE_TRANSIENT )
       {
         xDel( ref zData );
       }
@@ -1425,8 +1416,7 @@ return bindText(pStmt, i, zData, nData, xDel, SQLITE_UTF16NATIVE);
             if ( ( pValue.flags & MEM_Zero ) != 0 )
             {
               rc = sqlite3_bind_zeroblob( pStmt, i, pValue.u.nZero );
-            }
-            else
+            } else
             {
               rc = sqlite3_bind_blob( pStmt, i, pValue.zBLOB, pValue.n, SQLITE_TRANSIENT );
             }
@@ -1638,8 +1628,7 @@ return sqlite3TransferBindings( pFromStmt, pToStmt );
       if ( pStmt == null )
       {
         pNext = (sqlite3_stmt)pDb.pVdbe;
-      }
-      else
+      } else
       {
         pNext = (sqlite3_stmt)( (Vdbe)pStmt ).pNext;
       }

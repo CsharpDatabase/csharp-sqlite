@@ -1203,6 +1203,9 @@
     <None Include="..\test\fkey3.test">
       <Link>test\fkey3.test</Link>
     </None>
+    <None Include="..\test\fkey4.test">
+      <Link>test\fkey4.test</Link>
+    </None>
     <None Include="..\test\format4.test">
       <Link>test\format4.test</Link>
     </None>
@@ -1692,6 +1695,9 @@
     <None Include="..\test\tkt-31338dca7e.test">
       <Link>test\tkt-31338dca7e.test</Link>
     </None>
+    <None Include="..\test\tkt-313723c356.test">
+      <Link>test\tkt-313723c356.test</Link>
+    </None>
     <None Include="..\test\tkt-38cb5df375.test">
       <Link>test\tkt-38cb5df375.test</Link>
     </None>
@@ -1710,6 +1716,9 @@
     <None Include="..\test\tkt-5ee23731f.test">
       <Link>test\tkt-5ee23731f.test</Link>
     </None>
+    <None Include="..\test\tkt-752e1646fc.test">
+      <Link>test\tkt-752e1646fc.test</Link>
+    </None>
     <None Include="..\test\tkt-78e04e52ea.test">
       <Link>test\tkt-78e04e52ea.test</Link>
     </None>
@@ -1727,6 +1736,9 @@
     </None>
     <None Include="..\test\tkt-b351d95f9.test">
       <Link>test\tkt-b351d95f9.test</Link>
+    </None>
+    <None Include="..\test\tkt-b72787b1.test">
+      <Link>test\tkt-b72787b1.test</Link>
     </None>
     <None Include="..\test\tkt-cbd054fa6b.test">
       <Link>test\tkt-cbd054fa6b.test</Link>

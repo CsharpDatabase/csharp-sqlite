@@ -188,7 +188,8 @@ namespace Community.CsharpSqlite
       /* Same as READ_UTF8() above but without the zTerm parameter.
       ** For this routine, we assume the UTF8 string is always zero-terminated.
       */
-      if ( String.IsNullOrEmpty(zIn)) return 0;
+      if ( String.IsNullOrEmpty( zIn ) )
+        return 0;
       //c = *( zIn++ );
       //if ( c >= 0xc0 )
       //{
@@ -216,9 +217,13 @@ namespace Community.CsharpSqlite
           }
           if ( c < 0x80
           || ( c & 0xFFFFF800 ) == 0xD800
-          || ( c & 0xFFFFFFFE ) == 0xFFFE ) { c = 0xFFFD; }
+          || ( c & 0xFFFFFFFE ) == 0xFFFE )
+          {
+            c = 0xFFFD;
+          }
         }
-      } pzNext = zIn.Substring( zIndex );
+      }
+      pzNext = zIn.Substring( zIndex );
       return c;
     }
 
@@ -428,7 +433,8 @@ return rc;
     {
       //int r = 0;
       //string z = zIn;
-      if ( zIn.Length == 0 ) return 0;
+      if ( zIn.Length == 0 )
+        return 0;
       int zInLength = zIn.Length;
       int zTerm = ( nByte >= 0 && nByte <= zInLength ) ? nByte : zInLength;
       //Debug.Assert( z<=zTerm );
@@ -494,9 +500,9 @@ Mem m = Pool.Allocate_Mem();
 //  }
 //  Debug.Assert( (m.flags & MEM_Term)!=0 || db.mallocFailed !=0);
 //  Debug.Assert( (m.flags & MEM_Str)!=0 || db.mallocFailed !=0);
-  assert( (m.flags & MEM_Dyn)!=0 || db->mallocFailed );
-  assert( m.z || db->mallocFailed );
-  return m.z;
+assert( (m.flags & MEM_Dyn)!=0 || db->mallocFailed );
+assert( m.z || db->mallocFailed );
+return m.z;
 }
 
 /*
@@ -511,17 +517,17 @@ Mem m = Pool.Allocate_Mem();
 */
 #if SQLITE_ENABLE_STAT2
 char *sqlite3Utf8to16(sqlite3 *db, u8 enc, char *z, int n, int *pnOut){
-  Mem m;
-  memset(&m, 0, sizeof(m));
-  m.db = db;
-  sqlite3VdbeMemSetStr(&m, z, n, SQLITE_UTF8, SQLITE_STATIC);
-  if( sqlite3VdbeMemTranslate(&m, enc) ){
-    assert( db->mallocFailed );
-    return 0;
-  }
-  assert( m.z==m.zMalloc );
-  *pnOut = m.n;
-  return m.z;
+Mem m;
+memset(&m, 0, sizeof(m));
+m.db = db;
+sqlite3VdbeMemSetStr(&m, z, n, SQLITE_UTF8, SQLITE_STATIC);
+if( sqlite3VdbeMemTranslate(&m, enc) ){
+assert( db->mallocFailed );
+return 0;
+}
+assert( m.z==m.zMalloc );
+*pnOut = m.n;
+return m.z;
 }
 #endif
 
@@ -531,22 +537,22 @@ char *sqlite3Utf8to16(sqlite3 *db, u8 enc, char *z, int n, int *pnOut){
 ** in pZ.  nChar must be non-negative.
 */
 int sqlite3Utf16ByteLen(const void *zIn, int nChar){
-  int c;
-  unsigned char const *z = zIn;
-  int n = 0;
-  
-  if( SQLITE_UTF16NATIVE==SQLITE_UTF16BE ){
-    while( n<nChar ){
-      READ_UTF16BE(z, 1, c);
-      n++;
-    }
-  }else{
-    while( n<nChar ){
-      READ_UTF16LE(z, 1, c);
-      n++;
-    }
-  }
-  return (int)(z-(unsigned char const *)zIn);
+int c;
+unsigned char const *z = zIn;
+int n = 0;
+
+if( SQLITE_UTF16NATIVE==SQLITE_UTF16BE ){
+while( n<nChar ){
+READ_UTF16BE(z, 1, c);
+n++;
+}
+}else{
+while( n<nChar ){
+READ_UTF16LE(z, 1, c);
+n++;
+}
+}
+return (int)(z-(unsigned char const *)zIn);
 }
 
 #if SQLITE_TEST

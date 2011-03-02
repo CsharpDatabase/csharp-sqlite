@@ -15,23 +15,25 @@
 using System;
 namespace tcl.lang
 {
-	
-	/// <summary> Signals that a unrecoverable run-time error in the interpreter.
-	/// Similar to the panic() function in C.
-	/// </summary>
-	public class TclRuntimeError:System.SystemException
-	{
-		/// <summary> Constructs a TclRuntimeError with the specified detail
-		/// message.
-		/// 
-		/// </summary>
-		/// <param name="s">the detail message.
-		/// </param>
-		public TclRuntimeError(string s):base(s)
-		{
-		}
-		public TclRuntimeError(string s,Exception inner):base(s,inner)
-		{
-		}
-	}
+
+  /// <summary> Signals that a unrecoverable run-time error in the interpreter.
+  /// Similar to the panic() function in C.
+  /// </summary>
+  public class TclRuntimeError : System.SystemException
+  {
+    /// <summary> Constructs a TclRuntimeError with the specified detail
+    /// message.
+    /// 
+    /// </summary>
+    /// <param name="s">the detail message.
+    /// </param>
+    public TclRuntimeError( string s )
+      : base( s )
+    {
+    }
+    public TclRuntimeError( string s, Exception inner )
+      : base( s, inner )
+    {
+    }
+  }
 }

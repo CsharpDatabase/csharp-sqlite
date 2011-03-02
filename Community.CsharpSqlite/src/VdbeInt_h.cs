@@ -165,9 +165,9 @@ public readonly sqlite3_module pModule; /* Module for cursor pVtabCursor */
       public i64 lastRowid;          /* Last insert rowid (sqlite3.lastRowid) */
       public int nChange;            /* Statement changes (Vdbe.nChanges)     */
       public VdbeFrame pParent;      /* Parent of this frame, or NULL if parent is main */
-//
-// Needed for C# Implementation
-//
+      //
+      // Needed for C# Implementation
+      //
       public Mem[] aChildMem;        /* Array of memory cells for child frame */
       public VdbeCursor[] aChildCsr; /* Array of cursors for child frame */
     };
@@ -234,7 +234,7 @@ set { _flags = value; }
       public object _MD5Context;    /* Used when C# overload Z as MD5 context */
 
 
-      public void CopyTo(ref Mem ct )
+      public void CopyTo( ref Mem ct )
       {
         if ( ct == null )
           ct = new Mem();
@@ -310,30 +310,36 @@ set { _flags = value; }
     const int MEM_Ephem = 0x1000;
     const int MEM_Agg = 0x2000;
 #if !SQLITE_OMIT_INCRBLOB
-    const int MEM_Zero = 0x4000;  
+const int MEM_Zero = 0x4000;  
 #else
     const int MEM_Zero = 0x0000;
 #endif
 
     /*
-    ** Clear any existing type flags from a Mem and replace them with f
-    */
+** Clear any existing type flags from a Mem and replace them with f
+*/
     //#define MemSetTypeFlag(p, f) \
     //   ((p)->flags = ((p)->flags&~(MEM_TypeMask|MEM_Zero))|f)
-    static void MemSetTypeFlag( Mem p, int f ) { p.flags = (u16)( p.flags & ~( MEM_TypeMask | MEM_Zero ) | f ); }// TODO -- Convert back to inline for speed
+    static void MemSetTypeFlag( Mem p, int f )
+    {
+      p.flags = (u16)( p.flags & ~( MEM_TypeMask | MEM_Zero ) | f );
+    }// TODO -- Convert back to inline for speed
 
-/*
-** Return true if a memory cell is not marked as invalid.  This macro
-** is for use inside assert() statements only.
-*/
+    /*
+    ** Return true if a memory cell is not marked as invalid.  This macro
+    ** is for use inside assert() statements only.
+    */
 #if SQLITE_DEBUG
-//#define memIsValid(M)  ((M)->flags & MEM_Invalid)==0
-    static bool memIsValid( Mem M ) { return ( ( M ).flags & MEM_Invalid ) == 0; }
+    //#define memIsValid(M)  ((M)->flags & MEM_Invalid)==0
+    static bool memIsValid( Mem M )
+    {
+      return ( ( M ).flags & MEM_Invalid ) == 0;
+    }
 #else
-    static bool memIsValid( Mem M ) { return true; }
+static bool memIsValid( Mem M ) { return true; }
 #endif
 
-/* A VdbeFunc is just a FuncDef (defined in sqliteInt.h) that contains
+    /* A VdbeFunc is just a FuncDef (defined in sqliteInt.h) that contains
 ** additional information about auxiliary information bound to arguments
 ** of the function.  This is used to implement the sqlite3_get_auxdata()
 ** and sqlite3_set_auxdata() APIs.  The "auxdata" is some auxiliary data
@@ -375,7 +381,7 @@ set { _flags = value; }
       public Mem pMem;             /* Memory cell used to store aggregate context */
       public int isError;          /* Error code returned by the function. */
       public CollSeq pColl;        /* Collating sequence */
-    
+
     };
 
     /*
@@ -566,7 +572,7 @@ ct.pLruNext=pLruNext;
     //int sqlite3VdbeMemSetStr(Mem*, const char*, int, u8, void(*)(void*));
     //void sqlite3VdbeMemSetInt64(Mem*, i64);
 #if SQLITE_OMIT_FLOATING_POINT
-    //# define sqlite3VdbeMemSetDouble sqlite3VdbeMemSetInt64
+//# define sqlite3VdbeMemSetDouble sqlite3VdbeMemSetInt64
 #else
     //void sqlite3VdbeMemSetDouble(Mem*, double);
 #endif
@@ -593,21 +599,23 @@ ct.pLruNext=pLruNext;
     //void sqlite3VdbeMemStoreType(Mem *pMem);  
 
 #if SQLITE_DEBUG
-//void sqlite3VdbeMemPrepareToChange(Vdbe*,Mem*);
+    //void sqlite3VdbeMemPrepareToChange(Vdbe*,Mem*);
 #endif
 
 #if !SQLITE_OMIT_FOREIGN_KEY
     //int sqlite3VdbeCheckFk(Vdbe *, int);
 #else
-    //# define sqlite3VdbeCheckFk(p,i) 0
-    static int sqlite3VdbeCheckFk( Vdbe p, int i ) { return 0; }
+//# define sqlite3VdbeCheckFk(p,i) 0
+static int sqlite3VdbeCheckFk( Vdbe p, int i ) { return 0; }
 #endif
 
 #if !SQLITE_OMIT_SHARED_CACHE
 //void sqlite3VdbeMutexArrayEnter(Vdbe *p);
 #else
     //# define sqlite3VdbeMutexArrayEnter(p)
-    static void sqlite3VdbeMutexArrayEnter( Vdbe p ) { }
+    static void sqlite3VdbeMutexArrayEnter( Vdbe p )
+    {
+    }
 #endif
 
     //int sqlite3VdbeMemTranslate(Mem*, u8);
@@ -621,7 +629,10 @@ ct.pLruNext=pLruNext;
 //  int sqlite3VdbeMemExpandBlob(Mem *);
 #else
     //  #define sqlite3VdbeMemExpandBlob(x) SQLITE_OK
-    static int sqlite3VdbeMemExpandBlob( Mem x ) { return SQLITE_OK; }
+    static int sqlite3VdbeMemExpandBlob( Mem x )
+    {
+      return SQLITE_OK;
+    }
 #endif
 
     //#endif //* !_VDBEINT_H_) */

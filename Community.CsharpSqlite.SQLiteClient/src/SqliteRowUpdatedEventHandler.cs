@@ -34,9 +34,9 @@ using System.Data.Common;
 
 namespace Community.CsharpSqlite.SQLiteClient
 {
-	/// <summary>
-	/// Represents the method that will handle the <see cref="SqliteDataAdapter.RowUpdated"/> event 
-	/// of a <see cref="SqliteDataAdapter"/>.
-	/// </summary>
-	public delegate void SqliteRowUpdatedEventHandler(Object sender, RowUpdatedEventArgs e);
+  /// <summary>
+  /// Represents the method that will handle the <see cref="SqliteDataAdapter.RowUpdated"/> event 
+  /// of a <see cref="SqliteDataAdapter"/>.
+  /// </summary>
+  public delegate void SqliteRowUpdatedEventHandler( Object sender, RowUpdatedEventArgs e );
 }

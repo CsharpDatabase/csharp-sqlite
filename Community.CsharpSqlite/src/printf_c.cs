@@ -394,8 +394,7 @@ const int SQLITE_PRINT_BUF_SIZE = 50;
             width = -width;
           }
           c = fmt[++_fmt];
-        }
-        else
+        } else
         {
           while ( c >= '0' && c <= '9' )
           {
@@ -418,8 +417,7 @@ const int SQLITE_PRINT_BUF_SIZE = 50;
             if ( precision < 0 )
               precision = -precision;
             c = fmt[++_fmt];
-          }
-          else
+          } else
           {
             while ( c >= '0' && c <= '9' )
             {
@@ -427,8 +425,7 @@ const int SQLITE_PRINT_BUF_SIZE = 50;
               c = fmt[++_fmt];
             }
           }
-        }
-        else
+        } else
         {
           precision = -1;
         }
@@ -441,13 +438,11 @@ const int SQLITE_PRINT_BUF_SIZE = 50;
           {
             flag_longlong = true;
             c = fmt[++_fmt];
-          }
-          else
+          } else
           {
             flag_longlong = false;
           }
-        }
-        else
+        } else
         {
           flag_long = flag_longlong = false;
         }
@@ -462,8 +457,7 @@ const int SQLITE_PRINT_BUF_SIZE = 50;
             if ( useExtended != 0 || ( infop.flags & FLAG_INTERN ) == 0 )
             {
               xtype = infop.type;
-            }
-            else
+            } else
             {
               return;
             }
@@ -514,12 +508,10 @@ const int SQLITE_PRINT_BUF_SIZE = 50;
               if ( flag_longlong )
               {
                 v = (long)va_arg( ap, "i64" );
-              }
-              else if ( flag_long )
+              } else if ( flag_long )
               {
                 v = (long)va_arg( ap, "long int" );
-              }
-              else
+              } else
               {
                 v = (int)va_arg( ap, "int" );
               }
@@ -527,8 +519,7 @@ const int SQLITE_PRINT_BUF_SIZE = 50;
               {
                 longvalue = -v;
                 prefix = '-';
-              }
-              else
+              } else
               {
                 longvalue = v;
                 if ( flag_plussign )
@@ -538,18 +529,15 @@ const int SQLITE_PRINT_BUF_SIZE = 50;
                 else
                   prefix = '\0';
               }
-            }
-            else
+            } else
             {
               if ( flag_longlong )
               {
                 longvalue = (i64)va_arg( ap, "longlong int" );
-              }
-              else if ( flag_long )
+              } else if ( flag_long )
               {
                 longvalue = (i64)va_arg( ap, "long int" );
-              }
-              else
+              } else
               {
                 longvalue = (i64)va_arg( ap, "long" );
               }
@@ -645,8 +633,7 @@ length = 0;
             {
               realvalue = -realvalue;
               prefix = '-';
-            }
-            else
+            } else
             {
               if ( flag_plussign )
                 prefix = '+';
@@ -662,7 +649,9 @@ length = 0;
 for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
 #else
             /* It makes more sense to use 0.5 */
-            for ( idx = precision, rounder = 0.5; idx > 0; idx--, rounder *= 0.1 ) { }
+            for ( idx = precision, rounder = 0.5; idx > 0; idx--, rounder *= 0.1 )
+            {
+            }
 #endif
             if ( xtype == etFLOAT )
               realvalue += rounder;
@@ -679,11 +668,31 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
             }
             if ( realvalue > 0.0 )
             {
-              while ( realvalue >= 1e32 && exp <= 350 ) { realvalue *= 1e-32; exp += 32; }
-              while ( realvalue >= 1e8 && exp <= 350 ) { realvalue *= 1e-8; exp += 8; }
-              while ( realvalue >= 10.0 && exp <= 350 ) { realvalue *= 0.1; exp++; }
-              while ( realvalue < 1e-8 ) { realvalue *= 1e8; exp -= 8; }
-              while ( realvalue < 1.0 ) { realvalue *= 10.0; exp--; }
+              while ( realvalue >= 1e32 && exp <= 350 )
+              {
+                realvalue *= 1e-32;
+                exp += 32;
+              }
+              while ( realvalue >= 1e8 && exp <= 350 )
+              {
+                realvalue *= 1e-8;
+                exp += 8;
+              }
+              while ( realvalue >= 10.0 && exp <= 350 )
+              {
+                realvalue *= 0.1;
+                exp++;
+              }
+              while ( realvalue < 1e-8 )
+              {
+                realvalue *= 1e8;
+                exp -= 8;
+              }
+              while ( realvalue < 1.0 )
+              {
+                realvalue *= 10.0;
+                exp--;
+              }
               if ( exp > 350 )
               {
                 if ( prefix == '-' )
@@ -693,16 +702,14 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
                   buf[2] = 'n';
                   buf[3] = 'f';// "-Inf"
                   bufpt = 4;
-                }
-                else if ( prefix == '+' )
+                } else if ( prefix == '+' )
                 {
                   buf[0] = '+';
                   buf[1] = 'I';
                   buf[2] = 'n';
                   buf[3] = 'f';// "+Inf"
                   bufpt = 4;
-                }
-                else
+                } else
                 {
                   buf[0] = 'I';
                   buf[1] = 'n';
@@ -723,7 +730,11 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
             if ( xtype != etFLOAT )
             {
               realvalue += rounder;
-              if ( realvalue >= 10.0 ) { realvalue *= 0.1; exp++; }
+              if ( realvalue >= 10.0 )
+              {
+                realvalue *= 0.1;
+                exp++;
+              }
             }
             if ( xtype == etGENERIC )
             {
@@ -731,22 +742,19 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
               if ( exp < -4 || exp > precision )
               {
                 xtype = etEXP;
-              }
-              else
+              } else
               {
                 precision = precision - exp;
                 xtype = etFLOAT;
               }
-            }
-            else
+            } else
             {
               flag_rtz = false;
             }
             if ( xtype == etEXP )
             {
               e2 = 0;
-            }
-            else
+            } else
             {
               e2 = exp;
             }
@@ -761,8 +769,7 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
             if ( e2 < 0 )
             {
               buf[bufpt++] = '0';
-            }
-            else
+            } else
             {
               for ( ; e2 >= 0; e2-- )
               {
@@ -798,8 +805,7 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
                 if ( flag_altform2 )
                 {
                   buf[( bufpt++ )] = '0';
-                }
-                else
+                } else
                 {
                   buf[( --bufpt )] = '0';
                 }
@@ -813,8 +819,7 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
               {
                 buf[bufpt++] = '-';
                 exp = -exp;
-              }
-              else
+              } else
               {
                 buf[bufpt++] = '+';
               }
@@ -869,8 +874,7 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
               for ( idx = 1; idx < precision; idx++ )
                 buf[idx] = (char)c;
               length = precision;
-            }
-            else
+            } else
             {
               length = 1;
             }
@@ -887,17 +891,17 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
             if ( bufpt == 0 )
             {
               buf[0] = '\0';
-            }
-            else if ( xtype == etDYNSTRING )
+            } else if ( xtype == etDYNSTRING )
             {
               //              zExtra = bufpt;
             }
             if ( precision >= 0 )
             {
-              for ( length = 0; length < precision && length < bufStr.Length && buf[length] != 0; length++ ) { }
+              for ( length = 0; length < precision && length < bufStr.Length && buf[length] != 0; length++ )
+              {
+              }
               //length += precision;
-            }
-            else
+            } else
             {
               length = sqlite3Strlen30( bufpt );
             }
@@ -936,8 +940,7 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
                 //  return;
                 //}
                 bufpt = 0; //Start of Buffer
-              }
-              else
+              } else
               {
                 //bufpt = buf;
                 bufpt = 0; //Start of Buffer
@@ -1271,7 +1274,8 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
       //acc.useMalloc = 0;
       sqlite3VXPrintf( acc, 0, zFormat, ap );
       zBuf.Length = 0;
-      if (n > 1 && n <= acc.zText.Length) acc.zText.Length = n-1;
+      if ( n > 1 && n <= acc.zText.Length )
+        acc.zText.Length = n - 1;
       zBuf.Append( sqlite3StrAccumFinish( acc ) );
       return;
     }

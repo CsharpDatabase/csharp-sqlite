@@ -197,13 +197,12 @@ namespace tcl.lang
       }
 
       int uniqueIx = 1;
-      for ( int ix = 1 ; ix < a.Length ; ix++ )
+      for ( int ix = 1; ix < a.Length; ix++ )
       {
         if ( compare( a[ix], a[uniqueIx - 1] ) == 0 )
         {
           a[ix].release();
-        }
-        else
+        } else
         {
           if ( ix != uniqueIx )
           {
@@ -246,8 +245,7 @@ namespace tcl.lang
         if ( sortIndex < -1 )
         {
           index = TclList.getLength( sortInterp, obj1 ) - 1;
-        }
-        else
+        } else
         {
           index = sortIndex;
         }
@@ -263,8 +261,7 @@ namespace tcl.lang
         if ( sortIndex < -1 )
         {
           index = TclList.getLength( sortInterp, obj2 ) - 1;
-        }
-        else
+        } else
         {
           index = sortIndex;
         }
@@ -302,8 +299,7 @@ namespace tcl.lang
             if ( int1 > int2 )
             {
               code = 1;
-            }
-            else if ( int2 > int1 )
+            } else if ( int2 > int1 )
             {
               code = -1;
             }
@@ -324,8 +320,7 @@ namespace tcl.lang
             if ( f1 > f2 )
             {
               code = 1;
-            }
-            else if ( f2 > f1 )
+            } else if ( f2 > f1 )
             {
               code = -1;
             }
@@ -375,8 +370,7 @@ namespace tcl.lang
       if ( sortIncreasing )
       {
         return code;
-      }
-      else
+      } else
       {
         return -code;
       }
@@ -468,8 +462,7 @@ namespace tcl.lang
               if ( System.Char.IsDigit( str1[i1] ) )
               {
                 return 1;
-              }
-              else
+              } else
               {
                 if ( diff != 0 )
                 {
@@ -477,8 +470,7 @@ namespace tcl.lang
                 }
                 break;
               }
-            }
-            else if ( !System.Char.IsDigit( str1[i1] ) )
+            } else if ( !System.Char.IsDigit( str1[i1] ) )
             {
               return -1;
             }
@@ -494,25 +486,21 @@ namespace tcl.lang
             if ( diff != 0 )
             {
               return diff;
-            }
-            else if ( secondaryDiff == 0 )
+            } else if ( secondaryDiff == 0 )
             {
               secondaryDiff = -1;
             }
-          }
-          else if ( System.Char.IsUpper( str2[i2] ) && System.Char.IsLower( str1[i1] ) )
+          } else if ( System.Char.IsUpper( str2[i2] ) && System.Char.IsLower( str1[i1] ) )
           {
             diff = str1[i1] - System.Char.ToLower( str2[i2] );
             if ( diff != 0 )
             {
               return diff;
-            }
-            else if ( secondaryDiff == 0 )
+            } else if ( secondaryDiff == 0 )
             {
               secondaryDiff = 1;
             }
-          }
-          else
+          } else
           {
             return diff;
           }
@@ -526,19 +514,16 @@ namespace tcl.lang
         if ( !System.Char.IsDigit( str2[i2] ) )
         {
           return 1;
-        }
-        else
+        } else
         {
           return -1;
         }
-      }
-      else if ( i2 >= len2 && i1 < len1 )
+      } else if ( i2 >= len2 && i1 < len1 )
       {
         if ( !System.Char.IsDigit( str1[i1] ) )
         {
           return -1;
-        }
-        else
+        } else
         {
           return 1;
         }

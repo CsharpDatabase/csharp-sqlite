@@ -18,15 +18,15 @@
 using System;
 namespace tcl.lang
 {
-	
-	/// <summary> This interface is the API for registering named data objects in the
-	/// Tcl interpreter.
-	/// </summary>
-	
-	public interface AssocData
-		{
-			
-			void  disposeAssocData(Interp interp); // The interpreter in which this AssocData
-			// instance is registered in.
-		}
+
+  /// <summary> This interface is the API for registering named data objects in the
+  /// Tcl interpreter.
+  /// </summary>
+
+  public interface AssocData
+  {
+
+    void disposeAssocData( Interp interp ); // The interpreter in which this AssocData
+    // instance is registered in.
+  }
 }

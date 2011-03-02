@@ -249,9 +249,13 @@ namespace Community.CsharpSqlite
 //void sqlite3BtreeEnterAll(sqlite3*);
 #else
     //# define sqlite3BtreeEnter(X)
-    static void sqlite3BtreeEnter( Btree bt ) { }
+    static void sqlite3BtreeEnter( Btree bt )
+    {
+    }
     //# define sqlite3BtreeEnterAll(X)
-    static void sqlite3BtreeEnterAll( sqlite3 p ) { }
+    static void sqlite3BtreeEnterAll( sqlite3 p )
+    {
+    }
 #endif
 
 #if !(SQLITE_OMIT_SHARED_CACHE) && SQLITE_THREADSAFE
@@ -270,31 +274,51 @@ int sqlite3BtreeHoldsAllMutexes(sqlite3*);
 #else
 
     //# define sqlite3BtreeLeave(X)
-    static void sqlite3BtreeLeave( Btree X ) { }
+    static void sqlite3BtreeLeave( Btree X )
+    {
+    }
 
     //# define sqlite3BtreeEnterCursor(X)
-    static void sqlite3BtreeEnterCursor( BtCursor X ) { }
+    static void sqlite3BtreeEnterCursor( BtCursor X )
+    {
+    }
 
     //# define sqlite3BtreeLeaveCursor(X)
-    static void sqlite3BtreeLeaveCursor( BtCursor X ) { }
+    static void sqlite3BtreeLeaveCursor( BtCursor X )
+    {
+    }
 
     //# define sqlite3BtreeLeaveAll(X)
-    static void sqlite3BtreeLeaveAll( sqlite3 X ) { }
+    static void sqlite3BtreeLeaveAll( sqlite3 X )
+    {
+    }
 
     //# define sqlite3BtreeMutexArrayEnter(X)
-    static void sqlite3BtreeMutexArrayEnter( BtreeMutexArray X ) { }
+    static void sqlite3BtreeMutexArrayEnter( BtreeMutexArray X )
+    {
+    }
 
     //# define sqlite3BtreeMutexArrayLeave(X)
-    static void sqlite3BtreeMutexArrayLeave( BtreeMutexArray X ) { }
+    static void sqlite3BtreeMutexArrayLeave( BtreeMutexArray X )
+    {
+    }
 
     //# define sqlite3BtreeMutexArrayInsert(X,Y)
-    static void sqlite3BtreeMutexArrayInsert( BtreeMutexArray X, Btree Y ) { }
+    static void sqlite3BtreeMutexArrayInsert( BtreeMutexArray X, Btree Y )
+    {
+    }
 
     //# define sqlite3BtreeHoldsMutex(X) 1
-    static bool sqlite3BtreeHoldsMutex( Btree X ) { return true; }
+    static bool sqlite3BtreeHoldsMutex( Btree X )
+    {
+      return true;
+    }
 
     //# define sqlite3BtreeHoldsAllMutexes(X) 1
-    static bool sqlite3BtreeHoldsAllMutexes( sqlite3 X ) { return true; }
+    static bool sqlite3BtreeHoldsAllMutexes( sqlite3 X )
+    {
+      return true;
+    }
 #endif
 
     //#endif // * _BTREE_H_ */

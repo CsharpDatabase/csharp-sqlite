@@ -105,8 +105,7 @@ namespace tcl.lang
                     if ( count == BINARY_ALL )
                     {
                       count = TclByteArray.getLength( interp, argv[arg] );
-                    }
-                    else if ( count == BINARY_NOCOUNT )
+                    } else if ( count == BINARY_NOCOUNT )
                     {
                       count = 1;
                     }
@@ -115,13 +114,19 @@ namespace tcl.lang
                     {
 
                       case 'a':
-                      case 'A': offset += count; break;
+                      case 'A':
+                        offset += count;
+                        break;
 
                       case 'b':
-                      case 'B': offset += ( count + 7 ) / 8; break;
+                      case 'B':
+                        offset += ( count + 7 ) / 8;
+                        break;
 
                       case 'h':
-                      case 'H': offset += ( count + 1 ) / 2; break;
+                      case 'H':
+                        offset += ( count + 1 ) / 2;
+                        break;
                     }
                     break;
                   }
@@ -141,17 +146,27 @@ namespace tcl.lang
                     switch ( cmd )
                     {
 
-                      case 'c': size = 1; break;
+                      case 'c':
+                        size = 1;
+                        break;
 
                       case 's':
-                      case 'S': size = 2; break;
+                      case 'S':
+                        size = 2;
+                        break;
 
                       case 'i':
-                      case 'I': size = 4; break;
+                      case 'I':
+                        size = 4;
+                        break;
 
-                      case 'f': size = 4; break;
+                      case 'f':
+                        size = 4;
+                        break;
 
-                      case 'd': size = 8; break;
+                      case 'd':
+                        size = 8;
+                        break;
                     }
 
                     // For number-type specifiers, the count corresponds
@@ -163,15 +178,13 @@ namespace tcl.lang
                     {
                       arg++;
                       count = 1;
-                    }
-                    else
+                    } else
                     {
                       int listc = TclList.getLength( interp, argv[arg++] );
                       if ( count == BINARY_ALL )
                       {
                         count = listc;
-                      }
-                      else if ( count > listc )
+                      } else if ( count > listc )
                       {
                         throw new TclException( interp, "number of elements in list" + " does not match count" );
                       }
@@ -221,12 +234,10 @@ namespace tcl.lang
                     if ( count == BINARY_ALL )
                     {
                       offset = length;
-                    }
-                    else if ( count == BINARY_NOCOUNT )
+                    } else if ( count == BINARY_NOCOUNT )
                     {
                       alephWithoutCount( interp );
-                    }
-                    else
+                    } else
                     {
                       offset = count;
                     }
@@ -289,19 +300,17 @@ namespace tcl.lang
                     if ( count == BINARY_ALL )
                     {
                       count = length;
-                    }
-                    else if ( count == BINARY_NOCOUNT )
+                    } else if ( count == BINARY_NOCOUNT )
                     {
                       count = 1;
                     }
                     if ( length >= count )
                     {
                       Array.Copy( bytes, 0, resultBytes, cursor, count );
-                    }
-                    else
+                    } else
                     {
                       Array.Copy( bytes, 0, resultBytes, cursor, length );
-                      for ( int ix = 0 ; ix < count - length ; ix++ )
+                      for ( int ix = 0; ix < count - length; ix++ )
                       {
                         resultBytes[cursor + length + ix] = pad;
                       }
@@ -317,8 +326,7 @@ namespace tcl.lang
                     if ( count == BINARY_ALL )
                     {
                       count = str.Length;
-                    }
-                    else if ( count == BINARY_NOCOUNT )
+                    } else if ( count == BINARY_NOCOUNT )
                     {
                       count = 1;
                     }
@@ -329,14 +337,13 @@ namespace tcl.lang
                     }
                     if ( cmd == 'B' )
                     {
-                      for ( offset = 0 ; offset < count ; offset++ )
+                      for ( offset = 0; offset < count; offset++ )
                       {
                         value <<= 1;
                         if ( str[offset] == '1' )
                         {
                           value |= 1;
-                        }
-                        else if ( str[offset] != '0' )
+                        } else if ( str[offset] != '0' )
                         {
                           expectedButGot( interp, "binary", new string( str ) );
                         }
@@ -346,17 +353,15 @@ namespace tcl.lang
                           value = 0;
                         }
                       }
-                    }
-                    else
+                    } else
                     {
-                      for ( offset = 0 ; offset < count ; offset++ )
+                      for ( offset = 0; offset < count; offset++ )
                       {
                         value >>= 1;
                         if ( str[offset] == '1' )
                         {
                           value |= 128;
-                        }
-                        else if ( str[offset] != '0' )
+                        } else if ( str[offset] != '0' )
                         {
                           expectedButGot( interp, "binary", new string( str ) );
                         }
@@ -372,8 +377,7 @@ namespace tcl.lang
                       if ( cmd == 'B' )
                       {
                         value <<= 8 - ( offset % 8 );
-                      }
-                      else
+                      } else
                       {
                         value >>= 8 - ( offset % 8 );
                       }
@@ -393,8 +397,7 @@ namespace tcl.lang
                     if ( count == BINARY_ALL )
                     {
                       count = str.Length;
-                    }
-                    else if ( count == BINARY_NOCOUNT )
+                    } else if ( count == BINARY_NOCOUNT )
                     {
                       count = 1;
                     }
@@ -405,7 +408,7 @@ namespace tcl.lang
                     }
                     if ( cmd == 'H' )
                     {
-                      for ( offset = 0 ; offset < count ; offset++ )
+                      for ( offset = 0; offset < count; offset++ )
                       {
                         value <<= 4;
                         int c = HEXDIGITS.IndexOf( Char.ToLower( str[offset] ) );
@@ -420,10 +423,9 @@ namespace tcl.lang
                           value = 0;
                         }
                       }
-                    }
-                    else
+                    } else
                     {
-                      for ( offset = 0 ; offset < count ; offset++ )
+                      for ( offset = 0; offset < count; offset++ )
                       {
                         value >>= 4;
                         int c = HEXDIGITS.IndexOf( Char.ToLower( str[offset] ) );
@@ -444,8 +446,7 @@ namespace tcl.lang
                       if ( cmd == 'H' )
                       {
                         value <<= 4;
-                      }
-                      else
+                      } else
                       {
                         value >>= 4;
                       }
@@ -473,8 +474,7 @@ namespace tcl.lang
                       listv = new TclObject[1];
                       listv[0] = argv[arg++];
                       count = 1;
-                    }
-                    else
+                    } else
                     {
                       listv = TclList.getElements( interp, argv[arg++] );
                       if ( count == BINARY_ALL )
@@ -482,7 +482,7 @@ namespace tcl.lang
                         count = listv.Length;
                       }
                     }
-                    for ( int ix = 0 ; ix < count ; ix++ )
+                    for ( int ix = 0; ix < count; ix++ )
                     {
                       cursor = FormatNumber( interp, cmd, listv[ix], resultBytes, cursor );
                     }
@@ -495,7 +495,7 @@ namespace tcl.lang
                     {
                       count = 1;
                     }
-                    for ( int ix = 0 ; ix < count ; ix++ )
+                    for ( int ix = 0; ix < count; ix++ )
                     {
                       resultBytes[cursor++] = 0;
                     }
@@ -515,8 +515,7 @@ namespace tcl.lang
                     if ( count == BINARY_ALL || count > cursor )
                     {
                       cursor = 0;
-                    }
-                    else
+                    } else
                     {
                       cursor -= count;
                     }
@@ -532,8 +531,7 @@ namespace tcl.lang
                     if ( count == BINARY_ALL )
                     {
                       cursor = maxPos;
-                    }
-                    else
+                    } else
                     {
                       cursor = count;
                     }
@@ -575,8 +573,7 @@ namespace tcl.lang
                     if ( count == BINARY_ALL )
                     {
                       count = length - offset;
-                    }
-                    else
+                    } else
                     {
                       if ( count == BINARY_NOCOUNT )
                       {
@@ -620,8 +617,7 @@ namespace tcl.lang
                     if ( count == BINARY_ALL )
                     {
                       count = ( length - offset ) * 8;
-                    }
-                    else
+                    } else
                     {
                       if ( count == BINARY_NOCOUNT )
                       {
@@ -637,28 +633,25 @@ namespace tcl.lang
 
                     if ( cmd == 'b' )
                     {
-                      for ( int ix = 0 ; ix < count ; ix++ )
+                      for ( int ix = 0; ix < count; ix++ )
                       {
                         if ( ( ix % 8 ) != 0 )
                         {
                           value >>= 1;
-                        }
-                        else
+                        } else
                         {
                           value = src[thisOffset++];
                         }
                         s.Append( ( value & 1 ) != 0 ? '1' : '0' );
                       }
-                    }
-                    else
+                    } else
                     {
-                      for ( int ix = 0 ; ix < count ; ix++ )
+                      for ( int ix = 0; ix < count; ix++ )
                       {
                         if ( ( ix % 8 ) != 0 )
                         {
                           value <<= 1;
-                        }
-                        else
+                        } else
                         {
                           value = src[thisOffset++];
                         }
@@ -682,8 +675,7 @@ namespace tcl.lang
                     if ( count == BINARY_ALL )
                     {
                       count = ( length - offset ) * 2;
-                    }
-                    else
+                    } else
                     {
                       if ( count == BINARY_NOCOUNT )
                       {
@@ -699,28 +691,25 @@ namespace tcl.lang
 
                     if ( cmd == 'h' )
                     {
-                      for ( int ix = 0 ; ix < count ; ix++ )
+                      for ( int ix = 0; ix < count; ix++ )
                       {
                         if ( ( ix % 2 ) != 0 )
                         {
                           value >>= 4;
-                        }
-                        else
+                        } else
                         {
                           value = src[thisOffset++];
                         }
                         s.Append( HEXDIGITS[value & 0xf] );
                       }
-                    }
-                    else
+                    } else
                     {
-                      for ( int ix = 0 ; ix < count ; ix++ )
+                      for ( int ix = 0; ix < count; ix++ )
                       {
                         if ( ( ix % 2 ) != 0 )
                         {
                           value <<= 4;
-                        }
-                        else
+                        } else
                         {
                           value = src[thisOffset++];
                         }
@@ -749,17 +738,27 @@ namespace tcl.lang
                     switch ( cmd )
                     {
 
-                      case 'c': size = 1; break;
+                      case 'c':
+                        size = 1;
+                        break;
 
                       case 's':
-                      case 'S': size = 2; break;
+                      case 'S':
+                        size = 2;
+                        break;
 
                       case 'i':
-                      case 'I': size = 4; break;
+                      case 'I':
+                        size = 4;
+                        break;
 
-                      case 'f': size = 4; break;
+                      case 'f':
+                        size = 4;
+                        break;
 
-                      case 'd': size = 8; break;
+                      case 'd':
+                        size = 8;
+                        break;
                     }
                     TclObject valueObj;
                     if ( count == BINARY_NOCOUNT )
@@ -770,8 +769,7 @@ namespace tcl.lang
                       }
                       valueObj = ScanNumber( src, offset, cmd );
                       offset += size;
-                    }
-                    else
+                    } else
                     {
                       if ( count == BINARY_ALL )
                       {
@@ -783,7 +781,7 @@ namespace tcl.lang
                       }
                       valueObj = TclList.newInstance();
                       int thisOffset = offset;
-                      for ( int ix = 0 ; ix < count ; ix++ )
+                      for ( int ix = 0; ix < count; ix++ )
                       {
                         TclList.append( null, valueObj, ScanNumber( src, thisOffset, cmd ) );
                         thisOffset += size;
@@ -805,8 +803,7 @@ namespace tcl.lang
                     if ( count == BINARY_ALL || count > length - offset )
                     {
                       offset = length;
-                    }
-                    else
+                    } else
                     {
                       offset += count;
                     }
@@ -822,8 +819,7 @@ namespace tcl.lang
                     if ( count == BINARY_ALL || count > offset )
                     {
                       offset = 0;
-                    }
-                    else
+                    } else
                     {
                       offset -= count;
                     }
@@ -839,8 +835,7 @@ namespace tcl.lang
                     if ( count == BINARY_ALL || count > length )
                     {
                       offset = length;
-                    }
-                    else
+                    } else
                     {
                       offset = count;
                     }
@@ -901,8 +896,7 @@ namespace tcl.lang
       {
         parsePos = ix + 1;
         return BINARY_ALL;
-      }
-      else if ( ix < format.Length && System.Char.IsDigit( format[ix] ) )
+      } else if ( ix < format.Length && System.Char.IsDigit( format[ix] ) )
       {
         int length = 1;
         while ( ix + length < format.Length && System.Char.IsDigit( format[ix + length] ) )
@@ -911,8 +905,7 @@ namespace tcl.lang
         }
         parsePos = ix + length;
         return System.Int32.Parse( new string( format, ix, length ) );
-      }
-      else
+      } else
       {
         return BINARY_NOCOUNT;
       }
@@ -928,8 +921,7 @@ namespace tcl.lang
         cursor += 8;
         writer.Close();
         ms.Close();
-      }
-      else if ( type == 'f' )
+      } else if ( type == 'f' )
       {
         float fvalue = (float)TclDouble.get( interp, src );
         var ms = new System.IO.MemoryStream( resultBytes, cursor, 4 );
@@ -938,33 +930,28 @@ namespace tcl.lang
         cursor += 4;
         writer.Close();
         ms.Close();
-      }
-      else
+      } else
       {
         int value = TclInteger.get( interp, src );
 
         if ( type == 'c' )
         {
           resultBytes[cursor++] = (byte)value;
-        }
-        else if ( type == 's' )
+        } else if ( type == 's' )
         {
           resultBytes[cursor++] = (byte)value;
           resultBytes[cursor++] = (byte)( value >> 8 );
-        }
-        else if ( type == 'S' )
+        } else if ( type == 'S' )
         {
           resultBytes[cursor++] = (byte)( value >> 8 );
           resultBytes[cursor++] = (byte)value;
-        }
-        else if ( type == 'i' )
+        } else if ( type == 'i' )
         {
           resultBytes[cursor++] = (byte)value;
           resultBytes[cursor++] = (byte)( value >> 8 );
           resultBytes[cursor++] = (byte)( value >> 16 );
           resultBytes[cursor++] = (byte)( value >> 24 );
-        }
-        else if ( type == 'I' )
+        } else if ( type == 'I' )
         {
           resultBytes[cursor++] = (byte)( value >> 24 );
           resultBytes[cursor++] = (byte)( value >> 16 );

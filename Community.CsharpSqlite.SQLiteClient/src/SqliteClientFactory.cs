@@ -35,62 +35,62 @@ using System.Data.Common;
 
 namespace Community.CsharpSqlite.SQLiteClient
 {
-	public class SqliteClientFactory : DbProviderFactory
-	{
-                public static SqliteClientFactory Instance = null;
-                public static object lockStatic = new object ();
+public class SqliteClientFactory : DbProviderFactory
+{
+public static SqliteClientFactory Instance = null;
+public static object lockStatic = new object ();
 
-		private SqliteClientFactory ()
-		{
-		}
+private SqliteClientFactory ()
+{
+}
 
-                static SqliteClientFactory ()
-                {
-                        lock (lockStatic) {
-                                if (Instance == null)
-                                        Instance = new SqliteClientFactory ();
-                        }
-                }
+static SqliteClientFactory ()
+{
+lock (lockStatic) {
+if (Instance == null)
+        Instance = new SqliteClientFactory ();
+}
+}
 
-		public override bool CanCreateDataSourceEnumerator {
-			get { return false; }
-		}
+public override bool CanCreateDataSourceEnumerator {
+get { return false; }
+}
 
-                public override DbCommand CreateCommand ()
-                {
-                        return new SqliteCommand ();
-                }
+public override DbCommand CreateCommand ()
+{
+return new SqliteCommand ();
+}
 
-                public override DbCommandBuilder CreateCommandBuilder ()
-                {
-			return new SqliteCommandBuilder ();
-                }
+public override DbCommandBuilder CreateCommandBuilder ()
+{
+return new SqliteCommandBuilder ();
+}
 
-                public override DbConnection CreateConnection ()
-                {
-                        return new SqliteConnection ();
-                }
-                
-                public override DbDataAdapter CreateDataAdapter ()
-                {
-                        return new SqliteDataAdapter ();
-                }
-                
-                public override DbDataSourceEnumerator CreateDataSourceEnumerator ()
-                {
-                        return new SqliteDataSourceEnumerator ();
-                }
-                
-                public override DbParameter CreateParameter ()
-                {
-                        return new SqliteParameter ();
-                }
+public override DbConnection CreateConnection ()
+{
+return new SqliteConnection ();
+}
 
-		public override DbConnectionStringBuilder CreateConnectionStringBuilder ()
-		{
-			return new SqliteConnectionStringBuilder ();
-		}
-	}
+public override DbDataAdapter CreateDataAdapter ()
+{
+return new SqliteDataAdapter ();
+}
+
+public override DbDataSourceEnumerator CreateDataSourceEnumerator ()
+{
+return new SqliteDataSourceEnumerator ();
+}
+
+public override DbParameter CreateParameter ()
+{
+return new SqliteParameter ();
+}
+
+public override DbConnectionStringBuilder CreateConnectionStringBuilder ()
+{
+return new SqliteConnectionStringBuilder ();
+}
+}
 
 }
 

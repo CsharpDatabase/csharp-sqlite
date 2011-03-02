@@ -16,50 +16,49 @@
 using System;
 namespace tcl.lang
 {
-	
-	/// <summary> This class implements the built-in "eval" command in Tcl.</summary>
-	
-	class EvalCmd : Command
-	{
-		/// <summary> This procedure is invoked to process the "eval" Tcl command.
-		/// See the user documentation for details on what it does.
-		/// 
-		/// </summary>
-		/// <param name="interp">the current interpreter.
-		/// </param>
-		/// <param name="argv">command arguments.
-		/// </param>
-		/// <exception cref=""> TclException if script causes error.
-		/// </exception>
-		
-		public TCL.CompletionCode cmdProc(Interp interp, TclObject[] argv)
-		{
-			if (argv.Length < 2)
-			{
-				throw new TclNumArgsException(interp, 1, argv, "arg ?arg ...?");
-			}
-			
-			try
-			{
-				if (argv.Length == 2)
-				{
-					interp.eval(argv[1], 0);
-				}
-				else
-				{
-					string s = Util.concat(1, argv.Length - 1, argv);
-					interp.eval(s, 0);
-				}
-			}
-			catch (TclException e)
-			{
-				if (e.getCompletionCode() == TCL.CompletionCode.ERROR)
-				{
-					interp.addErrorInfo("\n    (\"eval\" body line " + interp.errorLine + ")");
-				}
-				throw ;
-			}
+
+  /// <summary> This class implements the built-in "eval" command in Tcl.</summary>
+
+  class EvalCmd : Command
+  {
+    /// <summary> This procedure is invoked to process the "eval" Tcl command.
+    /// See the user documentation for details on what it does.
+    /// 
+    /// </summary>
+    /// <param name="interp">the current interpreter.
+    /// </param>
+    /// <param name="argv">command arguments.
+    /// </param>
+    /// <exception cref=""> TclException if script causes error.
+    /// </exception>
+
+    public TCL.CompletionCode cmdProc( Interp interp, TclObject[] argv )
+    {
+      if ( argv.Length < 2 )
+      {
+        throw new TclNumArgsException( interp, 1, argv, "arg ?arg ...?" );
+      }
+
+      try
+      {
+        if ( argv.Length == 2 )
+        {
+          interp.eval( argv[1], 0 );
+        } else
+        {
+          string s = Util.concat( 1, argv.Length - 1, argv );
+          interp.eval( s, 0 );
+        }
+      }
+      catch ( TclException e )
+      {
+        if ( e.getCompletionCode() == TCL.CompletionCode.ERROR )
+        {
+          interp.addErrorInfo( "\n    (\"eval\" body line " + interp.errorLine + ")" );
+        }
+        throw;
+      }
       return TCL.CompletionCode.RETURN;
     }
-	}
+  }
 }

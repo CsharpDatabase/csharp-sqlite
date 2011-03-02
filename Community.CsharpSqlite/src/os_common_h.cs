@@ -46,10 +46,14 @@ namespace Community.CsharpSqlite
 #if SQLITE_DEBUG || TRACE
     static bool sqlite3OsTrace = false;
     //#define OSTRACE(X)          if( sqlite3OSTrace ) sqlite3DebugPrintf X
-    static void OSTRACE(string X, params va_list[] ap) { if (sqlite3OsTrace) sqlite3DebugPrintf(X, ap); }
+    static void OSTRACE( string X, params va_list[] ap )
+    {
+      if ( sqlite3OsTrace )
+        sqlite3DebugPrintf( X, ap );
+    }
 #else
-    //#define OSTRACE(X)
-    static void OSTRACE( string X, params object[] ap) { }
+//#define OSTRACE(X)
+static void OSTRACE( string X, params object[] ap) { }
 #endif
 
     /*
@@ -89,7 +93,10 @@ static sqlite_u3264 g_elapsed;
     static int sqlite3_io_error_benign = 0;         /* True if errors are benign */
     //static int sqlite3_diskfull_pending = 0;
     //static int sqlite3_diskfull = 0;
-    static void SimulateIOErrorBenign( int X ) { sqlite3_io_error_benign = ( X ); }
+    static void SimulateIOErrorBenign( int X )
+    {
+      sqlite3_io_error_benign = ( X );
+    }
     //#define SimulateIOError(CODE)  \
     //  if( (sqlite3_io_error_persist && sqlite3_io_error_hit) \
     //       || sqlite3_io_error_pending-- == 1 )  \
@@ -108,10 +115,11 @@ static sqlite_u3264 g_elapsed;
     static void local_ioerr()
     {
 #if TRACE
-      IOTRACE( "IOERR\n" );
+IOTRACE( "IOERR\n" );
 #endif
       sqlite3_io_error_hit.iValue++;
-      if ( sqlite3_io_error_benign == 0 ) sqlite3_io_error_hardhit.iValue++;
+      if ( sqlite3_io_error_benign == 0 )
+        sqlite3_io_error_hardhit.iValue++;
     }
     //#define SimulateDiskfullError(CODE) \
     //   if( sqlite3_diskfull_pending ){ \
@@ -134,8 +142,7 @@ static sqlite_u3264 g_elapsed;
           sqlite3_diskfull.iValue = 1;
           sqlite3_io_error_hit.iValue = 1;
           return true;
-        }
-        else
+        } else
         {
           sqlite3_diskfull_pending.iValue--;
         }
@@ -143,9 +150,9 @@ static sqlite_u3264 g_elapsed;
       return false;
     }
 #else
-    static bool SimulateIOError() { return false; }
+static bool SimulateIOError() { return false; }
 //#define SimulateIOErrorBenign(X)
-    static void SimulateIOErrorBenign( int x ) { }
+static void SimulateIOErrorBenign( int x ) { }
 
 //#define SimulateIOError(A)
 //#define SimulateDiskfullError(A)

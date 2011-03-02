@@ -94,7 +94,7 @@ namespace tcl.lang
     // is 10^2^i.  Used to convert decimal
     // exponents into floating-point numbers.
 
-    internal static readonly double[]  powersOf10 = new double[] { 10.0, 100.0, 1.0e4, 1.0e8, 1.0e16, 1.0e32, 1.0e64, 1.0e128, 1.0e256 };
+    internal static readonly double[] powersOf10 = new double[] { 10.0, 100.0, 1.0e4, 1.0e8, 1.0e16, 1.0e32, 1.0e64, 1.0e128, 1.0e256 };
 
     // Default precision for converting floating-point values to strings.
 
@@ -165,13 +165,11 @@ namespace tcl.lang
             anyDigits = true;
             base_ = 8;
           }
-        }
-        else
+        } else
         {
           base_ = 10;
         }
-      }
-      else if ( base_ == 16 )
+      } else if ( base_ == 16 )
       {
         if ( i < len - 2 )
         {
@@ -218,12 +216,10 @@ namespace tcl.lang
       if ( !anyDigits )
       {
         return new StrtoulResult( 0, 0, TCL.INVALID_INTEGER );
-      }
-      else if ( overflowed )
+      } else if ( overflowed )
       {
         return new StrtoulResult( 0, i, TCL.INTEGER_RANGE );
-      }
-      else
+      } else
       {
         return new StrtoulResult( result, i, 0 );
       }
@@ -250,8 +246,7 @@ namespace tcl.lang
       {
         sign = true;
         i += 1;
-      }
-      else
+      } else
       {
         if ( c == '+' )
         {
@@ -270,15 +265,13 @@ namespace tcl.lang
             interp.setErrorCode( TclString.newInstance( intTooBigCode ) );
           }
           throw new TclException( interp, "integer value too large to represent" );
-        }
-        else
+        } else
         {
           throw new TclException( interp, "expected integer but got \"" + s + "\"" + checkBadOctal( interp, s ) );
         }
-      }
-      else if ( res.index < len )
+      } else if ( res.index < len )
       {
-        for ( i = res.index ; i < len ; i++ )
+        for ( i = res.index; i < len; i++ )
         {
           if ( !System.Char.IsWhiteSpace( s[i] ) )
           {
@@ -290,8 +283,7 @@ namespace tcl.lang
       if ( sign )
       {
         return (int)( -res.value );
-      }
-      else
+      } else
       {
         return (int)( res.value );
       }
@@ -318,8 +310,7 @@ namespace tcl.lang
       {
         sign = true;
         i += 1;
-      }
-      else
+      } else
       {
         if ( c == '+' )
         {
@@ -338,15 +329,13 @@ namespace tcl.lang
             interp.setErrorCode( TclString.newInstance( intTooBigCode ) );
           }
           throw new TclException( interp, "integer value too large to represent" );
-        }
-        else
+        } else
         {
           throw new TclException( interp, "expected integer but got \"" + s + "\"" + checkBadOctal( interp, s ) );
         }
-      }
-      else if ( res.index < len )
+      } else if ( res.index < len )
       {
-        for ( i = res.index ; i < len ; i++ )
+        for ( i = res.index; i < len; i++ )
         {
           if ( !System.Char.IsWhiteSpace( s[i] ) )
           {
@@ -358,8 +347,7 @@ namespace tcl.lang
       if ( sign )
       {
         return (long)( -res.value );
-      }
-      else
+      } else
       {
         return (long)( res.value );
       }
@@ -396,15 +384,13 @@ namespace tcl.lang
       if ( length <= 3 )
       {
         return endValue;
-      }
-      else if ( bytes[3] == '-' )
+      } else if ( bytes[3] == '-' )
       {
         // This is our limited string expression evaluator
 
         offset = Util.getInt( interp, bytes.Substring( 3 ) );
         return endValue + offset;
-      }
-      else
+      } else
       {
         throw new TclException( interp, "bad index \"" + bytes + "\": must be integer or end?-integer?" + checkBadOctal( interp, bytes.Substring( 3 ) ) );
       }
@@ -473,16 +459,15 @@ namespace tcl.lang
       c = s[i];
       if ( c == '-' )
       {
-//        sign = true;
+        //        sign = true;
         i += 1;
-      }
-      else
+      } else
       {
         if ( c == '+' )
         {
           i += 1;
         }
-//        sign = false;
+        //        sign = false;
       }
 
       // Count the number of digits in the mantissa (including the decimal
@@ -490,7 +475,7 @@ namespace tcl.lang
 
       bool maybeZero = true;
       decPt = -1;
-      for ( mantSize = 0 ; ; mantSize += 1 )
+      for ( mantSize = 0; ; mantSize += 1 )
       {
         c = CharAt( s, i, len );
         if ( !System.Char.IsDigit( c ) )
@@ -516,8 +501,7 @@ namespace tcl.lang
         if ( CharAt( s, i, len ) == '-' )
         {
           i += 1;
-        }
-        else if ( CharAt( s, i, len ) == '+' )
+        } else if ( CharAt( s, i, len ) == '+' )
         {
           i += 1;
         }
@@ -561,8 +545,7 @@ namespace tcl.lang
       if ( index >= 0 && index < len )
       {
         return s[index];
-      }
-      else
+      } else
       {
         return '\x0000';
       }
@@ -589,8 +572,7 @@ namespace tcl.lang
       {
         sign = true;
         i += 1;
-      }
-      else
+      } else
       {
         if ( c == '+' )
         {
@@ -609,15 +591,13 @@ namespace tcl.lang
             interp.setErrorCode( TclString.newInstance( fpTooBigCode ) );
           }
           throw new TclException( interp, "floating-point value too large to represent" );
-        }
-        else
+        } else
         {
           throw new TclException( interp, "expected floating-point number but got \"" + s + "\"" );
         }
-      }
-      else if ( res.index < len )
+      } else if ( res.index < len )
       {
-        for ( i = res.index ; i < len ; i++ )
+        for ( i = res.index; i < len; i++ )
         {
           if ( !System.Char.IsWhiteSpace( s[i] ) )
           {
@@ -629,8 +609,7 @@ namespace tcl.lang
       if ( sign )
       {
         return (double)( -res.value );
-      }
-      else
+      } else
       {
         return (double)( res.value );
       }
@@ -650,7 +629,7 @@ namespace tcl.lang
       }
 
       sbuf = new StringBuilder();
-      for ( int i = from ; i <= to ; i++ )
+      for ( int i = from; i <= to; i++ )
       {
 
         string str = TrimLeft( argv[i].ToString() );
@@ -770,15 +749,14 @@ namespace tcl.lang
               {
                 break;
               }
-            }
-            else if ( ch1 == strch )
+            } else if ( ch1 == strch )
             {
               break;
             }
             pIndex++;
           }
 
-          for ( pIndex++ ; ( ( pIndex != patLen ) && ( patArr[pIndex] != ']' ) ) ; pIndex++ )
+          for ( pIndex++; ( ( pIndex != patLen ) && ( patArr[pIndex] != ']' ) ); pIndex++ )
           {
           }
           if ( pIndex == patLen )
@@ -847,7 +825,7 @@ namespace tcl.lang
       int openBraces = 0;
       bool inQuotes = false;
 
-      for ( ; i < len && System.Char.IsWhiteSpace( s[i] ) ; i++ )
+      for ( ; i < len && System.Char.IsWhiteSpace( s[i] ); i++ )
       {
         ;
       }
@@ -860,8 +838,7 @@ namespace tcl.lang
       {
         openBraces = 1;
         i++;
-      }
-      else if ( c == '"' )
+      } else if ( c == '"' )
       {
         inQuotes = true;
         i++;
@@ -875,8 +852,7 @@ namespace tcl.lang
           if ( openBraces != 0 )
           {
             throw new TclException( interp, "unmatched open brace in list" );
-          }
-          else if ( inQuotes )
+          } else if ( inQuotes )
           {
             throw new TclException( interp, "unmatched open quote in list" );
           }
@@ -908,11 +884,10 @@ namespace tcl.lang
               if ( i == len - 1 || System.Char.IsWhiteSpace( s[i + 1] ) )
               {
                 return new FindElemResult( i + 1, sbuf.ToString() );
-              }
-              else
+              } else
               {
                 int errEnd;
-                for ( errEnd = i + 1 ; errEnd < len ; errEnd++ )
+                for ( errEnd = i + 1; errEnd < len; errEnd++ )
                 {
                   if ( System.Char.IsWhiteSpace( s[errEnd] ) )
                   {
@@ -921,8 +896,7 @@ namespace tcl.lang
                 }
                 throw new TclException( interp, "list element in braces followed by \"" + s.Substring( i + 1, ( errEnd ) - ( i + 1 ) ) + "\" instead of space" );
               }
-            }
-            else if ( openBraces != 0 )
+            } else if ( openBraces != 0 )
             {
               openBraces--;
             }
@@ -941,8 +915,7 @@ namespace tcl.lang
               // Quotes are ignored in brace-quoted stuff
 
               sbuf.Append( s.Substring( i, ( bs.nextIndex ) - ( i ) ) );
-            }
-            else
+            } else
             {
               sbuf.Append( bs.c );
             }
@@ -962,8 +935,7 @@ namespace tcl.lang
             if ( ( openBraces == 0 ) && !inQuotes )
             {
               return new FindElemResult( i + 1, sbuf.ToString() );
-            }
-            else
+            } else
             {
               sbuf.Append( c );
               i++;
@@ -979,11 +951,10 @@ namespace tcl.lang
               if ( i == len - 1 || System.Char.IsWhiteSpace( s[i + 1] ) )
               {
                 return new FindElemResult( i + 1, sbuf.ToString() );
-              }
-              else
+              } else
               {
                 int errEnd;
-                for ( errEnd = i + 1 ; errEnd < len ; errEnd++ )
+                for ( errEnd = i + 1; errEnd < len; errEnd++ )
                 {
                   if ( System.Char.IsWhiteSpace( s[errEnd] ) )
                   {
@@ -992,8 +963,7 @@ namespace tcl.lang
                 }
                 throw new TclException( interp, "list element in quotes followed by \"" + s.Substring( i + 1, ( errEnd ) - ( i + 1 ) ) + "\" instead of space" );
               }
-            }
-            else
+            } else
             {
               sbuf.Append( c );
               i++;
@@ -1072,7 +1042,7 @@ namespace tcl.lang
       {
         flags |= USE_BRACES;
       }
-      for ( ; i < len ; i++ )
+      for ( ; i < len; i++ )
       {
         System.Diagnostics.Debug.WriteLine( "getting char at index " + i );
         System.Diagnostics.Debug.WriteLine( "char is '" + inString[i] + "'" );
@@ -1110,8 +1080,7 @@ namespace tcl.lang
             if ( ( i >= len - 1 ) || ( inString[i + 1] == '\n' ) )
             {
               flags = TCL_DONT_USE_BRACES | BRACES_UNMATCHED;
-            }
-            else
+            } else
             {
               BackSlashResult bs = Interp.backslash( inString, i, len );
 
@@ -1151,13 +1120,12 @@ namespace tcl.lang
       if ( ( ( flags & USE_BRACES ) != 0 ) && ( ( flags & TCL_DONT_USE_BRACES ) == 0 ) )
       {
         sbuf.Append( '{' );
-        for ( i = 0 ; i < len ; i++ )
+        for ( i = 0; i < len; i++ )
         {
           sbuf.Append( s[i] );
         }
         sbuf.Append( '}' );
-      }
-      else
+      } else
       {
         c = s[0];
         if ( c == '{' )
@@ -1173,7 +1141,7 @@ namespace tcl.lang
           flags |= BRACES_UNMATCHED;
         }
 
-        for ( ; i < len ; i++ )
+        for ( ; i < len; i++ )
         {
           c = s[i];
           switch ( c )
@@ -1244,11 +1212,11 @@ namespace tcl.lang
       int patLen = pattern.Length;
       bool done = false;
 
-      for ( i = 0 ; i < strLen ; i++ )
+      for ( i = 0; i < strLen; i++ )
       {
         c = str[i];
         done = true;
-        for ( j = 0 ; j < patLen ; j++ )
+        for ( j = 0; j < patLen; j++ )
         {
           if ( c == pattern[j] )
           {
@@ -1303,32 +1271,25 @@ namespace tcl.lang
         if ( "yes".StartsWith( s ) )
         {
           return true;
-        }
-        else if ( "no".StartsWith( s ) )
+        } else if ( "no".StartsWith( s ) )
         {
           return false;
-        }
-        else if ( "true".StartsWith( s ) )
+        } else if ( "true".StartsWith( s ) )
         {
           return true;
-        }
-        else if ( "false".StartsWith( s ) )
+        } else if ( "false".StartsWith( s ) )
         {
           return false;
-        }
-        else if ( "on".StartsWith( s ) && s.Length > 1 )
+        } else if ( "on".StartsWith( s ) && s.Length > 1 )
         {
           return true;
-        }
-        else if ( "off".StartsWith( s ) && s.Length > 1 )
+        } else if ( "off".StartsWith( s ) && s.Length > 1 )
         {
           return false;
-        }
-        else if ( s.Equals( "0" ) )
+        } else if ( s.Equals( "0" ) )
         {
           return false;
-        }
-        else if ( s.Equals( "1" ) )
+        } else if ( s.Equals( "1" ) )
         {
           return true;
         }
@@ -1351,9 +1312,9 @@ namespace tcl.lang
     internal static string printDouble( double number )
     // The number to format into a string.
     {
-      string s = FormatCmd.toString( number, precision, 10 ).Replace("E","e");
+      string s = FormatCmd.toString( number, precision, 10 ).Replace( "E", "e" );
       int length = s.Length;
-      for ( int i = 0 ; i < length ; i++ )
+      for ( int i = 0; i < length; i++ )
       {
         if ( ( s[i] == '.' ) || System.Char.IsLetter( s[i] ) )
         {
@@ -1367,7 +1328,7 @@ namespace tcl.lang
     {
       try
       {
-        
+
         // ATK return System_Renamed.getProperty(propName);
         return System.Environment.GetEnvironmentVariable( "os.name" );
       }
@@ -1450,8 +1411,7 @@ namespace tcl.lang
       {
 
         value = tobj.ToString();
-      }
-      else
+      } else
       {
         value = "";
       }

@@ -33,16 +33,17 @@ using System.Data.Common;
 
 namespace Community.CsharpSqlite.SQLiteClient
 {
-	/// <summary>
-	/// Provides data for the <see cref="SqliteDataAdapter.RowUpdating"/> event. 
-	/// </summary>
-	public sealed class SqliteRowUpdatingEventArgs : RowUpdatingEventArgs
-	{
-		/// <summary>
-		/// Initializes a new instance of the <see cref="SqliteRowUpdatingEventArgs"/> class.
-		/// </summary>
-		public SqliteRowUpdatingEventArgs(DataRow row, IDbCommand command, StatementType statementType, DataTableMapping tableMapping) : base(row, command, statementType, tableMapping)
-		{
-		}
-	}
+  /// <summary>
+  /// Provides data for the <see cref="SqliteDataAdapter.RowUpdating"/> event. 
+  /// </summary>
+  public sealed class SqliteRowUpdatingEventArgs : RowUpdatingEventArgs
+  {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SqliteRowUpdatingEventArgs"/> class.
+    /// </summary>
+    public SqliteRowUpdatingEventArgs( DataRow row, IDbCommand command, StatementType statementType, DataTableMapping tableMapping )
+      : base( row, command, statementType, tableMapping )
+    {
+    }
+  }
 }

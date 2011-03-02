@@ -56,7 +56,9 @@ namespace Community.CsharpSqlite
 //# define wsdStat x[0]
 #else
     //# define wsdStatInit
-    static void wsdStatInit() { }
+    static void wsdStatInit()
+    {
+    }
     //# define wsdStat sqlite3Stat
     static sqlite3StatType wsdStat = sqlite3Stat;
 #endif

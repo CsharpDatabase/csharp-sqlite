@@ -102,8 +102,7 @@ namespace Community.CsharpSqlite
         pHead = pEntry.count != 0 ? pEntry.chain : null;
         pEntry.count++;
         pEntry.chain = pNew;
-      }
-      else
+      } else
       {
         pHead = null;
       }
@@ -111,14 +110,21 @@ namespace Community.CsharpSqlite
       {
         pNew.next = pHead;
         pNew.prev = pHead.prev;
-        if ( pHead.prev != null ) { pHead.prev.next = pNew; }
-        else { pH.first = pNew; }
+        if ( pHead.prev != null )
+        {
+          pHead.prev.next = pNew;
+        } else
+        {
+          pH.first = pNew;
+        }
         pHead.prev = pNew;
-      }
-      else
+      } else
       {
         pNew.next = pH.first;
-        if ( pH.first != null ) { pH.first.prev = pNew; }
+        if ( pH.first != null )
+        {
+          pH.first.prev = pNew;
+        }
         pNew.prev = null;
         pH.first = pNew;
       }
@@ -150,10 +156,12 @@ if( new_size==pH->htsize ) return false;
 */
       sqlite3BeginBenignMalloc();
       new_ht = new _ht[new_size]; //(struct _ht *)sqlite3Malloc( new_size*sizeof(struct _ht) );
-      for ( int i = 0; i < new_size; i++ ) new_ht[i] = new _ht();
+      for ( int i = 0; i < new_size; i++ )
+        new_ht[i] = new _ht();
       sqlite3EndBenignMalloc();
 
-      if ( new_ht == null ) return false;
+      if ( new_ht == null )
+        return false;
       //sqlite3_free( ref  pH.ht );
       pH.ht = new_ht;
       // pH.htsize = new_size = sqlite3MallocSize(new_ht)/sizeof(struct _ht);
@@ -188,8 +196,7 @@ if( new_size==pH->htsize ) return false;
         _ht pEntry = pH.ht[h];
         elem = pEntry.chain;
         count = (int)pEntry.count;
-      }
-      else
+      } else
       {
         elem = pH.first;
         count = (int)pH.count;
@@ -218,8 +225,7 @@ if( new_size==pH->htsize ) return false;
       if ( elem.prev != null )
       {
         elem.prev.next = elem.next;
-      }
-      else
+      } else
       {
         pH.first = elem.next;
       }
@@ -251,19 +257,18 @@ if( new_size==pH->htsize ) return false;
     ** that matches pKey,nKey.  Return the data for this element if it is
     ** found, or NULL if there is no match.
     */
-    static T sqlite3HashFind <T>( Hash pH, string pKey, int nKey, T nullType ) where T: class
+    static T sqlite3HashFind<T>( Hash pH, string pKey, int nKey, T nullType ) where T : class
     {
       HashElem elem;  /* The element that matches key */
       u32 h;          /* A hash on key */
-      
+
       Debug.Assert( pH != null );
       Debug.Assert( pKey != null );
       Debug.Assert( nKey >= 0 );
       if ( pH.ht != null )
       {
         h = strHash( pKey, nKey ) % pH.htsize;
-      }
-      else
+      } else
       {
         h = 0;
       }
@@ -299,8 +304,7 @@ if( new_size==pH->htsize ) return false;
       if ( pH.htsize != 0 )
       {
         h = strHash( pKey, nKey ) % pH.htsize;
-      }
-      else
+      } else
       {
         h = 0;
       }
@@ -311,8 +315,7 @@ if( new_size==pH->htsize ) return false;
         if ( data == null )
         {
           removeElementGivenHash( pH, ref elem, h );
-        }
-        else
+        } else
         {
           elem.data = data;
           elem.pKey = pKey;
@@ -323,7 +326,8 @@ if( new_size==pH->htsize ) return false;
       if ( data == null )
         return data;
       new_elem = new HashElem();//(HashElem*)sqlite3Malloc( sizeof(HashElem) );
-      if ( new_elem == null ) return data;
+      if ( new_elem == null )
+        return data;
       new_elem.pKey = pKey;
       new_elem.nKey = nKey;
       new_elem.data = data;
@@ -340,8 +344,7 @@ if( new_size==pH->htsize ) return false;
       {
         insertElement( pH, pH.ht[h], new_elem );
 
-      }
-      else
+      } else
       {
         insertElement( pH, null, new_elem );
       }

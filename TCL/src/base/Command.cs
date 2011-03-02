@@ -16,14 +16,14 @@
 using System;
 namespace tcl.lang
 {
-	
-	/// <summary> The Command interface specifies the method that a new Tcl command
-	/// must implement.  See the createCommand method of the Interp class
-	/// to see how to add a new command to an interperter.
-	/// </summary>
-	
-	public interface Command
-		{
-      TCL.CompletionCode cmdProc( Interp interp, TclObject[] objv ); // Tcl exceptions are thown for Tcl errors.
-		}
+
+  /// <summary> The Command interface specifies the method that a new Tcl command
+  /// must implement.  See the createCommand method of the Interp class
+  /// to see how to add a new command to an interperter.
+  /// </summary>
+
+  public interface Command
+  {
+    TCL.CompletionCode cmdProc( Interp interp, TclObject[] objv ); // Tcl exceptions are thown for Tcl errors.
+  }
 }

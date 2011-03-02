@@ -37,7 +37,7 @@ namespace Community.CsharpSqlite
     *************************************************************************
     */
 #if SQLITE_ENABLE_ATOMIC_WRITE
-    //#include "sqliteInt.h"
+//#include "sqliteInt.h"
 
 /*
 ** A JournalFile object is a subclass of sqlite3_file used by

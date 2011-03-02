@@ -66,13 +66,20 @@ public class Benchmark
     int i;
 
     string databaseName = "Benchmark_cs-SQLite.sqlite";
-    if ( File.Exists( databaseName ) ) File.Delete( databaseName );
+    if ( File.Exists( databaseName ) )
+      File.Delete( databaseName );
 
     db = new SQLiteDatabase( databaseName );
-    for ( i = 0; i < PRAGMA_Commands.Length; i++ ) { db.ExecuteNonQuery( PRAGMA_Commands[i] ); }
+    for ( i = 0; i < PRAGMA_Commands.Length; i++ )
+    {
+      db.ExecuteNonQuery( PRAGMA_Commands[i] );
+    }
 
     db.ExecuteNonQuery( "BEGIN EXCLUSIVE" );
-    for ( i = 0; i < CREATE_Commands.Length; i++ ) { db.ExecuteNonQuery( CREATE_Commands[i] ); }
+    for ( i = 0; i < CREATE_Commands.Length; i++ )
+    {
+      db.ExecuteNonQuery( CREATE_Commands[i] );
+    }
     stmt = new SQLiteVdbe( db, INSERT_Command );
     long start = DateTime.Now.Ticks;
     long key = 1999;
@@ -168,7 +175,8 @@ Sqlite3.sqlite3_shutdown();
   {
     int i;
     string databaseName = "Benchmark_SQLite.sqlite";
-    if ( File.Exists( databaseName ) ) File.Delete( databaseName );
+    if ( File.Exists( databaseName ) )
+      File.Delete( databaseName );
 
     SQLiteConnectionStringBuilder constring = new SQLiteConnectionStringBuilder();
     constring.PageSize = 1024;

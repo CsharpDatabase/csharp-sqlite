@@ -17,43 +17,43 @@
 using System;
 namespace tcl.lang
 {
-	
-	/// <summary> This class implements the built-in "rename" command in Tcl.</summary>
-	
-	class RenameCmd : Command
-	{
-		/// <summary>----------------------------------------------------------------------
-		/// 
-		/// Tcl_RenameObjCmd -> RenameCmd.cmdProc
-		/// 
-		/// This procedure is invoked to process the "rename" Tcl command.
-		/// See the user documentation for details on what it does.
-		/// 
-		/// Results:
-		/// A standard Tcl object result.
-		/// 
-		/// Side effects:
-		/// See the user documentation.
-		/// 
-		/// ----------------------------------------------------------------------
-		/// </summary>
-		
-		public TCL.CompletionCode cmdProc(Interp interp, TclObject[] objv)
-		{
-			string oldName, newName;
-			
-			if (objv.Length != 3)
-			{
-				throw new TclNumArgsException(interp, 1, objv, "oldName newName");
-			}
-			
-			
-			oldName = objv[1].ToString();
-			
-			newName = objv[2].ToString();
-			
-			interp.renameCommand(oldName, newName);
+
+  /// <summary> This class implements the built-in "rename" command in Tcl.</summary>
+
+  class RenameCmd : Command
+  {
+    /// <summary>----------------------------------------------------------------------
+    /// 
+    /// Tcl_RenameObjCmd -> RenameCmd.cmdProc
+    /// 
+    /// This procedure is invoked to process the "rename" Tcl command.
+    /// See the user documentation for details on what it does.
+    /// 
+    /// Results:
+    /// A standard Tcl object result.
+    /// 
+    /// Side effects:
+    /// See the user documentation.
+    /// 
+    /// ----------------------------------------------------------------------
+    /// </summary>
+
+    public TCL.CompletionCode cmdProc( Interp interp, TclObject[] objv )
+    {
+      string oldName, newName;
+
+      if ( objv.Length != 3 )
+      {
+        throw new TclNumArgsException( interp, 1, objv, "oldName newName" );
+      }
+
+
+      oldName = objv[1].ToString();
+
+      newName = objv[2].ToString();
+
+      interp.renameCommand( oldName, newName );
       return TCL.CompletionCode.RETURN;
-		}
-	}
+    }
+  }
 }

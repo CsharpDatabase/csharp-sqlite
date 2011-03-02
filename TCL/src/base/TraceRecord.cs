@@ -18,23 +18,23 @@
 using System;
 namespace tcl.lang
 {
-	
-	/// <summary> This class is used internally by CallFrame to store one variable
-	/// trace.
-	/// </summary>
-	
-	class TraceRecord
-	{
-		
-		/// <summary> Stores info about the conditions under which this trace should be
-		/// triggered. Should be a combination of TCL.VarFlag.TRACE_READS, TCL.VarFlag.TRACE_WRITES
-		/// or TCL.VarFlag.TRACE_UNSETS.
-		/// </summary>
-		
-		internal TCL.VarFlag flags;
-		
-		/// <summary> Stores the trace procedure to invoke when a trace is fired.</summary>
-		
-		internal VarTrace trace;
-	} // end TraceRecord
+
+  /// <summary> This class is used internally by CallFrame to store one variable
+  /// trace.
+  /// </summary>
+
+  class TraceRecord
+  {
+
+    /// <summary> Stores info about the conditions under which this trace should be
+    /// triggered. Should be a combination of TCL.VarFlag.TRACE_READS, TCL.VarFlag.TRACE_WRITES
+    /// or TCL.VarFlag.TRACE_UNSETS.
+    /// </summary>
+
+    internal TCL.VarFlag flags;
+
+    /// <summary> Stores the trace procedure to invoke when a trace is fired.</summary>
+
+    internal VarTrace trace;
+  } // end TraceRecord
 }

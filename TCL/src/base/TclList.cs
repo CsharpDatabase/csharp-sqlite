@@ -49,7 +49,7 @@ namespace tcl.lang
     public void dispose()
     {
       int size = vector.Count;
-      for ( int i = 0 ; i < size ; i++ )
+      for ( int i = 0; i < size; i++ )
       {
         ( (TclObject)vector[i] ).release();
       }
@@ -67,7 +67,7 @@ namespace tcl.lang
       int size = vector.Count;
       var newList = new TclList( size );
 
-      for ( int i = 0 ; i < size ; i++ )
+      for ( int i = 0; i < size; i++ )
       {
         TclObject tobj = (TclObject)vector[i];
         tobj.preserve();
@@ -91,15 +91,14 @@ namespace tcl.lang
 
       try
       {
-        for ( int i = 0 ; i < size ; i++ )
+        for ( int i = 0; i < size; i++ )
         {
           Object elm = vector[i];
           if ( elm != null )
           {
 
             Util.appendElement( null, sbuf, elm.ToString() );
-          }
-          else
+          } else
           {
             Util.appendElement( null, sbuf, "" );
           }
@@ -169,8 +168,7 @@ namespace tcl.lang
         if ( res == null )
         {
           break;
-        }
-        else
+        } else
         {
           TclObject tobj = TclString.newInstance( res.elem );
           tobj.preserve();
@@ -205,9 +203,10 @@ namespace tcl.lang
 
       TclList tlist = (TclList)tobj.InternalRep;
 
-      if (!String.IsNullOrEmpty(elemObj.stringRep) && elemObj.stringRep.StartsWith("{") && elemObj.stringRep.EndsWith("}")) elemObj = TclString.newInstance(elemObj.stringRep.Substring(1, elemObj.stringRep.Length - 2));
+      if ( !String.IsNullOrEmpty( elemObj.stringRep ) && elemObj.stringRep.StartsWith( "{" ) && elemObj.stringRep.EndsWith( "}" ) )
+        elemObj = TclString.newInstance( elemObj.stringRep.Substring( 1, elemObj.stringRep.Length - 2 ) );
       elemObj.preserve();
-      tlist.vector.Add(elemObj);
+      tlist.vector.Add( elemObj );
     }
 
     /// <summary> Queries the length of the list. If tobj is not a list object,
@@ -254,7 +253,7 @@ namespace tcl.lang
 
       int size = tlist.vector.Count;
       var objArray = new TclObject[size];
-      for ( int i = 0 ; i < size ; i++ )
+      for ( int i = 0; i < size; i++ )
       {
         objArray[i] = (TclObject)tlist.vector[i];
       }
@@ -286,8 +285,7 @@ namespace tcl.lang
       if ( index < 0 || index >= tlist.vector.Count )
       {
         return null;
-      }
-      else
+      } else
       {
         return (TclObject)tlist.vector[index];
       }
@@ -367,8 +365,7 @@ namespace tcl.lang
         // Append to the end of the list. There is no need for deleting
         // elements.
         index = size;
-      }
-      else
+      } else
       {
         if ( index < 0 )
         {
@@ -378,14 +375,14 @@ namespace tcl.lang
         {
           count = size - index;
         }
-        for ( i = 0 ; i < count ; i++ )
+        for ( i = 0; i < count; i++ )
         {
           TclObject obj = (TclObject)tlist.vector[index];
           obj.release();
           tlist.vector.RemoveAt( index );
         }
       }
-      for ( i = from ; i <= to ; i++ )
+      for ( i = from; i <= to; i++ )
       {
         elements[i].preserve();
         tlist.vector.Insert( index++, elements[i] );
@@ -428,7 +425,7 @@ namespace tcl.lang
       }
 
       var objArray = new TclObject[size];
-      for ( int i = 0 ; i < size ; i++ )
+      for ( int i = 0; i < size; i++ )
       {
         objArray[i] = (TclObject)tlist.vector[i];
       }
@@ -436,14 +433,14 @@ namespace tcl.lang
       var s = new QSort();
       int newsize = s.sort( interp, objArray, sortMode, sortIndex, sortIncreasing, command, unique );
 
-      for ( int i = 0 ; i < size   ; i++ )
+      for ( int i = 0; i < size; i++ )
       {
         if ( i < newsize )
         {
           tlist.vector[i] = objArray[i];
           objArray[i] = null;
-        }
-        else tlist.vector.RemoveAt( newsize  );
+        } else
+          tlist.vector.RemoveAt( newsize );
       }
     }
   }

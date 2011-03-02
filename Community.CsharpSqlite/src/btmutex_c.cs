@@ -20,7 +20,7 @@ namespace Community.CsharpSqlite
     ** This code really belongs in btree.c.  But btree.c is getting too
     ** big and we want to break it down some.  This packaged seemed like
     ** a good breakout.
-     *************************************************************************
+    *************************************************************************
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
