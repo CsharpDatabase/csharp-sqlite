@@ -231,7 +231,8 @@ namespace Community.CsharpSqlite
       if ( memfault.enable != 0 )
       {
         return memfault.iCountdown;
-      } else
+      }
+      else
       {
         return -1;
       }
@@ -288,7 +289,8 @@ namespace Community.CsharpSqlite
         sqlite3_test_control( SQLITE_TESTCTRL_BENIGN_MALLOC_HOOKS,
         (void_function)faultsimBeginBenign, (void_function)faultsimEndBenign
         );
-      } else
+      }
+      else
       {
         //sqlite3_mem_methods m;
         Debug.Assert( memfault.m.xMalloc != null );
@@ -737,23 +739,27 @@ nMalloc = sqlite3MemdebugMallocCount();
           if ( ii == ( objc - 1 ) )
           {
             zErr = "option requires an argument: ";
-          } else
+          }
+          else
           {
             if ( TCL.TCL_OK != TCL.Tcl_GetIntFromObj( interp, objv[ii + 1], ref  nRepeat ) )
             {
               return TCL.TCL_ERROR;
             }
           }
-        } else if ( nOption > 1 && zOption == "-benigncnt" )
+        }
+        else if ( nOption > 1 && zOption == "-benigncnt" )
         {
           if ( ii == ( objc - 1 ) )
           {
             zErr = "option requires an argument: ";
-          } else
+          }
+          else
           {
             pBenignCnt = objv[ii + 1];
           }
-        } else
+        }
+        else
         {
           zErr = "unknown option: ";
         }
@@ -1010,7 +1016,8 @@ sqlite3MemdebugSettitle(zTitle);
       {
         buf = null;
         rc = sqlite3_config( SQLITE_CONFIG_SCRATCH, 0, 0, 0 );
-      } else
+      }
+      else
       {
         buf = new byte[2][];//// malloc( sz * N + 1 );
         rc = sqlite3_config( SQLITE_CONFIG_SCRATCH, buf, sz, N );
@@ -1057,7 +1064,8 @@ sqlite3MemdebugSettitle(zTitle);
       {
         buf = null;
         rc = sqlite3_config( SQLITE_CONFIG_PAGECACHE, 0, 0, 0 );
-      } else
+      }
+      else
       {
         buf = new MemPage();// new byte[sz * N]; //malloc( sz * N );
         rc = sqlite3_config( SQLITE_CONFIG_PAGECACHE, buf, sz, N );
@@ -1212,10 +1220,12 @@ sqlite3MemdebugSettitle(zTitle);
       if ( bufid == 0 )
       {
         rc = sqlite3_db_config( db, SQLITE_DBCONFIG_LOOKASIDE, null, sz, cnt );
-      } else if ( bufid >= 1 && bufid <= 2 && sz * cnt <= azBuf[0].Length )
+      }
+      else if ( bufid >= 1 && bufid <= 2 && sz * cnt <= azBuf[0].Length )
       {
         rc = sqlite3_db_config( db, SQLITE_DBCONFIG_LOOKASIDE, azBuf[bufid], sz, cnt );
-      } else
+      }
+      else
       {
         TCL.Tcl_AppendResult( interp, "illegal arguments - see documentation" );
         return TCL.TCL_ERROR;
@@ -1352,11 +1362,7 @@ sqlite3MemdebugSettitle(zTitle);
     {
       public string zName;
       public int op;
-      public _aOp( string zName, int op )
-      {
-        this.zName = zName;
-        this.op = op;
-      }
+      public _aOp( string zName, int op ) { this.zName = zName; this.op = op; }
     }
 
     static int test_status(
@@ -1526,7 +1532,8 @@ new _aOp(  "LOOKASIDE_MISS_FULL", SQLITE_DBSTATUS_LOOKASIDE_MISS_FULL )
       {
         TCL.Tcl_WrongNumArgs( interp, 1, objv, "?INTEGER?" );
         return TCL.TCL_ERROR;
-      } else if ( objc == 2 )
+      }
+      else if ( objc == 2 )
       {
         int iNew = 0;
         if ( TCL.Tcl_GetIntFromObj( interp, objv[1], ref iNew ) != 0 )

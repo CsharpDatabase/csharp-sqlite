@@ -1,10 +1,5 @@
 /*
 *************************************************************************
-**  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
-**  C#-SQLite is an independent reimplementation of the SQLite software library
-**
-**  SQLITE_SOURCE_ID: 2010-12-07 20:14:09 a586a4deeb25330037a49df295b36aaf624d0f45
-**
 **  $Header$
 *************************************************************************
 */
@@ -30,45 +25,33 @@ namespace Community.CsharpSqlite
   {
 
     static int atoi( byte[] inStr )
-    {
-      return atoi( Encoding.UTF8.GetString( inStr, 0, inStr.Length ) );
-    }
+    { return atoi(Encoding.UTF8.GetString(inStr,0,inStr.Length)); }
 
     static int atoi( string inStr )
     {
       int i;
       for ( i = 0; i < inStr.Length; i++ )
       {
-        if ( !sqlite3Isdigit( inStr[i] ) && inStr[i] != '-' )
-          break;
+        if ( !sqlite3Isdigit( inStr[i] ) && inStr[i] != '-' ) break;
       }
       int result = 0;
 
       return ( Int32.TryParse( inStr.Substring( 0, i ), out result ) ? result : 0 );
     }
 
-    static void fprintf( TextWriter tw, string zFormat, params object[] ap )
-    {
-      tw.Write( sqlite3_mprintf( zFormat, ap ) );
-    }
-    static void printf( string zFormat, params object[] ap )
-    {
-      Console.Out.Write( sqlite3_mprintf( zFormat, ap ) );
-    }
+    static void fprintf( TextWriter tw, string zFormat, params object[] ap ) { tw.Write( sqlite3_mprintf( zFormat, ap ) ); }
+    static void printf( string zFormat, params object[] ap ) { Console.Out.Write( sqlite3_mprintf( zFormat, ap ) ); }
 
 
     //Byte Buffer Testing
 
     static int memcmp( byte[] bA, byte[] bB, int Limit )
     {
-      if ( bA.Length < Limit )
-        return ( bA.Length < bB.Length ) ? -1 : +1;
-      if ( bB.Length < Limit )
-        return +1;
+      if ( bA.Length < Limit ) return ( bA.Length < bB.Length ) ? -1 : +1;
+      if ( bB.Length < Limit ) return +1;
       for ( int i = 0; i < Limit; i++ )
       {
-        if ( bA[i] != bB[i] )
-          return ( bA[i] < bB[i] ) ? -1 : 1;
+        if ( bA[i] != bB[i] ) return ( bA[i] < bB[i] ) ? -1 : 1;
       }
       return 0;
     }
@@ -76,14 +59,11 @@ namespace Community.CsharpSqlite
     //Byte Buffer  & String Testing
     static int memcmp( byte[] bA, string B, int Limit )
     {
-      if ( bA.Length < Limit )
-        return ( bA.Length < B.Length ) ? -1 : +1;
-      if ( B.Length < Limit )
-        return +1;
+      if ( bA.Length < Limit ) return ( bA.Length < B.Length ) ? -1 : +1;
+      if ( B.Length < Limit ) return +1;
       for ( int i = 0; i < Limit; i++ )
       {
-        if ( bA[i] != B[i] )
-          return ( bA[i] < B[i] ) ? -1 : 1;
+        if ( bA[i] != B[i] ) return ( bA[i] < B[i] ) ? -1 : 1;
       }
       return 0;
     }
@@ -91,14 +71,11 @@ namespace Community.CsharpSqlite
     //Byte Buffer  & String Testing
     static int memcmp( string A, byte[] bB, int Limit )
     {
-      if ( A.Length < Limit )
-        return ( A.Length < bB.Length ) ? -1 : +1;
-      if ( bB.Length < Limit )
-        return +1;
+      if ( A.Length < Limit ) return ( A.Length < bB.Length ) ? -1 : +1;
+      if ( bB.Length < Limit ) return +1;
       for ( int i = 0; i < Limit; i++ )
       {
-        if ( A[i] != bB[i] )
-          return ( A[i] < bB[i] ) ? -1 : 1;
+        if ( A[i] != bB[i] ) return ( A[i] < bB[i] ) ? -1 : 1;
       }
       return 0;
     }
@@ -106,57 +83,45 @@ namespace Community.CsharpSqlite
     //byte with Offset & String Testing
     static int memcmp( byte[] a, int Offset, byte[] b, int Limit )
     {
-      if ( a.Length < Offset + Limit )
-        return ( a.Length - Offset < b.Length ) ? -1 : +1;
-      if ( b.Length < Limit )
-        return +1;
+      if ( a.Length < Offset + Limit ) return ( a.Length - Offset < b.Length ) ? -1 : +1;
+      if ( b.Length < Limit ) return +1;
       for ( int i = 0; i < Limit; i++ )
       {
-        if ( a[i + Offset] != b[i] )
-          return ( a[i + Offset] < b[i] ) ? -1 : 1;
+        if ( a[i + Offset] != b[i] ) return ( a[i + Offset] < b[i] ) ? -1 : 1;
       }
       return 0;
     }
 
     //byte with Offset & String Testing
-    static int memcmp( byte[] a, int Aoffset, byte[] b, int Boffset, int Limit )
+    static int memcmp(byte[] a, int Aoffset, byte[] b, int Boffset, int Limit)
     {
-      if ( a.Length < Aoffset + Limit )
-        return ( a.Length - Aoffset < b.Length - Boffset ) ? -1 : +1;
-      if ( b.Length < Boffset + Limit )
-        return +1;
-      for ( int i = 0; i < Limit; i++ )
+      if (a.Length < Aoffset + Limit) return (a.Length - Aoffset < b.Length - Boffset) ? -1 : +1;
+      if (b.Length < Boffset + Limit) return +1;
+      for (int i = 0; i < Limit; i++)
       {
-        if ( a[i + Aoffset] != b[i + Boffset] )
-          return ( a[i + Aoffset] < b[i + Boffset] ) ? -1 : 1;
+        if (a[i + Aoffset] != b[i + Boffset]) return (a[i + Aoffset] < b[i + Boffset]) ? -1 : 1;
       }
       return 0;
     }
 
-    static int memcmp( string a, int Offset, byte[] b, int Limit )
+    static int memcmp(string a, int Offset, byte[] b, int Limit)
     {
-      if ( a.Length < Offset + Limit )
-        return ( a.Length - Offset < b.Length ) ? -1 : +1;
-      if ( b.Length < Limit )
-        return +1;
+      if ( a.Length < Offset + Limit ) return ( a.Length - Offset < b.Length ) ? -1 : +1;
+      if ( b.Length < Limit ) return +1;
       for ( int i = 0; i < Limit; i++ )
       {
-        if ( a[i + Offset] != b[i] )
-          return ( a[i + Offset] < b[i] ) ? -1 : 1;
+        if ( a[i + Offset] != b[i] ) return ( a[i + Offset] < b[i] ) ? -1 : 1;
       }
       return 0;
     }
 
     static int memcmp( byte[] a, int Offset, string b, int Limit )
     {
-      if ( a.Length < Offset + Limit )
-        return ( a.Length - Offset < b.Length ) ? -1 : +1;
-      if ( b.Length < Limit )
-        return +1;
+      if ( a.Length < Offset + Limit ) return ( a.Length - Offset < b.Length ) ? -1 : +1;
+      if ( b.Length < Limit ) return +1;
       for ( int i = 0; i < Limit; i++ )
       {
-        if ( a[i + Offset] != b[i] )
-          return ( a[i + Offset] < b[i] ) ? -1 : 1;
+        if ( a[i + Offset] != b[i] ) return ( a[i + Offset] < b[i] ) ? -1 : 1;
       }
       return 0;
     }
@@ -165,14 +130,11 @@ namespace Community.CsharpSqlite
     //String Testing
     static int memcmp( string A, string B, int Limit )
     {
-      if ( A.Length < Limit )
-        return ( A.Length < B.Length ) ? -1 : +1;
-      if ( B.Length < Limit )
-        return +1;
+      if ( A.Length < Limit ) return ( A.Length < B.Length ) ? -1 : +1;
+      if ( B.Length < Limit ) return +1;
       for ( int i = 0; i < Limit; i++ )
       {
-        if ( A[i] != B[i] )
-          return ( A[i] < B[i] ) ? -1 : 1;
+        if ( A[i] != B[i] ) return ( A[i] < B[i] ) ? -1 : 1;
       }
       return 0;
     }
@@ -202,29 +164,26 @@ namespace Community.CsharpSqlite
         case "long int":
         case "longlong int":
         case "i64":
-          if ( ap[vaNEXT - 1].GetType().BaseType.Name == "Object" )
-            return (i64)( ap[vaNEXT - 1].GetHashCode() );
-          ;
+          if ( ap[vaNEXT - 1].GetType().BaseType.Name == "Object" ) return (i64)( ap[vaNEXT - 1].GetHashCode() ); ;
           return Convert.ToInt64( ap[vaNEXT - 1] );
         case "int":
-          if ( Convert.ToInt64( ap[vaNEXT - 1] ) > 0 && ( Convert.ToUInt32( ap[vaNEXT - 1] ) > Int32.MaxValue ) )
-            return (Int32)( Convert.ToUInt32( ap[vaNEXT - 1] ) - System.UInt32.MaxValue - 1 );
-          else
-            return (Int32)Convert.ToInt32( ap[vaNEXT - 1] );
+          if ( Convert.ToInt64( ap[vaNEXT - 1] ) > 0 && ( Convert.ToUInt32( ap[vaNEXT - 1] ) > Int32.MaxValue ) ) return (Int32)( Convert.ToUInt32( ap[vaNEXT - 1] ) - System.UInt32.MaxValue - 1 );
+          else return (Int32)Convert.ToInt32( ap[vaNEXT - 1] );
         case "SrcList":
           return (SrcList)ap[vaNEXT - 1];
         case "char":
           if ( ap[vaNEXT - 1].GetType().Name == "Int32" && (int)ap[vaNEXT - 1] == 0 )
           {
             return (char)'0';
-          } else
+          }
+          else
           {
             if ( ap[vaNEXT - 1].GetType().Name == "Int64" )
               if ( (i64)ap[vaNEXT - 1] == 0 )
               {
                 return (char)'0';
-              } else
-                return (char)( (i64)ap[vaNEXT - 1] );
+              }
+              else return (char)( (i64)ap[vaNEXT - 1] );
             else
               return (char)ap[vaNEXT - 1];
           }
@@ -233,25 +192,26 @@ namespace Community.CsharpSqlite
           if ( ap[vaNEXT - 1] == null )
           {
             return "NULL";
-          } else
+          }
+          else
           {
             if ( ap[vaNEXT - 1].GetType().Name == "Byte[]" )
-              if ( Encoding.UTF8.GetString( (byte[])ap[vaNEXT - 1], 0, ( (byte[])ap[vaNEXT - 1] ).Length ) == "\0" )
+              if ( Encoding.UTF8.GetString( (byte[])ap[vaNEXT - 1], 0, ((byte[])ap[vaNEXT - 1]).Length) == "\0" )
                 return "";
               else
-                return Encoding.UTF8.GetString( (byte[])ap[vaNEXT - 1], 0, ( (byte[])ap[vaNEXT - 1] ).Length );
+                return Encoding.UTF8.GetString((byte[])ap[vaNEXT - 1], 0, ((byte[])ap[vaNEXT - 1]).Length);
             else if ( ap[vaNEXT - 1].GetType().Name == "Int32" )
               return null;
             else if ( ap[vaNEXT - 1].GetType().Name == "StringBuilder" )
               return (string)ap[vaNEXT - 1].ToString();
-            else
-              return (string)ap[vaNEXT - 1];
+            else return (string)ap[vaNEXT - 1];
           }
         case "byte[]":
           if ( ap[vaNEXT - 1] == null )
           {
             return null;
-          } else
+          }
+          else
           {
             return (byte[])ap[vaNEXT - 1];
           }
@@ -259,7 +219,8 @@ namespace Community.CsharpSqlite
           if ( ap[vaNEXT - 1] == null )
           {
             return null;
-          } else
+          }
+          else
           {
             return (byte[][])ap[vaNEXT - 1];
           }
@@ -267,7 +228,8 @@ namespace Community.CsharpSqlite
           if ( ap[vaNEXT - 1] == null )
           {
             return "NULL";
-          } else
+          }
+          else
           {
             return (int[])ap[vaNEXT - 1];
           }
@@ -280,7 +242,8 @@ namespace Community.CsharpSqlite
           if ( ap[vaNEXT - 1].GetType().IsClass )
           {
             return ap[vaNEXT - 1].GetHashCode();
-          } else
+          }
+          else
           {
             return Convert.ToUInt32( ap[vaNEXT - 1] );
           }
@@ -376,21 +339,14 @@ namespace Community.CsharpSqlite
           }
         }
       }
-      catch
-      {
-      }
+      catch { }
       return 4096;
 #else
-return 4096;
+      return 4096;
 #endif
     }
 
-    static void SWAP<T>( ref T A, ref T B )
-    {
-      T t = A;
-      A = B;
-      B = t;
-    }
+    static void SWAP<T>( ref T A, ref T B ) { T t = A; A = B; B = t; }
 
     static void x_CountStep(
     sqlite3_context context,
@@ -403,16 +359,15 @@ return 4096;
       int type;
       Debug.Assert( argc <= 1 );
       Mem pMem = sqlite3_aggregate_context( context, 1 );//sizeof(*p));
-      if ( pMem._SumCtx == null )
-        pMem._SumCtx = new SumCtx();
+      if ( pMem._SumCtx == null ) pMem._SumCtx = new SumCtx();
       p = pMem._SumCtx;
-      if ( p.Context == null )
-        p.Context = pMem;
+      if ( p.Context == null ) p.Context = pMem;
       if ( argc == 0 || SQLITE_NULL == sqlite3_value_type( argv[0] ) )
       {
         p.cnt++;
         p.iSum += 1;
-      } else
+      }
+      else
       {
         type = sqlite3_value_numeric_type( argv[0] );
         if ( p != null && type != SQLITE_NULL )
@@ -425,7 +380,8 @@ return 4096;
             {
               sqlite3_result_error( context, "value of " + v + " handed to x_count", -1 );
               return;
-            } else
+            }
+            else
             {
               p.iSum += v;
               if ( !( p.approx | p.overflow != 0 ) )
@@ -438,7 +394,8 @@ return 4096;
                 p.iSum = iNewSum;
               }
             }
-          } else
+          }
+          else
           {
             p.rSum += sqlite3_value_double( argv[0] );
             p.approx = true;
@@ -456,13 +413,16 @@ return 4096;
         if ( p.overflow != 0 )
         {
           sqlite3_result_error( context, "integer overflow", -1 );
-        } else if ( p.approx )
+        }
+        else if ( p.approx )
         {
           sqlite3_result_double( context, p.rSum );
-        } else if ( p.iSum == 42 )
+        }
+        else if ( p.iSum == 42 )
         {
           sqlite3_result_error( context, "x_count totals to 42", -1 );
-        } else
+        }
+        else
         {
           sqlite3_result_int64( context, p.iSum );
         }
@@ -499,8 +459,8 @@ Monitor.Exit(mtx);
 }
 #endif
 
-    // Miscellaneous Windows Constants
-    //#define ERROR_HANDLE_DISK_FULL           39L
+  // Miscellaneous Windows Constants
+  //#define ERROR_HANDLE_DISK_FULL           39L
     const long ERROR_HANDLE_DISK_FULL = 39L;
   }
 }

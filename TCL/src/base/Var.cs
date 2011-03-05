@@ -280,26 +280,13 @@ namespace tcl.lang
       }
       public int iValue
       {
-        get
-        {
-          return _Integer;
-        }
-        set
-        {
-          _Integer = value;
-        }
+        get { return _Integer; }
+        set { _Integer = value; }
       }
       public string sValue
       {
-        get
-        {
-          return _StringBuilder.ToString();
-        }
-        set
-        {
-          _StringBuilder.Length = 0;
-          _StringBuilder.Append( value );
-        }
+        get { return _StringBuilder.ToString(); }
+        set { _StringBuilder.Length = 0; _StringBuilder.Append( value ); }
       }
       public void Append( byte[] append )
       {
@@ -317,10 +304,7 @@ namespace tcl.lang
 
       public int Length
       {
-        get
-        {
-          return _StringBuilder.Length;
-        }
+        get { return _StringBuilder.Length; }
       }
     }
     /// <summary> Reference to the object the allows getting & setting the sqlite3 linked variable
@@ -340,8 +324,8 @@ namespace tcl.lang
           to = TclInteger.newInstance( (Int32)sqlite3_get_set );
         else
           to = TclInteger.newInstance( ( (SQLITE3_GETSET)sqlite3_get_set ).iValue );
-      } else
-        to = TclString.newInstance( ( (SQLITE3_GETSET)sqlite3_get_set ).sValue );
+      }
+      else to = TclString.newInstance( ( (SQLITE3_GETSET)sqlite3_get_set ).sValue );
       to.preserve();
       return to;
     }
@@ -396,7 +380,8 @@ namespace tcl.lang
       {
         // It is in the global namespace
         sb.Append( hashKey );
-      } else
+      }
+      else
       {
         // It is not in the global namespaces
         sb.Append( "::" );
@@ -418,7 +403,7 @@ namespace tcl.lang
     protected internal SearchId getSearch( string s )
     {
       SearchId sid;
-      for ( int i = 0; i < sidVec.Count; i++ )
+      for ( int i = 0 ; i < sidVec.Count ; i++ )
       {
         sid = (SearchId)sidVec[i];
         if ( sid.equals( s ) )
@@ -440,7 +425,7 @@ namespace tcl.lang
     {
       SearchId curSid;
 
-      for ( int i = 0; i < sidVec.Count; i++ )
+      for ( int i = 0 ; i < sidVec.Count ; i++ )
       {
         curSid = (SearchId)sidVec[i];
         if ( curSid.equals( sid ) )
@@ -553,7 +538,7 @@ namespace tcl.lang
       // the part2's test and error reporting  or move that code in array set)
       elName = part2;
       int len = part1.Length;
-      for ( p = 0; p < len; p++ )
+      for ( p = 0 ; p < len ; p++ )
       {
         if ( part1[p] == '(' )
         {
@@ -587,7 +572,8 @@ namespace tcl.lang
       if ( ( ( flags & TCL.VarFlag.GLOBAL_ONLY ) != 0 ) || ( interp.varFrame == null ) )
       {
         cxtNs = interp.globalNs;
-      } else
+      }
+      else
       {
         cxtNs = interp.varFrame.ns;
       }
@@ -599,7 +585,8 @@ namespace tcl.lang
           if ( cxtNs.resolver != null )
           {
             var = cxtNs.resolver.resolveVar( interp, part1, cxtNs, flags );
-          } else
+          }
+          else
           {
             var = null;
           }
@@ -687,7 +674,8 @@ namespace tcl.lang
             var.table = varNs.varTable;
 
             var.ns = varNs;
-          } else
+          }
+          else
           {
             // var wasn't found and not to create it
             if ( ( flags & TCL.VarFlag.LEAVE_ERR_MSG ) != 0 )
@@ -697,7 +685,8 @@ namespace tcl.lang
             return null;
           }
         }
-      } else
+      }
+      else
       {
         // local var: look in frame varFrame
         // removed code block that searches for local compiled vars
@@ -727,7 +716,8 @@ namespace tcl.lang
 
               var.ns = null; // a local variable
             }
-          } else
+          }
+          else
           {
             if ( table != null )
             {
@@ -793,7 +783,8 @@ namespace tcl.lang
         var.setVarArray();
         var.clearVarUndefined();
         var.value = new Hashtable();
-      } else if ( !var.isVarArray() )
+      }
+      else if ( !var.isVarArray() )
       {
         if ( ( flags & TCL.VarFlag.LEAVE_ERR_MSG ) != 0 )
         {
@@ -826,11 +817,13 @@ namespace tcl.lang
 
           var.ns = varNs;
           var.setVarArrayElement();
-        } else
+        }
+        else
         {
           var = searchvar;
         }
-      } else
+      }
+      else
       {
         var = (Var)arrayTable[elName];
         if ( var == null )
@@ -912,7 +905,8 @@ namespace tcl.lang
       {
 
         part2 = part2Obj.ToString();
-      } else
+      }
+      else
       {
         part2 = null;
       }
@@ -974,8 +968,7 @@ namespace tcl.lang
           return (TclObject)var.value;
         }
 
-        if ( var.isSQLITE3_Link() )
-          return var.sqlite3_get();
+        if ( var.isSQLITE3_Link() ) return var.sqlite3_get();
 
         if ( ( flags & TCL.VarFlag.LEAVE_ERR_MSG ) != 0 )
         {
@@ -983,10 +976,12 @@ namespace tcl.lang
           if ( var.isVarUndefined() && ( array != null ) && !array.isVarUndefined() )
           {
             msg = noSuchElement;
-          } else if ( var.isVarArray() )
+          }
+          else if ( var.isVarArray() )
           {
             msg = isArray;
-          } else
+          }
+          else
           {
             msg = noSuchVar;
           }
@@ -1069,7 +1064,8 @@ namespace tcl.lang
       {
 
         part2 = part2Obj.ToString();
-      } else
+      }
+      else
       {
         part2 = null;
       }
@@ -1147,7 +1143,8 @@ namespace tcl.lang
           if ( var.isVarArrayElement() )
           {
             throw new TclVarException( interp, part1, part2, "set", danglingElement );
-          } else
+          }
+          else
           {
             throw new TclVarException( interp, part1, part2, "set", danglingVar );
           }
@@ -1184,7 +1181,8 @@ namespace tcl.lang
         {
           var.sqlite3_set( newValue );
           return var.sqlite3_get();
-        } else
+        }
+        else
         {
           oldValue = (TclObject)var.value;
 
@@ -1204,7 +1202,8 @@ namespace tcl.lang
                 oldValue = TclList.newInstance();
                 var.value = oldValue;
                 oldValue.preserve(); // since var is referenced
-              } else if ( oldValue.Shared )
+              }
+              else if ( oldValue.Shared )
               {
                 // append to copy
                 var.value = oldValue.duplicate();
@@ -1213,7 +1212,8 @@ namespace tcl.lang
                 oldValue.preserve(); // since var is referenced
               }
               TclList.append( interp, oldValue, newValue );
-            } else
+            }
+            else
             {
               // append string
               // We append newValuePtr's bytes but don't change its ref count.
@@ -1224,7 +1224,8 @@ namespace tcl.lang
               {
                 var.value = TclString.newInstance( bytes );
                 ( (TclObject)var.value ).preserve();
-              } else
+              }
+              else
               {
                 if ( oldValue.Shared )
                 {
@@ -1237,7 +1238,8 @@ namespace tcl.lang
                 TclString.append( oldValue, newValue );
               }
             }
-          } else
+          }
+          else
           {
             if ( ( flags & TCL.VarFlag.LIST_ELEMENT ) != 0 )
             {
@@ -1258,7 +1260,8 @@ namespace tcl.lang
               oldValue = TclString.newInstance( Util.convertElement( bytes, listFlags ) );
               var.value = oldValue;
               ( (TclObject)var.value ).preserve();
-            } else if ( newValue != oldValue )
+            }
+            else if ( newValue != oldValue )
             {
               var.value = newValue.duplicate();
               ( (TclObject)var.value ).preserve(); // var is another ref
@@ -1742,7 +1745,7 @@ namespace tcl.lang
       if ( var.traces != null )
       {
         int len = var.traces.Count;
-        for ( int i = 0; i < len; i++ )
+        for ( int i = 0 ; i < len ; i++ )
         {
           TraceRecord rec = (TraceRecord)var.traces[i];
           if ( rec.trace == proc )
@@ -1937,7 +1940,8 @@ namespace tcl.lang
 
           var.ns = ns;
         }
-      } else
+      }
+      else
       {
         // Skip Compiled Local stuff
         var = null;
@@ -1992,10 +1996,12 @@ namespace tcl.lang
           {
             cleanupVar( link, null );
           }
-        } else if ( !var.isVarUndefined() )
+        }
+        else if ( !var.isVarUndefined() )
         {
           throw new TclException( interp, "variable \"" + myName + "\" already exists" );
-        } else if ( var.traces != null )
+        }
+        else if ( var.traces != null )
         {
           throw new TclException( interp, "variable \"" + myName + "\" has traces: can't use for upvar" );
         }
@@ -2120,7 +2126,7 @@ namespace tcl.lang
         {
           if ( part1[len - 1] == ')' )
           {
-            for ( i = 0; i < len - 1; i++ )
+            for ( i = 0 ; i < len - 1 ; i++ )
             {
               if ( part1[i] == '(' )
               {
@@ -2153,7 +2159,7 @@ namespace tcl.lang
         }
         if ( ( array != null ) && ( array.traces != null ) )
         {
-          for ( i = 0; ( array.traces != null ) && ( i < array.traces.Count ); i++ )
+          for ( i = 0 ; ( array.traces != null ) && ( i < array.traces.Count ) ; i++ )
           {
             TraceRecord rec = (TraceRecord)array.traces[i];
             if ( ( rec.flags & flags ) != 0 )
@@ -2181,7 +2187,7 @@ namespace tcl.lang
           flags |= TCL.VarFlag.TRACE_DESTROYED;
         }
 
-        for ( i = 0; ( var.traces != null ) && ( i < var.traces.Count ); i++ )
+        for ( i = 0 ; ( var.traces != null ) && ( i < var.traces.Count ) ; i++ )
         {
           TraceRecord rec = (TraceRecord)var.traces[i];
           if ( ( rec.flags & flags ) != 0 )
@@ -2265,13 +2271,14 @@ namespace tcl.lang
       if ( table == interp.globalNs.varTable )
       {
         flags |= ( TCL.VarFlag.INTERP_DESTROYED | TCL.VarFlag.GLOBAL_ONLY );
-      } else if ( table == currNs.varTable )
+      }
+      else if ( table == currNs.varTable )
       {
         flags |= TCL.VarFlag.NAMESPACE_ONLY;
       }
 
 
-      for ( search = table.Values.GetEnumerator(); search.MoveNext(); )
+      for ( search = table.Values.GetEnumerator() ; search.MoveNext() ; )
       {
         var = (Var)search.Current;
 
@@ -2291,7 +2298,8 @@ namespace tcl.lang
             if ( (System.Object)link.hashKey == null )
             {
               var.value = null; // Drops reference to the link Var
-            } else if ( link.table != table )
+            }
+            else if ( link.table != table )
             {
               SupportClass.HashtableRemove( link.table, link.hashKey );
               link.table = null; // Drops the link var's table reference
@@ -2388,7 +2396,7 @@ namespace tcl.lang
       Hashtable table = (Hashtable)var.value;
 
       Var dummyVar;
-      for ( search = table.Values.GetEnumerator(); search.MoveNext(); )
+      for ( search = table.Values.GetEnumerator() ; search.MoveNext() ; )
       {
         el = (Var)search.Current;
 

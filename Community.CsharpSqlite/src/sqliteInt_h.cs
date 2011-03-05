@@ -168,11 +168,11 @@ namespace Community.CsharpSqlite
 #if THREADSAFE
 //# define SQLITE_THREADSAFE THREADSAFE
 #else
-//# define SQLITE_THREADSAFE 1
-const int SQLITE_THREADSAFE = 1;
+    //# define SQLITE_THREADSAFE 1
+    const int SQLITE_THREADSAFE = 1;
 #endif
 #else
-    const int SQLITE_THREADSAFE = 1; /* IMP: R-07272-22309 */
+const int SQLITE_THREADSAFE = 1; /* IMP: R-07272-22309 */
 #endif
 
     /*
@@ -231,7 +231,7 @@ const int SQLITE_DEFAULT_MEMSTATUS = 1;
 ** See also ticket #2741.
 */
 #if !_XOPEN_SOURCE && !__DARWIN__ && !__APPLE__ && SQLITE_THREADSAFE
-    const int _XOPEN_SOURCE = 500;//#define _XOPEN_SOURCE 500  /* Needed to enable pthread recursive mutexes */
+const int _XOPEN_SOURCE = 500;//#define _XOPEN_SOURCE 500  /* Needed to enable pthread recursive mutexes */
 #endif
 
     /*
@@ -271,9 +271,7 @@ void sqlite3Coverage(int);
 //# define testcase(X)  if( X ){ sqlite3Coverage(__LINE__); }
 #else
     //# define testcase(X)
-    static void testcase<T>( T X )
-    {
-    }
+    static void testcase<T>( T X ) { }
 #endif
 
     /*
@@ -322,50 +320,15 @@ void sqlite3Coverage(int);
 //# define NEVER(X)       (0)
 #elif !NDEBUG
     //# define ALWAYS(X)      ((X)?1:(assert(0),0))
-    static bool ALWAYS( bool X )
-    {
-      if ( X != true )
-        Debug.Assert( false );
-      return true;
-    }
-    static int ALWAYS( int X )
-    {
-      if ( X == 0 )
-        Debug.Assert( false );
-      return 1;
-    }
-    static bool ALWAYS<T>( T X )
-    {
-      if ( X == null )
-        Debug.Assert( false );
-      return true;
-    }
+    static bool ALWAYS( bool X ) { if ( X != true ) Debug.Assert( false ); return true; }
+    static int ALWAYS( int X ) { if ( X == 0 ) Debug.Assert( false ); return 1; }
+    static bool ALWAYS<T>( T X ) { if ( X == null ) Debug.Assert( false ); return true; }
 
     //# define NEVER(X)       ((X)?(assert(0),1):0)
-    static bool NEVER( bool X )
-    {
-      if ( X == true )
-        Debug.Assert( false );
-      return false;
-    }
-    static byte NEVER( byte X )
-    {
-      if ( X != 0 )
-        Debug.Assert( false );
-      return 0;
-    }
-    static int NEVER( int X )
-    {
-      if ( X != 0 )
-        Debug.Assert( false );
-      return 0;
-    }
-    static bool NEVER<T>( T X )
-    {
-      if ( X != null )
-        Debug.Assert( false );
-      return false;
-    }
+    static bool NEVER( bool X ) { if ( X == true ) Debug.Assert( false ); return false; }
+    static byte NEVER( byte X ) { if ( X != 0 ) Debug.Assert( false ); return 0; }
+    static int NEVER( int X ) { if ( X != 0 ) Debug.Assert( false ); return 0; }
+    static bool NEVER<T>( T X ) { if ( X != null ) Debug.Assert( false ); return false; }
 #else
 //# define ALWAYS(X)      (X)
 static bool ALWAYS(bool X) { return X; }
@@ -385,10 +348,7 @@ static bool NEVER<T>(T X) { return false; }
 ** to fit in 32-bits.  This macro is used inside of various testcase()
 ** macros to verify that we have tested SQLite for large-file support.
 */
-    static bool IS_BIG_INT( i64 X )
-    {
-      return ( ( ( X ) & ~(i64)0xffffffff ) != 0 );
-    }//#define IS_BIG_INT(X)  (((X)&~(i64)0xffffffff)!=0)
+    static bool IS_BIG_INT( i64 X ) { return ( ( ( X ) & ~(i64)0xffffffff ) != 0 ); }//#define IS_BIG_INT(X)  (((X)&~(i64)0xffffffff)!=0)
 
     /*
     ** The macro unlikely() is a hint that surrounds a boolean
@@ -401,15 +361,9 @@ static bool NEVER<T>(T X) { return false; }
 //# define unlikely(X)  __builtin_expect((X),0)
 #else
     //# define likely(X)    !!(X)
-    static bool likely( bool X )
-    {
-      return !!X;
-    }
+    static bool likely( bool X ) { return !!X; }
     //# define unlikely(X)  !!(X)
-    static bool unlikely( bool X )
-    {
-      return !!X;
-    }
+    static bool unlikely( bool X ) { return !!X; }
 #endif
 
     //#include "sqlite3.h"
@@ -599,19 +553,13 @@ const int ;//#define SQLITE_UTF16NATIVE  SQLITE_UTF16LE
     ** to force 8-byte alignment on 64-bit architectures.
     */
     //#define ROUND8(x)     (((x)+7)&~7)
-    static int ROUND8( int x )
-    {
-      return ( x + 7 ) & ~7;
-    }
+    static int ROUND8( int x ) { return ( x + 7 ) & ~7; }
 
     /*
     ** Round down to the nearest multiple of 8
     */
     //#define ROUNDDOWN8(x) ((x)&~7)
-    static int ROUNDDOWN8( int x )
-    {
-      return x & ~7;
-    }
+    static int ROUNDDOWN8( int x ) { return x & ~7; }
 
     /*
     ** Assert that the pointer X is aligned to an 8-byte boundary.  This
@@ -662,19 +610,14 @@ const int ;//#define SQLITE_UTF16NATIVE  SQLITE_UTF16LE
     ** The name of the schema table.
     */
     static string SCHEMA_TABLE( int x ) //#define SCHEMA_TABLE(x)  ((!OMIT_TEMPDB)&&(x==1)?TEMP_MASTER_NAME:MASTER_NAME)
-    {
-      return ( ( OMIT_TEMPDB == 0 ) && ( x == 1 ) ? TEMP_MASTER_NAME : MASTER_NAME );
-    }
+    { return ( ( OMIT_TEMPDB == 0 ) && ( x == 1 ) ? TEMP_MASTER_NAME : MASTER_NAME ); }
 
     /*
     ** A convenience macro that returns the number of elements in
     ** an array.
     */
     //#define ArraySize(X)    ((int)(sizeof(X)/sizeof(X[0])))
-    static int ArraySize<T>( T[] x )
-    {
-      return x.Length;
-    }
+    static int ArraySize<T>( T[] x ) { return x.Length; }
 
     /*
     ** The following value as a destructor means to use sqlite3DbFree().
@@ -727,16 +670,10 @@ void *sqlite3_wsd_find(void *K, int L);
 ** cases the parameters are named as per the usual conventions.
 */
     //#define UNUSED_PARAMETER(x) (void)(x)
-    static void UNUSED_PARAMETER<T>( T x )
-    {
-    }
+    static void UNUSED_PARAMETER<T>( T x ) { }
 
     //#define UNUSED_PARAMETER2(x,y) UNUSED_PARAMETER(x),UNUSED_PARAMETER(y)
-    static void UNUSED_PARAMETER2<T1, T2>( T1 x, T2 y )
-    {
-      UNUSED_PARAMETER( x );
-      UNUSED_PARAMETER( y );
-    }
+    static void UNUSED_PARAMETER2<T1, T2>( T1 x, T2 y ) { UNUSED_PARAMETER( x ); UNUSED_PARAMETER( y ); }
 
     /*
     ** Forward references to structures
@@ -858,21 +795,12 @@ void *sqlite3_wsd_find(void *K, int L);
     ** Db.pSchema->flags field.
     */
     //#define DbHasProperty(D,I,P)     (((D)->aDb[I].pSchema->flags&(P))==(P))
-    static bool DbHasProperty( sqlite3 D, int I, ushort P )
-    {
-      return ( D.aDb[I].pSchema.flags & P ) == P;
-    }
+    static bool DbHasProperty( sqlite3 D, int I, ushort P ) { return ( D.aDb[I].pSchema.flags & P ) == P; }
     //#define DbHasAnyProperty(D,I,P)  (((D)->aDb[I].pSchema->flags&(P))!=0)
     //#define DbSetProperty(D,I,P)     (D)->aDb[I].pSchema->flags|=(P)
-    static void DbSetProperty( sqlite3 D, int I, ushort P )
-    {
-      D.aDb[I].pSchema.flags = (u16)( D.aDb[I].pSchema.flags | P );
-    }
+    static void DbSetProperty( sqlite3 D, int I, ushort P ) { D.aDb[I].pSchema.flags = (u16)( D.aDb[I].pSchema.flags | P ); }
     //#define DbClearProperty(D,I,P)   (D)->aDb[I].pSchema->flags&=~(P)
-    static void DbClearProperty( sqlite3 D, int I, ushort P )
-    {
-      D.aDb[I].pSchema.flags = (u16)( D.aDb[I].pSchema.flags & ~P );
-    }
+    static void DbClearProperty( sqlite3 D, int I, ushort P ) { D.aDb[I].pSchema.flags = (u16)( D.aDb[I].pSchema.flags & ~P ); }
     /*
     ** Allowed values for the DB.pSchema->flags field.
     **
@@ -1088,10 +1016,7 @@ sqlite3 *pNextBlocked;        /* Next in list of all blocked connections */
     ** A macro to discover the encoding of a database.
     */
     //#define ENC(db) ((db)->aDb[0].pSchema->enc)
-    static u8 ENC( sqlite3 db )
-    {
-      return db.aDb[0].pSchema.enc;
-    }
+    static u8 ENC( sqlite3 db ) { return db.aDb[0].pSchema.enc; }
 
     /*
     ** Possible values for the sqlite3.flags.
@@ -1199,8 +1124,7 @@ sqlite3 *pNextBlocked;        /* Next in list of all blocked connections */
       public FuncDestructor pDestructor;   /* Reference counted destructor function */
 
       public FuncDef()
-      {
-      }
+      { }
 
       public FuncDef( i16 nArg, u8 iPrefEnc, u8 iflags, object pUserData, FuncDef pNext, dxFunc xFunc, dxStep xStep, dxFinal xFinalize, string zName, FuncDef pHash, FuncDestructor pDestructor )
       {
@@ -1333,9 +1257,7 @@ sqlite3 *pNextBlocked;        /* Next in list of all blocked connections */
     //SQLITE_INT_TO_PTR(iArg), 0, xFunc, 0, 0, #zName, 0, 0}
 
     static FuncDef FUNCTION( string zName, i16 nArg, int iArg, u8 bNC, dxFunc xFunc )
-    {
-      return new FuncDef( zName, SQLITE_UTF8, nArg, iArg, (u8)( bNC * SQLITE_FUNC_NEEDCOLL ), xFunc );
-    }
+    { return new FuncDef( zName, SQLITE_UTF8, nArg, iArg, (u8)( bNC * SQLITE_FUNC_NEEDCOLL ), xFunc ); }
 
     //#define STR_FUNCTION(zName, nArg, pArg, bNC, xFunc) \
     //  {nArg, SQLITE_UTF8, bNC*SQLITE_FUNC_NEEDCOLL, \
@@ -1344,18 +1266,14 @@ sqlite3 *pNextBlocked;        /* Next in list of all blocked connections */
     //#define LIKEFUNC(zName, nArg, arg, flags) \
     //  {nArg, SQLITE_UTF8, flags, (void *)arg, 0, likeFunc, 0, 0, #zName, 0, 0}
     static FuncDef LIKEFUNC( string zName, i16 nArg, object arg, u8 flags )
-    {
-      return new FuncDef( zName, SQLITE_UTF8, nArg, arg, likeFunc, flags );
-    }
+    { return new FuncDef( zName, SQLITE_UTF8, nArg, arg, likeFunc, flags ); }
 
     //#define AGGREGATE(zName, nArg, arg, nc, xStep, xFinal) \
     //  {nArg, SQLITE_UTF8, nc*SQLITE_FUNC_NEEDCOLL, \
     //SQLITE_INT_TO_PTR(arg), 0, 0, xStep,xFinal,#zName,0,0}
 
     static FuncDef AGGREGATE( string zName, i16 nArg, int arg, u8 nc, dxStep xStep, dxFinal xFinal )
-    {
-      return new FuncDef( zName, SQLITE_UTF8, nArg, arg, (u8)( nc * SQLITE_FUNC_NEEDCOLL ), xStep, xFinal );
-    }
+    { return new FuncDef( zName, SQLITE_UTF8, nArg, arg, (u8)( nc * SQLITE_FUNC_NEEDCOLL ), xStep, xFinal ); }
 
     /*
     ** All current savepoints are stored in a linked list starting at
@@ -1687,15 +1605,9 @@ static bool IsVirtual( Table X) { return (X.tabFlags & TF_Virtual)!=0;}
 static bool IsVirtual( Column X) { return X.isHidden!=0;}
 #else
     //#  define IsVirtual(X)      0
-    static bool IsVirtual( Table T )
-    {
-      return false;
-    }
+    static bool IsVirtual( Table T ) { return false; }
     //#  define IsHiddenColumn(X) 0
-    static bool IsHiddenColumn( Column C )
-    {
-      return false;
-    }
+    static bool IsHiddenColumn( Column C ) { return false; }
 #endif
 
     /*
@@ -2178,10 +2090,10 @@ public int iValue;            /* Integer value if EP_IntValue */
       *********************************************************************/
 
       public int iTable;            /* TK_COLUMN: cursor number of table holding column
-** TK_REGISTER: register number
-** TK_TRIGGER: 1 -> new, 0 -> old */
+  ** TK_REGISTER: register number
+  ** TK_TRIGGER: 1 -> new, 0 -> old */
       public ynVar iColumn;         /* TK_COLUMN: column index.  -1 for rowid.
-** TK_VARIABLE: variable number (always >= 1). */
+  ** TK_VARIABLE: variable number (always >= 1). */
       public i16 iAgg;              /* Which entry in pAggInfo->aCol[] or ->aFunc[] */
       public i16 iRightJoinTable;   /* If EP_FromJoin, the right table of the join */
       public u8 flags2;             /* Second set of flags.  EP2_... */
@@ -2318,10 +2230,7 @@ set { _op = value; }
     */
 #if SQLITE_DEBUG
     //# define ExprSetIrreducible(X)  (X)->flags2 |= EP2_Irreducible
-    static void ExprSetIrreducible( Expr X )
-    {
-      X.flags2 |= EP2_Irreducible;
-    }
+    static void ExprSetIrreducible( Expr X ) { X.flags2 |= EP2_Irreducible; }
 #else
 //# define ExprSetIrreducible(X)
 static void ExprSetIrreducible( Expr X ) { }
@@ -2332,25 +2241,13 @@ static void ExprSetIrreducible( Expr X ) { }
 ** Expr.flags field.
 */
     //#define ExprHasProperty(E,P)     (((E)->flags&(P))==(P))
-    static bool ExprHasProperty( Expr E, int P )
-    {
-      return ( E.flags & P ) == P;
-    }
+    static bool ExprHasProperty( Expr E, int P ) { return ( E.flags & P ) == P; }
     //#define ExprHasAnyProperty(E,P)  (((E)->flags&(P))!=0)
-    static bool ExprHasAnyProperty( Expr E, int P )
-    {
-      return ( E.flags & P ) != 0;
-    }
+    static bool ExprHasAnyProperty( Expr E, int P ) { return ( E.flags & P ) != 0; }
     //#define ExprSetProperty(E,P)     (E)->flags|=(P)
-    static void ExprSetProperty( Expr E, int P )
-    {
-      E.flags = (ushort)( E.flags | P );
-    }
+    static void ExprSetProperty( Expr E, int P ) { E.flags = (ushort)( E.flags | P ); }
     //#define ExprClearProperty(E,P)   (E)->flags&=~(P)
-    static void ExprClearProperty( Expr E, int P )
-    {
-      E.flags = (ushort)( E.flags & ~P );
-    }
+    static void ExprClearProperty( Expr E, int P ) { E.flags = (ushort)( E.flags & ~P ); }
 
     /*
     ** Macros to determine the number of bytes required by a normal Expr
@@ -3034,10 +2931,7 @@ public Table[] apVtabLock;        /* Pointer to virtual tables needing locking *
       // We need to create instances of the col cache
       public Parse()
       {
-        for ( int i = 0; i < this.aColCache.Length; i++ )
-        {
-          this.aColCache[i] = new yColCache();
-        }
+        for ( int i = 0; i < this.aColCache.Length; i++ ) { this.aColCache[i] = new yColCache(); }
       }
 
       public void ResetMembers() // Need to clear all the following variables during each recursion
@@ -3127,7 +3021,7 @@ SaveBuf[nested].apVtabLock = apVtabLock ;
 #if SQLITE_OMIT_VIRTUALTABLE
     static bool IN_DECLARE_VTAB = false;//#define IN_DECLARE_VTAB 0
 #else
-//#define IN_DECLARE_VTAB (pParse.declareVtab)
+    //#define IN_DECLARE_VTAB (pParse.declareVtab)
 #endif
 
     /*
@@ -3332,20 +3226,10 @@ the <column-list> is stored here */
       }
 
       public i64 nChar
-      {
-        get
-        {
-          return zText.Length;
-        }
-      }
+      { get { return zText.Length; } }
 
       public bool tooBig
-      {
-        get
-        {
-          return mxAlloc > 0 && zText.Length > mxAlloc;
-        }
-      }
+      { get { return mxAlloc > 0 && zText.Length > mxAlloc; } }
     };
 
     /*
@@ -3508,10 +3392,7 @@ the <column-list> is stored here */
       iz++;
       if ( iz < zIn.Length && zIn[iz - 1] >= 0xC0 )
       {
-        while ( iz < zIn.Length && ( zIn[iz] & 0xC0 ) == 0x80 )
-        {
-          iz++;
-        }
+        while ( iz < zIn.Length && ( zIn[iz] & 0xC0 ) == 0x80 ) { iz++; }
       }
     }
     static void SQLITE_SKIP_UTF8(
@@ -3520,10 +3401,7 @@ the <column-list> is stored here */
       iz++;
       if ( iz < zIn.Length && zIn[iz - 1] >= 0xC0 )
       {
-        while ( iz < zIn.Length && ( zIn[iz] & 0xC0 ) == 0x80 )
-        {
-          iz++;
-        }
+        while ( iz < zIn.Length && ( zIn[iz] & 0xC0 ) == 0x80 ) { iz++; }
       }
     }
 
@@ -3539,22 +3417,13 @@ the <column-list> is stored here */
     //int sqlite3CantopenError(int);
 #if DEBUG
     //#define SQLITE_CORRUPT_BKPT sqlite3CorruptError(__LINE__)
-    static int SQLITE_CORRUPT_BKPT()
-    {
-      return sqlite3CorruptError( 0 );
-    }
+    static int SQLITE_CORRUPT_BKPT() { return sqlite3CorruptError( 0 ); }
 
     //#define SQLITE_MISUSE_BKPT sqlite3MisuseError(__LINE__)
-    static int SQLITE_MISUSE_BKPT()
-    {
-      return sqlite3MisuseError( 0 );
-    }
+    static int SQLITE_MISUSE_BKPT() { return sqlite3MisuseError( 0 ); }
 
     //#define SQLITE_CANTOPEN_BKPT sqlite3CantopenError(__LINE__)
-    static int SQLITE_CANTOPEN_BKPT()
-    {
-      return sqlite3CantopenError( 0 );
-    }
+    static int SQLITE_CANTOPEN_BKPT() { return sqlite3CantopenError( 0 ); }
 #else
 static int SQLITE_CORRUPT_BKPT() {return SQLITE_CORRUPT;}
 static int SQLITE_MISUSE_BKPT() {return SQLITE_MISUSE;}
@@ -3589,46 +3458,22 @@ static int SQLITE_CANTOPEN_BKPT() {return SQLITE_CANTOPEN;}
     //# define sqlite3Toupper(x)  ((x)&~(sqlite3CtypeMap[(unsigned char)(x)]&0x20))
 
     //# define sqlite3Isspace(x)   (sqlite3CtypeMap[(unsigned char)(x)]&0x01)
-    static bool sqlite3Isspace( byte x )
-    {
-      return ( sqlite3CtypeMap[(byte)( x )] & 0x01 ) != 0;
-    }
-    static bool sqlite3Isspace( char x )
-    {
-      return x < 256 && ( sqlite3CtypeMap[(byte)( x )] & 0x01 ) != 0;
-    }
+    static bool sqlite3Isspace( byte x ) { return ( sqlite3CtypeMap[(byte)( x )] & 0x01 ) != 0; }
+    static bool sqlite3Isspace( char x ) { return x < 256 && ( sqlite3CtypeMap[(byte)( x )] & 0x01 ) != 0; }
 
     //# define sqlite3Isalnum(x)   (sqlite3CtypeMap[(unsigned char)(x)]&0x06)
-    static bool sqlite3Isalnum( byte x )
-    {
-      return ( sqlite3CtypeMap[(byte)( x )] & 0x06 ) != 0;
-    }
-    static bool sqlite3Isalnum( char x )
-    {
-      return x < 256 && ( sqlite3CtypeMap[(byte)( x )] & 0x06 ) != 0;
-    }
+    static bool sqlite3Isalnum( byte x ) { return ( sqlite3CtypeMap[(byte)( x )] & 0x06 ) != 0; }
+    static bool sqlite3Isalnum( char x ) { return x < 256 && ( sqlite3CtypeMap[(byte)( x )] & 0x06 ) != 0; }
 
     //# define sqlite3Isalpha(x)   (sqlite3CtypeMap[(unsigned char)(x)]&0x02)
 
     //# define sqlite3Isdigit(x)   (sqlite3CtypeMap[(unsigned char)(x)]&0x04)
-    static bool sqlite3Isdigit( byte x )
-    {
-      return ( sqlite3CtypeMap[( (byte)x )] & 0x04 ) != 0;
-    }
-    static bool sqlite3Isdigit( char x )
-    {
-      return x < 256 && ( sqlite3CtypeMap[( (byte)x )] & 0x04 ) != 0;
-    }
+    static bool sqlite3Isdigit( byte x ) { return ( sqlite3CtypeMap[( (byte)x )] & 0x04 ) != 0; }
+    static bool sqlite3Isdigit( char x ) { return x < 256 && ( sqlite3CtypeMap[( (byte)x )] & 0x04 ) != 0; }
 
     //# define sqlite3Isxdigit(x)  (sqlite3CtypeMap[(unsigned char)(x)]&0x08)
-    static bool sqlite3Isxdigit( byte x )
-    {
-      return ( sqlite3CtypeMap[( (byte)x )] & 0x08 ) != 0;
-    }
-    static bool sqlite3Isxdigit( char x )
-    {
-      return x < 256 && ( sqlite3CtypeMap[( (byte)x )] & 0x08 ) != 0;
-    }
+    static bool sqlite3Isxdigit( byte x ) { return ( sqlite3CtypeMap[( (byte)x )] & 0x08 ) != 0; }
+    static bool sqlite3Isxdigit( char x ) { return x < 256 && ( sqlite3CtypeMap[( (byte)x )] & 0x08 ) != 0; }
 
     //# define sqlite3Tolower(x)   (sqlite3UpperToLower[(unsigned char)(x)])
 #else
@@ -3930,10 +3775,7 @@ const sqlite3_mem_methods *sqlite3MemGetMemsys5(void);
     //void sqlite3UnlinkAndDeleteTrigger(sqlite3*,int,const char*);
     //  u32  sqlite3TriggerColmask(Parse*,Trigger*,ExprList*,int,int,Table*,int);
     //# define sqlite3ParseToplevel(p) ((p)->pToplevel ? (p)->pToplevel : (p))
-    static Parse sqlite3ParseToplevel( Parse p )
-    {
-      return p.pToplevel != null ? p.pToplevel : p;
-    }
+    static Parse sqlite3ParseToplevel( Parse p ) { return p.pToplevel != null ? p.pToplevel : p; }
 #else
 static void sqlite3BeginTrigger( Parse A, Token B, Token C, int D, int E, IdList F, SrcList G, Expr H, int I, int J ) { }
 static void sqlite3FinishTrigger( Parse P, TriggerStep TS, Token T ) { }
@@ -3981,26 +3823,16 @@ void sqlite3AuthContextPop(AuthContext*);
 int sqlite3AuthReadCol(Parse*, const char *, const char *, int);
 #else
     //# define sqlite3AuthRead(a,b,c,d)
-    static void sqlite3AuthRead( Parse a, Expr b, Schema c, SrcList d )
-    {
-    }
+    static void sqlite3AuthRead( Parse a, Expr b, Schema c, SrcList d ) { }
 
     //# define sqlite3AuthCheck(a,b,c,d,e)    SQLITE_OK
-    static int sqlite3AuthCheck( Parse a, int b, string c, byte[] d, byte[] e )
-    {
-      return SQLITE_OK;
-    }
+    static int sqlite3AuthCheck( Parse a, int b, string c, byte[] d, byte[] e ) { return SQLITE_OK; }
 
     //# define sqlite3AuthContextPush(a,b,c)
-    static void sqlite3AuthContextPush( Parse a, AuthContext b, string c )
-    {
-    }
+    static void sqlite3AuthContextPush( Parse a, AuthContext b, string c ) { }
 
     //# define sqlite3AuthContextPop(a)  ((void)(a))
-    static Parse sqlite3AuthContextPop( Parse a )
-    {
-      return a;
-    }
+    static Parse sqlite3AuthContextPop( Parse a ) { return a; }
 #endif
     //void sqlite3Attach(Parse*, Expr*, Expr*, Expr*);
     //void sqlite3Detach(Parse*, Expr*);
@@ -4165,12 +3997,8 @@ int sqlite3ParserStackPeak(void*);
 //void sqlite3TableLock(Parse *, int, int, u8, const char *);
 #else
     //#define sqlite3TableLock(v,w,x,y,z)
-    static void sqlite3TableLock( Parse p, int p1, int p2, u8 p3, byte[] p4 )
-    {
-    }
-    static void sqlite3TableLock( Parse p, int p1, int p2, u8 p3, string p4 )
-    {
-    }
+    static void sqlite3TableLock( Parse p, int p1, int p2, u8 p3, byte[] p4 ) { }
+    static void sqlite3TableLock( Parse p, int p1, int p2, u8 p3, string p4 ) { }
 #endif
 
 #if SQLITE_TEST
@@ -4179,63 +4007,34 @@ int sqlite3ParserStackPeak(void*);
 
 #if SQLITE_OMIT_VIRTUALTABLE
     //#  define sqlite3VtabClear(D, Y)
-    static void sqlite3VtabClear( sqlite3 db, Table Y )
-    {
-    }
+    static void sqlite3VtabClear( sqlite3 db, Table Y ) { }
 
     //#  define sqlite3VtabSync(X,Y) SQLITE_OK
-    static int sqlite3VtabSync( sqlite3 X, string Y )
-    {
-      return SQLITE_OK;
-    }
+    static int sqlite3VtabSync( sqlite3 X, string Y ) { return SQLITE_OK; }
 
     //#  define sqlite3VtabRollback(X)
-    static void sqlite3VtabRollback( sqlite3 X )
-    {
-    }
+    static void sqlite3VtabRollback( sqlite3 X ) { }
 
     //#  define sqlite3VtabCommit(X)
-    static void sqlite3VtabCommit( sqlite3 X )
-    {
-    }
+    static void sqlite3VtabCommit( sqlite3 X ) { }
 
     //#  define sqlite3VtabInSync(db) 0
     //#  define sqlite3VtabLock(X) 
-    static void sqlite3VtabLock( VTable X )
-    {
-    }
+    static void sqlite3VtabLock( VTable X ) { }
 
     //#  define sqlite3VtabUnlock(X)
-    static void sqlite3VtabUnlock( VTable X )
-    {
-    }
+    static void sqlite3VtabUnlock( VTable X ) { }
 
     //#  define sqlite3VtabUnlockList(X)
-    static void sqlite3VtabUnlockList( sqlite3 X )
-    {
-    }
+    static void sqlite3VtabUnlockList( sqlite3 X ) { }
 
-    static void sqlite3VtabArgExtend( Parse P, Token T )
-    {
-    }//#  define sqlite3VtabArgExtend(P, T)
-    static void sqlite3VtabArgInit( Parse P )
-    {
-    }//#  define sqlite3VtabArgInit(P)
-    static void sqlite3VtabBeginParse( Parse P, Token T, Token T1, Token T2 )
-    {
-    }//#  define sqlite3VtabBeginParse(P, T, T1, T2);
-    static void sqlite3VtabFinishParse<T>( Parse P, T t )
-    {
-    }//#  define sqlite3VtabFinishParse(P, T)
-    static bool sqlite3VtabInSync( sqlite3 db )
-    {
-      return false;
-    }
+    static void sqlite3VtabArgExtend( Parse P, Token T ) { }//#  define sqlite3VtabArgExtend(P, T)
+    static void sqlite3VtabArgInit( Parse P ) { }//#  define sqlite3VtabArgInit(P)
+    static void sqlite3VtabBeginParse( Parse P, Token T, Token T1, Token T2 ) { }//#  define sqlite3VtabBeginParse(P, T, T1, T2);
+    static void sqlite3VtabFinishParse<T>( Parse P, T t ) { }//#  define sqlite3VtabFinishParse(P, T)
+    static bool sqlite3VtabInSync( sqlite3 db ) { return false; }
 
-    static VTable sqlite3GetVTable( sqlite3 db, Table T )
-    {
-      return null;
-    }
+    static VTable sqlite3GetVTable( sqlite3 db, Table T ) { return null; }
 #else
 //void sqlite3VtabClear(sqlite3 *db, Table*);
 //int sqlite3VtabSync(sqlite3 db, int rc);
@@ -4336,10 +4135,7 @@ static void sqlite3FkDelete(sqlite3 a, Table b) {}
 //  int sqlite3JournalCreate(sqlite3_file *);
 #else
     //#define sqlite3JournalSize(pVfs) ((pVfs)->szOsFile)
-    static int sqlite3JournalSize( sqlite3_vfs pVfs )
-    {
-      return pVfs.szOsFile;
-    }
+    static int sqlite3JournalSize( sqlite3_vfs pVfs ) { return pVfs.szOsFile; }
 #endif
 
     //void sqlite3MemJournalOpen(sqlite3_file *);
@@ -4364,15 +4160,9 @@ void sqlite3ConnectionBlocked(sqlite3 *, sqlite3 *);
 void sqlite3ConnectionUnlocked(sqlite3 *db);
 void sqlite3ConnectionClosed(sqlite3 *db);
 #else
-    static void sqlite3ConnectionBlocked( sqlite3 x, sqlite3 y )
-    {
-    } //#define sqlite3ConnectionBlocked(x,y)
-    static void sqlite3ConnectionUnlocked( sqlite3 x )
-    {
-    }                   //#define sqlite3ConnectionUnlocked(x)
-    static void sqlite3ConnectionClosed( sqlite3 x )
-    {
-    }                     //#define sqlite3ConnectionClosed(x)
+    static void sqlite3ConnectionBlocked( sqlite3 x, sqlite3 y ) { } //#define sqlite3ConnectionBlocked(x,y)
+    static void sqlite3ConnectionUnlocked( sqlite3 x ) { }                   //#define sqlite3ConnectionUnlocked(x)
+    static void sqlite3ConnectionClosed( sqlite3 x ) { }                     //#define sqlite3ConnectionClosed(x)
 #endif
 
 #if SQLITE_DEBUG
@@ -4393,13 +4183,9 @@ static void IOTRACE( string X, params object[] ap ) { if ( SQLite3IoTrace ) { pr
 //SQLITE_EXTERN void (*sqlite3IoTrace)(const char*,...);
 #else
     //#define IOTRACE(A)
-    static void IOTRACE( string F, params object[] ap )
-    {
-    }
+    static void IOTRACE( string F, params object[] ap ) { }
     //#define sqlite3VdbeIOTraceSql(X)
-    static void sqlite3VdbeIOTraceSql( Vdbe X )
-    {
-    }
+    static void sqlite3VdbeIOTraceSql( Vdbe X ) { }
 #endif
 
     /*
@@ -4436,19 +4222,11 @@ static void IOTRACE( string X, params object[] ap ) { if ( SQLite3IoTrace ) { pr
 //  int sqlite3MemdebugNoType(void*,u8);
 #else
     //# define sqlite3MemdebugSetType(X,Y)  /* no-op */
-    static void sqlite3MemdebugSetType<T>( T X, int Y )
-    {
-    }
+    static void sqlite3MemdebugSetType<T>( T X, int Y ) { }
     //# define sqlite3MemdebugHasType(X,Y)  1
-    static bool sqlite3MemdebugHasType<T>( T X, int Y )
-    {
-      return true;
-    }
+    static bool sqlite3MemdebugHasType<T>( T X, int Y ) { return true; }
     //# define sqlite3MemdebugNoType(X,Y)   1
-    static bool sqlite3MemdebugNoType<T>( T X, int Y )
-    {
-      return true;
-    }
+    static bool sqlite3MemdebugNoType<T>( T X, int Y ) { return true; }
 #endif
     //#define MEMTYPE_HEAP       0x01  /* General heap allocations */
     //#define MEMTYPE_LOOKASIDE  0x02  /* Might have been lookaside memory */

@@ -33,134 +33,122 @@ using System.Data.Common;
 
 namespace Community.CsharpSqlite.SQLiteClient
 {
-  public sealed class SqliteTransaction :
+	public sealed class SqliteTransaction :
 #if NET_2_0
-DbTransaction
+		DbTransaction
 #else
- IDbTransaction
+		IDbTransaction
 #endif
-  {
+	{
+	
+		#region Fields
+		
+		private IsolationLevel _isolationLevel;
+		private SqliteConnection _connection;
+		private bool _open;
+		
+		#endregion
 
-    #region Fields
-
-    private IsolationLevel _isolationLevel;
-    private SqliteConnection _connection;
-    private bool _open;
-
-    #endregion
-
-    #region Contructors and destructors
-
-    internal SqliteTransaction()
-    {
-      _open = true;
-    }
+		#region Contructors and destructors
+		
+		internal SqliteTransaction() 
+		{
+			_open = true;
+		}
 
 #if !NET_2_0
-    void System.IDisposable.Dispose()
-    {
-    }
+		void System.IDisposable.Dispose()
+		{
+		}
 #endif
 
-    #endregion
+		#endregion
 
-    #region Public Properties
+		#region Public Properties
 
 #if NET_2_0
-protected override DbConnection DbConnection
+		protected override DbConnection DbConnection
 #else
-    public IDbConnection Connection
+		public IDbConnection Connection
 #endif
-    {
-      get
-      {
-        return _connection;
-      }
+		{
+			get { return _connection; } 
 #if !NET_2_0
-      set
-      {
-        _connection = (SqliteConnection)value;
-      }
+			set { _connection = (SqliteConnection)value; }
 #endif
-    }
+		}
 
 #if NET_2_0
-override
+		override
 #endif
-    public IsolationLevel IsolationLevel
-    {
-      get
-      {
-        return _isolationLevel;
-      }
+		public IsolationLevel IsolationLevel
+		{
+			get { return _isolationLevel; }
 #if !NET_2_0
-      set
-      {
-        _isolationLevel = value;
-      }
+			set { _isolationLevel = value; }
 #endif
-    }
+		}
 
 #if NET_2_0
-internal void SetConnection (DbConnection conn)
-{
-_connection = (SqliteConnection)conn;
-}
+		internal void SetConnection (DbConnection conn)
+		{
+			_connection = (SqliteConnection)conn;
+		}
 
-internal void SetIsolationLevel (IsolationLevel level)
-{
-_isolationLevel = level;
-}
+		internal void SetIsolationLevel (IsolationLevel level)
+		{
+			_isolationLevel = level;
+		}
 #endif
 
-    #endregion
-
-    #region Public Methods
+		#endregion
+		
+		#region Public Methods
 
 #if NET_2_0
-override
+		override
 #endif
-    public void Commit()
-    {
-      if ( _connection == null || _connection.State != ConnectionState.Open )
-        throw new InvalidOperationException( "Connection must be valid and open to commit transaction" );
-      if ( !_open )
-        throw new InvalidOperationException( "Transaction has already been committed or is not pending" );
-      try
-      {
-        SqliteCommand cmd = (SqliteCommand)_connection.CreateCommand();
-        cmd.CommandText = "COMMIT";
-        cmd.ExecuteNonQuery();
-        _open = false;
-      }
-      catch ( Exception ex )
-      {
-        throw ex;
-      }
-    }
+		public void Commit()
+		{
+			if (_connection == null || _connection.State != ConnectionState.Open)
+				throw new InvalidOperationException("Connection must be valid and open to commit transaction");
+			if (!_open)
+				throw new InvalidOperationException("Transaction has already been committed or is not pending");
+			try 
+			{
+				SqliteCommand cmd = (SqliteCommand)_connection.CreateCommand();
+				cmd.CommandText = "COMMIT";
+				cmd.ExecuteNonQuery();
+				_open = false;
+			}
+			catch (Exception ex) 
+			{
+				throw ex;
+			}
+		}
 
 #if NET_2_0
-override
+		override
 #endif
-    public void Rollback()
-    {
-      if ( _connection == null || _connection.State != ConnectionState.Open )
-        throw new InvalidOperationException( "Connection must be valid and open to commit transaction" );
-      if ( !_open )
-        throw new InvalidOperationException( "Transaction has already been rolled back or is not pending" );
-      try
-      {
-        SqliteCommand cmd = (SqliteCommand)_connection.CreateCommand();
-        cmd.CommandText = "ROLLBACK";
-        cmd.ExecuteNonQuery();
-        _open = false;
-      }
-      catch ( Exception ex )
-      {
-        throw ex;
-      }
-    }
-
-    #endregion
-  }
+		public void Rollback()
+		{
+			if (_connection == null || _connection.State != ConnectionState.Open)
+				throw new InvalidOperationException("Connection must be valid and open to commit transaction");
+			if (!_open)
+				throw new InvalidOperationException("Transaction has already been rolled back or is not pending");
+			try 
+			{
+				SqliteCommand cmd = (SqliteCommand)_connection.CreateCommand();
+				cmd.CommandText = "ROLLBACK";
+				cmd.ExecuteNonQuery();
+				_open = false;
+			}
+			catch (Exception ex) 
+			{
+				throw ex;
+			}
+		}
+		
+		#endregion
+	}
 }

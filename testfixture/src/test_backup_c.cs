@@ -41,10 +41,7 @@ namespace Community.CsharpSqlite
 
     enum BackupSubCommandEnum
     {
-      BACKUP_STEP,
-      BACKUP_FINISH,
-      BACKUP_REMAINING,
-      BACKUP_PAGECOUNT
+      BACKUP_STEP, BACKUP_FINISH, BACKUP_REMAINING, BACKUP_PAGECOUNT
     };
 
     struct BackupSubCommand
@@ -66,10 +63,9 @@ namespace Community.CsharpSqlite
     static int Tcl_GetIndexFromObjStruct( Interp interp, TclObject to, BackupSubCommand[] table, int len, string msg, int flags, ref int index )
     {
       string zCmd = to.ToString();
-      for ( index = 0; index < len; index++ )
+      for ( index = 0 ; index < len ; index++ )
       {
-        if ( zCmd == table[index].zCmd )
-          return 0;
+        if ( zCmd == table[index].zCmd ) return 0;
       }
       return 1;
     }

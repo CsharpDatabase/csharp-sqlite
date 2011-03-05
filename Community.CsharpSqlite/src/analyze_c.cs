@@ -29,7 +29,6 @@ namespace Community.CsharpSqlite
     **
     **  SQLITE_SOURCE_ID: 2011-01-28 17:03:50 ed759d5a9edb3bba5f48f243df47be29e3fe8cd7
     **
-    **  $Header$
     *************************************************************************
     */
 #if !SQLITE_OMIT_ANALYZE
@@ -104,7 +103,8 @@ new _aTable( "sqlite_stat2", "tbl,idx,sampleno,sample" ),
           );
           aRoot[i] = pParse.regRoot;
           aCreateTbl[i] = 1;
-        } else
+        }
+        else
         {
           /* The table already exists. If zWhere is not NULL, delete all entries 
           ** associated with the table zWhere. If zWhere is NULL, delete the
@@ -116,7 +116,8 @@ new _aTable( "sqlite_stat2", "tbl,idx,sampleno,sample" ),
             sqlite3NestedParse( pParse,
             "DELETE FROM %Q.%s WHERE tbl=%Q", pDb.zName, zTab, zWhere
             );
-          } else
+          }
+          else
           {
             /* The sqlite_stat[12] table already exists.  Delete all rows. */
             sqlite3VdbeAddOp2( v, OP_Clear, aRoot[i], iDb );
@@ -398,7 +399,8 @@ return;
         VdbeComment( v, "%s", pTab.zName );
         sqlite3VdbeAddOp2( v, OP_Count, iIdxCur, regSampleno );
         sqlite3VdbeAddOp1( v, OP_Close, iIdxCur );
-      } else
+      }
+      else
       {
         Debug.Assert( jZeroRows > 0 );
         addr = sqlite3VdbeAddOp0( v, OP_Goto );
@@ -519,14 +521,16 @@ return;
             continue;  /* Do not analyze the TEMP database */
           analyzeDatabase( pParse, i );
         }
-      } else if ( pName2.n == 0 )
+      }
+      else if ( pName2.n == 0 )
       {
         /* Form 2:  Analyze the database or table named */
         iDb = sqlite3FindDb( db, pName1 );
         if ( iDb >= 0 )
         {
           analyzeDatabase( pParse, iDb );
-        } else
+        }
+        else
         {
           z = sqlite3NameFromToken( db, pName1 );
           if ( z != null )
@@ -539,7 +543,8 @@ return;
             }
           }
         }
-      } else
+      }
+      else
       {
         /* Form 3: Analyze the fully qualified table name */
         iDb = sqlite3TwoPartName( pParse, pName1, pName2, ref  pTableName );
@@ -606,7 +611,8 @@ return;
       if ( !String.IsNullOrEmpty( argv[1] ) )
       {
         pIndex = sqlite3FindIndex( pInfo.db, argv[1], pInfo.zDatabase );
-      } else
+      }
+      else
       {
         pIndex = null;
       }
@@ -715,7 +721,8 @@ UNUSED_PARAMETER( pIdx );
       if ( zSql == null )
       {
         rc = SQLITE_NOMEM;
-      } else
+      }
+      else
       {
         rc = sqlite3_exec( db, zSql, (dxCallback)analysisLoader, sInfo, 0 );
         sqlite3DbFree( db, ref zSql );
@@ -777,7 +784,8 @@ UNUSED_PARAMETER( pIdx );
                   if ( eType == SQLITE_INTEGER || eType == SQLITE_FLOAT )
                   {
                     pSample.u.r = sqlite3_column_double( pStmt, 2 );
-                  } else if ( eType == SQLITE_TEXT || eType == SQLITE_BLOB )
+                  }
+                  else if ( eType == SQLITE_TEXT || eType == SQLITE_BLOB )
                   {
                     string z = null;
                     byte[] zBLOB = null;
@@ -798,17 +806,20 @@ UNUSED_PARAMETER( pIdx );
                     pSample.nByte = (u8)n;
                     if ( n < 1 )
                     {
-                      pSample.u.z = "";
-                    } else
+                      pSample.u.z = null;
+                      pSample.u.zBLOB = null;
+                    }
+                    else
                     {
                       pSample.u.z = z;
                       pSample.u.zBLOB = zBLOB;
-                      //pSample->u.z = sqlite3DbStrNDup(0, z, n);
-                      //if( pSample->u.z==0 )
-                      //{
-                      //db.mallocFailed = 1;
-                      //break;
-                      //}
+                    //pSample->u.z = sqlite3DbMallocRaw(dbMem, n);
+                    //if( pSample->u.z ){
+                    //  memcpy(pSample->u.z, z, n);
+                    //}else{
+                    //  db->mallocFailed = 1;
+                    //  break;
+                    //}
                     }
                   }
                 }

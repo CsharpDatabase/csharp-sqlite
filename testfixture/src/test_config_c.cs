@@ -49,10 +49,7 @@ namespace Community.CsharpSqlite
     */
     //#define STRINGVALUE2(x) #x
     //#define STRINGVALUE(x) STRINGVALUE2(x)
-    static string STRINGVALUE( int x )
-    {
-      return x.ToString();
-    }
+    static string STRINGVALUE( int x ) { return x.ToString(); }
 
     /*
     ** This routine sets entries in the global ::sqlite_options() array variable

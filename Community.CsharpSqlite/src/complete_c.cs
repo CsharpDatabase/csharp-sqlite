@@ -42,10 +42,7 @@ namespace Community.CsharpSqlite
 #if !SQLITE_AMALGAMATION
 #if  SQLITE_ASCII
     //#define IdChar(C)  ((sqlite3CtypeMap[(unsigned char)C]&0x46)!=0)
-    static bool IdChar( u8 C )
-    {
-      return ( sqlite3CtypeMap[(char)C] & 0x46 ) != 0;
-    }
+    static bool IdChar( u8 C ) { return ( sqlite3CtypeMap[(char)C] & 0x46 ) != 0; }
 #endif
 #if  SQLITE_EBCDIC
 //extern const char sqlite3IsEbcdicIdChar[];
@@ -129,31 +126,31 @@ namespace Community.CsharpSqlite
       int token;       /* Value of the next token */
 
 #if !SQLITE_OMIT_TRIGGER
-      /* A complex statement machine used to detect the end of a CREATE TRIGGER
+/* A complex statement machine used to detect the end of a CREATE TRIGGER
 ** statement.  This is the normal case.
 */
       var trans = new u8[][]       {
-/* Token:                                                */
-/* State:       **  SEMI  WS  OTHER  EXPLAIN  CREATE  TEMP  TRIGGER  END */
-/* 0 INVALID: */ new u8[]{    1,  0,     2,       3,      4,    2,       2,   2, },
-/* 1   START: */ new u8[]{    1,  1,     2,       3,      4,    2,       2,   2, },
-/* 2  NORMAL: */ new u8[]{    1,  2,     2,       2,      2,    2,       2,   2, },
-/* 3 EXPLAIN: */ new u8[]{    1,  3,     3,       2,      4,    2,       2,   2, },
-/* 4  CREATE: */ new u8[]{    1,  4,     2,       2,      2,    4,       5,   2, },
-/* 5 TRIGGER: */ new u8[]{    6,  5,     5,       5,      5,    5,       5,   5, },
-/* 6    SEMI: */ new u8[]{    6,  6,     5,       5,      5,    5,       5,   7, },
-/* 7     END: */ new u8[]{    1,  7,     5,       5,      5,    5,       5,   5, },
+                     /* Token:                                                */
+     /* State:       **  SEMI  WS  OTHER  EXPLAIN  CREATE  TEMP  TRIGGER  END */
+     /* 0 INVALID: */ new u8[]{    1,  0,     2,       3,      4,    2,       2,   2, },
+     /* 1   START: */ new u8[]{    1,  1,     2,       3,      4,    2,       2,   2, },
+     /* 2  NORMAL: */ new u8[]{    1,  2,     2,       2,      2,    2,       2,   2, },
+     /* 3 EXPLAIN: */ new u8[]{    1,  3,     3,       2,      4,    2,       2,   2, },
+     /* 4  CREATE: */ new u8[]{    1,  4,     2,       2,      2,    4,       5,   2, },
+     /* 5 TRIGGER: */ new u8[]{    6,  5,     5,       5,      5,    5,       5,   5, },
+     /* 6    SEMI: */ new u8[]{    6,  6,     5,       5,      5,    5,       5,   7, },
+     /* 7     END: */ new u8[]{    1,  7,     5,       5,      5,    5,       5,   5, },
 };
 #else
-/* If triggers are not supported by this compile then the statement machine
-** used to detect the end of a statement is much simplier
-*/
-var trans = new u8[][]   {
-/* Token:           */
-/* State:       **  SEMI  WS  OTHER */
-/* 0 INVALID: */new u8[]  {    1,  0,     2, },
-/* 1   START: */new u8[]  {    1,  1,     2, },
-/* 2  NORMAL: */new u8[] {    1,  2,     2, },
+      /* If triggers are not supported by this compile then the statement machine
+  ** used to detect the end of a statement is much simplier
+  */
+      var trans = new u8[][]   {
+     /* Token:           */
+     /* State:       **  SEMI  WS  OTHER */
+     /* 0 INVALID: */new u8[]  {    1,  0,     2, },
+     /* 1   START: */new u8[]  {    1,  1,     2, },
+     /* 2  NORMAL: */new u8[] {    1,  2,     2, },
 };
 #endif // * SQLITE_OMIT_TRIGGER */
 
@@ -184,12 +181,8 @@ var trans = new u8[][]   {
                 break;
               }
               zIdx += 2;
-              while ( zIdx < zSql.Length && zSql[zIdx] != '*' || zIdx < zSql.Length - 1 && zSql[zIdx + 1] != '/' )
-              {
-                zIdx++;
-              }
-              if ( zIdx == zSql.Length )
-                return 0;
+              while ( zIdx < zSql.Length && zSql[zIdx] != '*' || zIdx < zSql.Length - 1 && zSql[zIdx + 1] != '/' ) { zIdx++; }
+              if ( zIdx == zSql.Length ) return 0;
               zIdx++;
               token = tkWS;
               break;
@@ -201,24 +194,16 @@ var trans = new u8[][]   {
                 token = tkOTHER;
                 break;
               }
-              while ( zIdx < zSql.Length && zSql[zIdx] != '\n' )
-              {
-                zIdx++;
-              }
-              if ( zIdx == zSql.Length )
-                return state == 1 ? 1 : 0;//if( *zSql==0 ) return state==1;
+              while ( zIdx < zSql.Length && zSql[zIdx] != '\n' ) { zIdx++; }
+              if ( zIdx == zSql.Length ) return state == 1 ? 1 : 0;//if( *zSql==0 ) return state==1;
               token = tkWS;
               break;
             }
           case '[':
             {   /* Microsoft-style identifiers in [...] */
               zIdx++;
-              while ( zIdx < zSql.Length && zSql[zIdx] != ']' )
-              {
-                zIdx++;
-              }
-              if ( zIdx == zSql.Length )
-                return 0;
+              while ( zIdx < zSql.Length && zSql[zIdx] != ']' ) { zIdx++; }
+              if ( zIdx == zSql.Length ) return 0;
               token = tkOTHER;
               break;
             }
@@ -228,29 +213,23 @@ var trans = new u8[][]   {
             {
               int c = zSql[zIdx];
               zIdx++;
-              while ( zIdx < zSql.Length && zSql[zIdx] != c )
-              {
-                zIdx++;
-              }
-              if ( zIdx == zSql.Length )
-                return 0;
+              while ( zIdx < zSql.Length && zSql[zIdx] != c ) { zIdx++; }
+              if ( zIdx == zSql.Length ) return 0;
               token = tkOTHER;
               break;
             }
           default:
             {
 #if SQLITE_EBCDIC
-unsigned char c;
+        unsigned char c;
 #endif
               if ( IdChar( (u8)zSql[zIdx] ) )
               {
                 /* Keywords and unquoted identifiers */
                 int nId;
-                for ( nId = 1; ( zIdx + nId ) < zSql.Length && IdChar( (u8)zSql[zIdx + nId] ); nId++ )
-                {
-                }
+                for ( nId = 1; ( zIdx + nId ) < zSql.Length && IdChar( (u8)zSql[zIdx + nId] ); nId++ ) { }
 #if  SQLITE_OMIT_TRIGGER
-token = tkOTHER;
+                token = tkOTHER;
 #else
                 switch ( zSql[zIdx] )
                 {
@@ -260,7 +239,8 @@ token = tkOTHER;
                       if ( nId == 6 && sqlite3StrNICmp( zSql, zIdx, "create", 6 ) == 0 )
                       {
                         token = tkCREATE;
-                      } else
+                      }
+                      else
                       {
                         token = tkOTHER;
                       }
@@ -272,13 +252,16 @@ token = tkOTHER;
                       if ( nId == 7 && sqlite3StrNICmp( zSql, zIdx, "trigger", 7 ) == 0 )
                       {
                         token = tkTRIGGER;
-                      } else if ( nId == 4 && sqlite3StrNICmp( zSql, zIdx, "temp", 4 ) == 0 )
+                      }
+                      else if ( nId == 4 && sqlite3StrNICmp( zSql, zIdx, "temp", 4 ) == 0 )
                       {
                         token = tkTEMP;
-                      } else if ( nId == 9 && sqlite3StrNICmp( zSql, zIdx, "temporary", 9 ) == 0 )
+                      }
+                      else if ( nId == 9 && sqlite3StrNICmp( zSql, zIdx, "temporary", 9 ) == 0 )
                       {
                         token = tkTEMP;
-                      } else
+                      }
+                      else
                       {
                         token = tkOTHER;
                       }
@@ -290,12 +273,14 @@ token = tkOTHER;
                       if ( nId == 3 && sqlite3StrNICmp( zSql, zIdx, "end", 3 ) == 0 )
                       {
                         token = tkEND;
-                      } else
+                      }
+                      else
 #if ! SQLITE_OMIT_EXPLAIN
                         if ( nId == 7 && sqlite3StrNICmp( zSql, zIdx, "explain", 7 ) == 0 )
                         {
                           token = tkEXPLAIN;
-                        } else
+                        }
+                        else
 #endif
                         {
                           token = tkOTHER;
@@ -310,7 +295,8 @@ token = tkOTHER;
                 }
 #endif // * SQLITE_OMIT_TRIGGER */
                 zIdx += nId - 1;
-              } else
+              }
+              else
               {
                 /* Operators and special symbols */
                 token = tkOTHER;

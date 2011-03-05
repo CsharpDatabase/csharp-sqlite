@@ -35,11 +35,13 @@ namespace tcl.lang
         System.Diagnostics.Debug.WriteLine( "getting value of \"" + argv[1].ToString() + "\"" );
 
         interp.setResult( interp.getVar( argv[1], 0 ) );
-      } else if ( argv.Length == 3 )
+      }
+      else if ( argv.Length == 3 )
       {
         System.Diagnostics.Debug.WriteLine( "setting value of \"" + argv[1].ToString() + "\" to \"" + argv[2].ToString() + "\"" );
         interp.setResult( interp.setVar( argv[1], argv[2], 0 ) );
-      } else
+      }
+      else
       {
         throw new TclNumArgsException( interp, 1, argv, "varName ?newValue?" );
       }

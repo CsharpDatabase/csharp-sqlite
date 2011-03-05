@@ -124,7 +124,8 @@ namespace Community.CsharpSqlite
         {
           sqlite3Error( pErrorDb, SQLITE_NOMEM, "out of memory" );
           rc = SQLITE_NOMEM;
-        } else
+        }
+        else
         {
           pParse.db = pDb;
           if ( sqlite3OpenTempDatabase( pParse ) != 0 )
@@ -195,7 +196,8 @@ namespace Community.CsharpSqlite
         pDestDb, SQLITE_ERROR, "source and destination must be distinct"
         );
         p = null;
-      } else
+      }
+      else
       {
         /* Allocate space for a new sqlite3_backup object...
         ** EVIDENCE-OF: R-64852-21591 The sqlite3_backup object is created by a
@@ -389,7 +391,8 @@ namespace Community.CsharpSqlite
         if ( p.pDestDb != null && p.pSrc.pBt.inTransaction == TRANS_WRITE )
         {
           rc = SQLITE_BUSY;
-        } else
+        }
+        else
         {
           rc = SQLITE_OK;
         }
@@ -451,7 +454,8 @@ namespace Community.CsharpSqlite
           if ( p.iNext > nSrcPage )
           {
             rc = SQLITE_DONE;
-          } else if ( 0 == p.isAttached )
+          }
+          else if ( 0 == p.isAttached )
           {
             attachBackupObject( p );
           }
@@ -495,7 +499,8 @@ namespace Community.CsharpSqlite
             {
               nDestTruncate--;
             }
-          } else
+          }
+          else
           {
             nDestTruncate = (Pgno)( nSrcPage * ( pgszSrc / pgszDest ) );
           }
@@ -559,7 +564,8 @@ namespace Community.CsharpSqlite
             {
               rc = sqlite3PagerSync( pDestPager );
             }
-          } else
+          }
+          else
           {
             rc = sqlite3PagerCommitPhaseOne( pDestPager, null, false );
           }

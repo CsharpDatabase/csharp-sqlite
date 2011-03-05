@@ -96,27 +96,26 @@ namespace Community.CsharpSqlite
       {
         pDup = sqlite3ExprDup( db, pOrig, 0 );
         pDup = sqlite3PExpr( pParse, TK_AS, pDup, null, null );
-        if ( pDup == null )
-          return;
+        if ( pDup == null ) return;
         if ( pEList.a[iCol].iAlias == 0 )
         {
           pEList.a[iCol].iAlias = (u16)( ++pParse.nAlias );
         }
         pDup.iTable = pEList.a[iCol].iAlias;
-      } else if ( ExprHasProperty( pOrig, EP_IntValue ) || pOrig.u.zToken == null )
+      }
+      else if ( ExprHasProperty( pOrig, EP_IntValue ) || pOrig.u.zToken == null )
       {
         pDup = sqlite3ExprDup( db, pOrig, 0 );
-        if ( pDup == null )
-          return;
-      } else
+        if ( pDup == null ) return;
+      }
+      else
       {
         string zToken = pOrig.u.zToken;
         Debug.Assert( zToken != null );
         pOrig.u.zToken = null;
         pDup = sqlite3ExprDup( db, pOrig, 0 );
         pOrig.u.zToken = zToken;
-        if ( pDup == null )
-          return;
+        if ( pDup == null ) return;
         Debug.Assert( ( pDup.flags & ( EP_Reduced | EP_TokenOnly ) ) == 0 );
         pDup.flags2 |= EP2_MallocedToken;
         pDup.u.zToken = zToken;// sqlite3DbStrDup( db, zToken );
@@ -216,9 +215,9 @@ namespace Community.CsharpSqlite
               if ( pItem.zAlias != null )
               {
                 string zTabName = pItem.zAlias;
-                if ( sqlite3StrICmp( zTabName, zTab ) != 0 )
-                  continue;
-              } else
+                if ( sqlite3StrICmp( zTabName, zTab ) != 0 ) continue;
+              }
+              else
               {
                 string zTabName = pTab.zName;
                 if ( NEVER( zTabName == null ) || sqlite3StrICmp( zTabName, zTab ) != 0 )
@@ -259,7 +258,8 @@ namespace Community.CsharpSqlite
                     ** then skip the right table to avoid a duplicate match */
                     //pItem++;
                     i++;
-                  } else if ( ( pUsing = pSrcList.a[i + 1].pUsing ) != null )//pItem[1].pUsing
+                  }
+                  else if ( ( pUsing = pSrcList.a[i + 1].pUsing ) != null )//pItem[1].pUsing
                   {
                     /* If this match occurs on a column that is in the USING clause
                     ** of a join, skip the search of the right table of the join
@@ -284,72 +284,72 @@ namespace Community.CsharpSqlite
 
 #if !SQLITE_OMIT_TRIGGER
         /* If we have not already resolved the name, then maybe
-** it is a new.* or old.* trigger argument reference
-*/
+        ** it is a new.* or old.* trigger argument reference
+        */
         if ( zDb == null && zTab != null && cnt == 0 && pParse.pTriggerTab != null )
-        {
-          int op = pParse.eTriggerOp;
-          Table pTab = null;
-          Debug.Assert( op == TK_DELETE || op == TK_UPDATE || op == TK_INSERT );
-          if ( op != TK_DELETE && sqlite3StrICmp( "new", zTab ) == 0 )
           {
-            pExpr.iTable = 1;
-            pTab = pParse.pTriggerTab;
-          } else if ( op != TK_INSERT && sqlite3StrICmp( "old", zTab ) == 0 )
-          {
-            pExpr.iTable = 0;
-            pTab = pParse.pTriggerTab;
-          }
+            int op = pParse.eTriggerOp;
+            Table pTab = null;
+            Debug.Assert( op == TK_DELETE || op == TK_UPDATE || op == TK_INSERT );
+            if ( op != TK_DELETE && sqlite3StrICmp( "new", zTab ) == 0 )
+            {
+              pExpr.iTable = 1;
+              pTab = pParse.pTriggerTab;
+            }
+            else if ( op != TK_INSERT && sqlite3StrICmp( "old", zTab ) == 0 )
+            {
+              pExpr.iTable = 0;
+              pTab = pParse.pTriggerTab;
+            }
 
-          if ( pTab != null )
-          {
-            int iCol;
-            pSchema = pTab.pSchema;
-            cntTab++;
-            for ( iCol = 0; iCol < pTab.nCol; iCol++ )
+            if ( pTab !=null)
             {
-              Column pCol = pTab.aCol[iCol];
-              if ( sqlite3StrICmp( pCol.zName, zCol ) == 0 )
-              {
-                if ( iCol == pTab.iPKey )
+              int iCol;
+              pSchema = pTab.pSchema;
+              cntTab++;
+                for ( iCol = 0; iCol < pTab.nCol; iCol++ )
                 {
-                  iCol = -1;
+                  Column pCol = pTab.aCol[iCol];
+                  if ( sqlite3StrICmp( pCol.zName, zCol ) == 0 )
+                  {
+                    if ( iCol == pTab.iPKey )
+                    {
+                      iCol = -1;
+                    }
+                    break;
+                  }
                 }
-                break;
+        if( iCol>=pTab.nCol && sqlite3IsRowid(zCol) ){
+          iCol = -1;        /* IMP: R-44911-55124 */
               }
-            }
-            if ( iCol >= pTab.nCol && sqlite3IsRowid( zCol ) )
-            {
-              iCol = -1;        /* IMP: R-44911-55124 */
-            }
-            if ( iCol < pTab.nCol )
-            {
-              cnt++;
-              if ( iCol < 0 )
+              if ( iCol < pTab.nCol )
               {
-                pExpr.affinity = SQLITE_AFF_INTEGER;
-              } else if ( pExpr.iTable == 0 )
-              {
-                testcase( iCol == 31 );
-                testcase( iCol == 32 );
-                pParse.oldmask |= ( iCol >= 32 ? 0xffffffff : ( ( (u32)1 ) << iCol ) );
-              } else
-              {
-                testcase( iCol == 31 );
-                testcase( iCol == 32 );
-                pParse.newmask |= ( iCol >= 32 ? 0xffffffff : ( ( (u32)1 ) << iCol ) );
+                cnt++;
+                if ( iCol < 0 )
+                {
+                  pExpr.affinity = SQLITE_AFF_INTEGER;
+                }
+                else if ( pExpr.iTable == 0 )
+                {
+                  testcase( iCol == 31 );
+                  testcase( iCol == 32 );
+                  pParse.oldmask |= ( iCol >= 32 ? 0xffffffff : ( ( (u32)1 ) << iCol ) );
+                  }else{
+                    testcase( iCol==31 );
+                    testcase( iCol==32 );
+                    pParse.newmask |= (iCol>=32 ? 0xffffffff : (((u32)1)<<iCol));
+                }
+                pExpr.iColumn = (i16)iCol;
+                pExpr.pTab = pTab;
+                isTrigger = 1;
               }
-              pExpr.iColumn = (i16)iCol;
-              pExpr.pTab = pTab;
-              isTrigger = 1;
             }
           }
-        }
 #endif //* !SQLITE_OMIT_TRIGGER) */
 
         /*
-** Perhaps the name is a reference to the ROWID
-*/
+        ** Perhaps the name is a reference to the ROWID
+        */
         if ( cnt == 0 && cntTab == 1 && sqlite3IsRowid( zCol ) )
         {
           cnt = 1;
@@ -432,10 +432,12 @@ namespace Community.CsharpSqlite
         if ( zDb != null )
         {
           sqlite3ErrorMsg( pParse, "%s: %s.%s.%s", zErr, zDb, zTab, zCol );
-        } else if ( zTab != null )
+        }
+        else if ( zTab != null )
         {
           sqlite3ErrorMsg( pParse, "%s: %s.%s", zErr, zTab, zCol );
-        } else
+        }
+        else
         {
           sqlite3ErrorMsg( pParse, "%s: %s", zErr, zCol );
         }
@@ -468,7 +470,7 @@ namespace Community.CsharpSqlite
       sqlite3ExprDelete( db, ref pExpr.pRight );
       pExpr.pRight = null;
       pExpr.op = (u8)( isTrigger != 0 ? TK_TRIGGER : TK_COLUMN );
-lookupname_end:
+    lookupname_end:
       if ( cnt == 1 )
       {
         Debug.Assert( pNC != null );
@@ -479,12 +481,12 @@ lookupname_end:
         {
           Debug.Assert( pTopNC != null );
           pTopNC.nRef++;
-          if ( pTopNC == pNC )
-            break;
+          if ( pTopNC == pNC ) break;
           pTopNC = pTopNC.pNext;
         }
         return WRC_Prune;
-      } else
+      }
+      else
       {
         return WRC_Abort;
       }
@@ -505,12 +507,13 @@ lookupname_end:
         if ( p.pTab.iPKey == iCol )
         {
           p.iColumn = -1;
-        } else
+        }
+        else
         {
           p.iColumn = (ynVar)iCol;
-          testcase( iCol == BMS );
-          testcase( iCol == BMS - 1 );
-          pItem.colUsed |= ( (Bitmask)1 ) << ( iCol >= BMS ? BMS - 1 : iCol );
+          testcase(iCol == BMS);
+          testcase(iCol == BMS - 1);
+          pItem.colUsed |= ((Bitmask)1) << (iCol >= BMS ? BMS - 1 : iCol);
         }
         ExprSetProperty( p, EP_Resolved );
       }
@@ -538,8 +541,7 @@ lookupname_end:
       pParse = pNC.pParse;
       Debug.Assert( pParse == pWalker.pParse );
 
-      if ( ExprHasAnyProperty( pExpr, EP_Resolved ) )
-        return WRC_Prune;
+      if ( ExprHasAnyProperty( pExpr, EP_Resolved ) ) return WRC_Prune;
       ExprSetProperty( pExpr, EP_Resolved );
 #if !NDEBUG
       if ( pNC.pSrcList != null && pNC.pSrcList.nAlloc > 0 )
@@ -598,7 +600,8 @@ break;
               zDb = null;
               zTable = pExpr.pLeft.u.zToken;
               zColumn = pRight.u.zToken;
-            } else
+            }
+            else
             {
               Debug.Assert( pRight.op == TK_DOT );
               zDb = pExpr.pLeft.u.zToken;
@@ -635,11 +638,13 @@ break;
               if ( pDef == null )
               {
                 no_such_func = true;
-              } else
+              }
+              else
               {
                 wrong_num_args = true;
               }
-            } else
+            }
+            else
             {
               is_agg = pDef.xFunc == null;
             }
@@ -662,11 +667,13 @@ return WRC_Prune;
               sqlite3ErrorMsg( pParse, "misuse of aggregate function %.*s()", nId, zId );
               pNC.nErr++;
               is_agg = false;
-            } else if ( no_such_func )
+            }
+            else if ( no_such_func )
             {
               sqlite3ErrorMsg( pParse, "no such function: %.*s", nId, zId );
               pNC.nErr++;
-            } else if ( wrong_num_args )
+            }
+            else if ( wrong_num_args )
             {
               sqlite3ErrorMsg( pParse, "wrong number of arguments to function %.*s()",
               nId, zId );
@@ -677,11 +684,9 @@ return WRC_Prune;
               pExpr.op = TK_AGG_FUNCTION;
               pNC.hasAgg = 1;
             }
-            if ( is_agg )
-              pNC.allowAgg = 0;
+            if ( is_agg ) pNC.allowAgg = 0;
             sqlite3WalkExprList( pWalker, pList );
-            if ( is_agg )
-              pNC.allowAgg = 1;
+            if ( is_agg ) pNC.allowAgg = 1;
             /* FIX ME:  Compute pExpr.affinity based on the expected return
             ** type of the function
             */
@@ -813,10 +818,9 @@ return WRC_Prune;
       db = pParse.db;
       savedSuppErr = db.suppressErr;
       db.suppressErr = 1;
-      rc = sqlite3ResolveExprNames( nc, ref pE );
+      rc = sqlite3ResolveExprNames(nc, ref pE);
       db.suppressErr = savedSuppErr;
-      if ( rc != 0 )
-        return 0;
+      if (rc != 0) return 0;
 
       /* Try to match the ORDER BY expression against an expression
       ** in the result set.  Return an 1-based index of the matching
@@ -876,8 +880,7 @@ return WRC_Prune;
       int moreToDo = 1;
 
       pOrderBy = pSelect.pOrderBy;
-      if ( pOrderBy == null )
-        return 0;
+      if ( pOrderBy == null ) return 0;
       db = pParse.db;
 #if SQLITE_MAX_COLUMN
 if( pOrderBy.nExpr>db.aLimit[SQLITE_LIMIT_COLUMN] ){
@@ -906,8 +909,7 @@ return 1;
           pItem = pOrderBy.a[i];
           int iCol = -1;
           Expr pE, pDup;
-          if ( pItem.done != 0 )
-            continue;
+          if ( pItem.done != 0 ) continue;
           pE = pItem.pExpr;
           if ( sqlite3ExprIsInteger( pE, ref iCol ) != 0 )
           {
@@ -916,7 +918,8 @@ return 1;
               resolveOutOfRangeError( pParse, "ORDER", i + 1, pEList.nExpr );
               return 1;
             }
-          } else
+          }
+          else
           {
             iCol = resolveAsName( pParse, pEList, pE );
             if ( iCol == 0 )
@@ -936,14 +939,14 @@ return 1;
             int flags = pE.flags & EP_ExpCollate;
             sqlite3ExprDelete( db, ref pE );
             pItem.pExpr = pE = sqlite3Expr( db, TK_INTEGER, null );
-            if ( pE == null )
-              return 1;
+            if ( pE == null ) return 1;
             pE.pColl = pColl;
             pE.flags = (u16)( pE.flags | EP_IntValue | flags );
             pE.u.iValue = iCol;
             pItem.iCol = (u16)iCol;
             pItem.done = 1;
-          } else
+          }
+          else
           {
             moreToDo = 1;
           }
@@ -984,8 +987,7 @@ return 1;
       ExprList pEList;
       ExprList_item pItem;
 
-      if ( pOrderBy == null /* || pParse.db.mallocFailed != 0 */ )
-        return 0;
+      if ( pOrderBy == null /* || pParse.db.mallocFailed != 0 */ ) return 0;
 #if SQLITE_MAX_COLUMN
 if( pOrderBy.nExpr>db.aLimit[SQLITE_LIMIT_COLUMN] ){
 sqlite3ErrorMsg(pParse, "too many terms in %s BY clause", zType);
@@ -1041,8 +1043,7 @@ return 1;
       Parse pParse;                 /* Parsing context */
       int nResult;                   /* Number of terms in the result set */
 
-      if ( pOrderBy == null )
-        return 0;
+      if ( pOrderBy == null ) return 0;
       nResult = pSelect.pEList.nExpr;
       pParse = pNC.pParse;
       for ( i = 0; i < pOrderBy.nExpr; i++ )//, pItem++ )
@@ -1170,12 +1171,10 @@ return 1;
           if ( pItem.pSelect != null )
           {
             string zSavedContext = pParse.zAuthContext;
-            if ( pItem.zName != null )
-              pParse.zAuthContext = pItem.zName;
+            if ( pItem.zName != null ) pParse.zAuthContext = pItem.zName;
             sqlite3ResolveSelectNames( pParse, pItem.pSelect, pOuterNC );
             pParse.zAuthContext = zSavedContext;
-            if ( pParse.nErr != 0 /*|| db.mallocFailed != 0 */ )
-              return WRC_Abort;
+            if ( pParse.nErr != 0 /*|| db.mallocFailed != 0 */ ) return WRC_Abort;
           }
         }
 
@@ -1187,7 +1186,8 @@ return 1;
         if ( pGroupBy != null || sNC.hasAgg != 0 )
         {
           p.selFlags |= SF_Aggregate;
-        } else
+        }
+        else
         {
           sNC.allowAgg = 0;
         }
@@ -1332,8 +1332,7 @@ return 1;
       u8 savedHasAgg;
       var w = new Walker();
 
-      if ( pExpr == null )
-        return 0;
+      if ( pExpr == null ) return 0;
 #if SQLITE_MAX_EXPR_DEPTH//>0
 {
 Parse pParse = pNC.pParse;
@@ -1360,7 +1359,8 @@ pNC.pParse.nHeight -= pExpr.nHeight;
       if ( pNC.hasAgg != 0 )
       {
         ExprSetProperty( pExpr, EP_Agg );
-      } else if ( savedHasAgg != 0 )
+      }
+      else if ( savedHasAgg != 0 )
       {
         pNC.hasAgg = 1;
       }

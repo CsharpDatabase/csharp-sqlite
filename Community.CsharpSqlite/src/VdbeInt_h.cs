@@ -47,7 +47,6 @@ namespace Community.CsharpSqlite
     **
     **  SQLITE_SOURCE_ID: 2011-01-28 17:03:50 ed759d5a9edb3bba5f48f243df47be29e3fe8cd7
     **
-    **  $Header$
     *************************************************************************
     */
     //#if !_VDBEINT_H_
@@ -216,9 +215,9 @@ get { return _flags; }
 set { _flags = value; }
 }
 #else
-      public u16 flags = MEM_Null;  /* Some combination of MEM_Null, MEM_Str, MEM_Dyn, etc. */
+      public u16 flags;             /* Some combination of MEM_Null, MEM_Str, MEM_Dyn, etc. */
 #endif
-      public u8 type = SQLITE_NULL; /* One of SQLITE_NULL, SQLITE_TEXT, SQLITE_INTEGER, etc */
+      public u8 type;               /* One of SQLITE_NULL, SQLITE_TEXT, SQLITE_INTEGER, etc */
       public u8 enc;                /* SQLITE_UTF8, SQLITE_UTF16BE, SQLITE_UTF16LE */
 #if SQLITE_DEBUG
       public Mem pScopyFrom;        /* This Mem is a shallow copy of pScopyFrom */
@@ -233,6 +232,21 @@ set { _flags = value; }
       public StrAccum _StrAccum;    /* Used when C# overload Z as STR context */
       public object _MD5Context;    /* Used when C# overload Z as MD5 context */
 
+      public Mem()
+      {
+      }
+
+      public Mem( sqlite3 db, string z, double r, int i, int n, u16 flags, u8 type, u8 enc )
+      {
+        this.db = db;
+        this.z = z;
+        this.r = r;
+        this.u.i = i;
+        this.n = n;
+        this.flags = flags;
+        this.type = type;
+        this.enc = enc;
+      }
 
       public void CopyTo( ref Mem ct )
       {

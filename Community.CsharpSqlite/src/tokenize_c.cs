@@ -141,9 +141,7 @@ namespace Community.CsharpSqlite
             testcase( z[iOffset + 0] == '\n' );
             testcase( z[iOffset + 0] == '\f' );
             testcase( z[iOffset + 0] == '\r' );
-            for ( i = 1; z.Length > iOffset + i && sqlite3Isspace( z[iOffset + i] ); i++ )
-            {
-            }
+            for ( i = 1; z.Length > iOffset + i && sqlite3Isspace( z[iOffset + i] ); i++ ) { }
             tokenType = TK_SPACE;
             return i;
           }
@@ -152,9 +150,7 @@ namespace Community.CsharpSqlite
             if ( z.Length > iOffset + 1 && z[iOffset + 1] == '-' )
             {
               /* IMP: R-15891-05542 -- syntax diagram for comments */
-              for ( i = 2; z.Length > iOffset + i && ( c = (byte)z[iOffset + i] ) != 0 && c != '\n'; i++ )
-              {
-              }
+              for ( i = 2; z.Length > iOffset + i && ( c = (byte)z[iOffset + i] ) != 0 && c != '\n'; i++ ) { }
               tokenType = TK_SPACE;   /* IMP: R-22934-25134 */
               return i;
             }
@@ -194,14 +190,9 @@ namespace Community.CsharpSqlite
               return 1;
             }
             /* IMP: R-15891-05542 -- syntax diagram for comments */
-            for ( i = 3, c = (byte)z[iOffset + 2]; iOffset + i < z.Length && ( c != '*' || ( z[iOffset + i] != '/' ) && ( c != 0 ) ); i++ )
-            {
-              c = (byte)z[iOffset + i];
-            }
-            if ( iOffset + i == z.Length )
-              c = 0;
-            if ( c != 0 )
-              i++;
+            for ( i = 3, c = (byte)z[iOffset + 2]; iOffset + i < z.Length && ( c != '*' || ( z[iOffset + i] != '/' ) && ( c != 0 ) ); i++ ) { c = (byte)z[iOffset + i]; }
+            if ( iOffset + i == z.Length ) c = 0;
+            if ( c != 0 ) i++;
             tokenType = TK_SPACE; /* IMP: R-22934-25134 */
             return i;
           }
@@ -221,15 +212,18 @@ namespace Community.CsharpSqlite
             {
               tokenType = TK_LE;
               return 2;
-            } else if ( c == '>' )
+            }
+            else if ( c == '>' )
             {
               tokenType = TK_NE;
               return 2;
-            } else if ( c == '<' )
+            }
+            else if ( c == '<' )
             {
               tokenType = TK_LSHIFT;
               return 2;
-            } else
+            }
+            else
             {
               tokenType = TK_LT;
               return 1;
@@ -241,11 +235,13 @@ namespace Community.CsharpSqlite
             {
               tokenType = TK_GE;
               return 2;
-            } else if ( c == '>' )
+            }
+            else if ( c == '>' )
             {
               tokenType = TK_RSHIFT;
               return 2;
-            } else
+            }
+            else
             {
               tokenType = TK_GT;
               return 1;
@@ -257,7 +253,8 @@ namespace Community.CsharpSqlite
             {
               tokenType = TK_ILLEGAL;
               return 2;
-            } else
+            }
+            else
             {
               tokenType = TK_NE;
               return 2;
@@ -269,7 +266,8 @@ namespace Community.CsharpSqlite
             {
               tokenType = TK_BITOR;
               return 1;
-            } else
+            }
+            else
             {
               tokenType = TK_CONCAT;
               return 2;
@@ -305,7 +303,8 @@ namespace Community.CsharpSqlite
                 if ( z.Length > iOffset + i + 1 && z[iOffset + i + 1] == delim )
                 {
                   i++;
-                } else
+                }
+                else
                 {
                   break;
                 }
@@ -320,11 +319,13 @@ namespace Community.CsharpSqlite
             {
               tokenType = TK_STRING;
               return i + 1;
-            } else if ( c != 0 )
+            }
+            else if ( c != 0 )
             {
               tokenType = TK_ID;
               return i + 1;
-            } else
+            }
+            else
             {
               tokenType = TK_ILLEGAL;
               return i;
@@ -354,28 +355,17 @@ namespace Community.CsharpSqlite
         case '8':
         case '9':
           {
-            testcase( z[iOffset] == '0' );
-            testcase( z[iOffset] == '1' );
-            testcase( z[iOffset] == '2' );
-            testcase( z[iOffset] == '3' );
-            testcase( z[iOffset] == '4' );
-            testcase( z[iOffset] == '5' );
-            testcase( z[iOffset] == '6' );
-            testcase( z[iOffset] == '7' );
-            testcase( z[iOffset] == '8' );
+            testcase( z[iOffset] == '0' ); testcase( z[iOffset] == '1' ); testcase( z[iOffset] == '2' );
+            testcase( z[iOffset] == '3' ); testcase( z[iOffset] == '4' ); testcase( z[iOffset] == '5' );
+            testcase( z[iOffset] == '6' ); testcase( z[iOffset] == '7' ); testcase( z[iOffset] == '8' );
             testcase( z[iOffset] == '9' );
             tokenType = TK_INTEGER;
-            for ( i = 0; z.Length > iOffset + i && sqlite3Isdigit( z[iOffset + i] ); i++ )
-            {
-            }
+            for ( i = 0; z.Length > iOffset + i && sqlite3Isdigit( z[iOffset + i] ); i++ ) { }
 #if !SQLITE_OMIT_FLOATING_POINT
             if ( z.Length > iOffset + i && z[iOffset + i] == '.' )
             {
               i++;
-              while ( z.Length > iOffset + i && sqlite3Isdigit( z[iOffset + i] ) )
-              {
-                i++;
-              }
+              while ( z.Length > iOffset + i && sqlite3Isdigit( z[iOffset + i] ) ) { i++; }
               tokenType = TK_FLOAT;
             }
             if ( z.Length > iOffset + i + 1 && ( z[iOffset + i] == 'e' || z[iOffset + i] == 'E' ) &&
@@ -385,10 +375,7 @@ namespace Community.CsharpSqlite
             )
             {
               i += 2;
-              while ( z.Length > iOffset + i && sqlite3Isdigit( z[iOffset + i] ) )
-              {
-                i++;
-              }
+              while ( z.Length > iOffset + i && sqlite3Isdigit( z[iOffset + i] ) ) { i++; }
               tokenType = TK_FLOAT;
             }
 #endif
@@ -402,25 +389,19 @@ namespace Community.CsharpSqlite
 
         case '[':
           {
-            for ( i = 1, c = (byte)z[iOffset + 0]; c != ']' && ( iOffset + i ) < z.Length && ( c = (byte)z[iOffset + i] ) != 0; i++ )
-            {
-            }
+            for ( i = 1, c = (byte)z[iOffset + 0]; c != ']' && ( iOffset + i ) < z.Length && ( c = (byte)z[iOffset + i] ) != 0; i++ ) { }
             tokenType = c == ']' ? TK_ID : TK_ILLEGAL;
             return i;
           }
         case '?':
           {
             tokenType = TK_VARIABLE;
-            for ( i = 1; z.Length > iOffset + i && sqlite3Isdigit( z[iOffset + i] ); i++ )
-            {
-            }
+            for ( i = 1; z.Length > iOffset + i && sqlite3Isdigit( z[iOffset + i] ); i++ ) { }
             return i;
           }
         case '#':
           {
-            for ( i = 1; z.Length > iOffset + i && sqlite3Isdigit( z[iOffset + i] ); i++ )
-            {
-            }
+            for ( i = 1; z.Length > iOffset + i && sqlite3Isdigit( z[iOffset + i] ); i++ ) { }
             if ( i > 1 )
             {
               /* Parameters of the form #NNN (where NNN is a number) are used
@@ -439,9 +420,7 @@ namespace Community.CsharpSqlite
         case ':':
           {
             int n = 0;
-            testcase( z[iOffset + 0] == '$' );
-            testcase( z[iOffset + 0] == '@' );
-            testcase( z[iOffset + 0] == ':' );
+            testcase( z[iOffset + 0] == '$' ); testcase( z[iOffset + 0] == '@' ); testcase( z[iOffset + 0] == ':' );
             tokenType = TK_VARIABLE;
             for ( i = 1; z.Length > iOffset + i && ( c = (byte)z[iOffset + i] ) != 0; i++ )
             {
@@ -449,7 +428,8 @@ namespace Community.CsharpSqlite
               {
                 n++;
 #if !SQLITE_OMIT_TCL_VARIABLE
-              } else if ( c == '(' && n > 0 )
+              }
+              else if ( c == '(' && n > 0 )
               {
                 do
                 {
@@ -458,30 +438,31 @@ namespace Community.CsharpSqlite
                 if ( c == ')' )
                 {
                   i++;
-                } else
+                }
+                else
                 {
                   tokenType = TK_ILLEGAL;
                 }
                 break;
-              } else if ( c == ':' && z[iOffset + i + 1] == ':' )
+              }
+              else if ( c == ':' && z[iOffset + i + 1] == ':' )
               {
                 i++;
 #endif
-              } else
+              }
+              else
               {
                 break;
               }
             }
-            if ( n == 0 )
-              tokenType = TK_ILLEGAL;
+            if ( n == 0 ) tokenType = TK_ILLEGAL;
             return i;
           }
 #if !SQLITE_OMIT_BLOB_LITERAL
         case 'x':
         case 'X':
           {
-            testcase( z[iOffset + 0] == 'x' );
-            testcase( z[iOffset + 0] == 'X' );
+            testcase( z[iOffset + 0] == 'x' ); testcase( z[iOffset + 0] == 'X' );
             if ( z.Length > iOffset + 1 && z[iOffset + 1] == '\'' )
             {
               tokenType = TK_BLOB;
@@ -492,10 +473,8 @@ namespace Community.CsharpSqlite
                   tokenType = TK_ILLEGAL;
                 }
               }
-              if ( i % 2 != 0 || z.Length == iOffset + i && c != '\'' )
-                tokenType = TK_ILLEGAL;
-              if ( c != 0 )
-                i++;
+              if ( i % 2 != 0 || z.Length == iOffset + i && c != '\'' ) tokenType = TK_ILLEGAL;
+              if ( c != 0 ) i++;
               return i;
             }
             goto default;
@@ -508,9 +487,7 @@ namespace Community.CsharpSqlite
             {
               break;
             }
-            for ( i = 1; i < z.Length - iOffset && IdChar( (byte)z[iOffset + i] ); i++ )
-            {
-            }
+            for ( i = 1; i < z.Length - iOffset && IdChar( (byte)z[iOffset + i] ); i++ ) { }
             tokenType = keywordCode( z, iOffset, i );
             return i;
           }
@@ -560,8 +537,7 @@ namespace Community.CsharpSqlite
       Debug.Assert( pParse.nVarExprAlloc == 0 );
       Debug.Assert( pParse.apVarExpr == null );
       enableLookaside = db.lookaside.bEnabled;
-      if ( db.lookaside.pStart != 0 )
-        db.lookaside.bEnabled = 1;
+      if ( db.lookaside.pStart != 0 ) db.lookaside.bEnabled = 1;
       while ( /*  0 == db.mallocFailed && */  i < zSql.Length )
       {
         Debug.Assert( i >= 0 );
@@ -590,7 +566,7 @@ namespace Community.CsharpSqlite
             {
               sqlite3DbFree( db, ref pzErrMsg );
               pzErrMsg = sqlite3MPrintf( db, "unrecognized token: \"%T\"",
-              (object)pParse.sLastToken );
+                (object)pParse.sLastToken );
               nErr++;
               goto abort_parse;
             }
@@ -612,7 +588,7 @@ namespace Community.CsharpSqlite
             }
         }
       }
-abort_parse:
+    abort_parse:
       pParse.zTail = new StringBuilder( zSql.Length <= i ? "" : zSql.Substring( i, zSql.Length - i ) );
       if ( zSql.Length >= i && nErr == 0 && pParse.rc == SQLITE_OK )
       {

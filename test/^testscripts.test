@@ -1,0 +1,83 @@
+#########################################################################################
+# test/^testscripts.txt
+#########################################################################################
+set testdir [file dirname $argv0]
+source $testdir/tester.tcl
+
+# Uncomment the _RunWorking line to run all the tests
+# or copy one of test filenames 
+# or enter TCL commands such as the ones that are listed 
+# after these comments
+
+
+##########################################################################################
+#puts -nonewline "Press RETURN to exit..."; gets stdin; exit 0
+
+set filter ""
+if [string compare $filter "skip"] {
+if ![string compare $filter ""] {puts -nonewline "Enter test name prefix:"; set filter [gets stdin]}
+source $testdir/_C#SQLite.txt
+}
+
+  set tm1 [clock seconds] 
+  if ![string compare $filter ""] { 
+    set rc [run_test_suite C#SQLitetests] 
+  } else { 
+    set rc [run_test_suite C#SQLiteFilterTests] 
+  }
+  set tm2 [clock seconds]
+
+  set minutes [expr {($tm2-$tm1)/60}]
+  set seconds [expr {($tm2-$tm1)%60}]
+  puts [format "\nTests ran in  (%d:%.2d) " $minutes $seconds]
+finish_test
+##########################################################################################
+
+
+
+##########################################################################################
+#
+# Sample TCL command sequences
+#
+##########################################################################################
+
+do_test SIMPLE_SQLITE_VERSION {
+    execsql { 
+    SELECT SQLITE_VERSION(), SQLITE_SOURCE_ID();
+  }
+} {3.7.5.C# {Ported to C# from 2011-01-28 17:03:50 ed759d5a9edb3bba5f48f243df47be29e3fe8cd7}}
+
+
+do_test SIMPLE_COUNT_SQL_MASTER {
+    execsql { 
+    SELECT COUNT(*) FROM SQLITE_MASTER;
+  }
+} {0}
+do_test SIMPLE_CREATE_TABLE {
+    execsql { 
+    CREATE TABLE T1 (C1);
+  }
+} {}
+
+do_test SIMPLE_SELECT_ALL {
+    execsql { 
+    SELECT * FROM SQLITE_MASTER;
+  }
+} {table T1 T1 2 {CREATE TABLE T1 (C1)}}
+
+
+
+##########################################################################################
+#
+# TCL Test suites
+#
+# help will display the test suites and descriptions
+# the supported test suites are listed below
+##########################################################################################
+#
+#  Test suite: "C#SQLitetests"
+#    Quick test suite for C#-SQLite. Runs in around 7 minutes on a workstation.
+#
+# test_list C#SQLitetests will display the individual file names
+##########################################################################################
+

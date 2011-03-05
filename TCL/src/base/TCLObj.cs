@@ -91,7 +91,8 @@ namespace tcl.lang
       {
         tint = (TclObj)rep;
         tint.value = o;
-      } else
+      }
+      else
       {
         tobj.InternalRep = new TclObj( o );
       }

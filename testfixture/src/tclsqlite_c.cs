@@ -57,7 +57,7 @@ using sqlite3_blob = sqlite.Incrblob;
     **
     **  SQLITE_SOURCE_ID: 2011-01-28 17:03:50 ed759d5a9edb3bba5f48f243df47be29e3fe8cd7
     **
-    **  $Header$
+    **  $Header: testfixture/src/tclsqlite_c.cs,v b62bda409264 2011/03/01 01:21:55 Noah $
     *************************************************************************
     */
     //#include "tcl.h"
@@ -201,7 +201,7 @@ public IncrblobChannel pPrev;   /* Linked list of all open incrblob channels */
       //while( *z2 ){ z2++; }
       return 0x3fffffff & z.Length;
     }
-
+    
     static int strlen30( string z )
     {
       //const char *z2 = z;
@@ -431,9 +431,7 @@ return TCL.TCL_OK;
 }
 #else  // * else clause for "#if !SQLITE_OMIT_INCRBLOB" */
     //#define closeIncrblobChannels(pDb)
-    static void closeIncrblobChannels( SqliteDb pDb )
-    {
-    }
+    static void closeIncrblobChannels( SqliteDb pDb ) { }
 #endif
 
     /*
@@ -641,9 +639,9 @@ return TCL.TCL_OK;
     {
       SqliteDb pDb = (SqliteDb)cd;
       TclObject str = null;
-      StringBuilder zTm = new StringBuilder( 100 );//char zTm[100];
+      StringBuilder zTm = new StringBuilder(100);//char zTm[100];
 
-      sqlite3_snprintf( 100, zTm, "%lld", tm );
+      sqlite3_snprintf( 100,  zTm, "%lld", tm );
       TCL.Tcl_DStringInit( ref str );
       TCL.Tcl_DStringAppendElement( str, pDb.zProfile );
       TCL.Tcl_DStringAppendElement( str, " {" + zSql + "}" );
@@ -826,7 +824,8 @@ pDb.pUnlockNotify = 0;
         TCL.Tcl_IncrRefCount( pCmd );
         rc = TCL.Tcl_EvalObjEx( p.interp, pCmd, 0 );
         TCL.Tcl_DecrRefCount( ref pCmd );
-      } else
+      }
+      else
       {
         /* If there are arguments to the function, make a shallow copy of the
         ** script object, lappend the arguments, then evaluate the copy.
@@ -866,7 +865,8 @@ pDb.pUnlockNotify = 0;
                 if ( v >= -2147483647 && v <= 2147483647 )
                 {
                   pVal = TCL.Tcl_NewIntObj( (int)v );
-                } else
+                }
+                else
                 {
                   pVal = TCL.Tcl_NewWideIntObj( v );
                 }
@@ -912,7 +912,8 @@ pDb.pUnlockNotify = 0;
       if ( rc != 0 && rc != TCL.TCL_RETURN )
       {
         sqlite3_result_error( context, TCL.Tcl_GetStringResult( p.interp ), -1 );
-      } else
+      }
+      else
       {
         Tcl_Obj pVar = TCL.Tcl_GetObjResult( p.interp );
         int n = 0;
@@ -924,22 +925,26 @@ pDb.pUnlockNotify = 0;
         { //&& pVar.bytes==0 ){
           /* Only return a BLOB type if the Tcl variable is a bytearray and
           ** has no string representation. */
-          data = Encoding.UTF8.GetString( TCL.Tcl_GetByteArrayFromObj( pVar, ref n ) );
+          data = Encoding.UTF8.GetString(TCL.Tcl_GetByteArrayFromObj( pVar, ref n ));
           sqlite3_result_blob( context, data, n, null );
-        } else if ( zType == "boolean" )
+        }
+        else if ( zType == "boolean" )
         {
-          TCL.Tcl_GetIntFromObj( null, pVar, ref n );
+          TCL.Tcl_GetIntFromObj(null, pVar, ref n);
           sqlite3_result_int( context, n );
-        } else if ( zType == "wideint" ||
-          zType == "int" || Int64.TryParse( pVar.ToString(), out v ) )
+        }
+        else if ( zType == "wideint"  ||
+        zType == "int"  || Int64.TryParse( pVar.ToString(), out v ) )
         {
           TCL.Tcl_GetWideIntFromObj( null, pVar, ref v );
           sqlite3_result_int64( context, v );
-        } else if ( zType == "double" || Double.TryParse( pVar.ToString(), out r ) )
+        }
+        else if ( zType == "double" || Double.TryParse( pVar.ToString(), out r ) )
         {
           TCL.Tcl_GetDoubleFromObj( null, pVar, ref r );
           sqlite3_result_double( context, r );
-        } else
+        }
+        else
         {
           data = TCL.Tcl_GetStringFromObj( pVar, n );
           n = data.Length;
@@ -1216,14 +1221,16 @@ else pVal = TCL.Tcl_NewStringObj( zText, -1 );
           if ( pPreStmt.pPrev != null )
           {
             pPreStmt.pPrev.pNext = pPreStmt.pNext;
-          } else
+          }
+          else
           {
             pDb.stmtList = pPreStmt.pNext;
           }
           if ( pPreStmt.pNext != null )
           {
             pPreStmt.pNext.pPrev = pPreStmt.pPrev;
-          } else
+          }
+          else
           {
             pDb.stmtLast = pPreStmt.pPrev;
           }
@@ -1252,7 +1259,8 @@ else pVal = TCL.Tcl_NewStringObj( zText, -1 );
             /* A compile-time error in the statement. */
             TCL.Tcl_SetObjResult( interp, dbTextToObj( sqlite3_errmsg( pDb.db ) ) );
             return TCL.TCL_ERROR;
-          } else
+          }
+          else
           {
             /* The statement was a no-op.  Continue to the next statement
             ** in the SQL string.
@@ -1290,40 +1298,45 @@ else pVal = TCL.Tcl_NewStringObj( zText, -1 );
             string zType = pVar.typePtr;
             //char c = zType[0];
             if ( zVar[0] == '@' ||
-            ( zType == "bytearray" ) )// TODO -- && pVar.bytes == 0 ) )
+            ( zType=="bytearray"  ) )// TODO -- && pVar.bytes == 0 ) )
             {
               /* Load a BLOB type if the Tcl variable is a bytearray and
               ** it has no string representation or the host
               ** parameter name begins with "@". */
-              if ( zVar[0] == '@' || pVar.stringRep == null )
+              if ( zVar[0] == '@' || pVar.stringRep == null)
                 sqlite3_bind_blob( pStmt, i, TCL.Tcl_GetByteArrayFromObj( pVar, ref n ), n, SQLITE_STATIC );
               else
-                sqlite3_bind_text( pStmt, i, TCL.Tcl_GetStringFromObj( pVar, ref n ), n, SQLITE_STATIC );
+              sqlite3_bind_text( pStmt, i, TCL.Tcl_GetStringFromObj( pVar, ref n ), n, SQLITE_STATIC );
               TCL.Tcl_IncrRefCount( pVar );
               pPreStmt.apParm[iParm++] = pVar;
-            } else if ( zType == "boolean" )
+            }
+            else if ( zType=="boolean"  )
             {
               TCL.Tcl_GetIntFromObj( interp, pVar, ref n );
               sqlite3_bind_int( pStmt, i, n );
-            } else if ( zType == "double" )
+            }
+            else if (  zType== "double" )
             {
               double r = 0;
               TCL.Tcl_GetDoubleFromObj( interp, pVar, ref r );
               sqlite3_bind_double( pStmt, i, r );
-            } else if ( zType == "wideint" ||
-              zType == "int" )
+            }
+            else if (  zType=="wideint" ||
+             zType== "int" )
             {
               Tcl_WideInt v = 0;
               TCL.Tcl_GetWideIntFromObj( interp, pVar, ref v );
               sqlite3_bind_int64( pStmt, i, v );
-            } else
+            }
+            else
             {
               data = TCL.Tcl_GetStringFromObj( pVar, ref n );
               sqlite3_bind_text( pStmt, i, data, n, SQLITE_STATIC );
               TCL.Tcl_IncrRefCount( pVar );
               pPreStmt.apParm[iParm++] = pVar;
             }
-          } else
+          }
+          else
           {
             sqlite3_bind_null( pStmt, i );
           }
@@ -1331,7 +1344,7 @@ else pVal = TCL.Tcl_NewStringObj( zText, -1 );
       }
       pPreStmt.nParm = iParm;
       /* save aMem values for later reuse */
-      pPreStmt.aMem = new Mem[pPreStmt.pStmt.aMem.Length];
+      pPreStmt.aMem = new Mem[pPreStmt.pStmt.aMem.Length ];
       for ( int ix = 0; ix < pPreStmt.pStmt.aMem.Length; ix++ )
       {
         pPreStmt.pStmt.aMem[ix].CopyTo( ref pPreStmt.aMem[ix] );
@@ -1371,7 +1384,8 @@ else pVal = TCL.Tcl_NewStringObj( zText, -1 );
         /* If the cache is turned off, deallocated the statement */
         sqlite3_finalize( pPreStmt.pStmt );
         TCL.Tcl_Free( ref pPreStmt );
-      } else
+      }
+      else
       {
         /* Add the prepared statement to the beginning of the cache list. */
         pPreStmt.pNext = pDb.stmtList;
@@ -1385,7 +1399,8 @@ else pVal = TCL.Tcl_NewStringObj( zText, -1 );
         {
           Debug.Assert( pDb.nStmt == 0 );
           pDb.stmtLast = pPreStmt;
-        } else
+        }
+        else
         {
           Debug.Assert( pDb.nStmt > 0 );
         }
@@ -1567,7 +1582,8 @@ else pVal = TCL.Tcl_NewStringObj( zText, -1 );
           rc = dbPrepareAndBind( p.pDb, p.zSql, ref p.zSql, ref p.pPreStmt );
           if ( rc != TCL.TCL_OK )
             return rc;
-        } else
+        }
+        else
         {
           int rcs;
           SqliteDb pDb = p.pDb;
@@ -1600,7 +1616,8 @@ else pVal = TCL.Tcl_NewStringObj( zText, -1 );
             TCL.Tcl_SetObjResult( pDb.interp, dbTextToObj( sqlite3_errmsg( pDb.db ) ) );
             dbReleaseStmt( pDb, pPreStmt, 1 );
             return TCL.TCL_ERROR;
-          } else
+          }
+          else
           {
             dbReleaseStmt( pDb, pPreStmt, 0 );
           }
@@ -1657,7 +1674,8 @@ else pVal = TCL.Tcl_NewStringObj( zText, -1 );
             if ( v >= -2147483647 && v <= 2147483647 )
             {
               return TCL.Tcl_NewIntObj( (int)v );
-            } else
+            }
+            else
             {
               return TCL.Tcl_NewWideIntObj( v );
             }
@@ -1700,10 +1718,7 @@ return( (major==8 && minor>=6) || major>8 );
 **   if( DbUseNre() ) { ... }
 */
     const int SQLITE_TCL_NRE = 0;                         //# define SQLITE_TCL_NRE 0
-    static bool DbUseNre()
-    {
-      return false;
-    }                     //# define DbUseNre() 0
+    static bool DbUseNre() { return false; }                     //# define DbUseNre() 0
     //# define Tcl_NRAddCallback(a,b,c,d,e,f) 0
     //# define Tcl_NREvalObj(a,b,c) 0
     //# define Tcl_NRCreateCommand(a,b,c,d,e,f) 0
@@ -1742,7 +1757,8 @@ return( (major==8 && minor>=6) || major>8 );
           if ( pArray == null )
           {
             TCL.Tcl_ObjSetVar2( interp, apColName[i], null, pVal, 0 );
-          } else
+          }
+          else
           {
             TCL.Tcl_ObjSetVar2( interp, pArray, apColName[i], pVal, 0 );
           }
@@ -1762,7 +1778,8 @@ return( (major==8 && minor>=6) || major>8 );
           Debugger.Break();
           //TCL.Tcl_NRAddCallback(interp, DbEvalNextCmd, (void*)p, (void*)pScript, 0, 0);
           //return TCL.Tcl_NREvalObj(interp, pScript, 0);
-        } else
+        }
+        else
         {
           rc = TCL.Tcl_EvalObjEx( interp, pScript, 0 );
         }
@@ -1945,11 +1962,13 @@ break;
             {
               zSrcDb = "main";
               zDestFile = TCL.Tcl_GetString( objv[2] );
-            } else if ( objc == 4 )
+            }
+            else if ( objc == 4 )
             {
               zSrcDb = TCL.Tcl_GetString( objv[2] );
               zDestFile = TCL.Tcl_GetString( objv[3] );
-            } else
+            }
+            else
             {
               TCL.Tcl_WrongNumArgs( interp, 2, objv, "?DATABASE? FILENAME" );
               return TCL.TCL_ERROR;
@@ -1979,14 +1998,13 @@ break;
               pBackup.pDest.pBt.pPager.pCodec = pBackup.pSrc.pBt.pPager.pCodec.Copy();
             }
 #endif
-            while ( ( rc = sqlite3_backup_step( pBackup, 100 ) ) == SQLITE_OK )
-            {
-            }
+            while ( ( rc = sqlite3_backup_step( pBackup, 100 ) ) == SQLITE_OK ) { }
             sqlite3_backup_finish( pBackup );
             if ( rc == SQLITE_DONE )
             {
               rc = TCL.TCL_OK;
-            } else
+            }
+            else
             {
               TCL.Tcl_AppendResult( interp, "backup failed: ",
               sqlite3_errmsg( pDest ) );
@@ -2007,13 +2025,15 @@ break;
             {
               TCL.Tcl_WrongNumArgs( interp, 2, objv, "CALLBACK" );
               return TCL.TCL_ERROR;
-            } else if ( objc == 2 )
+            }
+            else if ( objc == 2 )
             {
               if ( pDb.zBusy != null )
               {
                 TCL.Tcl_AppendResult( interp, pDb.zBusy );
               }
-            } else
+            }
+            else
             {
               string zBusy;
               int len = 0;
@@ -2026,7 +2046,8 @@ break;
               {
                 //pDb.zBusy = TCL.Tcl_Alloc( len + 1 );
                 pDb.zBusy = zBusy;// memcpy( pDb.zBusy, zBusy, len + 1 );
-              } else
+              }
+              else
               {
                 pDb.zBusy = null;
               }
@@ -2034,7 +2055,8 @@ break;
               {
                 pDb.interp = interp;
                 sqlite3_busy_handler( pDb.db, (dxBusy)DbBusyHandler, pDb );
-              } else
+              }
+              else
               {
                 sqlite3_busy_handler( pDb.db, null, null );
               }
@@ -2065,37 +2087,43 @@ break;
               {
                 TCL.Tcl_WrongNumArgs( interp, 2, objv, "flush" );
                 return TCL.TCL_ERROR;
-              } else
+              }
+              else
               {
                 flushStmtCache( pDb );
               }
-            } else if ( subCmd == "size" )
+            }
+            else if ( subCmd == "size" )
             {
               if ( objc != 4 )
               {
                 TCL.Tcl_WrongNumArgs( interp, 2, objv, "size n" );
                 return TCL.TCL_ERROR;
-              } else
+              }
+              else
               {
                 if ( TCL.TCL_ERROR == ( TCL.Tcl_GetIntFromObj( interp, objv[3], ref n ) != TCL.TCL_OK ? TCL.TCL_ERROR : TCL.TCL_OK ) )
                 {
                   TCL.Tcl_AppendResult( interp, "cannot convert \"",
-                  TCL.Tcl_GetStringFromObj( objv[3], 0 ), "\" to integer", 0 );
+                   TCL.Tcl_GetStringFromObj( objv[3], 0 ), "\" to integer", 0 );
                   return TCL.TCL_ERROR;
-                } else
+                }
+                else
                 {
                   if ( n < 0 )
                   {
                     flushStmtCache( pDb );
                     n = 0;
-                  } else if ( n > MAX_PREPARED_STMTS )
+                  }
+                  else if ( n > MAX_PREPARED_STMTS )
                   {
                     n = MAX_PREPARED_STMTS;
                   }
                   pDb.maxStmt = n;
                 }
               }
-            } else
+            }
+            else
             {
               TCL.Tcl_AppendResult( interp, "bad option \"",
               TCL.Tcl_GetStringFromObj( objv[2], 0 ), "\": must be flush or size", null );
@@ -2204,13 +2232,15 @@ break;
             {
               TCL.Tcl_WrongNumArgs( interp, 2, objv, "?CALLBACK?" );
               return TCL.TCL_ERROR;
-            } else if ( objc == 2 )
+            }
+            else if ( objc == 2 )
             {
               if ( pDb.zCommit != null )
               {
                 TCL.Tcl_AppendResult( interp, pDb.zCommit );
               }
-            } else
+            }
+            else
             {
               string zCommit;
               int len = 0;
@@ -2223,7 +2253,8 @@ break;
               {
                 pDb.zCommit = zCommit;// TCL.Tcl_Alloc( len + 1 );
                 //memcpy( pDb.zCommit, zCommit, len + 1 );
-              } else
+              }
+              else
               {
                 pDb.zCommit = null;
               }
@@ -2231,7 +2262,8 @@ break;
               {
                 pDb.interp = interp;
                 sqlite3_commit_hook( pDb.db, DbCommitHandler, pDb );
-              } else
+              }
+              else
               {
                 sqlite3_commit_hook( pDb.db, null, null );
               }
@@ -2290,7 +2322,7 @@ break;
             int i, j;                   /* Loop counters */
             int nSep;                   /* Number of bytes in zSep[] */
             int nNull;                  /* Number of bytes in zNull[] */
-            StringBuilder zSql = new StringBuilder( 200 );         /* An SQL statement */
+            StringBuilder zSql = new StringBuilder(200);         /* An SQL statement */
             string zLine;               /* A single line of input from the file */
             string[] azCol;             /* zLine[] broken up into columns */
             string zCommit;             /* How to commit changes */
@@ -2310,14 +2342,16 @@ break;
             if ( objc >= 6 )
             {
               zSep = TCL.Tcl_GetStringFromObj( objv[5], 0 );
-            } else
+            }
+            else
             {
               zSep = "\t";
             }
             if ( objc >= 7 )
             {
               zNull = TCL.Tcl_GetStringFromObj( objv[6], 0 );
-            } else
+            }
+            else
             {
               zNull = "";
             }
@@ -2342,7 +2376,7 @@ break;
               "abort, fail, ignore, or replace", 0 );
               return TCL.TCL_ERROR;
             }
-            zSql.Append( sqlite3_mprintf( "SELECT * FROM '%q'", zTable ) );
+            zSql.Append(sqlite3_mprintf( "SELECT * FROM '%q'", zTable ));
             if ( zSql == null )
             {
               TCL.Tcl_AppendResult( interp, "Error: no such table: ", zTable );
@@ -2356,7 +2390,8 @@ break;
             {
               TCL.Tcl_AppendResult( interp, "Error: ", sqlite3_errmsg( pDb.db ) );
               nCol = 0;
-            } else
+            }
+            else
             {
               nCol = sqlite3_column_count( pStmt );
             }
@@ -2377,11 +2412,11 @@ break;
             {
               //zSql+=[j++] = ',';
               //zSql[j++] = '?';
-              zSql.Append( ",?" );
+              zSql.Append(",?");
             }
             //zSql[j++] = ')';
             //zSql[j] = "";
-            zSql.Append( ")" );
+            zSql.Append(")");
             rc = sqlite3_prepare( pDb.db, zSql.ToString(), -1, ref pStmt, ref Dummy );
             //free(zSql);
             if ( rc != 0 )
@@ -2445,7 +2480,8 @@ break;
                 )
                 {
                   sqlite3_bind_null( pStmt, i + 1 );
-                } else
+                }
+                else
                 {
                   sqlite3_bind_text( pStmt, i + 1, azCol[i], -1, SQLITE_STATIC );
                 }
@@ -2471,7 +2507,8 @@ break;
               pResult = TCL.Tcl_GetObjResult( interp );
               TCL.Tcl_SetIntObj( pResult, lineno );
               rc = TCL.TCL_OK;
-            } else
+            }
+            else
             {
               /* failure, append lineno where failed */
               sqlite3_snprintf( 80, zLineNum, "%d", lineno );
@@ -2504,7 +2541,7 @@ break;
             break;
 #else
 TCL.Tcl_AppendResult(interp, "extension loading is turned off at compile-time",
-0);
+   0);
 return TCL.TCL_ERROR;
 #endif
           }
@@ -2546,7 +2583,8 @@ return TCL.TCL_ERROR;
               {
                 TCL.Tcl_SetObjResult( interp, dbEvalColumnValue( sEval, 0 ) );
               }
-            } else if ( rc == TCL.TCL_BREAK || rc == TCL.TCL_OK )
+            }
+            else if ( rc == TCL.TCL_BREAK || rc == TCL.TCL_OK )
             {
               TCL.Tcl_SetObjResult( interp, TCL.Tcl_NewBooleanObj( ( rc == TCL.TCL_OK ? 1 : 0 ) ) );
             }
@@ -2601,7 +2639,8 @@ return TCL.TCL_ERROR;
                 rc = TCL.TCL_OK;
               }
               TCL.Tcl_DecrRefCount( ref pRet );
-            } else
+            }
+            else
             {
               cd = new object[2];
               DbEvalContext p;
@@ -2652,11 +2691,13 @@ return TCL.TCL_ERROR;
                 }
               }
               pScript = objv[5];
-            } else if ( objc != 4 )
+            }
+            else if ( objc != 4 )
             {
               TCL.Tcl_WrongNumArgs( interp, 2, objv, "NAME [-argcount N] SCRIPT" );
               return TCL.TCL_ERROR;
-            } else
+            }
+            else
             {
               pScript = objv[3];
             }
@@ -2766,7 +2807,8 @@ break;
                 //pDb.zNull = TCL.Tcl_Alloc( len + 1 );
                 //strncpy( pDb.zNull, zNull, len );
                 //pDb.zNull[len] = '\0';
-              } else
+              }
+              else
               {
                 pDb.zNull = null;
               }
@@ -2812,7 +2854,8 @@ break;
               {
                 TCL.Tcl_AppendResult( interp, pDb.zProgress );
               }
-            } else if ( objc == 4 )
+            }
+            else if ( objc == 4 )
             {
               string zProgress;
               int len = 0;
@@ -2831,7 +2874,8 @@ break;
                 //pDb.zProgress = TCL.Tcl_Alloc( len + 1 );
                 //memcpy( pDb.zProgress, zProgress, len + 1 );
                 pDb.zProgress = zProgress;
-              } else
+              }
+              else
               {
                 pDb.zProgress = null;
               }
@@ -2840,12 +2884,14 @@ break;
               {
                 pDb.interp = interp;
                 sqlite3_progress_handler( pDb.db, N, DbProgressHandler, pDb );
-              } else
+              }
+              else
               {
                 sqlite3_progress_handler( pDb.db, 0, null, 0 );
               }
 #endif
-            } else
+            }
+            else
             {
               TCL.Tcl_WrongNumArgs( interp, 2, objv, "N CALLBACK" );
               return TCL.TCL_ERROR;
@@ -2865,13 +2911,15 @@ break;
             {
               TCL.Tcl_WrongNumArgs( interp, 2, objv, "?CALLBACK?" );
               return TCL.TCL_ERROR;
-            } else if ( objc == 2 )
+            }
+            else if ( objc == 2 )
             {
               if ( !String.IsNullOrEmpty( pDb.zProfile ) )
               {
                 TCL.Tcl_AppendResult( interp, pDb.zProfile );
               }
-            } else
+            }
+            else
             {
               string zProfile;
               int len = 0;
@@ -2885,7 +2933,8 @@ break;
                 //pDb.zProfile = TCL.Tcl_Alloc( len + 1 );
                 //memcpy( pDb.zProfile, zProfile, len + 1 );
                 pDb.zProfile = zProfile;
-              } else
+              }
+              else
               {
                 pDb.zProfile = null;
               }
@@ -2894,7 +2943,8 @@ break;
               {
                 pDb.interp = interp;
                 sqlite3_profile( pDb.db, DbProfileHandler, pDb );
-              } else
+              }
+              else
               {
                 sqlite3_profile( pDb.db, null, null );
               }
@@ -2946,11 +2996,13 @@ break;
             {
               zDestDb = "main";
               zSrcFile = TCL.Tcl_GetString( objv[2] );
-            } else if ( objc == 4 )
+            }
+            else if ( objc == 4 )
             {
               zDestDb = TCL.Tcl_GetString( objv[2] );
               zSrcFile = TCL.Tcl_GetString( objv[3] );
-            } else
+            }
+            else
             {
               TCL.Tcl_WrongNumArgs( interp, 2, objv, "?DATABASE? FILENAME" );
               return TCL.TCL_ERROR;
@@ -3002,12 +3054,14 @@ break;
             if ( rc == SQLITE_DONE )
             {
               rc = TCL.TCL_OK;
-            } else if ( rc == SQLITE_BUSY || rc == SQLITE_LOCKED )
+            }
+            else if ( rc == SQLITE_BUSY || rc == SQLITE_LOCKED )
             {
               TCL.Tcl_AppendResult( interp, "restore failed: source database busy"
               );
               rc = TCL.TCL_ERROR;
-            } else
+            }
+            else
             {
               TCL.Tcl_AppendResult( interp, "restore failed: ",
               sqlite3_errmsg( pDb.db ) );
@@ -3036,13 +3090,16 @@ break;
             if ( zOp == "step" )
             {
               v = pDb.nStep;
-            } else if ( zOp == "sort" )
+            }
+            else if ( zOp == "sort" )
             {
               v = pDb.nSort;
-            } else if ( zOp == "autoindex" )
+            }
+            else if ( zOp == "autoindex" )
             {
               v = pDb.nIndex;
-            } else
+            }
+            else
             {
               TCL.Tcl_AppendResult( interp, "bad argument: should be autoindex, step or sort" );
               return TCL.TCL_ERROR;
@@ -3101,13 +3158,15 @@ break;
             {
               TCL.Tcl_WrongNumArgs( interp, 2, objv, "?CALLBACK?" );
               return TCL.TCL_ERROR;
-            } else if ( objc == 2 )
+            }
+            else if ( objc == 2 )
             {
               if ( pDb.zTrace != null )
               {
                 TCL.Tcl_AppendResult( interp, pDb.zTrace );
               }
-            } else
+            }
+            else
             {
               string zTrace;
               int len = 0;
@@ -3120,7 +3179,8 @@ break;
               {
                 //pDb.zTrace = TCL.Tcl_Alloc( len + 1 );
                 pDb.zTrace = zTrace;//memcpy( pDb.zTrace, zTrace, len + 1 );
-              } else
+              }
+              else
               {
                 pDb.zTrace = null;
               }
@@ -3129,7 +3189,8 @@ break;
               {
                 pDb.interp = interp;
                 sqlite3_trace( pDb.db, (dxTrace)DbTraceHandler, pDb );
-              } else
+              }
+              else
               {
                 sqlite3_trace( pDb.db, null, null );
               }
@@ -3164,7 +3225,7 @@ break;
 
               int ttype = 0;
               if ( TCL.Tcl_GetIndexFromObj( interp, objv[2], TTYPE_strs, "transaction type",
-              0, ref ttype ) )
+                        0, ref ttype ) )
               {
                 return TCL.TCL_ERROR;
               }
@@ -3203,7 +3264,8 @@ break;
               Debugger.Break();
               //Tcl_NRAddCallback( interp, DbTransPostCmd, cd, 0, 0, 0 );
               //Tcl_NREvalObj(interp, pScript, 0);
-            } else
+            }
+            else
             {
               rc = DbTransPostCmd( cd, interp, TCL.Tcl_EvalObjEx( interp, pScript, 0 ) );
             }
@@ -3263,10 +3325,12 @@ rc = TCL_ERROR;
             if ( choice == (int)DB_enum.DB_UPDATE_HOOK )
             {
               ppHook = pDb.pUpdateHook;
-            } else if ( choice == (int)DB_enum.DB_WAL_HOOK )
+            }
+            else if ( choice == (int)DB_enum.DB_WAL_HOOK )
             {
               ppHook = pDb.pWalHook;
-            } else
+            }
+            else
             {
               ppHook = pDb.pRollbackHook;
             }
@@ -3297,7 +3361,8 @@ rc = TCL_ERROR;
             if ( choice == (int)DB_enum.DB_UPDATE_HOOK )
             {
               pDb.pUpdateHook = ppHook;
-            } else
+            }
+            else
             {
               pDb.pRollbackHook = ppHook;
             }
@@ -3394,11 +3459,7 @@ TCL.Tcl_AppendResult( interp, "0", null );
 #endif
           return TCL.TCL_OK;
         }
-        if ( zArg == "-tcl-uses-utf" )
-        {
-          TCL.Tcl_AppendResult( interp, "1", null );
-          return TCL.TCL_OK;
-        }
+        if ( zArg == "-tcl-uses-utf" ) { TCL.Tcl_AppendResult( interp, "1", null ); return TCL.TCL_OK; }
       }
       for ( i = 3; i + 1 < objc; i += 2 )
       {
@@ -3406,10 +3467,12 @@ TCL.Tcl_AppendResult( interp, "0", null );
         if ( zArg == "-key" )
         {
           pKey = TCL.Tcl_GetStringFromObj( objv[i + 1], ref nKey );
-        } else if ( zArg == "-vfs" )
+        }
+        else if ( zArg == "-vfs" )
         {
           zVfs = TCL.Tcl_GetString( objv[i + 1] );
-        } else if ( zArg == "-readonly" )
+        }
+        else if ( zArg == "-readonly" )
         {
           bool b = false;
           if ( TCL.Tcl_GetBooleanFromObj( interp, objv[i + 1], ref b ) )
@@ -3418,12 +3481,14 @@ TCL.Tcl_AppendResult( interp, "0", null );
           {
             flags &= ~( SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE );
             flags |= SQLITE_OPEN_READONLY;
-          } else
+          }
+          else
           {
             flags &= ~SQLITE_OPEN_READONLY;
             flags |= SQLITE_OPEN_READWRITE;
           }
-        } else if ( zArg == "-create" )
+        }
+        else if ( zArg == "-create" )
         {
           bool b = false;
           if ( TCL.Tcl_GetBooleanFromObj( interp, objv[i + 1], ref b ) )
@@ -3431,11 +3496,13 @@ TCL.Tcl_AppendResult( interp, "0", null );
           if ( b && ( flags & SQLITE_OPEN_READONLY ) == 0 )
           {
             flags |= SQLITE_OPEN_CREATE;
-          } else
+          }
+          else
           {
             flags &= ~SQLITE_OPEN_CREATE;
           }
-        } else if ( zArg == "-nomutex" )
+        }
+        else if ( zArg == "-nomutex" )
         {
           bool b = false;
           if ( TCL.Tcl_GetBooleanFromObj( interp, objv[i + 1], ref b ) )
@@ -3444,11 +3511,13 @@ TCL.Tcl_AppendResult( interp, "0", null );
           {
             flags |= SQLITE_OPEN_NOMUTEX;
             flags &= ~SQLITE_OPEN_FULLMUTEX;
-          } else
+          }
+          else
           {
             flags &= ~SQLITE_OPEN_NOMUTEX;
           }
-        } else if ( zArg == "-fullmutex" )//strcmp( zArg, "-fullmutex" ) == 0 )
+        }
+        else if ( zArg == "-fullmutex" )//strcmp( zArg, "-fullmutex" ) == 0 )
         {
           bool b = false;
           if ( TCL.Tcl_GetBooleanFromObj( interp, objv[i + 1], ref b ) )
@@ -3457,11 +3526,13 @@ TCL.Tcl_AppendResult( interp, "0", null );
           {
             flags |= SQLITE_OPEN_FULLMUTEX;
             flags &= ~SQLITE_OPEN_NOMUTEX;
-          } else
+          }
+          else
           {
             flags &= ~SQLITE_OPEN_FULLMUTEX;
           }
-        } else
+        }
+        else
         {
           TCL.Tcl_AppendResult( interp, "unknown option: ", zArg, null );
           return TCL.TCL_ERROR;
@@ -3516,7 +3587,8 @@ TCL.Tcl_AppendResult( interp, "0", null );
         Debugger.Break();
         //Tcl_NRCreateCommand(interp, zArg, DbObjCmdAdaptor, DbObjCmd,
         //                    p, DbDeleteCmd);
-      } else
+      }
+      else
       {
         TCL.Tcl_CreateObjCommand( interp, zArg, (Interp.dxObjCmdProc)DbObjCmd, p, (Interp.dxCmdDeleteProc)DbDeleteCmd );
       }
@@ -3529,9 +3601,7 @@ TCL.Tcl_AppendResult( interp, "0", null );
     */
 #if !USE_TCL_STUBS
     //# undef  TCL.Tcl_InitStubs
-    static void Tcl_InitStubs( Tcl_Interp interp, string s, int i )
-    {
-    }
+    static void Tcl_InitStubs( Tcl_Interp interp, string s, int i ) { }
 #endif
 
     /*
@@ -3666,28 +3736,16 @@ TCL.Tcl_AppendResult( interp, "0", null );
 
     //* #define F1(x, y, z) (x & y | ~x & z) */
     //#define F1(x, y, z) (z ^ (x & (y ^ z)))
-    static u32 F1( u32 x, u32 y, u32 z )
-    {
-      return ( z ^ ( x & ( y ^ z ) ) );
-    }
+    static u32 F1( u32 x, u32 y, u32 z ) { return ( z ^ ( x & ( y ^ z ) ) ); }
 
     //#define F2(x, y, z) F1(z, x, y)
-    static u32 F2( u32 x, u32 y, u32 z )
-    {
-      return F1( z, x, y );
-    }
+    static u32 F2( u32 x, u32 y, u32 z ) { return F1( z, x, y ); }
 
     //#define F3(x, y, z) (x ^ y ^ z)
-    static u32 F3( u32 x, u32 y, u32 z )
-    {
-      return ( x ^ y ^ z );
-    }
+    static u32 F3( u32 x, u32 y, u32 z ) { return ( x ^ y ^ z ); }
 
     //#define F4(x, y, z) (y ^ (x | ~z))
-    static u32 F4( u32 x, u32 y, u32 z )
-    {
-      return ( y ^ ( x | ~z ) );
-    }
+    static u32 F4( u32 x, u32 y, u32 z ) { return ( y ^ ( x | ~z ) ); }
 
     ///* This is the central step in the MD5 algorithm. */
     //#define MD5STEP(f, w, x, y, z, data, s) \
@@ -3889,7 +3947,8 @@ TCL.Tcl_AppendResult( interp, "0", null );
 
         /* Now fill the next block with 56 bytes */
         Array.Clear( ctx._in, 0, 56 );//memset(ctx._in, 0, 56);
-      } else
+      }
+      else
       {
         /* Pad block to 56 bytes */
         Array.Clear( ctx._in, p, count - 8 );//memset(p, 0, count-8);
@@ -4199,10 +4258,10 @@ TCL.Tcl_AppendResult( interp, "0", null );
       //extern int Sqlitetestintarray_Init(Tcl_Interp*);
       //extern int Sqlitetestvfs_Init(Tcl_Interp *);
       //extern int SqlitetestStat_Init(Tcl_Interp*);
-      //    extern int Sqlitetestrtree_Init(Tcl_Interp*);
-      //    extern int Sqlitequota_Init(Tcl_Interp*);
-      //    extern int Sqlitemultiplex_Init(Tcl_Interp*);
-      //    extern int SqliteSuperlock_Init(Tcl_Interp*);
+//    extern int Sqlitetestrtree_Init(Tcl_Interp*);
+//    extern int Sqlitequota_Init(Tcl_Interp*);
+//    extern int Sqlitemultiplex_Init(Tcl_Interp*);
+//    extern int SqliteSuperlock_Init(Tcl_Interp*);
 
 #if SQLITE_ENABLE_ZIPVFS
 //    extern int Zipvfs_Init(Tcl_Interp*);

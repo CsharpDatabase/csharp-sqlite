@@ -42,448 +42,388 @@ using Community.CsharpSqlite;
 namespace Community.CsharpSqlite.SQLiteClient
 {
 #if NET_2_0
-public class SqliteConnection : DbConnection, ICloneable
+	public class SqliteConnection : DbConnection, ICloneable
 #else
-  public class SqliteConnection : IDbConnection, ICloneable
+		public class SqliteConnection : IDbConnection, ICloneable
 #endif
-  {
+	{
 
-    #region Fields
-
-    private string conn_str;
-    private string db_file;
-    private int db_mode;
-    private int db_version;
-    private IntPtr sqlite_handle;
-    private Sqlite3.sqlite3 sqlite_handle2;
-    private ConnectionState state;
-    private Encoding encoding;
-    private int busy_timeout;
+#region Fields
+		
+		private string conn_str;
+		private string db_file;
+		private int db_mode;
+		private int db_version;
+		private IntPtr sqlite_handle;
+        private Sqlite3.sqlite3 sqlite_handle2;
+		private ConnectionState state;
+		private Encoding encoding;
+		private int busy_timeout;
 #if NET_2_0
-bool disposed;
+		bool disposed;
 #endif
 
-    #endregion
+#endregion
 
-    #region Constructors and destructors
-
-    public SqliteConnection()
-    {
-      db_file = null;
-      db_mode = 0644;
-      db_version = 3;
-      state = ConnectionState.Closed;
-      sqlite_handle = IntPtr.Zero;
-      encoding = null;
-      busy_timeout = 0;
-    }
-
-    public SqliteConnection( string connstring )
-      : this()
-    {
-      ConnectionString = connstring;
-    }
+#region Constructors and destructors
+		
+		public SqliteConnection ()
+		{
+			db_file = null;
+			db_mode = 0644;
+			db_version = 3;
+			state = ConnectionState.Closed;
+			sqlite_handle = IntPtr.Zero;
+			encoding = null;
+			busy_timeout = 0;
+		}
+		
+		public SqliteConnection (string connstring) : this ()
+		{
+			ConnectionString = connstring;
+		}
 
 
 #if !NET_2_0
-    public void Dispose()
-    {
-      Close();
-    }
+		public void Dispose ()
+		{
+			Close ();
+		}
 #else
-protected override void Dispose (bool disposing)
-{
-try {
-if (disposing && !disposed) {
-Close ();
-conn_str = null;
-}
-} finally {
-disposed = true;
-base.Dispose (disposing);
-}
-}
+		protected override void Dispose (bool disposing)
+		{
+			try {
+				if (disposing && !disposed) {
+					Close ();
+					conn_str = null;
+				}
+			} finally {
+				disposed = true;
+				base.Dispose (disposing);
+			}
+		}
 #endif
+		                
+#endregion
 
-    #endregion
+#region Properties
+		
+#if NET_2_0
+		override
+#endif
+			public string ConnectionString {
+			get { return conn_str; }
+			set { SetConnectionString(value); }
+		}
+		
+#if NET_2_0
+		override
+#endif
+			public int ConnectionTimeout {
+			get { return 0; }
+		}
+	
+#if NET_2_0
+		override
+#endif
+			public string Database {
+			get { return db_file; }
+		}
+		
+#if NET_2_0
+		override
+#endif
+			public ConnectionState State {
+			get { return state; }
+		}
+		
+		public Encoding Encoding {
+			get { return encoding; }
+		}
 
-    #region Properties
+		public int Version {
+			get { return db_version; }
+		}
 
 #if NET_2_0
-override
+      override
 #endif
-    public string ConnectionString
-    {
-      get
+      public string ServerVersion
       {
-        return conn_str;
+        get { return Sqlite3.sqlite3_libversion(); }
       }
-      set
-      {
-        SetConnectionString( value );
-      }
-    }
 
+      internal Sqlite3.sqlite3 Handle2
+		    {
+                get { return sqlite_handle2; }
+		    }
+		internal IntPtr Handle {
+			get { return sqlite_handle; }
+		}
+		
 #if NET_2_0
-override
-#endif
-    public int ConnectionTimeout
-    {
-      get
-      {
-        return 0;
-      }
-    }
-
-#if NET_2_0
-override
-#endif
-    public string Database
-    {
-      get
-      {
-        return db_file;
-      }
-    }
-
-#if NET_2_0
-override
-#endif
-    public ConnectionState State
-    {
-      get
-      {
-        return state;
-      }
-    }
-
-    public Encoding Encoding
-    {
-      get
-      {
-        return encoding;
-      }
-    }
-
-    public int Version
-    {
-      get
-      {
-        return db_version;
-      }
-    }
-
-#if NET_2_0
-override
-#endif
-    public string ServerVersion
-    {
-      get
-      {
-        return Sqlite3.sqlite3_libversion();
-      }
-    }
-
-    internal Sqlite3.sqlite3 Handle2
-    {
-      get
-      {
-        return sqlite_handle2;
-      }
-    }
-    internal IntPtr Handle
-    {
-      get
-      {
-        return sqlite_handle;
-      }
-    }
-
-#if NET_2_0
-public override string DataSource {
-get { return db_file; }
-}
+		public override string DataSource {
+			get { return db_file; }
+		}
 
 #endif
 
-    public int LastInsertRowId
-    {
-      get
-      {
-        //if (Version == 3)
-        return (int)Sqlite3.sqlite3_last_insert_rowid( Handle2 );
-        //return (int)Sqlite.sqlite3_last_insert_rowid (Handle);
-        //else
-        //	return Sqlite.sqlite_last_insert_rowid (Handle);
-      }
-    }
+    public int LastInsertRowId {
+			get {
+				//if (Version == 3)
+				    return (int) Sqlite3.sqlite3_last_insert_rowid(Handle2);
+					//return (int)Sqlite.sqlite3_last_insert_rowid (Handle);
+				//else
+				//	return Sqlite.sqlite_last_insert_rowid (Handle);
+			}
+		}
 
-    public int BusyTimeout
-    {
-      get
-      {
-        return busy_timeout;
-      }
-      set
-      {
-        busy_timeout = value < 0 ? 0 : value;
-      }
-    }
+		public int BusyTimeout {
+			get {
+				return busy_timeout;  
+			}
+			set {
+			  	busy_timeout = value < 0 ? 0 : value;
+			}
+		}
+		
+#endregion
 
-    #endregion
-
-    #region Private Methods
-
-    private void SetConnectionString( string connstring )
-    {
-      if ( connstring == null )
-      {
-        Close();
-        conn_str = null;
-        return;
-      }
-
-      if ( connstring != conn_str )
-      {
-        Close();
-        conn_str = connstring;
-
-        db_file = null;
-        db_mode = 0644;
-
-        string[] conn_pieces = connstring.Split( ',' );
-        for ( int i = 0; i < conn_pieces.Length; i++ )
-        {
-          string piece = conn_pieces[i].Trim();
-          if ( piece.Length == 0 )
-          { // ignore empty elements
-            continue;
-          }
-          string[] arg_pieces = piece.Split( '=' );
-          if ( arg_pieces.Length != 2 )
-          {
-            throw new InvalidOperationException( "Invalid connection string" );
-          }
-          string token = arg_pieces[0].ToLower( System.Globalization.CultureInfo.InvariantCulture ).Trim();
-          string tvalue = arg_pieces[1].Trim();
-          string tvalue_lc = arg_pieces[1].ToLower( System.Globalization.CultureInfo.InvariantCulture ).Trim();
-          switch ( token )
-          {
+#region Private Methods
+		
+		private void SetConnectionString(string connstring)
+		{
+			if (connstring == null) {
+				Close ();
+				conn_str = null;
+				return;
+			}
+			
+			if (connstring != conn_str) {
+				Close ();
+				conn_str = connstring;
+				
+				db_file = null;
+				db_mode = 0644;
+				
+				string[] conn_pieces = connstring.Split (',');
+				for (int i = 0; i < conn_pieces.Length; i++) {
+					string piece = conn_pieces [i].Trim ();
+					if (piece.Length == 0) { // ignore empty elements
+                                                continue;
+					}
+					string[] arg_pieces = piece.Split ('=');
+					if (arg_pieces.Length != 2) {
+						throw new InvalidOperationException ("Invalid connection string");
+					}
+					string token = arg_pieces[0].ToLower (System.Globalization.CultureInfo.InvariantCulture).Trim ();
+					string tvalue = arg_pieces[1].Trim ();
+					string tvalue_lc = arg_pieces[1].ToLower (System.Globalization.CultureInfo.InvariantCulture).Trim ();
+					switch (token) {
 #if NET_2_0
-case "DataSource":
+						case "DataSource":
 #endif
-            case "uri":
-              if ( tvalue_lc.StartsWith( "file://" ) )
-              {
-                db_file = tvalue.Substring( 7 );
-              } else if ( tvalue_lc.StartsWith( "file:" ) )
-              {
-                db_file = tvalue.Substring( 5 );
-              } else if ( tvalue_lc.StartsWith( "/" ) )
-              {
-                db_file = tvalue;
+						case "uri": 
+							if (tvalue_lc.StartsWith ("file://")) {
+								db_file = tvalue.Substring (7);
+							} else if (tvalue_lc.StartsWith ("file:")) {
+								db_file = tvalue.Substring (5);
+							} else if (tvalue_lc.StartsWith ("/")) {
+								db_file = tvalue;
 #if NET_2_0
-} else if (tvalue_lc.StartsWith ("|DataDirectory|",
-StringComparison.InvariantCultureIgnoreCase)) {
-AppDomainSetup ads = AppDomain.CurrentDomain.SetupInformation;
-string filePath = String.Format ("App_Data{0}{1}",
-Path.DirectorySeparatorChar,
-tvalue_lc.Substring (15));
-
-db_file = Path.Combine (ads.ApplicationBase, filePath);
+							} else if (tvalue_lc.StartsWith ("|DataDirectory|",
+											 StringComparison.InvariantCultureIgnoreCase)) {
+								AppDomainSetup ads = AppDomain.CurrentDomain.SetupInformation;
+								string filePath = String.Format ("App_Data{0}{1}",
+												 Path.DirectorySeparatorChar,
+												 tvalue_lc.Substring (15));
+								
+								db_file = Path.Combine (ads.ApplicationBase, filePath);
 #endif
-              } else
-              {
-                throw new InvalidOperationException( "Invalid connection string: invalid URI" );
-              }
-              break;
+							} else {
+								throw new InvalidOperationException ("Invalid connection string: invalid URI");
+							}
+							break;
 
-            case "mode":
-              db_mode = Convert.ToInt32( tvalue );
-              break;
+						case "mode": 
+							db_mode = Convert.ToInt32 (tvalue);
+							break;
 
-            case "version":
-              db_version = Convert.ToInt32( tvalue );
-              if ( db_version < 3 )
-                throw new InvalidOperationException( "Minimum database version is 3" );
-              break;
+						case "version":
+							db_version = Convert.ToInt32 (tvalue);
+              if (db_version < 3) throw new InvalidOperationException ("Minimum database version is 3");
+							break;
 
-            case "encoding": // only for sqlite2
-              encoding = Encoding.GetEncoding( tvalue );
-              break;
+						case "encoding": // only for sqlite2
+							encoding = Encoding.GetEncoding (tvalue);
+							break;
 
-            case "busy_timeout":
-              busy_timeout = Convert.ToInt32( tvalue );
-              break;
-          }
-        }
+						case "busy_timeout":
+							busy_timeout = Convert.ToInt32 (tvalue);
+							break;
+					}
+				}
+				
+				if (db_file == null) {
+					throw new InvalidOperationException ("Invalid connection string: no URI");
+				}
+			}
+		}		
+#endregion
 
-        if ( db_file == null )
-        {
-          throw new InvalidOperationException( "Invalid connection string: no URI" );
-        }
-      }
-    }
-    #endregion
+#region Internal Methods
+		
+		internal void StartExec ()
+		{
+			// use a mutex here
+			state = ConnectionState.Executing;
+		}
+		
+		internal void EndExec ()
+		{
+			state = ConnectionState.Open;
+		}
+		
+#endregion
 
-    #region Internal Methods
+#region Public Methods
 
-    internal void StartExec()
-    {
-      // use a mutex here
-      state = ConnectionState.Executing;
-    }
-
-    internal void EndExec()
-    {
-      state = ConnectionState.Open;
-    }
-
-    #endregion
-
-    #region Public Methods
-
-    object ICloneable.Clone()
-    {
-      return new SqliteConnection( ConnectionString );
-    }
-
+		object ICloneable.Clone ()
+		{
+			return new SqliteConnection (ConnectionString);
+		}
+		
 #if NET_2_0
-// [MonoTODO ("handle IsolationLevel")]
-protected override DbTransaction BeginDbTransaction (IsolationLevel il)
+		// [MonoTODO ("handle IsolationLevel")]
+		protected override DbTransaction BeginDbTransaction (IsolationLevel il)
 #else
-    public IDbTransaction BeginTransaction()
+			public IDbTransaction BeginTransaction ()
 #endif
-    {
-      if ( state != ConnectionState.Open )
-        throw new InvalidOperationException( "Invalid operation: The connection is closed" );
-
-      SqliteTransaction t = new SqliteTransaction();
+		{
+			if (state != ConnectionState.Open)
+				throw new InvalidOperationException("Invalid operation: The connection is closed");
+			
+			SqliteTransaction t = new SqliteTransaction();
 #if NET_2_0
-t.SetConnection (this);
+			t.SetConnection (this);
 #else
-      t.Connection = this;
+			t.Connection = this;
 #endif
-      SqliteCommand cmd = (SqliteCommand)this.CreateCommand();
-      cmd.CommandText = "BEGIN";
-      cmd.ExecuteNonQuery();
-      return t;
-    }
+			SqliteCommand cmd = (SqliteCommand)this.CreateCommand();
+			cmd.CommandText = "BEGIN";
+			cmd.ExecuteNonQuery();
+			return t;
+		}
 
 #if NET_2_0
-public new DbTransaction BeginTransaction ()
-{
-return BeginDbTransaction (IsolationLevel.Unspecified);
-}
+		public new DbTransaction BeginTransaction ()
+			{
+				return BeginDbTransaction (IsolationLevel.Unspecified);
+		}
 
-public new DbTransaction BeginTransaction (IsolationLevel il)
-{
-return BeginDbTransaction (il);
-}
+			public new DbTransaction BeginTransaction (IsolationLevel il)
+				{
+					return BeginDbTransaction (il);
+			}
 #else
-    public IDbTransaction BeginTransaction( IsolationLevel il )
-    {
-      throw new InvalidOperationException();
-    }
+			public IDbTransaction BeginTransaction (IsolationLevel il)
+		{
+			throw new InvalidOperationException();
+		}
 #endif
-
+		
 #if NET_2_0
-override
+		override
 #endif
-    public void Close()
-    {
-      if ( state != ConnectionState.Open )
-      {
-        return;
-      }
-
-      state = ConnectionState.Closed;
-
-      if ( Version == 3 )
-        //Sqlite3.sqlite3_close()
-        Sqlite3.sqlite3_close( sqlite_handle2 );
-      //else 
-      //Sqlite.sqlite_close (sqlite_handle);
-      sqlite_handle = IntPtr.Zero;
-    }
-
+		public void Close ()
+		{
+			if (state != ConnectionState.Open) {
+				return;
+			}
+			
+			state = ConnectionState.Closed;
+		
+			if (Version == 3)
+                //Sqlite3.sqlite3_close()
+				Sqlite3.sqlite3_close (sqlite_handle2);
+			//else 
+				//Sqlite.sqlite_close (sqlite_handle);
+			sqlite_handle = IntPtr.Zero;
+		}
+		
 #if NET_2_0
-override
+		override
 #endif
-    public void ChangeDatabase( string databaseName )
-    {
-      Close();
-      db_file = databaseName;
-      Open();
-    }
-
+		public void ChangeDatabase (string databaseName)
+		{
+			Close ();
+			db_file = databaseName;
+			Open ();
+		}
+		
 #if !NET_2_0
-    IDbCommand IDbConnection.CreateCommand()
-    {
-      return CreateCommand();
-    }
+		IDbCommand IDbConnection.CreateCommand ()
+		{
+			return CreateCommand ();
+		}
 #endif
-
+		
 #if NET_2_0
-protected override DbCommand CreateDbCommand ()
+		protected override DbCommand CreateDbCommand ()
 #else
-    public SqliteCommand CreateCommand()
+			public SqliteCommand CreateCommand ()
 #endif
-    {
-      return new SqliteCommand( null, this );
-    }
-
+		{
+			return new SqliteCommand (null, this);
+		}
+		
 #if NET_2_0
-override
+		override
 #endif
-    public void Open()
-    {
-      if ( conn_str == null )
-      {
-        throw new InvalidOperationException( "No database specified" );
-      }
-
-      if ( state != ConnectionState.Closed )
-      {
-        return;
-      }
-
-      IntPtr errmsg = IntPtr.Zero;
-      /*
-      if (Version == 2){
-      try {
-      sqlite_handle = Sqlite.sqlite_open(db_file, db_mode, out errmsg);
-      if (errmsg != IntPtr.Zero) {
-      string msg = Marshal.PtrToStringAnsi (errmsg);
-      Sqlite.sqliteFree (errmsg);
-      throw new ApplicationException (msg);
-      }
-      } catch (DllNotFoundException) {
-      db_version = 3;
-      } catch (EntryPointNotFoundException) {
-      db_version = 3;
-      }
-
-      if (busy_timeout != 0)
-      Sqlite.sqlite_busy_timeout (sqlite_handle, busy_timeout);
-      }
-      */
-      if ( Version == 3 )
-      {
-        sqlite_handle = (IntPtr)1;
-        int err = Sqlite3.sqlite3_open( db_file, ref sqlite_handle2 );
-        //int err = Sqlite.sqlite3_open16(db_file, out sqlite_handle);
-        if ( err == (int)SqliteError.ERROR )
-          throw new ApplicationException( Sqlite3.sqlite3_errmsg( sqlite_handle2 ) );
-        //throw new ApplicationException (Marshal.PtrToStringUni( Sqlite.sqlite3_errmsg16 (sqlite_handle)));
-        if ( busy_timeout != 0 )
-          Sqlite3.sqlite3_busy_timeout( sqlite_handle2, busy_timeout );
-        //Sqlite.sqlite3_busy_timeout (sqlite_handle, busy_timeout);
-      } else
-      {
-      }
-      state = ConnectionState.Open;
-    }
+		public void Open ()
+		{
+			if (conn_str == null) {
+				throw new InvalidOperationException ("No database specified");
+			}
+			
+			if (state != ConnectionState.Closed) {
+				return;
+			}
+			
+			IntPtr errmsg = IntPtr.Zero;
+            /*
+			if (Version == 2){
+				try {
+					sqlite_handle = Sqlite.sqlite_open(db_file, db_mode, out errmsg);
+					if (errmsg != IntPtr.Zero) {
+						string msg = Marshal.PtrToStringAnsi (errmsg);
+						Sqlite.sqliteFree (errmsg);
+						throw new ApplicationException (msg);
+					}
+				} catch (DllNotFoundException) {
+					db_version = 3;
+				} catch (EntryPointNotFoundException) {
+					db_version = 3;
+				}
+				
+				if (busy_timeout != 0)
+					Sqlite.sqlite_busy_timeout (sqlite_handle, busy_timeout);
+			}
+             */
+			if (Version == 3) {
+			    sqlite_handle = (IntPtr)1;
+			    int err = Sqlite3.sqlite3_open(db_file, ref sqlite_handle2);
+				//int err = Sqlite.sqlite3_open16(db_file, out sqlite_handle);
+				if (err == (int)SqliteError.ERROR)
+                    throw new ApplicationException (Sqlite3.sqlite3_errmsg(sqlite_handle2));
+					//throw new ApplicationException (Marshal.PtrToStringUni( Sqlite.sqlite3_errmsg16 (sqlite_handle)));
+                if (busy_timeout != 0)
+                    Sqlite3.sqlite3_busy_timeout(sqlite_handle2, busy_timeout);
+					//Sqlite.sqlite3_busy_timeout (sqlite_handle, busy_timeout);
+			} else {
+			}
+			state = ConnectionState.Open;
+		}
 
     public DataTable GetSchema( String collectionName )
     {
@@ -602,11 +542,11 @@ override
     DataTable GetSchemaTables( string[] restrictionValues )
     {
       SqliteCommand cmd = new SqliteCommand(
-      "SELECT type, name, tbl_name, rootpage, sql " +
-      " FROM sqlite_master " +
-      " WHERE (name = :pname or (:pname is null)) " +
-      " AND type = 'table' " +
-      " ORDER BY name", this );
+                    "SELECT type, name, tbl_name, rootpage, sql " +
+                    " FROM sqlite_master " +
+                    " WHERE (name = :pname or (:pname is null)) " +
+                    " AND type = 'table' " +
+                    " ORDER BY name", this );
       cmd.Parameters.Add( "pname", DbType.String ).Value = DBNull.Value;
       return GetSchemaDataTable( cmd, restrictionValues );
     }
@@ -627,11 +567,11 @@ override
     DataTable GetSchemaTriggers( string[] restrictionValues )
     {
       SqliteCommand cmd = new SqliteCommand(
-      "SELECT type, name, tbl_name, rootpage, sql " +
-      " FROM sqlite_master " +
-      " WHERE (tbl_name = :pname or :pname is null) " +
-      " AND type = 'trigger' " +
-      " ORDER BY name", this );
+                    "SELECT type, name, tbl_name, rootpage, sql " +
+                    " FROM sqlite_master " +
+                    " WHERE (tbl_name = :pname or :pname is null) " +
+                    " AND type = 'trigger' " +
+                    " ORDER BY name", this );
       cmd.Parameters.Add( "pname", DbType.String ).Value = DBNull.Value;
       return GetSchemaDataTable( cmd, restrictionValues );
     }
@@ -684,11 +624,11 @@ override
     DataTable GetSchemaViews( string[] restrictionValues )
     {
       SqliteCommand cmd = new SqliteCommand(
-      "SELECT type, name, tbl_name, rootpage, sql " +
-      " FROM sqlite_master " +
-      " WHERE (name = :pname or :pname is null) " +
-      " AND type = 'view' " +
-      " ORDER BY name", this );
+                    "SELECT type, name, tbl_name, rootpage, sql " +
+                    " FROM sqlite_master " +
+                    " WHERE (name = :pname or :pname is null) " +
+                    " AND type = 'view' " +
+                    " ORDER BY name", this );
       cmd.Parameters.Add( "pname", DbType.String ).Value = DBNull.Value;
       return GetSchemaDataTable( cmd, restrictionValues );
     }
@@ -717,21 +657,21 @@ override
 
       // TODO: set correctly
       dt.LoadDataRow( new object[] { "",
-      "SQLite",
-      ServerVersion,
-      ServerVersion,
-      3,
-      "",
-      1,
-      false,
-      "",
-      "",
-      30,
-      "",
-      2,
-      DBNull.Value,
-      "" },
-      true );
+                                "SQLite",
+                                ServerVersion,
+                                ServerVersion,
+                                3,
+                                "",
+                                1,
+                                false,
+                                "",
+                                "",
+                                30,
+                                "",
+                                2,
+                                DBNull.Value,
+                                "" },
+          true );
 
       return dt;
     }
@@ -944,6 +884,6 @@ override
 
       return dt;
     }
-    #endregion
-  }
+#endregion
+	}
 }

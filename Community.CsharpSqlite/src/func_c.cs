@@ -266,7 +266,8 @@ namespace Community.CsharpSqlite
         if ( zBLOB == null )
           return;
         Debug.Assert( len == zBLOB.Length );
-      } else
+      }
+      else
       {
         z = sqlite3_value_text( argv[0] );
         if ( String.IsNullOrEmpty( z ) )
@@ -289,7 +290,8 @@ namespace Community.CsharpSqlite
           p2 = -p2;
           negP2 = 1;
         }
-      } else
+      }
+      else
       {
         p2 = ( sqlite3_context_db_handle( context ) ).aLimit[SQLITE_LIMIT_LENGTH];
       }
@@ -303,10 +305,12 @@ namespace Community.CsharpSqlite
             p2 = 0;
           p1 = 0;
         }
-      } else if ( p1 > 0 )
+      }
+      else if ( p1 > 0 )
       {
         p1--;
-      } else if ( p2 > 0 )
+      }
+      else if ( p2 > 0 )
       {
         p2--;
       }
@@ -332,7 +336,8 @@ namespace Community.CsharpSqlite
         //  SQLITE_SKIP_UTF8( ref z2 );
         //}
         sqlite3_result_text( context, z, p1, p2 <= z.Length - p1 ? p2 : z.Length - p1, SQLITE_TRANSIENT );
-      } else
+      }
+      else
       {
         if ( p1 + p2 > len )
         {
@@ -345,10 +350,7 @@ namespace Community.CsharpSqlite
           sb.Length = 0;
         else
         {
-          for ( int i = p1; i < p1 + p2; i++ )
-          {
-            sb.Append( (char)zBLOB[i] );
-          }
+          for ( int i = p1; i < p1 + p2; i++ ) { sb.Append( (char)zBLOB[i] ); }
         }
 
         sqlite3_result_blob( context, sb.ToString(), (int)p2, SQLITE_TRANSIENT );
@@ -389,10 +391,12 @@ namespace Community.CsharpSqlite
       if ( n == 0 && r >= 0 && r < LARGEST_INT64 - 1 )
       {
         r = (double)( (sqlite_int64)( r + 0.5 ) );
-      } else if ( n == 0 && r < 0 && ( -r ) < LARGEST_INT64 - 1 )
+      }
+      else if ( n == 0 && r < 0 && ( -r ) < LARGEST_INT64 - 1 )
       {
         r = -(double)( (sqlite_int64)( ( -r ) + 0.5 ) );
-      } else
+      }
+      else
       {
         zBuf = sqlite3_mprintf( "%.*f", n, r );
         if ( zBuf == null )
@@ -740,14 +744,16 @@ break;
           if ( c == 0 )
           {
             return true;
-          } else if ( c == esc )
+          }
+          else if ( c == esc )
           {
             c = sqlite3Utf8Read( zPattern, ref zPattern );
             if ( c == 0 )
             {
               return false;
             }
-          } else if ( c == matchSet )
+          }
+          else if ( c == matchSet )
           {
             Debug.Assert( esc == 0 );         /* This is GLOB, not LIKE */
             Debug.Assert( matchSet < 0x80 );  /* '[' is a single-byte character */
@@ -772,7 +778,8 @@ break;
                 if ( c2 < 0x80 )
                   c2 = sqlite3UpperToLower[c2]; //GlogUpperToLower(c2);
               }
-            } else
+            }
+            else
             {
               while ( c2 != 0 && c2 != c )
               {
@@ -785,13 +792,15 @@ break;
               return true;
           }
           return false;
-        } else if ( !prevEscape && c == matchOne )
+        }
+        else if ( !prevEscape && c == matchOne )
         {
           if ( sqlite3Utf8Read( zString, ref zString ) == 0 )
           {
             return false;
           }
-        } else if ( c == matchSet )
+        }
+        else if ( c == matchSet )
         {
           int prior_c = 0;
           Debug.Assert( esc == 0 );    /* This only occurs for GLOB, not LIKE */
@@ -820,7 +829,8 @@ break;
               if ( c >= prior_c && c <= c2 )
                 seen = 1;
               prior_c = 0;
-            } else
+            }
+            else
             {
               if ( c == c2 )
               {
@@ -834,10 +844,12 @@ break;
           {
             return false;
           }
-        } else if ( esc == c && !prevEscape )
+        }
+        else if ( esc == c && !prevEscape )
         {
           prevEscape = true;
-        } else
+        }
+        else
         {
           c2 = sqlite3Utf8Read( zString, ref zString );
           if ( noCase )
@@ -1104,11 +1116,7 @@ break;
 
             if ( zArg == null || zArg.Length == 0 )
               return;
-            for ( i = 0, n = 0; i < zArg.Length; i++ )
-            {
-              if ( zArg[i] == '\'' )
-                n++;
-            }
+            for ( i = 0, n = 0; i < zArg.Length; i++ ) { if ( zArg[i] == '\'' ) n++; }
             z = new StringBuilder( i + n + 3 );// contextMalloc(context, ((i64)i)+((i64)n)+3);
             if ( z != null )
             {
@@ -1190,7 +1198,8 @@ break;
       if ( n > db.aLimit[SQLITE_LIMIT_LENGTH] )
       {
         sqlite3_result_error_toobig( context );
-      } else
+      }
+      else
       {
         sqlite3_result_zeroblob( context, (int)n );/* IMP: R-00293-64994 */
       }
@@ -1331,10 +1340,12 @@ break;
         azChar = new byte[1][];
         azChar[0] = azOne;
         zCharSet = null;
-      } else if ( ( zCharSet = sqlite3_value_text( argv[1] ) ) == null )
+      }
+      else if ( ( zCharSet = sqlite3_value_text( argv[1] ) ) == null )
       {
         return;
-      } else
+      }
+      else
       {
         if ( ( zBytes = sqlite3_value_blob( argv[1] ) ) != null )
         {
@@ -1492,7 +1503,8 @@ sqlite3_result_text(context, "?000", 4, SQLITE_STATIC);
       if ( argc == 2 )
       {
         zProc = sqlite3_value_text( argv[1] );
-      } else
+      }
+      else
       {
         zProc = "";
       }
@@ -1519,10 +1531,7 @@ sqlite3_result_text(context, "?000", 4, SQLITE_STATIC);
       public Mem _M;
       public Mem Context
       {
-        get
-        {
-          return _M;
-        }
+        get { return _M; }
         set
         {
           _M = value;
@@ -1578,7 +1587,8 @@ sqlite3_result_text(context, "?000", 4, SQLITE_STATIC);
             p.overflow = ( ( s1 & s2 & ~s3 ) | ( ~s1 & ~s2 & s3 ) ) != 0 ? 1 : 0;
             p.iSum = iNewSum;
           }
-        } else
+        }
+        else
         {
           p.rSum += sqlite3_value_double( argv[0] );
           p.approx = true;
@@ -1596,10 +1606,12 @@ sqlite3_result_text(context, "?000", 4, SQLITE_STATIC);
         if ( p.overflow != 0 )
         {
           sqlite3_result_error( context, "integer overflow", -1 );
-        } else if ( p.approx )
+        }
+        else if ( p.approx )
         {
           sqlite3_result_double( context, p.rSum );
-        } else
+        }
+        else
         {
           sqlite3_result_int64( context, p.iSum );
         }
@@ -1640,10 +1652,7 @@ sqlite3_result_text(context, "?000", 4, SQLITE_STATIC);
       Mem _M;
       public Mem Context
       {
-        get
-        {
-          return _M;
-        }
+        get { return _M; }
         set
         {
           _M = value;
@@ -1655,10 +1664,7 @@ sqlite3_result_text(context, "?000", 4, SQLITE_STATIC);
       }
       public i64 n
       {
-        get
-        {
-          return _n;
-        }
+        get { return _n; }
         set
         {
           _n = value;
@@ -1737,7 +1743,8 @@ Debug.Assert( argc == 1 || p == null || p.n > 0x7fffffff
         {
           sqlite3VdbeMemCopy( pBest, pArg );
         }
-      } else
+      }
+      else
       {
         sqlite3VdbeMemCopy( pBest, pArg );
       }
@@ -1776,32 +1783,32 @@ Debug.Assert( argc == 1 || p == null || p.n > 0x7fffffff
       Mem pMem = sqlite3_aggregate_context( context, 1 );//sizeof(*pAccum));
       if ( pMem._StrAccum == null )
         pMem._StrAccum = new StrAccum( 100 );
-      //pAccum = pMem._StrAccum;
+        //pAccum = pMem._StrAccum;
 
       //if ( pMem._StrAccum != null )
       //{
-      sqlite3 db = sqlite3_context_db_handle( context );
-      //int firstTerm = pMem._StrAccum.useMalloc == 0 ? 1 : 0;
-      //pMem._StrAccum.useMalloc = 2;
-      pMem._StrAccum.mxAlloc = db.aLimit[SQLITE_LIMIT_LENGTH];
-      if ( pMem._StrAccum.Context == null ) // first term
-        pMem._StrAccum.Context = pMem;
-      else
-      {
-        if ( argc == 2 )
-        {
-          zSep = sqlite3_value_text( argv[1] );
-          nSep = sqlite3_value_bytes( argv[1] );
-        } else
-        {
-          zSep = ",";
-          nSep = 1;
+        sqlite3 db = sqlite3_context_db_handle( context );
+        //int firstTerm = pMem._StrAccum.useMalloc == 0 ? 1 : 0;
+        //pMem._StrAccum.useMalloc = 2;
+        pMem._StrAccum.mxAlloc = db.aLimit[SQLITE_LIMIT_LENGTH];
+        if ( pMem._StrAccum.Context == null ) // first term
+          pMem._StrAccum.Context = pMem;
+        else {
+          if (argc == 2)
+          {
+            zSep = sqlite3_value_text( argv[1] );
+            nSep = sqlite3_value_bytes( argv[1] );
+          }
+          else
+          {
+            zSep = ",";
+            nSep = 1;
+          }
+          sqlite3StrAccumAppend( pMem._StrAccum, zSep, nSep );
         }
-        sqlite3StrAccumAppend( pMem._StrAccum, zSep, nSep );
-      }
-      zVal = sqlite3_value_text( argv[0] );
-      nVal = sqlite3_value_bytes( argv[0] );
-      sqlite3StrAccumAppend( pMem._StrAccum, zVal, nVal );
+        zVal = sqlite3_value_text( argv[0] );
+        nVal = sqlite3_value_bytes( argv[0] );
+        sqlite3StrAccumAppend( pMem._StrAccum, zVal, nVal );
       //}
     }
 
@@ -1821,10 +1828,10 @@ Debug.Assert( argc == 1 || p == null || p.n > 0x7fffffff
         {
           sqlite3_result_error_toobig( context );
         }
-          //else if ( pAccum.mallocFailed != 0 )
-          //{
-          //  sqlite3_result_error_nomem( context );
-          //}
+        //else if ( pAccum.mallocFailed != 0 )
+        //{
+        //  sqlite3_result_error_nomem( context );
+        //}
         else
         {
           sqlite3_result_text( context, sqlite3StrAccumFinish( pAccum ), -1,
@@ -1913,7 +1920,8 @@ Debug.Assert( argc == 1 || p == null || p.n > 0x7fffffff
       if ( caseSensitive != 0 )
       {
         pInfo = likeInfoAlt;
-      } else
+      }
+      else
       {
         pInfo = likeInfoNorm;
       }

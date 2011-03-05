@@ -21,14 +21,14 @@
 using System.Text;
 namespace tcl.lang
 {
-
-  public class TclToken
-  {
-    internal string TokenString
-    {
-      get
-      {
-#if DEBUG				
+	
+	public class TclToken
+	{
+		 internal string TokenString
+		{
+			get
+			{
+				#if DEBUG				
 				if ((script_index + size) > script_array.Length)
 				{
 					System.Diagnostics.Debug.WriteLine("Entered TclToken.getTokenString()");
@@ -44,89 +44,83 @@ namespace tcl.lang
 					}
 					System.Diagnostics.Debug.WriteLine("\"");
 				}
-#endif
-
-        return ( new string( script_array, script_index, size ) );
-      }
-
-    }
-
-    // Contains an array the references the script from where the
-    // token originates from and an index to the first character
-    // of the token inside the script.
-
-
-    internal char[] script_array;
-    internal int script_index;
-
-    // Number of bytes in token. 
-
-    public int size;
-
-    // Type of token, such as TCL_TOKEN_WORD;  See Parse.java 
-    // for valid types. 
-
-    internal int type;
-
-    // If this token is composed of other tokens, this field 
-    // tells how many of them there are (including components
-    // of components, etc.).  The component tokens immediately
-    // follow this one.
-
-    internal int numComponents;
-    internal TclToken()
-    {
-      script_array = null;
-      script_index = -1;
-    }
-    public override string ToString()
-    {
+				#endif
+				
+				return (new string(script_array, script_index, size));
+			}
+			
+		}
+		
+		// Contains an array the references the script from where the
+		// token originates from and an index to the first character
+		// of the token inside the script.
+		
+		
+		internal char[] script_array;
+		internal int script_index;
+		
+		// Number of bytes in token. 
+		
+		public int size;
+		
+		// Type of token, such as TCL_TOKEN_WORD;  See Parse.java 
+		// for valid types. 
+		
+		internal int type;
+		
+		// If this token is composed of other tokens, this field 
+		// tells how many of them there are (including components
+		// of components, etc.).  The component tokens immediately
+		// follow this one.
+		
+		internal int numComponents;
+		internal TclToken()
+		{
+			script_array = null;
+			script_index = - 1;
+		}
+		public override string ToString()
+		{
       var sbuf = new StringBuilder();
-      switch ( type )
-      {
-
-        case Parser.TCL_TOKEN_WORD:
-          {
-            sbuf.Append( "\n  Token Type: TCL_TOKEN_WORD" );
-            break;
-          }
-
-        case Parser.TCL_TOKEN_SIMPLE_WORD:
-          {
-            sbuf.Append( "\n  Token Type: TCL_TOKEN_SIMPLE_WORD" );
-            break;
-          }
-
-        case Parser.TCL_TOKEN_TEXT:
-          {
-            sbuf.Append( "\n  Token Type: TCL_TOKEN_TEXT" );
-            break;
-          }
-
-        case Parser.TCL_TOKEN_BS:
-          {
-            sbuf.Append( "\n  Token Type: TCL_TOKEN_BS" );
-            break;
-          }
-
-        case Parser.TCL_TOKEN_COMMAND:
-          {
-            sbuf.Append( "\n  Token Type: TCL_TOKEN_COMMAND" );
-            break;
-          }
-
-        case Parser.TCL_TOKEN_VARIABLE:
-          {
-            sbuf.Append( "\n  Token Type: TCL_TOKEN_VARIABLE" );
-            break;
-          }
-      }
-      sbuf.Append( "\n  String:      " + TokenString );
-      sbuf.Append( "\n  String Size: " + TokenString.Length );
-      sbuf.Append( "\n  ScriptIndex: " + script_index );
-      sbuf.Append( "\n  NumComponents: " + numComponents );
-      sbuf.Append( "\n  Token Size: " + size );
-      return sbuf.ToString();
-    }
-  } // end TclToken
+			switch (type)
+			{
+				
+				case Parser.TCL_TOKEN_WORD:  {
+						sbuf.Append("\n  Token Type: TCL_TOKEN_WORD");
+						break;
+					}
+				
+				case Parser.TCL_TOKEN_SIMPLE_WORD:  {
+						sbuf.Append("\n  Token Type: TCL_TOKEN_SIMPLE_WORD");
+						break;
+					}
+				
+				case Parser.TCL_TOKEN_TEXT:  {
+						sbuf.Append("\n  Token Type: TCL_TOKEN_TEXT");
+						break;
+					}
+				
+				case Parser.TCL_TOKEN_BS:  {
+						sbuf.Append("\n  Token Type: TCL_TOKEN_BS");
+						break;
+					}
+				
+				case Parser.TCL_TOKEN_COMMAND:  {
+						sbuf.Append("\n  Token Type: TCL_TOKEN_COMMAND");
+						break;
+					}
+				
+				case Parser.TCL_TOKEN_VARIABLE:  {
+						sbuf.Append("\n  Token Type: TCL_TOKEN_VARIABLE");
+						break;
+					}
+				}
+			sbuf.Append("\n  String:      " + TokenString);
+			sbuf.Append("\n  String Size: " + TokenString.Length);
+			sbuf.Append("\n  ScriptIndex: " + script_index);
+			sbuf.Append("\n  NumComponents: " + numComponents);
+			sbuf.Append("\n  Token Size: " + size);
+			return sbuf.ToString();
+		}
+	} // end TclToken
 }

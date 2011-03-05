@@ -51,20 +51,20 @@ namespace Community.CsharpSqlite
     ** binary data.  zBuf[] is 2*n+1 bytes long.  Overwrite zBuf[]
     ** with a hexadecimal representation of its original binary input.
     */
-    static void sqlite3TestBinToHex( byte[] zBuf, int N )
+    static void sqlite3TestBinToHex(byte[] zBuf, int N)
     {
-      var zHex = new StringBuilder( "0123456789ABCDEF" );
+      var zHex = new StringBuilder("0123456789ABCDEF");
       int i, j;
       byte c;
       i = N * 2;
       zBuf[i--] = 0;
-      for ( j = N - 1; j >= 0; j-- )
+      for (j = N - 1; j >= 0; j--)
       {
         c = zBuf[j];
         zBuf[i--] = (byte)zHex[c & 0xf];
         zBuf[i--] = (byte)zHex[c >> 4];
       }
-      Debug.Assert( i == -1 );
+      Debug.Assert(i == -1);
     }
 
     /*
@@ -73,7 +73,7 @@ namespace Community.CsharpSqlite
     ** the binary data.  Spaces _in the original input are ignored.
     ** Return the number of bytes of binary rendered.
     */
-    static int sqlite3TestHexToBin( string zIn, int N, byte[] aOut )
+    static int sqlite3TestHexToBin(string zIn, int N, byte[] aOut)
     {
       var aMap = new int[]  {
 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,
@@ -97,18 +97,18 @@ namespace Community.CsharpSqlite
       int hi = 1;
       int c;
 
-      for ( i = j = 0; i < N; i++ )
+      for (i = j = 0; i < N; i++)
       {
         c = aMap[zIn[i]];
-        if ( c == 0 )
-          continue;
-        if ( hi != 0 )
+        if (c == 0) continue;
+        if (hi != 0)
         {
-          aOut[j] = (byte)( ( c - 1 ) << 4 );
+          aOut[j] = (byte)((c - 1) << 4);
           hi = 0;
-        } else
+        }
+        else
         {
-          aOut[j++] |= (byte)( c - 1 );
+          aOut[j++] |= (byte)(c - 1);
           hi = 1;
         }
       }
@@ -136,40 +136,38 @@ namespace Community.CsharpSqlite
       byte[] zBuf;
       FileStream _in;
 
-      if ( objc != 4 )
+      if (objc != 4)
       {
-        TCL.Tcl_WrongNumArgs( interp, 1, objv, "FILENAME OFFSET AMT" );
+        TCL.Tcl_WrongNumArgs(interp, 1, objv, "FILENAME OFFSET AMT");
         return TCL.TCL_ERROR;
       }
-      if ( TCL.TCL_OK != TCL.Tcl_GetIntFromObj( interp, objv[2], ref offset ) )
-        return TCL.TCL_ERROR;
-      if ( TCL.TCL_OK != TCL.Tcl_GetIntFromObj( interp, objv[3], ref amt ) )
-        return TCL.TCL_ERROR;
-      zFile = TCL.Tcl_GetString( objv[1] );
+      if ( TCL.TCL_OK != TCL.Tcl_GetIntFromObj(interp, objv[2], ref offset)) return TCL.TCL_ERROR;
+      if ( TCL.TCL_OK != TCL.Tcl_GetIntFromObj(interp, objv[3], ref amt)) return TCL.TCL_ERROR;
+      zFile = TCL.Tcl_GetString(objv[1]);
       zBuf = new byte[amt * 2 + 1];// sqlite3Malloc( amt * 2 + 1 );
-      if ( zBuf == null )
+      if (zBuf == null)
       {
         return TCL.TCL_ERROR;
       }
-      _in = new FileStream( zFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite );
+      _in = new FileStream(zFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
       //if( _in==null){
       //  _in = fopen(zFile, "r");
       //}
-      if ( _in == null )
+      if (_in == null)
       {
-        TCL.Tcl_AppendResult( interp, "cannot open input file ", zFile );
+        TCL.Tcl_AppendResult(interp, "cannot open input file ", zFile);
         return TCL.TCL_ERROR;
       }
-      _in.Seek( offset, SeekOrigin.Begin ); //fseek(_in, offset, SEEK_SET);
-      got = _in.Read( zBuf, 0, amt ); // got = fread( zBuf, 1, amt, _in );
+      _in.Seek(offset, SeekOrigin.Begin); //fseek(_in, offset, SEEK_SET);
+      got = _in.Read(zBuf, 0, amt); // got = fread( zBuf, 1, amt, _in );
       _in.Flush();
       _in.Close();// fclose( _in );
-      if ( got < 0 )
+      if (got < 0)
       {
         got = 0;
       }
-      sqlite3TestBinToHex( zBuf, got );
-      TCL.Tcl_AppendResult( interp, System.Text.Encoding.UTF8.GetString( zBuf ).Substring( 0, got * 2 ) );
+      sqlite3TestBinToHex(zBuf, got);
+      TCL.Tcl_AppendResult(interp, System.Text.Encoding.UTF8.GetString(zBuf).Substring(0, got * 2));
       zBuf = null;// sqlite3DbFree( db, ref zBuf );
       return TCL.TCL_OK;
     }
@@ -195,38 +193,37 @@ namespace Community.CsharpSqlite
       byte[] aOut;
       FileStream _out;
 
-      if ( objc != 4 )
+      if (objc != 4)
       {
-        TCL.Tcl_WrongNumArgs( interp, 1, objv, "FILENAME OFFSET HEXDATA" );
+        TCL.Tcl_WrongNumArgs(interp, 1, objv, "FILENAME OFFSET HEXDATA");
         return TCL.TCL_ERROR;
       }
-      if ( TCL.TCL_OK != TCL.Tcl_GetIntFromObj( interp, objv[2], ref offset ) )
-        return TCL.TCL_ERROR;
-      zFile = TCL.Tcl_GetString( objv[1] );
-      zIn = TCL.Tcl_GetStringFromObj( objv[3], ref nIn );
+      if ( TCL.TCL_OK != TCL.Tcl_GetIntFromObj(interp, objv[2], ref offset)) return TCL.TCL_ERROR;
+      zFile = TCL.Tcl_GetString(objv[1]);
+      zIn = TCL.Tcl_GetStringFromObj(objv[3], ref nIn);
       aOut = new byte[nIn / 2 + 1];//sqlite3Malloc( nIn/2 );
-      if ( aOut == null )
+      if (aOut == null)
       {
         return TCL.TCL_ERROR;
       }
-      nOut = sqlite3TestHexToBin( zIn, nIn, aOut );
-      _out = new FileStream( zFile, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite );// fopen( zFile, "r+b" );
+      nOut = sqlite3TestHexToBin(zIn, nIn, aOut);
+      _out = new FileStream(zFile, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);// fopen( zFile, "r+b" );
       //if( _out==0 ){
       //  _out = fopen(zFile, "r+");
       //}
-      if ( _out == null )
+      if (_out == null)
       {
-        TCL.Tcl_AppendResult( interp, "cannot open output file ", zFile );
+        TCL.Tcl_AppendResult(interp, "cannot open output file ", zFile);
         return TCL.TCL_ERROR;
       }
-      _out.Seek( offset, SeekOrigin.Begin );// fseek( _out, offset, SEEK_SET );
+      _out.Seek(offset, SeekOrigin.Begin);// fseek( _out, offset, SEEK_SET );
       written = (int)_out.Position;
-      _out.Write( aOut, 0, nOut );// written = fwrite( aOut, 1, nOut, _out );
+      _out.Write(aOut, 0, nOut);// written = fwrite( aOut, 1, nOut, _out );
       written = (int)_out.Position - written;
       aOut = null;// sqlite3DbFree( db, ref aOut );
       _out.Flush();
       _out.Close();// fclose( _out );
-      TCL.Tcl_SetObjResult( interp, TCL.Tcl_NewIntObj( written ) );
+      TCL.Tcl_SetObjResult(interp, TCL.Tcl_NewIntObj(written));
       return TCL.TCL_OK;
     }
 
@@ -250,39 +247,37 @@ namespace Community.CsharpSqlite
       byte[] aOut;
       var aNum = new byte[4];
 
-      if ( objc != 2 )
+      if (objc != 2)
       {
-        TCL.Tcl_WrongNumArgs( interp, 1, objv, "HEXDATA" );
+        TCL.Tcl_WrongNumArgs(interp, 1, objv, "HEXDATA");
         return TCL.TCL_ERROR;
       }
-      zIn = TCL.Tcl_GetStringFromObj( objv[1], ref nIn );
+      zIn = TCL.Tcl_GetStringFromObj(objv[1], ref nIn);
       aOut = new byte[nIn / 2];// sqlite3Malloc( nIn / 2 );
-      if ( aOut == null )
+      if (aOut == null)
       {
         return TCL.TCL_ERROR;
       }
-      nOut = sqlite3TestHexToBin( zIn, nIn, aOut );
-      if ( nOut >= 4 )
+      nOut = sqlite3TestHexToBin(zIn, nIn, aOut);
+      if (nOut >= 4)
       {
         aNum[0] = aOut[0]; // memcpy( aNum, aOut, 4 );
         aNum[1] = aOut[1];
         aNum[2] = aOut[2];
         aNum[3] = aOut[3];
-      } else
+      }
+      else
       {
         //memset(aNum, 0, sizeof(aNum));
         //memcpy(&aNum[4-nOut], aOut, nOut);
         aNum[4 - nOut] = aOut[0];
-        if ( nOut > 1 )
-          aNum[4 - nOut + 1] = aOut[1];
-        if ( nOut > 2 )
-          aNum[4 - nOut + 2] = aOut[2];
-        if ( nOut > 3 )
-          aNum[4 - nOut + 3] = aOut[3];
+        if (nOut > 1) aNum[4 - nOut + 1] = aOut[1];
+        if (nOut > 2) aNum[4 - nOut + 2] = aOut[2];
+        if (nOut > 3) aNum[4 - nOut + 3] = aOut[3];
       }
       aOut = null;// sqlite3DbFree( db, ref aOut );
-      val = ( aNum[0] << 24 ) | ( aNum[1] << 16 ) | ( aNum[2] << 8 ) | aNum[3];
-      TCL.Tcl_SetObjResult( interp, TCL.Tcl_NewIntObj( val ) );
+      val = (aNum[0] << 24) | (aNum[1] << 16) | (aNum[2] << 8) | aNum[3];
+      TCL.Tcl_SetObjResult(interp, TCL.Tcl_NewIntObj(val));
       return TCL.TCL_OK;
     }
 
@@ -302,17 +297,16 @@ namespace Community.CsharpSqlite
       int val = 0;
       var aNum = new byte[10];
 
-      if ( objc != 2 )
+      if (objc != 2)
       {
-        TCL.Tcl_WrongNumArgs( interp, 1, objv, "INTEGER" );
+        TCL.Tcl_WrongNumArgs(interp, 1, objv, "INTEGER");
         return TCL.TCL_ERROR;
       }
-      if ( TCL.TCL_OK != TCL.Tcl_GetIntFromObj( interp, objv[1], ref val ) )
-        return TCL.TCL_ERROR;
-      aNum[0] = (byte)( val >> 8 );
+      if ( TCL.TCL_OK != TCL.Tcl_GetIntFromObj(interp, objv[1], ref val)) return TCL.TCL_ERROR;
+      aNum[0] = (byte)(val >> 8);
       aNum[1] = (byte)val;
-      sqlite3TestBinToHex( aNum, 2 );
-      TCL.Tcl_SetObjResult( interp, TCL.Tcl_NewStringObj( aNum, 4 ) );
+      sqlite3TestBinToHex(aNum, 2);
+      TCL.Tcl_SetObjResult(interp, TCL.Tcl_NewStringObj(aNum, 4));
       return TCL.TCL_OK;
     }
 
@@ -332,19 +326,18 @@ namespace Community.CsharpSqlite
       int val = 0;
       var aNum = new byte[10];
 
-      if ( objc != 2 )
+      if (objc != 2)
       {
-        TCL.Tcl_WrongNumArgs( interp, 1, objv, "INTEGER" );
+        TCL.Tcl_WrongNumArgs(interp, 1, objv, "INTEGER");
         return TCL.TCL_ERROR;
       }
-      if ( TCL.TCL_OK != TCL.Tcl_GetIntFromObj( interp, objv[1], ref val ) )
-        return TCL.TCL_ERROR;
-      aNum[0] = (byte)( val >> 24 );
-      aNum[1] = (byte)( val >> 16 );
-      aNum[2] = (byte)( val >> 8 );
+      if ( TCL.TCL_OK != TCL.Tcl_GetIntFromObj(interp, objv[1], ref val)) return TCL.TCL_ERROR;
+      aNum[0] = (byte)(val >> 24);
+      aNum[1] = (byte)(val >> 16);
+      aNum[2] = (byte)(val >> 8);
       aNum[3] = (byte)val;
-      sqlite3TestBinToHex( aNum, 4 );
-      TCL.Tcl_SetObjResult( interp, TCL.Tcl_NewStringObj( aNum, 8 ) );
+      sqlite3TestBinToHex(aNum, 4);
+      TCL.Tcl_SetObjResult(interp, TCL.Tcl_NewStringObj(aNum, 8));
       return TCL.TCL_OK;
     }
 
@@ -429,7 +422,7 @@ namespace Community.CsharpSqlite
     /*
     ** Register commands with the TCL interpreter.
     */
-    static public int Sqlitetest_hexio_Init( Tcl_Interp interp )
+    static public int Sqlitetest_hexio_Init(Tcl_Interp interp)
     {
       //static struct {
       //   string zName;
@@ -445,9 +438,9 @@ new _aObjCmd(  "hexio_render_int32",           hexio_render_int32    ),
 //     { "read_fts3varint",                  read_fts3varint           },
 };
       int i;
-      for ( i = 0; i < aObjCmd.Length; i++ )
+      for (i = 0; i < aObjCmd.Length; i++)
       {
-        TCL.Tcl_CreateObjCommand( interp, aObjCmd[i].zName, aObjCmd[i].xProc, null, null );
+        TCL.Tcl_CreateObjCommand(interp, aObjCmd[i].zName, aObjCmd[i].xProc, null, null);
       }
       return TCL.TCL_OK;
     }

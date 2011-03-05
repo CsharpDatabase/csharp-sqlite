@@ -19,59 +19,59 @@
 using System;
 namespace tcl.lang
 {
-
-  public abstract class EventuallyFreed
-  {
-
-    // Number of preserve() calls in effect for this object.
-
-    internal int refCount = 0;
-
-    // True means dispose() was called while a preserve()
-    // call was in effect, so the object must be disposed
-    // when refCount becomes zero.
-
-    internal bool mustFree = false;
-
-    // Procedure to call to dispose.
-
-    public abstract void eventuallyDispose();
-    internal void preserve()
-    {
-      // Just increment its reference count.
-
-      refCount++;
-    }
-    internal void release()
-    {
-      refCount--;
-      if ( refCount == 0 )
-      {
-
-        if ( mustFree )
-        {
-          dispose();
-        }
-      }
-    }
-    public void dispose()
-    {
-      // See if there is a reference for this pointer.  If so, set its
-      // "mustFree" flag (the flag had better not be set already!).
-
-      if ( refCount >= 1 )
-      {
-        if ( mustFree )
-        {
-          throw new TclRuntimeError( "eventuallyDispose() called twice" );
-        }
-        mustFree = true;
-        return;
-      }
-
-      // No reference for this block.  Free it now.
-
-      eventuallyDispose();
-    }
-  } // end EventuallyFreed
+	
+	public abstract class EventuallyFreed
+	{
+		
+		// Number of preserve() calls in effect for this object.
+		
+		internal int refCount = 0;
+		
+		// True means dispose() was called while a preserve()
+		// call was in effect, so the object must be disposed
+		// when refCount becomes zero.
+		
+		internal bool mustFree = false;
+		
+		// Procedure to call to dispose.
+		
+		public abstract void  eventuallyDispose();
+		internal  void  preserve()
+		{
+			// Just increment its reference count.
+			
+			refCount++;
+		}
+		internal  void  release()
+		{
+			refCount--;
+			if (refCount == 0)
+			{
+				
+				if (mustFree)
+				{
+					dispose();
+				}
+			}
+		}
+		public  void  dispose()
+		{
+			// See if there is a reference for this pointer.  If so, set its
+			// "mustFree" flag (the flag had better not be set already!).
+			
+			if (refCount >= 1)
+			{
+				if (mustFree)
+				{
+					throw new TclRuntimeError("eventuallyDispose() called twice");
+				}
+				mustFree = true;
+				return ;
+			}
+			
+			// No reference for this block.  Free it now.
+			
+			eventuallyDispose();
+		}
+	} // end EventuallyFreed
 }

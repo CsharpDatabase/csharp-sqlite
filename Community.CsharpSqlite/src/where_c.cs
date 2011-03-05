@@ -39,7 +39,6 @@ namespace Community.CsharpSqlite
     **
     **  SQLITE_SOURCE_ID: 2011-01-28 17:03:50 ed759d5a9edb3bba5f48f243df47be29e3fe8cd7
     **
-    **  $Header$
     *************************************************************************
     */
     //#include "sqliteInt.h"
@@ -55,9 +54,7 @@ namespace Community.CsharpSqlite
 static void WHERETRACE( string X, params object[] ap ) { if ( sqlite3WhereTrace ) sqlite3DebugPrintf( X, ap ); }
 #else
     //# define WHERETRACE(X)
-    static void WHERETRACE( string X, params object[] ap )
-    {
-    }
+    static void WHERETRACE( string X, params object[] ap ) { }
 #endif
 
     /* Forward reference
@@ -404,7 +401,8 @@ public WhereTerm[] aStatic = new WhereTerm[1];    /* Initial static space for a[
         if ( ( a.wtFlags & TERM_ORINFO ) != 0 )
         {
           whereOrInfoDelete( db, a.u.pOrInfo );
-        } else if ( ( a.wtFlags & TERM_ANDINFO ) != 0 )
+        }
+        else if ( ( a.wtFlags & TERM_ANDINFO ) != 0 )
         {
           whereAndInfoDelete( db, a.u.pAndInfo );
         }
@@ -493,7 +491,8 @@ public WhereTerm[] aStatic = new WhereTerm[1];    /* Initial static space for a[
       if ( pExpr.op != op )
       {
         whereClauseInsert( pWC, pExpr, 0 );
-      } else
+      }
+      else
       {
         whereSplit( pWC, pExpr.pLeft, op );
         whereSplit( pWC, pExpr.pRight, op );
@@ -568,7 +567,8 @@ public WhereTerm[] aStatic = new WhereTerm[1];    /* Initial static space for a[
       if ( ExprHasProperty( p, EP_xIsSelect ) )
       {
         mask |= exprSelectTableUsage( pMaskSet, p.x.pSelect );
-      } else
+      }
+      else
       {
         mask |= exprListTableUsage( pMaskSet, p.x.pList );
       }
@@ -672,10 +672,12 @@ public WhereTerm[] aStatic = new WhereTerm[1];    /* Initial static space for a[
       if ( op == TK_IN )
       {
         c = WO_IN;
-      } else if ( op == TK_ISNULL )
+      }
+      else if ( op == TK_ISNULL )
       {
         c = WO_ISNULL;
-      } else
+      }
+      else
       {
         Debug.Assert( ( WO_EQ << ( op - TK_EQ ) ) < 0x7fff );
         c = (u16)( WO_EQ << ( op - TK_EQ ) );
@@ -833,7 +835,8 @@ if( pnoCase ) return 0;
         }
         sqlite3VdbeSetVarmask( pParse.pVdbe, iCol ); /* IMP: R-23257-02778 */
         Debug.Assert( pRight.op == TK_VARIABLE || pRight.op == TK_REGISTER );
-      } else if ( op == TK_STRING )
+      }
+      else if ( op == TK_STRING )
       {
         z = pRight.u.zToken;
       }
@@ -847,7 +850,7 @@ if( pnoCase ) return 0;
         if ( cnt != 0 && 255 != (u8)z[cnt - 1] )
         {
           Expr pPrefix;
-          pisComplete = c == wc[0] && cnt == z.Length - 1;
+          pisComplete = c == wc[0] && cnt == z.Length-1;
           pPrefix = sqlite3Expr( db, TK_STRING, z );
           if ( pPrefix != null )
             pPrefix.u.zToken = pPrefix.u.zToken.Substring( 0, cnt );
@@ -870,7 +873,8 @@ if( pnoCase ) return 0;
               sqlite3ReleaseTempReg( pParse, r1 );
             }
           }
-        } else
+        }
+        else
         {
           z = null;
         }
@@ -1078,11 +1082,13 @@ return 1;
             }
             indexable &= b;
           }
-        } else if ( ( pOrTerm.wtFlags & TERM_COPIED ) != 0 )
+        }
+        else if ( ( pOrTerm.wtFlags & TERM_COPIED ) != 0 )
         {
           /* Skip this term for now.  We revisit it when we process the
           ** corresponding TERM_VIRTUAL term */
-        } else
+        }
+        else
         {
           Bitmask b;
           b = getMask( pMaskSet, pOrTerm.leftCursor );
@@ -1095,7 +1101,8 @@ return 1;
           if ( pOrTerm.eOperator != WO_EQ )
           {
             chngToIN = 0;
-          } else
+          }
+          else
           {
             chngToIN &= b;
           }
@@ -1194,10 +1201,12 @@ return 1;
             if ( pOrTerm.leftCursor != iCursor )
             {
               pOrTerm.wtFlags = (u8)( pOrTerm.wtFlags & ~TERM_OR_OK );
-            } else if ( pOrTerm.u.leftColumn != iColumn )
+            }
+            else if ( pOrTerm.u.leftColumn != iColumn )
             {
               okToChngToIN = 0;
-            } else
+            }
+            else
             {
               int affLeft, affRight;
               /* If the right-hand side is also a column, then the affinities
@@ -1209,7 +1218,8 @@ return 1;
               if ( affRight != 0 && affRight != affLeft )
               {
                 okToChngToIN = 0;
-              } else
+              }
+              else
               {
                 pOrTerm.wtFlags |= TERM_OR_OK;
               }
@@ -1257,7 +1267,8 @@ return 1;
             pTerm = pWC.a[idxTerm];
             pWC.a[idxNew].iParent = idxTerm;
             pTerm.nChild = 1;
-          } else
+          }
+          else
           {
             sqlite3ExprListDelete( db, ref pList );
           }
@@ -1320,14 +1331,17 @@ return 1;
         if ( ExprHasProperty( pExpr, EP_xIsSelect ) )
         {
           pTerm.prereqRight = exprSelectTableUsage( pMaskSet, pExpr.x.pSelect );
-        } else
+        }
+        else
         {
           pTerm.prereqRight = exprListTableUsage( pMaskSet, pExpr.x.pList );
         }
-      } else if ( op == TK_ISNULL )
+      }
+      else if ( op == TK_ISNULL )
       {
         pTerm.prereqRight = 0;
-      } else
+      }
+      else
       {
         pTerm.prereqRight = exprTableUsage( pMaskSet, pExpr.pRight );
       }
@@ -1374,7 +1388,8 @@ return 1;
             pTerm = pWC.a[idxTerm];
             pTerm.nChild = 1;
             pTerm.wtFlags |= TERM_COPIED;
-          } else
+          }
+          else
           {
             pDup = pExpr;
             pNew = pTerm;
@@ -1391,7 +1406,7 @@ return 1;
       }
 
 #if  !SQLITE_OMIT_BETWEEN_OPTIMIZATION
-        /* If a term is the BETWEEN operator, create two new virtual terms
+      /* If a term is the BETWEEN operator, create two new virtual terms
 ** that define the range that the BETWEEN implements.  For example:
 **
 **      a BETWEEN b AND c
@@ -1431,7 +1446,7 @@ return 1;
 #endif //* SQLITE_OMIT_BETWEEN_OPTIMIZATION */
 
 #if  !(SQLITE_OMIT_OR_OPTIMIZATION) && !(SQLITE_OMIT_SUBQUERY)
-        /* Analyze a term that is composed of two or more subterms connected by
+      /* Analyze a term that is composed of two or more subterms connected by
 ** an OR operator.
 */
       else if ( pExpr.op == TK_OR )
@@ -1494,8 +1509,8 @@ return 1;
         testcase( idxNew1 == 0 );
         exprAnalyze( pSrc, pWC, idxNew1 );
         pNewExpr2 = sqlite3PExpr( pParse, TK_LT,
-        sqlite3ExprSetColl( sqlite3ExprDup( db, pLeft, 0 ), pColl ),
-        pStr2, null );
+                 sqlite3ExprSetColl( sqlite3ExprDup( db, pLeft, 0 ), pColl ),
+                 pStr2, null );
         idxNew2 = whereClauseInsert( pWC, pNewExpr2, TERM_VIRTUAL | TERM_DYNAMIC );
         testcase( idxNew2 == 0 );
         exprAnalyze( pSrc, pWC, idxNew2 );
@@ -1661,7 +1676,8 @@ pNewTerm.prereqAll = pTerm.prereqAll;
           }
           iSortOrder = pIdx.aSortOrder[i];
           zColl = pIdx.azColl[i];
-        } else
+        }
+        else
         {
           iColumn = -1;
           iSortOrder = 0;
@@ -1676,11 +1692,13 @@ pNewTerm.prereqAll = pTerm.prereqAll;
             ** ORDER BY term, that is OK.  Just ignore that column of the index
             */
             continue;
-          } else if ( i == pIdx.nColumn )
+          }
+          else if ( i == pIdx.nColumn )
           {
             /* Index column i is the rowid.  All other terms match. */
             break;
-          } else
+          }
+          else
           {
             /* If an index column fails to match and is not constrained by ==
             ** then the index cannot satisfy the ORDER BY constraint.
@@ -1700,7 +1718,8 @@ pNewTerm.prereqAll = pTerm.prereqAll;
             ** equality constraints are all either DESC or ASC. */
             return false;
           }
-        } else
+        }
+        else
         {
           sortOrder = termSortOrder;
         }
@@ -1726,8 +1745,8 @@ pNewTerm.prereqAll = pTerm.prereqAll;
         return true;
       }
       if ( pIdx.onError != OE_None && i == pIdx.nColumn
-      && ( wsFlags & WHERE_COLUMN_NULL ) == 0
-      && !referencesOtherTables( pOrderBy, pMaskSet, j, _base ) )
+        && ( wsFlags & WHERE_COLUMN_NULL ) == 0
+        && !referencesOtherTables( pOrderBy, pMaskSet, j, _base ) )
       {
         /* All terms of this index match some prefix of the ORDER BY clause
         ** and the index is UNIQUE and no terms on the tail of the ORDER BY
@@ -1875,7 +1894,8 @@ sqlite3DebugPrintf( "  estimatedCost=%g\n", p.estimatedCost );
             {
               WhereClause pAndWC = pOrTerm.u.pAndInfo.wc;
               bestIndex( pParse, pAndWC, pSrc, notReady, notValid, null, ref sTermCost );
-            } else if ( pOrTerm.leftCursor == iCur )
+            }
+            else if ( pOrTerm.leftCursor == iCur )
             {
               var tempWC = new WhereClause();
               tempWC.pParse = pWC.pParse;
@@ -1885,7 +1905,8 @@ sqlite3DebugPrintf( "  estimatedCost=%g\n", p.estimatedCost );
               tempWC.a[0] = pOrTerm;
               tempWC.nTerm = 1;
               bestIndex( pParse, tempWC, pSrc, notReady, notValid, null, ref sTermCost );
-            } else
+            }
+            else
             {
               continue;
             }
@@ -2155,7 +2176,7 @@ WhereCost pCost            /* Lowest cost query plan */
             idxCols |= cMask;
             pIdx.aiColumn[n] = pTerm.u.leftColumn;
             pColl = sqlite3BinaryCompareCollSeq( pParse, pX.pLeft, pX.pRight );
-            pIdx.azColl[n] = ALWAYS( pColl != null ) ? pColl.zName : "BINARY";
+            pIdx.azColl[n] = ALWAYS(pColl != null) ? pColl.zName : "BINARY";
             n++;
           }
         }
@@ -2560,7 +2581,8 @@ bestOrClauseIndex(pParse, pWC, pSrc, notReady, notValid, pOrderBy, pCost);
             if ( aSample[i].eType >= SQLITE_TEXT || aSample[i].u.r > r )
               break;
           }
-        } else
+        }
+        else
         {
           sqlite3 db = pParse.db;
           CollSeq pColl;
@@ -2575,13 +2597,14 @@ bestOrClauseIndex(pParse, pWC, pSrc, notReady, notValid, pOrderBy, pCost);
             z = Encoding.UTF8.GetString( sqlite3_value_blob( pVal ) );
             pColl = db.pDfltColl;
             Debug.Assert( pColl.enc == SQLITE_UTF8 );
-          } else
+          }
+          else
           {
             pColl = sqlite3GetCollSeq( db, SQLITE_UTF8, null, pIdx.azColl[0] );
             if ( pColl == null )
             {
               sqlite3ErrorMsg( pParse, "no such collation sequence: %s",
-              pIdx.azColl );
+                  pIdx.azColl );
               return SQLITE_ERROR;
             }
             z = sqlite3ValueText( pVal, pColl.enc );
@@ -2748,17 +2771,20 @@ sqlite3DbFree(db, ref zSample);
           sqlite3ValueFree( ref pLowerVal );
           sqlite3ValueFree( ref pUpperVal );
           goto range_est_fallback;
-        } else if ( pLowerVal == null )
+        }
+        else if ( pLowerVal == null )
         {
           rc = whereRangeRegion( pParse, p, pUpperVal, ref iUpper );
           if ( pLower != null )
             iLower = iUpper / 2;
-        } else if ( pUpperVal == null )
+        }
+        else if ( pUpperVal == null )
         {
           rc = whereRangeRegion( pParse, p, pLowerVal, ref iLower );
           if ( pUpper != null )
             iUpper = ( iLower + SQLITE_INDEX_SAMPLES + 1 ) / 2;
-        } else
+        }
+        else
         {
           rc = whereRangeRegion( pParse, p, pUpperVal, ref iUpper );
           if ( rc == SQLITE_OK )
@@ -2790,7 +2816,8 @@ UNUSED_PARAMETER(nEq);
       if ( pLower != null && pUpper != null )
       {
         piEst = 11;
-      } else
+      }
+      else
       {
         piEst = 33;
       }
@@ -2861,7 +2888,8 @@ UNUSED_PARAMETER(nEq);
       if ( ( pSrc.jointype & JT_LEFT ) != 0 )
       {
         idxEqTermMask = WO_EQ | WO_IN;
-      } else
+      }
+      else
       {
         idxEqTermMask = WO_EQ | WO_IN | WO_ISNULL;
       }
@@ -2872,7 +2900,8 @@ UNUSED_PARAMETER(nEq);
         pIdx = pProbe = pSrc.pIndex;
         wsFlagMask = ~( WHERE_ROWID_EQ | WHERE_ROWID_RANGE );
         eqTermMask = idxEqTermMask;
-      } else
+      }
+      else
       {
         /* There is no INDEXED BY clause.  Create a fake Index object to
         ** represent the primary key */
@@ -2995,11 +3024,13 @@ UNUSED_PARAMETER(nEq);
             {
               nInMul *= 25;
               bInEst = 1;
-            } else if ( ALWAYS( pExpr.x.pList != null ) )
+            }
+            else if ( ALWAYS( pExpr.x.pList != null ) )
             {
               nInMul *= pExpr.x.pList.nExpr + 1;
             }
-          } else if ( ( pTerm.eOperator & WO_ISNULL ) != 0 )
+          }
+          else if ( ( pTerm.eOperator & WO_ISNULL ) != 0 )
           {
             wsFlags |= WHERE_COLUMN_NULL;
           }
@@ -3029,7 +3060,8 @@ UNUSED_PARAMETER(nEq);
             }
             wsFlags |= ( WHERE_COLUMN_RANGE | WHERE_ROWID_RANGE );
           }
-        } else if ( pProbe.onError != OE_None )
+        }
+        else if ( pProbe.onError != OE_None )
         {
           testcase( wsFlags & WHERE_COLUMN_IN );
           testcase( wsFlags & WHERE_COLUMN_NULL );
@@ -3046,13 +3078,14 @@ UNUSED_PARAMETER(nEq);
         if ( pOrderBy != null )
         {
           if ( ( wsFlags & WHERE_COLUMN_IN ) == 0
-          && isSortingIndex( pParse, pWC.pMaskSet, pProbe, iCur, pOrderBy,
-          nEq, wsFlags, ref rev )
-          )
+            && isSortingIndex( pParse, pWC.pMaskSet, pProbe, iCur, pOrderBy,
+                              nEq, wsFlags, ref rev )
+              )
           {
             wsFlags |= WHERE_ROWID_RANGE | WHERE_COLUMN_RANGE | WHERE_ORDERBY;
             wsFlags |= ( rev != 0 ? WHERE_REVERSE : 0 );
-          } else
+          }
+          else
           {
             bSort = 1;
           }
@@ -3078,7 +3111,8 @@ UNUSED_PARAMETER(nEq);
           if ( m == 0 )
           {
             wsFlags |= WHERE_IDX_ONLY;
-          } else
+          }
+          else
           {
             bLookup = 1;
           }
@@ -3162,26 +3196,30 @@ UNUSED_PARAMETER(nEq);
                 /* Ignore the first nEq equality matches since the index
                 ** has already accounted for these */
                 nSkipEq--;
-              } else
+              }
+              else
               {
                 /* Assume each additional equality match reduces the result
                 ** set size by a factor of 10 */
                 nRow /= 10;
               }
-            } else if ( ( pTerm.eOperator & ( WO_LT | WO_LE | WO_GT | WO_GE ) ) != 0 )
+            }
+            else if ( ( pTerm.eOperator & ( WO_LT | WO_LE | WO_GT | WO_GE ) ) != 0 )
             {
               if ( nSkipRange != 0 )
               {
                 /* Ignore the first nBound range constraints since the index
                 ** has already accounted for these */
                 nSkipRange--;
-              } else
+              }
+              else
               {
                 /* Assume each additional range constraint reduces the result
                 ** set size by a factor of 3 */
                 nRow /= 3;
               }
-            } else
+            }
+            else
             {
               /* Any other expression lowers the output row count by half */
               nRow /= 2;
@@ -3400,12 +3438,14 @@ else
       if ( pX.op == TK_EQ )
       {
         iReg = sqlite3ExprCodeTarget( pParse, pX.pRight, iTarget );
-      } else if ( pX.op == TK_ISNULL )
+      }
+      else if ( pX.op == TK_ISNULL )
       {
         iReg = iTarget;
         sqlite3VdbeAddOp2( v, OP_Null, 0, iReg );
 #if  !SQLITE_OMIT_SUBQUERY
-      } else
+      }
+      else
       {
         int eType;
         int iTab;
@@ -3438,12 +3478,14 @@ else
           if ( eType == IN_INDEX_ROWID )
           {
             pIn.addrInTop = sqlite3VdbeAddOp2( v, OP_Rowid, iTab, iReg );
-          } else
+          }
+          else
           {
             pIn.addrInTop = sqlite3VdbeAddOp3( v, OP_Column, iTab, 0, iReg );
           }
           sqlite3VdbeAddOp1( v, OP_IsNull, iReg );
-        } else
+        }
+        else
         {
           pLevel.u._in.nIn = 0;
         }
@@ -3548,7 +3590,8 @@ else
           {
             sqlite3ReleaseTempReg( pParse, regBase );
             regBase = r1;
-          } else
+          }
+          else
           {
             sqlite3VdbeAddOp2( v, OP_SCopy, r1, regBase + j );
           }
@@ -3686,46 +3729,51 @@ else
         || ( flags & ( WHERE_BTM_LIMIT | WHERE_TOP_LIMIT ) ) != 0
         || ( wctrlFlags & ( WHERE_ORDERBY_MIN | WHERE_ORDERBY_MAX ) ) != 0;
 
-        zMsg.Append( sqlite3MPrintf( db, "%s", isSearch ? "SEARCH" : "SCAN" ) );
+        zMsg.Append( sqlite3MPrintf( db, "%s", isSearch ? "SEARCH" : "SCAN" ));
         if ( pItem.pSelect != null )
         {
-          zMsg.Append( sqlite3MAppendf( db, null, " SUBQUERY %d", pItem.iSelectId ) );
-        } else
+          zMsg.Append( sqlite3MAppendf( db, null, " SUBQUERY %d", pItem.iSelectId ));
+        }
+        else
         {
-          zMsg.Append( sqlite3MAppendf( db, null, " TABLE %s", pItem.zName ) );
+                    zMsg.Append(  sqlite3MAppendf( db, null, " TABLE %s",  pItem.zName ));
         }
 
         if ( pItem.zAlias != null )
         {
-          zMsg.Append( sqlite3MAppendf( db, null, " AS %s", pItem.zAlias ) );
+          zMsg.Append( sqlite3MAppendf( db, null, " AS %s",  pItem.zAlias ));
         }
         if ( ( flags & WHERE_INDEXED ) != 0 )
         {
           string zWhere = explainIndexRange( db, pLevel, pItem.pTab );
-          zMsg.Append( sqlite3MAppendf( db, null, " USING %s%sINDEX%s%s%s",
+          zMsg.Append( sqlite3MAppendf( db, null, " USING %s%sINDEX%s%s%s", 
           ( ( flags & WHERE_TEMP_INDEX ) != 0 ? "AUTOMATIC " : "" ),
           ( ( flags & WHERE_IDX_ONLY ) != 0 ? "COVERING " : "" ),
           ( ( flags & WHERE_TEMP_INDEX ) != 0 ? "" : " " ),
           ( ( flags & WHERE_TEMP_INDEX ) != 0 ? "" : pLevel.plan.u.pIdx.zName ),
-          zWhere != null ? zWhere : ""
-          ) );
+          zWhere != null?zWhere :""
+          ));
           sqlite3DbFree( db, ref zWhere );
-        } else if ( ( flags & ( WHERE_ROWID_EQ | WHERE_ROWID_RANGE ) ) != 0 )
+        }
+        else if ( ( flags & ( WHERE_ROWID_EQ | WHERE_ROWID_RANGE ) ) != 0 )
         {
           zMsg.Append( " USING INTEGER PRIMARY KEY" );
 
           if ( ( flags & WHERE_ROWID_EQ ) != 0 )
           {
             zMsg.Append( " (rowid=?)" );
-          } else if ( ( flags & WHERE_BOTH_LIMIT ) == WHERE_BOTH_LIMIT )
+          }
+          else if ( ( flags & WHERE_BOTH_LIMIT ) == WHERE_BOTH_LIMIT )
           {
-            zMsg.Append( " (rowid>? AND rowid<?)" );
-          } else if ( ( flags & WHERE_BTM_LIMIT ) != 0 )
+            zMsg.Append(" (rowid>? AND rowid<?)");
+          }
+          else if ( ( flags & WHERE_BTM_LIMIT ) != 0 )
           {
-            zMsg.Append( " (rowid>?)" );
-          } else if ( ( flags & WHERE_TOP_LIMIT ) != 0 )
+            zMsg.Append( " (rowid>?)");
+          }
+          else if ( ( flags & WHERE_TOP_LIMIT ) != 0 )
           {
-            zMsg.Append( " (rowid<?)" );
+            zMsg.Append( " (rowid<?)");
           }
         }
 #if !SQLITE_OMIT_VIRTUALTABLE
@@ -3739,11 +3787,12 @@ pVtabIdx.idxNum, pVtabIdx.idxStr);
         {
           testcase( wctrlFlags & WHERE_ORDERBY_MIN );
           nRow = 1;
-        } else
+        }
+        else
         {
           nRow = (sqlite3_int64)pLevel.plan.nRow;
         }
-        zMsg.Append( sqlite3MAppendf( db, null, " (~%lld rows)", nRow ) );
+        zMsg.Append( sqlite3MAppendf( db, null, " (~%lld rows)",  nRow ));
         sqlite3VdbeAddOp4( v, OP_Explain, iId, iLevel, iFrom, zMsg, P4_DYNAMIC );
       }
     }
@@ -3890,7 +3939,8 @@ else
         VdbeComment( v, "pk" );
 #endif
         pLevel.op = OP_Noop;
-      } else if ( ( pLevel.plan.wsFlags & WHERE_ROWID_RANGE ) != 0 )
+      }
+      else if ( ( pLevel.plan.wsFlags & WHERE_ROWID_RANGE ) != 0 )
       {
         /* Case 2:  We have an inequality comparison against the ROWID field.
         */
@@ -3938,7 +3988,8 @@ else
           sqlite3ExprCacheAffinityChange( pParse, r1, 1 );
           sqlite3ReleaseTempReg( pParse, rTemp );
           disableTerm( pLevel, pStart );
-        } else
+        }
+        else
         {
           sqlite3VdbeAddOp2( v, bRev != 0 ? OP_Last : OP_Rewind, iCur, addrBrk );
         }
@@ -3954,7 +4005,8 @@ else
           if ( pX.op == TK_LT || pX.op == TK_GT )
           {
             testOp = bRev != 0 ? OP_Le : OP_Ge;
-          } else
+          }
+          else
           {
             testOp = bRev != 0 ? OP_Lt : OP_Gt;
           }
@@ -3967,7 +4019,8 @@ else
         if ( pStart == null && pEnd == null )
         {
           pLevel.p5 = SQLITE_STMTSTATUS_FULLSCAN_STEP;
-        } else
+        }
+        else
         {
           Debug.Assert( pLevel.p5 == 0 );
         }
@@ -3979,7 +4032,8 @@ else
           sqlite3VdbeAddOp3( v, testOp, memEndValue, addrBrk, iRowidReg );
           sqlite3VdbeChangeP5( v, SQLITE_AFF_NUMERIC | SQLITE_JUMPIFNULL );
         }
-      } else if ( ( pLevel.plan.wsFlags & ( WHERE_COLUMN_RANGE | WHERE_COLUMN_EQ ) ) != 0 )
+      }
+      else if ( ( pLevel.plan.wsFlags & ( WHERE_COLUMN_RANGE | WHERE_COLUMN_EQ ) ) != 0 )
       {
         /* Case 3: A scan using an index.
         **
@@ -4132,7 +4186,8 @@ OP_IdxLT             /* 2: (end_constraints && bRev) */
           }
           nConstraint++;
           testcase( pRangeStart.wtFlags & TERM_VIRTUAL ); /* EV: R-30575-11662 */
-        } else if ( isMinQuery != 0 )
+        }
+        else if ( isMinQuery != 0 )
         {
           sqlite3VdbeAddOp2( v, OP_Null, 0, regBase + nEq );
           nConstraint++;
@@ -4225,7 +4280,8 @@ OP_IdxLT             /* 2: (end_constraints && bRev) */
         */
         pLevel.op = (u8)( bRev != 0 ? OP_Prev : OP_Next );
         pLevel.p1 = iIdxCur;
-      } else
+      }
+      else
 
 #if  !SQLITE_OMIT_OR_OPTIMIZATION
         if ( ( pLevel.plan.wsFlags & WHERE_MULTI_OR ) != 0 )
@@ -4311,7 +4367,8 @@ OP_IdxLT             /* 2: (end_constraints && bRev) */
             {
               pOrTab.a[k] = origSrc[pWInfo.a[iLevel + k].iFrom];// memcpy(&pOrTab.a[k], &origSrc[pLevel[k].iFrom], sizeof(pOrTab.a[k]));
             }
-          } else
+          }
+          else
           {
             pOrTab = pWInfo.pTabList;
           }
@@ -4345,8 +4402,8 @@ OP_IdxLT             /* 2: (end_constraints && bRev) */
               /* Loop through table entries that match term pOrTerm. */
               ExprList elDummy = null;
               pSubWInfo = sqlite3WhereBegin( pParse, pOrTab, pOrTerm.pExpr, ref elDummy,
-              WHERE_OMIT_OPEN | WHERE_OMIT_CLOSE |
-              WHERE_FORCE_TABLE | WHERE_ONETABLE_ONLY );
+                  WHERE_OMIT_OPEN | WHERE_OMIT_CLOSE |
+                  WHERE_FORCE_TABLE | WHERE_ONETABLE_ONLY );
               if ( pSubWInfo != null )
               {
                 explainOneScan(
@@ -4359,7 +4416,7 @@ OP_IdxLT             /* 2: (end_constraints && bRev) */
                   r = sqlite3ExprCodeGetColumn( pParse, pTabItem.pTab, -1, iCur,
                   regRowid );
                   sqlite3VdbeAddOp4Int( v, OP_RowSetTest, regRowset,
-                  sqlite3VdbeCurrentAddr( v ) + 2, r, iSet );
+                                 sqlite3VdbeCurrentAddr( v ) + 2, r, iSet );
                 }
                 sqlite3VdbeAddOp2( v, OP_Gosub, regReturn, iLoopBody );
 
@@ -4384,7 +4441,8 @@ OP_IdxLT             /* 2: (end_constraints && bRev) */
             sqlite3DbFree( pParse.db, ref pOrTab );//sqlite3DbFree(pParse.db, pOrTab)
           if ( 0 == untestedTerms )
             disableTerm( pLevel, pTerm );
-        } else
+        }
+        else
 #endif //* SQLITE_OMIT_OR_OPTIMIZATION */
 
         {
@@ -4949,7 +5007,8 @@ bestVirtualIndex(pParse, pWC, pTabItem, mask, notReady, pOrderBy,
         if ( ( bestPlan.plan.wsFlags & ( WHERE_INDEXED | WHERE_TEMP_INDEX ) ) != 0 )
         {
           pLevel.iIdxCur = pParse.nTab++;
-        } else
+        }
+        else
         {
           pLevel.iIdxCur = -1;
         }
@@ -4972,7 +5031,8 @@ bestVirtualIndex(pParse, pWC, pTabItem, mask, notReady, pOrderBy,
           {
             sqlite3ErrorMsg( pParse, "cannot use index: %s", pIdx.zName );
             goto whereBeginError;
-          } else
+          }
+          else
           {
             /* If an INDEXED BY clause is used, the bestIndex() function is
             ** guaranteed to find the index specified in the INDEXED BY clause
@@ -5029,7 +5089,8 @@ bestVirtualIndex(pParse, pWC, pTabItem, mask, notReady, pOrderBy,
         if ( ( pTab.tabFlags & TF_Ephemeral ) != 0 || pTab.pSelect != null )
         {
           /* Do nothing */
-        } else
+        }
+        else
 #if  !SQLITE_OMIT_VIRTUALTABLE
 if( (pLevel.plan.wsFlags & WHERE_VIRTUALTABLE)!=null ){
 VTable pVTab = sqlite3GetVTable(db, pTab);
@@ -5049,14 +5110,13 @@ pVTab, P4_VTAB);
             {
               Bitmask b = pTabItem.colUsed;
               int n = 0;
-              for ( ; b != 0; b = b >> 1, n++ )
-              {
-              }
+              for ( ; b != 0; b = b >> 1, n++ ) { }
               sqlite3VdbeChangeP4( v, sqlite3VdbeCurrentAddr( v ) - 1,
-              n, P4_INT32 );//SQLITE_INT_TO_PTR(n)
+                      n, P4_INT32 );//SQLITE_INT_TO_PTR(n)
               Debug.Assert( n <= pTab.nCol );
             }
-          } else
+          }
+          else
           {
             sqlite3TableLock( pParse, iDb, pTab.tnum, 0, pTab.zName );
           }
@@ -5064,7 +5124,8 @@ pVTab, P4_VTAB);
         if ( ( pLevel.plan.wsFlags & WHERE_TEMP_INDEX ) != 0 )
         {
           constructAutomaticIndex( pParse, pWC, pTabItem, notReady, pLevel );
-        } else
+        }
+        else
 #endif
           if ( ( pLevel.plan.wsFlags & WHERE_INDEXED ) != 0 )
           {
@@ -5122,7 +5183,8 @@ pVTab, P4_VTAB);
           {
             sqlite3_query_plan.Append( "{}" ); //memcpy( &sqlite3_query_plan[nQPlan], "{}", 2 );
             nQPlan += 2;
-          } else
+          }
+          else
           {
             sqlite3_query_plan.Append( z ); //memcpy( &sqlite3_query_plan[nQPlan], z, n );
             nQPlan += n;
@@ -5136,7 +5198,8 @@ pVTab, P4_VTAB);
         {
           sqlite3_query_plan.Append( "* " ); //memcpy(&sqlite3_query_plan[nQPlan], "* ", 2);
           nQPlan += 2;
-        } else if ( ( pLevel.plan.wsFlags & WHERE_INDEXED ) != 0 )
+        }
+        else if ( ( pLevel.plan.wsFlags & WHERE_INDEXED ) != 0 )
         {
           n = sqlite3Strlen30( pLevel.plan.u.pIdx.zName );
           if ( true ) //n+nQPlan < sizeof(sqlite3_query_plan)-2 )//if( n+nQPlan < sizeof(sqlite3_query_plan)-2 )
@@ -5145,7 +5208,8 @@ pVTab, P4_VTAB);
             nQPlan += n;
             sqlite3_query_plan.Append( " " ); //sqlite3_query_plan[nQPlan++] = ' ';
           }
-        } else
+        }
+        else
         {
           sqlite3_query_plan.Append( "{} " ); //memcpy( &sqlite3_query_plan[nQPlan], "{} ", 3 );
           nQPlan += 3;
@@ -5231,7 +5295,8 @@ whereBeginError:
           if ( pLevel.op == OP_Return )
           {
             sqlite3VdbeAddOp2( v, OP_Gosub, pLevel.p1, pLevel.addrFirst );
-          } else
+          }
+          else
           {
             sqlite3VdbeAddOp2( v, OP_Goto, 0, pLevel.addrFirst );
           }
@@ -5310,7 +5375,8 @@ whereBeginError:
               Debug.Assert( ( pLevel.plan.wsFlags & WHERE_IDX_ONLY ) == 0
               || j < pIdx.nColumn );
 
-            } else if ( pOp.opcode == OP_Rowid )
+            }
+            else if ( pOp.opcode == OP_Rowid )
             {
               pOp.p1 = pLevel.iIdxCur;
               pOp.opcode = OP_IdxRowid;

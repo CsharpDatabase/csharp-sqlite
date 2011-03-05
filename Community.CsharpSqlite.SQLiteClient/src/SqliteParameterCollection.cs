@@ -41,407 +41,392 @@ using System.Collections;
 
 namespace Community.CsharpSqlite.SQLiteClient
 {
-  public class SqliteParameterCollection :
+	public class SqliteParameterCollection :
 #if NET_2_0
-DbParameterCollection
+		DbParameterCollection
 #else
- IDataParameterCollection, IList
+		IDataParameterCollection, IList
 #endif
-  {
+	{
+	
+		#region Fields
+		
+		ArrayList numeric_param_list = new ArrayList();
+		Hashtable named_param_hash = new Hashtable();
+		
+		#endregion
 
-    #region Fields
+		#region Private Methods
 
-    ArrayList numeric_param_list = new ArrayList();
-    Hashtable named_param_hash = new Hashtable();
+		private void CheckSqliteParam (object value)
+		{
+			if (!(value is SqliteParameter))
+				throw new InvalidCastException ("Can only use SqliteParameter objects");
+			SqliteParameter sqlp = value as SqliteParameter;
+			if (sqlp.ParameterName == null || sqlp.ParameterName.Length == 0)
+				sqlp.ParameterName = this.GenerateParameterName();
+                 }
 
-    #endregion
+		private void RecreateNamedHash ()
+		{
+			for (int i = 0; i < numeric_param_list.Count; i++) 
+			{
+				named_param_hash[((SqliteParameter) numeric_param_list[i]).ParameterName] = i;
+			}
+		}
 
-    #region Private Methods
+		//FIXME: if the user is calling Insert at various locations with unnamed parameters, this is not going to work....
+		private string GenerateParameterName()
+		{
+			int		index	= this.Count + 1;
+			string	name	= String.Empty;
 
-    private void CheckSqliteParam( object value )
-    {
-      if ( !( value is SqliteParameter ) )
-        throw new InvalidCastException( "Can only use SqliteParameter objects" );
-      SqliteParameter sqlp = value as SqliteParameter;
-      if ( sqlp.ParameterName == null || sqlp.ParameterName.Length == 0 )
-        sqlp.ParameterName = this.GenerateParameterName();
-    }
+			while (index > 0)
+			{
+				name = ":" + index.ToString();
+					if (this.IndexOf(name) == -1)
+					index = -1;
+				else
+				index++;
+			}
+			return name;
+		}
 
-    private void RecreateNamedHash()
-    {
-      for ( int i = 0; i < numeric_param_list.Count; i++ )
-      {
-        named_param_hash[( (SqliteParameter)numeric_param_list[i] ).ParameterName] = i;
-      }
-    }
+		#endregion
 
-    //FIXME: if the user is calling Insert at various locations with unnamed parameters, this is not going to work....
-    private string GenerateParameterName()
-    {
-      int index = this.Count + 1;
-      string name = String.Empty;
+		#region Properties
+		
+#if !NET_2_0
+		object IList.this[int index] {
+			get 
+			{
+				return this[index];
+			}
+			set 
+			{
+				CheckSqliteParam (value);
+				this[index] = (SqliteParameter) value;
+			}
+		}
 
-      while ( index > 0 )
-      {
-        name = ":" + index.ToString();
-        if ( this.IndexOf( name ) == -1 )
-          index = -1;
-        else
-          index++;
-      }
-      return name;
-    }
+		object IDataParameterCollection.this[string parameterName] {
+			get 
+			{
+				return this[parameterName];
+			}
+			set 
+			{
+				CheckSqliteParam (value);
+				this[parameterName] = (SqliteParameter) value;
+			}
+		}
+#endif
+		
+		private bool isPrefixed (string parameterName)
+		{
+			return parameterName.Length > 1 && (parameterName[0] == ':' || parameterName[0] == '$');
+		}
 
-    #endregion
+#if NET_2_0
+		protected override DbParameter GetParameter (int parameterIndex)
+#else
+		SqliteParameter GetParameter (int parameterIndex)
+#endif
+		{
+			if (this.Count >= parameterIndex+1)
+				return (SqliteParameter) numeric_param_list[parameterIndex];
+			else          
+				throw new IndexOutOfRangeException("The specified parameter index does not exist: " + parameterIndex.ToString());
+		}
 
-    #region Properties
+#if NET_2_0
+		protected override DbParameter GetParameter (string parameterName)
+#else
+		SqliteParameter GetParameter (string parameterName)
+#endif
+		{
+			if (this.Contains(parameterName))
+				return this[(int) named_param_hash[parameterName]];
+			else if (isPrefixed(parameterName) && this.Contains(parameterName.Substring(1)))
+				return this[(int) named_param_hash[parameterName.Substring(1)]];
+			else
+				throw new IndexOutOfRangeException("The specified name does not exist: " + parameterName);
+		}
+
+#if NET_2_0
+		protected override void SetParameter (int parameterIndex, DbParameter parameter)
+#else
+		void SetParameter (int parameterIndex, SqliteParameter parameter)
+#endif
+		{
+			if (this.Count >= parameterIndex+1)
+				numeric_param_list[parameterIndex] = parameter;
+			else          
+				throw new IndexOutOfRangeException("The specified parameter index does not exist: " + parameterIndex.ToString());
+		}
+
+#if NET_2_0
+		protected override void SetParameter (string parameterName, DbParameter parameter)
+#else
+		void SetParameter (string parameterName, SqliteParameter parameter)
+#endif
+		{
+			if (this.Contains(parameterName))
+				numeric_param_list[(int) named_param_hash[parameterName]] = parameter;
+			else if (parameterName.Length > 1 && this.Contains(parameterName.Substring(1)))
+				numeric_param_list[(int) named_param_hash[parameterName.Substring(1)]] = parameter;
+			else
+				throw new IndexOutOfRangeException("The specified name does not exist: " + parameterName);
+		}
 
 #if !NET_2_0
-    object IList.this[int index]
-    {
-      get
-      {
-        return this[index];
-      }
-      set
-      {
-        CheckSqliteParam( value );
-        this[index] = (SqliteParameter)value;
-      }
-    }
+		public SqliteParameter this[string parameterName] 
+		{
+			get { return GetParameter (parameterName); }
+			set { SetParameter (parameterName, value); }
+		}
 
-    object IDataParameterCollection.this[string parameterName]
-    {
-      get
-      {
-        return this[parameterName];
-      }
-      set
-      {
-        CheckSqliteParam( value );
-        this[parameterName] = (SqliteParameter)value;
-      }
-    }
+		public SqliteParameter this[int parameterIndex]
+		{
+			get { return GetParameter (parameterIndex); }
+			set { SetParameter (parameterIndex, value); }
+		}
 #endif
 
-    private bool isPrefixed( string parameterName )
-    {
-      return parameterName.Length > 1 && ( parameterName[0] == ':' || parameterName[0] == '$' );
-    }
+#if NET_2_0
+		override
+#endif
+		public int Count 
+		{
+			get
+			{
+				return this.numeric_param_list.Count;
+			}
+		}
 
 #if NET_2_0
-protected override DbParameter GetParameter (int parameterIndex)
+		public override bool IsFixedSize
 #else
-    SqliteParameter GetParameter( int parameterIndex )
+		bool IList.IsFixedSize
 #endif
-    {
-      if ( this.Count >= parameterIndex + 1 )
-        return (SqliteParameter)numeric_param_list[parameterIndex];
-      else
-        throw new IndexOutOfRangeException( "The specified parameter index does not exist: " + parameterIndex.ToString() );
-    }
+		{
+			get
+			{
+				return this.numeric_param_list.IsFixedSize;
+			}
+		}
 
 #if NET_2_0
-protected override DbParameter GetParameter (string parameterName)
+		public override bool IsReadOnly
 #else
-    SqliteParameter GetParameter( string parameterName )
+		bool IList.IsReadOnly
 #endif
-    {
-      if ( this.Contains( parameterName ) )
-        return this[(int)named_param_hash[parameterName]];
-      else if ( isPrefixed( parameterName ) && this.Contains( parameterName.Substring( 1 ) ) )
-        return this[(int)named_param_hash[parameterName.Substring( 1 )]];
-      else
-        throw new IndexOutOfRangeException( "The specified name does not exist: " + parameterName );
-    }
+		{
+			get
+			{
+				return this.numeric_param_list.IsReadOnly;
+			}
+		}
+
 
 #if NET_2_0
-protected override void SetParameter (int parameterIndex, DbParameter parameter)
+		public override bool IsSynchronized
 #else
-    void SetParameter( int parameterIndex, SqliteParameter parameter )
+		bool ICollection.IsSynchronized 
 #endif
-    {
-      if ( this.Count >= parameterIndex + 1 )
-        numeric_param_list[parameterIndex] = parameter;
-      else
-        throw new IndexOutOfRangeException( "The specified parameter index does not exist: " + parameterIndex.ToString() );
-    }
+		{
+			get
+			{
+				return this.numeric_param_list.IsSynchronized;
+			}
+		}
+		
 
 #if NET_2_0
-protected override void SetParameter (string parameterName, DbParameter parameter)
+		public override object SyncRoot
 #else
-    void SetParameter( string parameterName, SqliteParameter parameter )
+		object ICollection.SyncRoot 
 #endif
-    {
-      if ( this.Contains( parameterName ) )
-        numeric_param_list[(int)named_param_hash[parameterName]] = parameter;
-      else if ( parameterName.Length > 1 && this.Contains( parameterName.Substring( 1 ) ) )
-        numeric_param_list[(int)named_param_hash[parameterName.Substring( 1 )]] = parameter;
-      else
-        throw new IndexOutOfRangeException( "The specified name does not exist: " + parameterName );
-    }
+		{
+			get
+			{
+				return this.numeric_param_list.SyncRoot;
+			}
+		}
 
-#if !NET_2_0
-    public SqliteParameter this[string parameterName]
-    {
-      get
-      {
-        return GetParameter( parameterName );
-      }
-      set
-      {
-        SetParameter( parameterName, value );
-      }
-    }
+		#endregion
 
-    public SqliteParameter this[int parameterIndex]
-    {
-      get
-      {
-        return GetParameter( parameterIndex );
-      }
-      set
-      {
-        SetParameter( parameterIndex, value );
-      }
-    }
-#endif
+		#region Public Methods
 
 #if NET_2_0
-override
-#endif
-    public int Count
-    {
-      get
-      {
-        return this.numeric_param_list.Count;
-      }
-    }
+		public override void AddRange (Array values)
+		{
+			if (values == null || values.Length == 0)
+				return;
 
+			foreach (object value in values)
+				Add (value);
+		}
+#endif
+		
 #if NET_2_0
-public override bool IsFixedSize
+		override
+#endif
+		public int Add (object value)
+		{
+			CheckSqliteParam (value);
+			SqliteParameter sqlp = value as SqliteParameter;
+			if (named_param_hash.Contains (sqlp.ParameterName))
+				throw new DuplicateNameException ("Parameter collection already contains the a SqliteParameter with the given ParameterName.");
+			named_param_hash[sqlp.ParameterName] = numeric_param_list.Add(value);
+				return (int) named_param_hash[sqlp.ParameterName];
+		}
+
+		public SqliteParameter Add (SqliteParameter param)
+		{
+			Add ((object)param);
+			return param;
+		}
+		
+		public SqliteParameter Add (string name, object value)
+		{
+			return Add (new SqliteParameter (name, value));
+		}
+		
+		public SqliteParameter Add (string name, DbType type)
+		{
+			return Add (new SqliteParameter (name, type));
+		}
+		
+#if NET_2_0
+		override
+#endif
+		public void Clear ()
+		{
+			numeric_param_list.Clear ();
+			named_param_hash.Clear ();
+		}
+	
+#if NET_2_0
+		override
+#endif
+		public void CopyTo (Array array, int index)
+		{
+			this.numeric_param_list.CopyTo(array, index);
+		}
+		
+#if NET_2_0
+		public override bool Contains (object value)
 #else
-    bool IList.IsFixedSize
+		bool IList.Contains (object value)
 #endif
-    {
-      get
-      {
-        return this.numeric_param_list.IsFixedSize;
-      }
-    }
-
+		{
+			return Contains ((SqliteParameter) value);
+		}
+		
 #if NET_2_0
-public override bool IsReadOnly
+		override
+#endif
+		public bool Contains (string parameterName)
+		{
+			return named_param_hash.Contains (parameterName);
+		}
+		
+		public bool Contains (SqliteParameter param)
+		{
+			return Contains (param.ParameterName);
+		}
+		
+#if NET_2_0
+		override
+#endif
+		public IEnumerator GetEnumerator ()
+		{
+			return this.numeric_param_list.GetEnumerator();
+		}
+		
+#if NET_2_0
+		public override int IndexOf (object param)
 #else
-    bool IList.IsReadOnly
+		int IList.IndexOf (object param)
 #endif
-    {
-      get
-      {
-        return this.numeric_param_list.IsReadOnly;
-      }
-    }
-
-
+		{
+			return IndexOf ((SqliteParameter) param);
+		}
+		
 #if NET_2_0
-public override bool IsSynchronized
-#else
-    bool ICollection.IsSynchronized
+		override
 #endif
-    {
-      get
-      {
-        return this.numeric_param_list.IsSynchronized;
-      }
-    }
-
-
+		public int IndexOf (string parameterName)
+		{
+			if (isPrefixed (parameterName)){
+				string sub = parameterName.Substring (1);
+				if (named_param_hash.Contains(sub))
+					return (int) named_param_hash [sub];
+			}
+			if (named_param_hash.Contains(parameterName))
+				return (int) named_param_hash[parameterName];
+			else 
+				return -1;
+		}
+		
+		public int IndexOf (SqliteParameter param)
+		{
+			return IndexOf (param.ParameterName);
+		}
+		
 #if NET_2_0
-public override object SyncRoot
-#else
-    object ICollection.SyncRoot
+		override
 #endif
-    {
-      get
-      {
-        return this.numeric_param_list.SyncRoot;
-      }
-    }
-
-    #endregion
-
-    #region Public Methods
-
+		public void Insert (int index, object value)
+		{
+			CheckSqliteParam (value);
+			if (numeric_param_list.Count == index) 
+			{
+				Add (value);
+				return;
+			}
+			
+			numeric_param_list.Insert (index, value);
+			RecreateNamedHash ();
+		}
+		
 #if NET_2_0
-public override void AddRange (Array values)
-{
-if (values == null || values.Length == 0)
-return;
-
-foreach (object value in values)
-Add (value);
-}
+		override
 #endif
-
+		public void Remove (object value)
+		{
+			CheckSqliteParam (value);
+			RemoveAt ((SqliteParameter) value);
+		}
+		
 #if NET_2_0
-override
+		override
 #endif
-    public int Add( object value )
-    {
-      CheckSqliteParam( value );
-      SqliteParameter sqlp = value as SqliteParameter;
-      if ( named_param_hash.Contains( sqlp.ParameterName ) )
-        throw new DuplicateNameException( "Parameter collection already contains the a SqliteParameter with the given ParameterName." );
-      named_param_hash[sqlp.ParameterName] = numeric_param_list.Add( value );
-      return (int)named_param_hash[sqlp.ParameterName];
-    }
-
-    public SqliteParameter Add( SqliteParameter param )
-    {
-      Add( (object)param );
-      return param;
-    }
-
-    public SqliteParameter Add( string name, object value )
-    {
-      return Add( new SqliteParameter( name, value ) );
-    }
-
-    public SqliteParameter Add( string name, DbType type )
-    {
-      return Add( new SqliteParameter( name, type ) );
-    }
-
+		public void RemoveAt (int index)
+		{
+			RemoveAt (((SqliteParameter) numeric_param_list[index]).ParameterName);
+		}
+		
 #if NET_2_0
-override
+		override
 #endif
-    public void Clear()
-    {
-      numeric_param_list.Clear();
-      named_param_hash.Clear();
-    }
+		public void RemoveAt (string parameterName)
+		{
+			if (!named_param_hash.Contains (parameterName))
+				throw new ApplicationException ("Parameter " + parameterName + " not found");
+			
+			numeric_param_list.RemoveAt ((int) named_param_hash[parameterName]);
+			named_param_hash.Remove (parameterName);
+			
+			RecreateNamedHash ();
+		}
+		
+		public void RemoveAt (SqliteParameter param)
+		{
+			RemoveAt (param.ParameterName);
+		}
 
-#if NET_2_0
-override
-#endif
-    public void CopyTo( Array array, int index )
-    {
-      this.numeric_param_list.CopyTo( array, index );
-    }
-
-#if NET_2_0
-public override bool Contains (object value)
-#else
-    bool IList.Contains( object value )
-#endif
-    {
-      return Contains( (SqliteParameter)value );
-    }
-
-#if NET_2_0
-override
-#endif
-    public bool Contains( string parameterName )
-    {
-      return named_param_hash.Contains( parameterName );
-    }
-
-    public bool Contains( SqliteParameter param )
-    {
-      return Contains( param.ParameterName );
-    }
-
-#if NET_2_0
-override
-#endif
-    public IEnumerator GetEnumerator()
-    {
-      return this.numeric_param_list.GetEnumerator();
-    }
-
-#if NET_2_0
-public override int IndexOf (object param)
-#else
-    int IList.IndexOf( object param )
-#endif
-    {
-      return IndexOf( (SqliteParameter)param );
-    }
-
-#if NET_2_0
-override
-#endif
-    public int IndexOf( string parameterName )
-    {
-      if ( isPrefixed( parameterName ) )
-      {
-        string sub = parameterName.Substring( 1 );
-        if ( named_param_hash.Contains( sub ) )
-          return (int)named_param_hash[sub];
-      }
-      if ( named_param_hash.Contains( parameterName ) )
-        return (int)named_param_hash[parameterName];
-      else
-        return -1;
-    }
-
-    public int IndexOf( SqliteParameter param )
-    {
-      return IndexOf( param.ParameterName );
-    }
-
-#if NET_2_0
-override
-#endif
-    public void Insert( int index, object value )
-    {
-      CheckSqliteParam( value );
-      if ( numeric_param_list.Count == index )
-      {
-        Add( value );
-        return;
-      }
-
-      numeric_param_list.Insert( index, value );
-      RecreateNamedHash();
-    }
-
-#if NET_2_0
-override
-#endif
-    public void Remove( object value )
-    {
-      CheckSqliteParam( value );
-      RemoveAt( (SqliteParameter)value );
-    }
-
-#if NET_2_0
-override
-#endif
-    public void RemoveAt( int index )
-    {
-      RemoveAt( ( (SqliteParameter)numeric_param_list[index] ).ParameterName );
-    }
-
-#if NET_2_0
-override
-#endif
-    public void RemoveAt( string parameterName )
-    {
-      if ( !named_param_hash.Contains( parameterName ) )
-        throw new ApplicationException( "Parameter " + parameterName + " not found" );
-
-      numeric_param_list.RemoveAt( (int)named_param_hash[parameterName] );
-      named_param_hash.Remove( parameterName );
-
-      RecreateNamedHash();
-    }
-
-    public void RemoveAt( SqliteParameter param )
-    {
-      RemoveAt( param.ParameterName );
-    }
-
-    #endregion
-  }
+		#endregion
+	}
 }

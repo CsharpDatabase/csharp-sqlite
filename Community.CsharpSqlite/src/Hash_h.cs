@@ -115,20 +115,11 @@ namespace Community.CsharpSqlite
     **   }
     */
     //#define sqliteHashFirst(H)  ((H).first)
-    static HashElem sqliteHashFirst( Hash H )
-    {
-      return H.first;
-    }
+    static HashElem sqliteHashFirst( Hash H ) { return H.first; }
     //#define sqliteHashNext(E)   ((E).next)
-    static HashElem sqliteHashNext( HashElem E )
-    {
-      return E.next;
-    }
+    static HashElem sqliteHashNext( HashElem E ) { return E.next; }
     //#define sqliteHashData(E)   ((E).data)
-    static object sqliteHashData( HashElem E )
-    {
-      return E.data;
-    }
+    static object sqliteHashData( HashElem E ) { return E.data; }
     /* #define sqliteHashKey(E)    ((E)->pKey) // NOT USED */
     /* #define sqliteHashKeysize(E) ((E)->nKey)  // NOT USED */
 

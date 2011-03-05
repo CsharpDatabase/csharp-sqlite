@@ -885,7 +885,8 @@ id.lastErrno  = 1;
         if ( id.lastErrno == ERROR_HANDLE_DISK_FULL )
         {
           return SQLITE_FULL;
-        } else
+        }
+        else
         {
           return SQLITE_IOERR_WRITE;
         }
@@ -1095,8 +1096,8 @@ pFile.lastErrno = 1;
           res = 0;
         }
       }
-        /* isNT() is 1 if SQLITE_OS_WINCE==1, so this else is never executed.
-        */
+      /* isNT() is 1 if SQLITE_OS_WINCE==1, so this else is never executed.
+      */
 #if !SQLITE_OS_WINCE
       else
       {
@@ -1219,7 +1220,8 @@ error = 1;
         if ( res != 0 )
         {
           newLocktype = SHARED_LOCK;
-        } else
+        }
+        else
         {
 #if SQLITE_SILVERLIGHT
 error = 1;
@@ -1252,7 +1254,8 @@ error = 1;
         if ( res != 0 )
         {
           newLocktype = RESERVED_LOCK;
-        } else
+        }
+        else
         {
 #if SQLITE_SILVERLIGHT
 error = 1;
@@ -1293,7 +1296,8 @@ error = 1;
         if ( res != 0 )
         {
           newLocktype = EXCLUSIVE_LOCK;
-        } else
+        }
+        else
         {
 #if SQLITE_SILVERLIGHT
 error = 1;
@@ -1321,7 +1325,8 @@ error = 1;
       if ( res != 0 )
       {
         rc = SQLITE_OK;
-      } else
+      }
+      else
       {
 #if SQLITE_DEBUG
         OSTRACE( "LOCK FAILED %d trying for %d but got %d\n", pFile.fs.GetHashCode(),
@@ -1354,7 +1359,8 @@ error = 1;
 #if SQLITE_DEBUG
         OSTRACE( "TEST WR-LOCK %d %d (local)\n", pFile.fs.Name, rc );
 #endif
-      } else
+      }
+      else
       {
         try
         {
@@ -1363,9 +1369,7 @@ error = 1;
           rc = 1;
         }
         catch ( IOException e )
-        {
-          rc = 0;
-        }
+        { rc = 0; }
         rc = 1 - rc; // !rc
 #if SQLITE_DEBUG
         OSTRACE( "TEST WR-LOCK %d %d (remote)\n", pFile.fs.GetHashCode(), rc );
@@ -1415,9 +1419,7 @@ error = 1;
         {
           lockingStrategy.UnlockFile( pFile, RESERVED_BYTE, 1 );// UnlockFile(pFile.h, RESERVED_BYTE, 0, 1, 0);
         }
-        catch ( Exception e )
-        {
-        }
+        catch ( Exception e ) { }
       }
       if ( locktype == NO_LOCK && type >= SHARED_LOCK )
       {
@@ -1430,8 +1432,7 @@ error = 1;
           lockingStrategy.UnlockFile( pFile, PENDING_BYTE, 1 );//    UnlockFile(pFile.h, PENDING_BYTE, 0, 1, 0);
         }
         catch ( Exception e )
-        {
-        }
+        { }
       }
       pFile.locktype = (u8)locktype;
       return rc;
@@ -2133,10 +2134,7 @@ return rc;
     int szRegion,                   /* Size of regions */
     int isWrite,                    /* True to extend file if necessary */
     ref object pp                   /* OUT: Mapped memory */
-    )
-    {
-      return 0;
-    }
+    ) { return 0; }
 
     //# define winShmLock    0
     static int winShmLock(
@@ -2144,26 +2142,18 @@ return rc;
     int ofst,                  /* First lock to acquire or release */
     int n,                     /* Number of locks to acquire or release */
     int flags                  /* What to do with the lock */
-    )
-    {
-      return 0;
-    }
+    ) { return 0; }
 
     //# define winShmBarrier 0
     static void winShmBarrier(
     sqlite3_file fd          /* Database holding the shared memory */
-    )
-    {
-    }
+    ) { }
 
     //# define winShmUnmap   0
     static int winShmUnmap(
     sqlite3_file fd,           /* Database holding shared memory */
     int deleteFlag             /* Delete after closing if true */
-    )
-    {
-      return 0;
-    }
+    ) { return 0; }
 
 #endif //* #if !SQLITE_OMIT_WAL */
 
@@ -2431,12 +2421,12 @@ int isTemp = 0;
       ) );
 
       /* Check the following statements are true:
-      **
-      **   (a) Exactly one of the READWRITE and READONLY flags must be set, and
-      **   (b) if CREATE is set, then READWRITE must also be set, and
-      **   (c) if EXCLUSIVE is set, then CREATE must also be set.
-      **   (d) if DELETEONCLOSE is set, then CREATE must also be set.
-      */
+**
+**   (a) Exactly one of the READWRITE and READONLY flags must be set, and
+**   (b) if CREATE is set, then READWRITE must also be set, and
+**   (c) if EXCLUSIVE is set, then CREATE must also be set.
+**   (d) if DELETEONCLOSE is set, then CREATE must also be set.
+*/
       Debug.Assert( ( isReadonly == false || isReadWrite == false ) && ( isReadWrite || isReadonly ) );
       Debug.Assert( isCreate == false || isReadWrite );
       Debug.Assert( isExclusive == false || isCreate );
@@ -2485,7 +2475,8 @@ int isTemp = 0;
       if ( isReadWrite )
       {
         dwDesiredAccess = FileAccess.Read | FileAccess.Write; // GENERIC_READ | GENERIC_WRITE;
-      } else
+      }
+      else
       {
         dwDesiredAccess = FileAccess.Read; // GENERIC_READ;
       }
@@ -2499,11 +2490,13 @@ int isTemp = 0;
         /* Creates a new file, only if it does not already exist. */
         /* If the file exists, it fails. */
         dwCreationDisposition = FileMode.CreateNew;// CREATE_NEW;
-      } else if ( isCreate )
+      }
+      else if ( isCreate )
       {
         /* Open existing file, or create if it doesn't exist */
         dwCreationDisposition = FileMode.OpenOrCreate;// OPEN_ALWAYS;
-      } else
+      }
+      else
       {
         /* Opens a file, only if it exists. */
         dwCreationDisposition = FileMode.Open;//OPEN_EXISTING;
@@ -2523,7 +2516,8 @@ isTemp = 1;
         //| FILE_FLAG_DELETE_ON_CLOSE;
 #endif
 #endif
-      } else
+      }
+      else
       {
 #if !SQLITE_SILVERLIGHT
         dwFlagsAndAttributes = FileOptions.None; // FILE_ATTRIBUTE_NORMAL;
@@ -2555,11 +2549,11 @@ dwFlagsAndAttributes |= FileOptions.RandomAccess; // FILE_FLAG_RANDOM_ACCESS;
           {
             retries--;
 #if WINDOWS_PHONE
-fs = new System.IO.IsolatedStorage.IsolatedStorageFileStream(zConverted, dwCreationDisposition, dwDesiredAccess, dwShareMode, System.IO.IsolatedStorage.IsolatedStorageFile.GetUserStoreForApplication());
+ fs = new System.IO.IsolatedStorage.IsolatedStorageFileStream(zConverted, dwCreationDisposition, dwDesiredAccess, dwShareMode, System.IO.IsolatedStorage.IsolatedStorageFile.GetUserStoreForApplication());
 #elif !SQLITE_SILVERLIGHT
             fs = new FileStream( zConverted, dwCreationDisposition, dwDesiredAccess, dwShareMode, 4096, dwFlagsAndAttributes );
 #else
-fs = new FileStream( zConverted, dwCreationDisposition, dwDesiredAccess, dwShareMode, 4096);
+            fs = new FileStream( zConverted, dwCreationDisposition, dwDesiredAccess, dwShareMode, 4096);
 #endif
 
 #if SQLITE_DEBUG
@@ -2576,7 +2570,8 @@ fs = new FileStream( zConverted, dwCreationDisposition, dwDesiredAccess, dwShare
         ** it's important to not reference them for WINCE builds.
         */
 #if !SQLITE_OS_WINCE
-      } else
+      }
+      else
       {
         Debugger.Break(); // Not NT
         //h = CreateFileA((char*)zConverted,
@@ -2613,7 +2608,8 @@ pFile.lastErrno = 1;
         {
           return winOpen( pVfs, zName, pFile,
           ( ( flags | SQLITE_OPEN_READONLY ) & ~( SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE ) ), ref pOutFlags );
-        } else
+        }
+        else
         {
           return SQLITE_CANTOPEN_BKPT();
         }
@@ -2624,7 +2620,8 @@ pFile.lastErrno = 1;
       if ( isReadWrite )
       {
         pOutFlags = SQLITE_OPEN_READWRITE;
-      } else
+      }
+      else
       {
         pOutFlags = SQLITE_OPEN_READONLY;
       }
@@ -2705,9 +2702,9 @@ pFile.zDeleteOnClose = zConverted;
         //       && (Sleep(100), 1) );
         {
 #if WINDOWS_PHONE
-if ( !System.IO.IsolatedStorage.IsolatedStorageFile.GetUserStoreForApplication().FileExists( zFilename ) )
+           if ( !System.IO.IsolatedStorage.IsolatedStorageFile.GetUserStoreForApplication().FileExists( zFilename ) )
 #else
-          if ( !File.Exists( zFilename ) )
+           if ( !File.Exists( zFilename ) )
 #endif
           {
             rc = SQLITE_IOERR;
@@ -2716,7 +2713,7 @@ if ( !System.IO.IsolatedStorage.IsolatedStorageFile.GetUserStoreForApplication()
           try
           {
 #if WINDOWS_PHONE
-System.IO.IsolatedStorage.IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(zFilename);
+            System.IO.IsolatedStorage.IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(zFilename);
 #else
             File.Delete( zConverted );
 #endif
@@ -2733,7 +2730,8 @@ System.IO.IsolatedStorage.IsolatedStorageFile.GetUserStoreForApplication().Delet
         ** it's important to not reference them for WINCE builds.
         */
 #if !SQLITE_OS_WINCE
-      } else
+      }
+      else
       {
         do
         {
@@ -2799,9 +2797,9 @@ System.IO.IsolatedStorage.IsolatedStorageFile.GetUserStoreForApplication().Delet
       if ( flags == SQLITE_ACCESS_EXISTS )
       {
 #if WINDOWS_PHONE
-pResOut = System.IO.IsolatedStorage.IsolatedStorageFile.GetUserStoreForApplication().FileExists( zFilename ) ? 1 : 0;
+ pResOut = System.IO.IsolatedStorage.IsolatedStorageFile.GetUserStoreForApplication().FileExists( zFilename ) ? 1 : 0;
 #else
-        pResOut = File.Exists( zFilename ) ? 1 : 0;
+         pResOut = File.Exists( zFilename ) ? 1 : 0;
 #endif
         return SQLITE_OK;
       }
@@ -2832,7 +2830,7 @@ pResOut = System.IO.IsolatedStorage.IsolatedStorageFile.GetUserStoreForApplicati
         //  }
         //}
 #if WINDOWS_PHONE
-if (new DirectoryInfo(zFilename).Exists)
+        if (new DirectoryInfo(zFilename).Exists)
 #else
         attr = File.GetAttributes( zFilename );// GetFileAttributesW( (WCHAR*)zConverted );
         if ( attr == FileAttributes.Directory )
@@ -2846,10 +2844,7 @@ if (new DirectoryInfo(zFilename).Exists)
             File.Delete( name );
             attr = FileAttributes.Normal;
           }
-          catch ( IOException e )
-          {
-            attr = FileAttributes.ReadOnly;
-          }
+          catch ( IOException e ) { attr = FileAttributes.ReadOnly; }
         }
       }
       /* isNT() is 1 if SQLITE_OS_WINCE==1, so this else is never executed.
@@ -2864,8 +2859,7 @@ if (new DirectoryInfo(zFilename).Exists)
 #endif
       //}
       catch ( IOException e )
-      {
-      }
+      { }
       //  free(zConverted);
       switch ( flags )
       {
@@ -2943,22 +2937,21 @@ return SQLITE_OK;
         try
         {
 #if WINDOWS_PHONE
-zOut = zRelative;
+          zOut = zRelative;
 #else
-          zOut = Path.GetFullPath( zRelative ); // was unicodeToUtf8(zTemp);
+          zOut = Path.GetFullPath(zRelative); // was unicodeToUtf8(zTemp);
 #endif
         }
         catch ( IOException e )
-        {
-          zOut = zRelative;
-        }
+        { zOut = zRelative; }
         // will happen on exit; was   free(zTemp);
         /* isNT() is 1 if SQLITE_OS_WINCE==1, so this else is never executed.
         ** Since the ASCII version of these Windows API do not exist for WINCE,
         ** it's important to not reference them for WINCE builds.
         */
 #if !SQLITE_OS_WINCE
-      } else
+      }
+      else
       {
         Debugger.Break(); // -- Not Running under NT
         //string zTemp;
@@ -2983,7 +2976,8 @@ zOut = zRelative;
 
         // will happen on exit; was   free(zOut);
         return SQLITE_OK;
-      } else
+      }
+      else
       {
         return SQLITE_NOMEM;
       }
@@ -3137,22 +3131,10 @@ return bytesPerSector == 0 ? SQLITE_DEFAULT_SECTOR_SIZE : bytesPerSector;
     //     FreeLibrary((HANDLE)pHandle);
     //   }
     //TODO -- Fix This
-    static HANDLE winDlOpen( sqlite3_vfs vfs, string zFilename )
-    {
-      return new HANDLE();
-    }
-    static int winDlError( sqlite3_vfs vfs, int nByte, string zErrMsg )
-    {
-      return 0;
-    }
-    static HANDLE winDlSym( sqlite3_vfs vfs, HANDLE data, string zSymbol )
-    {
-      return new HANDLE();
-    }
-    static int winDlClose( sqlite3_vfs vfs, HANDLE data )
-    {
-      return 0;
-    }
+    static HANDLE winDlOpen( sqlite3_vfs vfs, string zFilename ) { return new HANDLE(); }
+    static int winDlError( sqlite3_vfs vfs, int nByte, string zErrMsg ) { return 0; }
+    static HANDLE winDlSym( sqlite3_vfs vfs, HANDLE data, string zSymbol ) { return new HANDLE(); }
+    static int winDlClose( sqlite3_vfs vfs, HANDLE data ) { return 0; }
 #else // * if SQLITE_OMIT_LOAD_EXTENSION is defined: */
 static object winDlOpen(ref sqlite3_vfs vfs, string zFilename) { return null; }
 static int winDlError(ref sqlite3_vfs vfs, int nByte, ref string zErrMsg) { return 0; }

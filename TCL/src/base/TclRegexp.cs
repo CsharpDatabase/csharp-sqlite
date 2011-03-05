@@ -15,33 +15,34 @@ using System;
 using Regexp = sunlabs.brazil.util.regexp.Regexp;
 namespace tcl.lang
 {
-
-  public class TclRegexp
-  {
-    private TclRegexp()
-    {
-    }
-
-    public static Regexp compile( Interp interp, TclObject exp, bool nocase )
-    {
-      try
-      {
-
-        return new Regexp( exp.ToString(), nocase );
-      }
-      catch ( System.ArgumentException e )
-      {
-        string msg = e.Message;
-        if ( msg.Equals( "missing )" ) )
-        {
-          msg = "unmatched ()";
-        } else if ( msg.Equals( "missing ]" ) )
-        {
-          msg = "unmatched []";
-        }
-        msg = "couldn't compile regular expression pattern: " + msg;
-        throw new TclException( interp, msg );
-      }
-    }
-  }
+	
+	public class TclRegexp
+	{
+		private TclRegexp()
+		{
+		}
+		
+		public static Regexp compile(Interp interp, TclObject exp, bool nocase)
+		{
+			try
+			{
+				
+				return new Regexp(exp.ToString(), nocase);
+			}
+			catch (System.ArgumentException e)
+			{
+				string msg = e.Message;
+				if (msg.Equals("missing )"))
+				{
+					msg = "unmatched ()";
+				}
+				else if (msg.Equals("missing ]"))
+				{
+					msg = "unmatched []";
+				}
+				msg = "couldn't compile regular expression pattern: " + msg;
+				throw new TclException(interp, msg);
+			}
+		}
+	}
 }

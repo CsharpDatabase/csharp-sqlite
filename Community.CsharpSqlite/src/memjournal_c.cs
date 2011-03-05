@@ -62,14 +62,8 @@ namespace Community.CsharpSqlite
     //#if ! MIN
     //# define MIN(x,y) ((x)<(y)?(x):(y))
     //#endif
-    static int MIN( int x, int y )
-    {
-      return ( x < y ) ? x : y;
-    }
-    static int MIN( int x, u32 y )
-    {
-      return ( x < y ) ? x : (int)y;
-    }
+    static int MIN( int x, int y ) { return ( x < y ) ? x : y; }
+    static int MIN( int x, u32 y ) { return ( x < y ) ? x : (int)y; }
 
     /*
     ** The rollback journal is composed of a linked list of these structures.
@@ -132,7 +126,8 @@ namespace Community.CsharpSqlite
         {
           iOff += JOURNAL_CHUNKSIZE;
         }
-      } else
+      }
+      else
       {
         pChunk = p.readpoint.pChunk;
       }
@@ -194,7 +189,8 @@ namespace Community.CsharpSqlite
           {
             Debug.Assert( p.pFirst != null );
             pChunk.pNext = pNew;
-          } else
+          }
+          else
           {
             Debug.Assert( null == p.pFirst );
             p.pFirst = pNew;
@@ -286,7 +282,7 @@ namespace Community.CsharpSqlite
     null,                        /* xShmLock */
     null,                        /* xShmBarrier */
     null                         /* xShmUnlock */
-    );
+      );
 
     /*
     ** Open a journal file.

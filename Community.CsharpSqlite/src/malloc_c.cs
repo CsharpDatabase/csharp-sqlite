@@ -107,9 +107,7 @@ return nRet;
       public memstat msMem;
       public memstat msBtCursor;
 
-      public Mem0Global()
-      {
-      }
+      public Mem0Global() { }
 
       public Mem0Global( int nScratchFree, int nPageFree, sqlite3_mutex mutex, sqlite3_int64 alarmThreshold, dxalarmCallback alarmCallback, object alarmArg, int Byte_Allocation, int Int_Allocation, int Mem_Allocation, int BtCursor_Allocation )
       {
@@ -186,7 +184,8 @@ return sqlite3MemoryAlarm(xCallback, pArg, iThreshold);
       if ( n > 0 )
       {
         sqlite3MemoryAlarm( softHeapLimitEnforcer, 0, n );
-      } else
+      }
+      else
       {
         sqlite3MemoryAlarm( null, 0, 0 );
       }
@@ -225,7 +224,8 @@ return sqlite3MemoryAlarm(xCallback, pArg, iThreshold);
         //  [sqlite3GlobalConfig.szScratch*sqlite3GlobalConfig.nScratch];
         //for(i=0; i<sqlite3GlobalConfig.nScratch; i++){ mem0.aScratchFree[i] = i; }
         //mem0.nScratchFree = sqlite3GlobalConfig.nScratch;
-      } else
+      }
+      else
       {
         sqlite3GlobalConfig.pScratch = null;
         sqlite3GlobalConfig.szScratch = 0;
@@ -347,7 +347,8 @@ return sqlite3MemoryAlarm(xCallback, pArg, iThreshold);
         {
           mem0.nearlyFull = true;
           sqlite3MallocAlarm( nFull );
-        } else
+        }
+        else
         {
           mem0.nearlyFull = false;
         }
@@ -407,9 +408,7 @@ p = sqlite3GlobalConfig.m.xMalloc(nFull);
       return sqlite3GlobalConfig.m.xMallocMem( pMem );
     }
     static int[] sqlite3Malloc( int[] pInt, u32 n )
-    {
-      return sqlite3Malloc( pInt, (int)n );
-    }
+    { return sqlite3Malloc( pInt, (int)n ); }
 
     static int[] sqlite3Malloc( int[] pInt, int n )
     {
@@ -422,12 +421,14 @@ p = sqlite3GlobalConfig.m.xMalloc(nFull);
         ** 255 bytes of overhead.  SQLite itself will never use anything near
         ** this amount.  The only way to reach the limit is with sqlite3_malloc() */
         p = null;
-      } else if ( sqlite3GlobalConfig.bMemstat )
+      }
+      else if ( sqlite3GlobalConfig.bMemstat )
       {
         sqlite3_mutex_enter( mem0.mutex );
         mallocWithAlarm( n, ref p );
         sqlite3_mutex_leave( mem0.mutex );
-      } else
+      }
+      else
       {
         p = sqlite3GlobalConfig.m.xMallocInt( n );
       }
@@ -449,12 +450,14 @@ p = sqlite3GlobalConfig.m.xMalloc(nFull);
         ** 255 bytes of overhead.  SQLite itself will never use anything near
         ** this amount.  The only way to reach the limit is with sqlite3_malloc() */
         p = null;
-      } else if ( sqlite3GlobalConfig.bMemstat )
+      }
+      else if ( sqlite3GlobalConfig.bMemstat )
       {
         sqlite3_mutex_enter( mem0.mutex );
         mallocWithAlarm( n, ref p );
         sqlite3_mutex_leave( mem0.mutex );
-      } else
+      }
+      else
       {
         p = sqlite3GlobalConfig.m.xMalloc( n );
       }
@@ -482,7 +485,7 @@ p = sqlite3GlobalConfig.m.xMalloc(nFull);
     ** is outstanding clearing it when the allocation is freed.
     */
 #if SQLITE_THREADSAFE && !(NDEBUG)
-    static int scratchAllocOut = 0;
+static int scratchAllocOut = 0;
 #endif
 
 
@@ -521,14 +524,16 @@ p = sqlite3GlobalConfig.m.xMalloc(nFull);
       if ( sqlite3GlobalConfig.szScratch < n )
       {
         goto scratch_overflow;
-      } else
+      }
+      else
       {
         sqlite3_mutex_enter( mem0.mutex );
         if ( mem0.nScratchFree == 0 )
         {
           sqlite3_mutex_leave( mem0.mutex );
           goto scratch_overflow;
-        } else
+        }
+        else
         {
           int i;
           //i = mem0.aScratchFree[--mem0.nScratchFree];
@@ -564,13 +569,14 @@ scratch_overflow:
         if ( p != null )
           sqlite3StatusAdd( SQLITE_STATUS_SCRATCH_OVERFLOW, n );
         sqlite3_mutex_leave( mem0.mutex );
-      } else
+      }
+      else
       {
         p = sqlite3GlobalConfig.m.xMalloc( n );
       }
       sqlite3MemdebugSetType( p, MEMTYPE_SCRATCH );
 #if SQLITE_THREADSAFE && !(NDEBUG)
-      scratchAllocOut = ( p != null ) ? 1 : 0;
+      scratchAllocOut = (p != null) ? 1 : 0;
 #endif
       return p;
     }
@@ -593,11 +599,13 @@ scratch_overflow:
             sqlite3StatusAdd( SQLITE_STATUS_MALLOC_COUNT, -1 );
             sqlite3GlobalConfig.pScratch2 = p;// sqlite3GlobalConfig.m.xFree(ref p);
             sqlite3_mutex_leave( mem0.mutex );
-          } else
+          }
+          else
           {
             sqlite3GlobalConfig.pScratch2 = p;//sqlite3GlobalConfig.m.xFree(ref p);
           }
-        } else // larger Scratch 2 already in use, let the C# GC handle
+        }
+        else // larger Scratch 2 already in use, let the C# GC handle
         {
           //int i;
           //i = (int)((u8*)p - (u8*)sqlite3GlobalConfig.pScratch);
@@ -609,7 +617,7 @@ scratch_overflow:
           //sqlite3StatusAdd(SQLITE_STATUS_SCRATCH_USED, -1);
           //sqlite3_mutex_leave(mem0.mutex);
 #if SQLITE_THREADSAFE && !(NDEBUG)
-          /* Verify that no more than two scratch allocation per thread
+/* Verify that no more than two scratch allocation per thread
 ** is outstanding at one time.  (This is only checked in the
 ** single-threaded case since checking in the multi-threaded case
 ** would be much more complicated.) */
@@ -667,7 +675,8 @@ return p && p>=db.lookaside.pStart && p<db.lookaside.pEnd;
       if ( db != null && isLookaside( db, p ) )
       {
         return db.lookaside.sz;
-      } else
+      }
+      else
       {
         Debug.Assert( sqlite3MemdebugHasType( p, MEMTYPE_DB ) );
         Debug.Assert( sqlite3MemdebugHasType( p, MEMTYPE_LOOKASIDE | MEMTYPE_HEAP ) );
@@ -692,7 +701,8 @@ return p && p>=db.lookaside.pStart && p<db.lookaside.pEnd;
         sqlite3StatusAdd( SQLITE_STATUS_MALLOC_COUNT, -1 );
         sqlite3GlobalConfig.m.xFree( ref p );
         sqlite3_mutex_leave( mem0.mutex );
-      } else
+      }
+      else
       {
         sqlite3GlobalConfig.m.xFree( ref p );
       }
@@ -708,7 +718,8 @@ return p && p>=db.lookaside.pStart && p<db.lookaside.pEnd;
         //sqlite3StatusAdd( SQLITE_STATUS_MEMORY_USED, -sqlite3MallocSize( p ) );
         sqlite3GlobalConfig.m.xFreeMem( ref p );
         sqlite3_mutex_leave( mem0.mutex );
-      } else
+      }
+      else
       {
         sqlite3GlobalConfig.m.xFreeMem( ref p );
       }
@@ -778,7 +789,8 @@ db.lookaside.nOut--;
       if ( nOld == nNew )
       {
         pNew = pOld;
-      } else if ( sqlite3GlobalConfig.bMemstat )
+      }
+      else if ( sqlite3GlobalConfig.bMemstat )
       {
         sqlite3_mutex_enter( mem0.mutex );
         sqlite3StatusSet( SQLITE_STATUS_MALLOC_SIZE, nBytes );
@@ -801,7 +813,8 @@ db.lookaside.nOut--;
           sqlite3StatusAdd( SQLITE_STATUS_MEMORY_USED, nNew - nOld );
         }
         sqlite3_mutex_leave( mem0.mutex );
-      } else
+      }
+      else
       {
         pNew = sqlite3GlobalConfig.m.xRealloc( pOld, nNew );
       }

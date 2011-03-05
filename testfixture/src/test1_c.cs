@@ -65,10 +65,12 @@ namespace Community.CsharpSqlite
       if ( h >= '0' && h <= '9' )
       {
         return h - '0';
-      } else if ( h >= 'a' && h <= 'f' )
+      }
+      else if ( h >= 'a' && h <= 'f' )
       {
         return h - 'a' + 10;
-      } else
+      }
+      else
       {
         Debug.Assert( h >= 'A' && h <= 'F' );
         return h - 'A' + 10;
@@ -102,9 +104,8 @@ namespace Community.CsharpSqlite
       //}
       var cmdInfo = new WrappedCommand();
       if ( TCL.Tcl_GetCommandInfo( interp, z, ref cmdInfo ) || cmdInfo == null )
-      {
-        return null;
-      } else
+      { return null; }
+      else
       {
         return cmdInfo.objClientData;
       }
@@ -160,12 +161,14 @@ namespace Community.CsharpSqlite
         if ( cmdInfo == null )
         {
           ppDb = new sqlite3();
-        } else
+        }
+        else
         {
           p = (SqliteDb)cmdInfo.objClientData;
           ppDb = p.db;
         }
-      } else
+      }
+      else
       {
         Debugger.Break();// ppDb = (sqlite3)sqlite3TestTextToPtr( zA );
       }
@@ -269,19 +272,13 @@ namespace Community.CsharpSqlite
       return zName;
     }
     //#define t1ErrorName sqlite3TestErrorName
-    static string t1ErrorName( int i )
-    {
-      return sqlite3TestErrorName( i );
-    }
+    static string t1ErrorName( int i ) { return sqlite3TestErrorName( i ); }
     /*
     ** Convert an sqlite3_stmt* into an sqlite3*. This depends on the
     ** fact that the sqlite3* is the first field in the Vdbe structure.
     */
     //#define StmtToDb(X) sqlite3_db_handle(X)
-    static sqlite3 StmtToDb( Vdbe v )
-    {
-      return sqlite3_db_handle( v );
-    }
+    static sqlite3 StmtToDb( Vdbe v ) { return sqlite3_db_handle( v ); }
 
     /*
     ** Check a return value to make sure it agrees with the results
@@ -318,7 +315,8 @@ namespace Community.CsharpSqlite
       {
         ppStmt = cmdInfo == null ? null : (sqlite3_stmt)cmdInfo.objClientData;
         ;
-      } else
+      }
+      else
       {
         Debugger.Break();
       }
@@ -379,7 +377,8 @@ namespace Community.CsharpSqlite
           {
             beginbrace = "{";
             endbrace = "}";
-          } else
+          }
+          else
           {
             beginbrace = "";
             endbrace = "";
@@ -524,7 +523,8 @@ namespace Community.CsharpSqlite
         {
           zSql.Append( (char)( ( testHexToInt( zHex[j + 1] ) << 4 ) + testHexToInt( zHex[j + 2] ) ) );
           j += 2;
-        } else
+        }
+        else
         {
           zSql.Append( zHex[j] );
         }
@@ -624,7 +624,8 @@ namespace Community.CsharpSqlite
         {
           sb.Append( (char)( ( testHexToInt( zSql[i + 1] ) << 4 ) + testHexToInt( zSql[i + 2] ) ) );
           i += 2;
-        } else
+        }
+        else
           sb.Append( zSql[i] );
       }
       ////zSql[j] = 0;
@@ -742,7 +743,7 @@ namespace Community.CsharpSqlite
       int a1 = atoi( argv[3].ToString() );
       if ( n > zStr.Capacity )
         n = zStr.Capacity;// sizeof( zStr );
-      zStr = new StringBuilder( "abcdefghijklmnopqrstuvwxyz" );
+      zStr=new StringBuilder("abcdefghijklmnopqrstuvwxyz");
       sqlite3_snprintf( n, zStr, zFormat, a1 );
       TCL.Tcl_AppendResult( interp, zStr );
       return TCL.TCL_OK;
@@ -862,7 +863,7 @@ return TCL.TCL_OK;
       zKey = argv[2].ToString();
       nKey = zKey.Length;
 #if SQLITE_HAS_CODEC
-      sqlite3_key( db, zKey, nKey );
+sqlite3_key( db, zKey, nKey );
 #endif
       return TCL.TCL_OK;
     }
@@ -893,7 +894,7 @@ return TCL.TCL_OK;
       zKey = argv[2].ToString();
       nKey = zKey.Length;
 #if SQLITE_HAS_CODEC
-      sqlite3_rekey( db, zKey, nKey );
+sqlite3_rekey( db, zKey, nKey );
 #endif
       return TCL.TCL_OK;
     }
@@ -1032,7 +1033,8 @@ Debugger.Break (); //TODO --
         if ( argv[i] == null )
         {
           dstrAppend( p, "NULL", ' ' );
-        } else
+        }
+        else
         {
           dstrAppend( p, argv[i].ToString(), ' ' );
         }
@@ -1102,7 +1104,8 @@ Debugger.Break (); //TODO --
       if ( zText1 != zText2 || zText2 != zText3 )
       {
         sqlite3_result_error( context, "tkt2213 is not fixed", -1 );
-      } else
+      }
+      else
       {
         //char *zCopy = (char *)sqlite3Malloc(nText);
         //memcpy(zCopy, zText1, nText);
@@ -1328,7 +1331,8 @@ Debugger.Break (); // TODO --
         if ( p.cnt == 42 )
         {
           sqlite3_result_error( context, "x_count totals to 42", -1 );
-        } else
+        }
+        else
         {
           sqlite3_result_int( context, p != null ? (int)p.cnt : 0 );
         }
@@ -1740,9 +1744,9 @@ legacyCountStep, legacyCountFinalize
       d = x2;
       d = ( d << 32 ) + x1;
 #if WINDOWS_PHONE
-r = BitConverter.ToDouble(BitConverter.GetBytes((long)d), 0);
+      r = BitConverter.ToDouble(BitConverter.GetBytes((long)d), 0);
 #else
-      r = BitConverter.Int64BitsToDouble( d );// memcpy( &r, d, sizeof( r ) );
+      r = BitConverter.Int64BitsToDouble(d);// memcpy( &r, d, sizeof( r ) );
 #endif
       z = sqlite3_mprintf( argv[1].ToString(), r );
       TCL.Tcl_AppendResult( interp, z );
@@ -2290,9 +2294,7 @@ new EncTable("0", 0 )
       // "encoding", 0, ref enc)
       //)
       int iEnc;
-      for ( iEnc = 0; iEnc < aEnc.Length && ( aEnc[iEnc].zEnc != objv[4].ToString() ); iEnc++ )
-      {
-      }
+      for ( iEnc = 0; iEnc < aEnc.Length && ( aEnc[iEnc].zEnc != objv[4].ToString()  ); iEnc++ ) { }
       if ( iEnc >= aEnc.Length )
         return TCL.TCL_ERROR;
       enc = aEnc[iEnc].enc;
@@ -2355,7 +2357,7 @@ new EncTable("0", 0 )
       if ( rc != SQLITE_OK )
       {
         TCL.Tcl_ResetResult( interp );
-        TCL.Tcl_AppendResult( interp, sqlite3TestErrorName( rc ) );
+        TCL.Tcl_AppendResult( interp, sqlite3TestErrorName( rc ));
         return TCL.TCL_ERROR;
       }
       return TCL.TCL_OK;
@@ -2498,27 +2500,34 @@ new EncTable("0", 0 )
           if ( 0 == sqlite3StrICmp( zArg0, "int" ) )
           {
             sqlite3_result_int( context, sqlite3_value_int( argv[ARGV + 1] ) );
-          } else if ( sqlite3StrICmp( zArg0, "int64" ) == 0 )
+          }
+          else if ( sqlite3StrICmp( zArg0, "int64" ) == 0 )
           {
             sqlite3_result_int64( context, sqlite3_value_int64( argv[ARGV + 1] ) );
-          } else if ( sqlite3StrICmp( zArg0, "string" ) == 0 )
+          }
+          else if ( sqlite3StrICmp( zArg0, "string" ) == 0 )
           {
             sqlite3_result_text( context, sqlite3_value_text( argv[ARGV + 1] ), -1,
             SQLITE_TRANSIENT );
-          } else if ( sqlite3StrICmp( zArg0, "double" ) == 0 )
+          }
+          else if ( sqlite3StrICmp( zArg0, "double" ) == 0 )
           {
             sqlite3_result_double( context, sqlite3_value_double( argv[ARGV + 1] ) );
-          } else if ( sqlite3StrICmp( zArg0, "null" ) == 0 )
+          }
+          else if ( sqlite3StrICmp( zArg0, "null" ) == 0 )
           {
             sqlite3_result_null( context );
-          } else if ( sqlite3StrICmp( zArg0, "value" ) == 0 )
+          }
+          else if ( sqlite3StrICmp( zArg0, "value" ) == 0 )
           {
             sqlite3_result_value( context, argv[sqlite3_value_int( argv[ARGV + 1] )] );
-          } else
+          }
+          else
           {
             goto error_out;
           }
-        } else
+        }
+        else
         {
           goto error_out;
         }
@@ -2886,20 +2895,25 @@ TCL.Tcl_NewIntObj( pStmt1.nVar == pStmt2.nVar ? sqlite3TransferBindings( pStmt1,
       if ( argv[4].ToString() == "null" )
       {
         rc = sqlite3_bind_null( pStmt, idx );
-      } else if ( argv[4].ToString() == "static" )
+      }
+      else if ( argv[4].ToString() == "static" )
       {
         rc = sqlite3_bind_text( pStmt, idx, sqlite_static_bind_value.sValue, -1, null );
-      } else if ( argv[4].ToString() == "static-nbytes" )
+      }
+      else if ( argv[4].ToString() == "static-nbytes" )
       {
         rc = sqlite3_bind_text( pStmt, idx, sqlite_static_bind_value.sValue,
         sqlite_static_bind_nbyte.iValue, null );
-      } else if ( argv[4].ToString() == "normal" )
+      }
+      else if ( argv[4].ToString() == "normal" )
       {
         rc = sqlite3_bind_text( pStmt, idx, argv[3].ToString(), -1, SQLITE_TRANSIENT );
-      } else if ( argv[4].ToString() == "blob10" )
+      }
+      else if ( argv[4].ToString() == "blob10" )
       {
         rc = sqlite3_bind_text( pStmt, idx, "abc\0xyz\0pq", 10, SQLITE_STATIC );
-      } else
+      }
+      else
       {
         TCL.Tcl_AppendResult( interp, "4th argument should be " +
         "\"null\" or \"static\" or \"normal\"" );
@@ -3558,10 +3572,10 @@ new _aSpecialFp( "-NaN0", 0xfff80000, 0x00000000 ),
           Debug.Assert( sizeof( double ) == 8 );
           Debug.Assert( sizeof( sqlite3_u3264 ) == 8 );
 #if WINDOWS_PHONE
-value = BitConverter.ToDouble(BitConverter.GetBytes((long)x), 0);
+          value = BitConverter.ToDouble(BitConverter.GetBytes((long)x), 0);
 #else
-          value = BitConverter.Int64BitsToDouble( x );//memcpy(&value, x, 8);
-#endif
+          value = BitConverter.Int64BitsToDouble(x);//memcpy(&value, x, 8);
+#endif          
           //value = Double.NaN;
           break;
         }
@@ -3972,7 +3986,8 @@ return TCL.TCL_ERROR;
       if ( ( rc & 0xff ) == rc )
       {
         zBuf.Length = 0;
-      } else
+      }
+      else
       {
         sqlite3_snprintf( 30, zBuf, "+%d", rc >> 8 );
       }
@@ -4867,16 +4882,20 @@ pRet = TCL.Tcl_NewByteArrayObj(zName16, n+2);
       if ( argv[2].ToString() == "SQLITE_MAGIC_OPEN" )
       {
         db.magic = SQLITE_MAGIC_OPEN;
-      } else if ( argv[2].ToString() == "SQLITE_MAGIC_CLOSED" )
+      }
+      else if ( argv[2].ToString() == "SQLITE_MAGIC_CLOSED" )
       {
         db.magic = SQLITE_MAGIC_CLOSED;
-      } else if ( argv[2].ToString() == "SQLITE_MAGIC_BUSY" )
+      }
+      else if ( argv[2].ToString() == "SQLITE_MAGIC_BUSY" )
       {
         db.magic = SQLITE_MAGIC_BUSY;
-      } else if ( argv[2].ToString() == "SQLITE_MAGIC_ERROR" )
+      }
+      else if ( argv[2].ToString() == "SQLITE_MAGIC_ERROR" )
       {
         db.magic = SQLITE_MAGIC_ERROR;
-      } else if ( TCL.Tcl_GetInt( interp, argv[2], ref db.magic ) )
+      }
+      else if ( TCL.Tcl_GetInt( interp, argv[2], ref db.magic ) )
       {
         return TCL.TCL_ERROR;
       }

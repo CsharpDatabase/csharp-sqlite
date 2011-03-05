@@ -68,18 +68,13 @@ namespace Community.CsharpSqlite
     //# define sqlite3_create_collation16     0
     //# define sqlite3_create_function16      0
     //# define sqlite3_errmsg16               0
-    static string sqlite3_errmsg16( sqlite3 db )
-    {
-      return "";
-    }
+    static string sqlite3_errmsg16( sqlite3 db ) { return ""; }
     //# define sqlite3_open16                 0
     //# define sqlite3_prepare16              0
     //# define sqlite3_prepare16_v2           0
     //# define sqlite3_result_error16         0
     //# define sqlite3_result_text16          0
-    static void sqlite3_result_text16( sqlite3_context pCtx, string z, int n, dxDel xDel )
-    {
-    }
+    static void sqlite3_result_text16( sqlite3_context pCtx, string z, int n, dxDel xDel ) { }
     //# define sqlite3_result_text16be        0
     //# define sqlite3_result_text16le        0
     //# define sqlite3_value_text16           0
@@ -125,10 +120,7 @@ static void sqlite3_progress_handler (sqlite3 db,       int nOps, dxProgress xPr
     ref int pnRow,          /* Number of result rows written here */
     ref int pnColumn,       /* Number of result columns written here */
     ref string pzErrmsg     /* Error msg written here */
-    )
-    {
-      return 0;
-    }
+    ) { return 0; }
 #endif
 
 #if SQLITE_OMIT_INCRBLOB
@@ -159,12 +151,12 @@ static void sqlite3_progress_handler (sqlite3 db,       int nOps, dxProgress xPr
     {
       public sqlite3 context_db_handle;
     };
-
+    
     static sqlite3_api_routines sqlite3Apis = new sqlite3_api_routines();
     //{
     //  sqlite3_aggregate_context,
 #if !SQLITE_OMIT_DEPRECATED
-/  sqlite3_aggregate_count,
+    /  sqlite3_aggregate_count,
 #else
     //  0,
 #endif
@@ -223,7 +215,7 @@ static void sqlite3_progress_handler (sqlite3 db,       int nOps, dxProgress xPr
     //  sqlite3_errmsg16,
     //  sqlite3_exec,
 #if !SQLITE_OMIT_DEPRECATED
-//sqlite3_expired,
+    //sqlite3_expired,
 #else
     //0,
 #endif
@@ -267,14 +259,14 @@ static void sqlite3_progress_handler (sqlite3 db,       int nOps, dxProgress xPr
     //  sqlite3_step,
     //  sqlite3_table_column_metadata,
 #if !SQLITE_OMIT_DEPRECATED
-//sqlite3_thread_cleanup,
+    //sqlite3_thread_cleanup,
 #else
     //  0,
 #endif
     //  sqlite3_total_changes,
     //  sqlite3_trace,
 #if !SQLITE_OMIT_DEPRECATED
-//sqlite3_transfer_bindings,
+    //sqlite3_transfer_bindings,
 #else
     //  0,
 #endif
@@ -433,11 +425,10 @@ static void sqlite3_progress_handler (sqlite3 db,       int nOps, dxProgress xPr
       sqlite3_vfs pVfs = db.pVfs;
       HANDLE handle;
       dxInit xInit; //int (*xInit)(sqlite3*,char**,const sqlite3_api_routines*);
-      StringBuilder zErrmsg = new StringBuilder( 100 );
+      StringBuilder zErrmsg = new StringBuilder(100);
       //object aHandle;
       const int nMsg = 300;
-      if ( pzErrMsg != null )
-        pzErrMsg = null;
+      if ( pzErrMsg != null ) pzErrMsg = null;
 
 
       /* Ticket #1863.  To avoid a creating security problems for older
@@ -549,7 +540,8 @@ static void sqlite3_progress_handler (sqlite3 db,       int nOps, dxProgress xPr
       if ( onoff != 0 )
       {
         db.flags |= SQLITE_LoadExtension;
-      } else
+      }
+      else
       {
         db.flags &= ~SQLITE_LoadExtension;
       }
@@ -582,11 +574,7 @@ const sqlite3_api_routines sqlite3Apis = null;
     {
       public int nExt = 0;            /* Number of entries in aExt[] */
       public dxInit[] aExt = null;    /* Pointers to the extension init functions */
-      public sqlite3AutoExtList( int nExt, dxInit[] aExt )
-      {
-        this.nExt = nExt;
-        this.aExt = aExt;
-      }
+      public sqlite3AutoExtList( int nExt, dxInit[] aExt ) { this.nExt = nExt; this.aExt = aExt; }
     }
     static sqlite3AutoExtList sqlite3Autoext = new sqlite3AutoExtList( 0, null );
     /* The "wsdAutoext" macro will resolve to the autoextension
@@ -601,9 +589,7 @@ sqlite3AutoExtList *x = &GLOBAL(sqlite3AutoExtList,sqlite3Autoext)
 //# define wsdAutoext x[0]
 #else
     //# define wsdAutoextInit
-    static void wsdAutoextInit()
-    {
-    }
+    static void wsdAutoextInit() { }
     //# define wsdAutoext sqlite3Autoext
     static sqlite3AutoExtList wsdAutoext = sqlite3Autoext;
 #endif
@@ -620,21 +606,21 @@ sqlite3AutoExtList *x = &GLOBAL(sqlite3AutoExtList,sqlite3Autoext)
       if ( rc != 0 )
       {
         return rc;
-      } else
+      }
+      else
 #endif
       {
         int i;
 #if SQLITE_THREADSAFE
-        sqlite3_mutex mutex = sqlite3MutexAlloc( SQLITE_MUTEX_STATIC_MASTER );
+sqlite3_mutex mutex = sqlite3MutexAlloc( SQLITE_MUTEX_STATIC_MASTER );
 #else
-sqlite3_mutex mutex = sqlite3MutexAlloc( SQLITE_MUTEX_STATIC_MASTER ); // Need this since mutex_enter & leave are not MACROS under C#
+        sqlite3_mutex mutex = sqlite3MutexAlloc( SQLITE_MUTEX_STATIC_MASTER ); // Need this since mutex_enter & leave are not MACROS under C#
 #endif
         wsdAutoextInit();
         sqlite3_mutex_enter( mutex );
         for ( i = 0; i < wsdAutoext.nExt; i++ )
         {
-          if ( wsdAutoext.aExt[i] == xInit )
-            break;
+          if ( wsdAutoext.aExt[i] == xInit ) break;
         }
         //if( i==wsdAutoext.nExt ){
         //  int nByte = (wsdAutoext.nExt+1)*sizeof(wsdAutoext.aExt[0]);
@@ -663,9 +649,9 @@ sqlite3_mutex mutex = sqlite3MutexAlloc( SQLITE_MUTEX_STATIC_MASTER ); // Need t
 #endif
       {
 #if SQLITE_THREADSAFE
-        sqlite3_mutex mutex = sqlite3MutexAlloc( SQLITE_MUTEX_STATIC_MASTER );
+sqlite3_mutex mutex = sqlite3MutexAlloc( SQLITE_MUTEX_STATIC_MASTER );
 #else
-sqlite3_mutex mutex = sqlite3MutexAlloc( SQLITE_MUTEX_STATIC_MASTER ); // Need this since mutex_enter & leave are not MACROS under C#
+        sqlite3_mutex mutex = sqlite3MutexAlloc( SQLITE_MUTEX_STATIC_MASTER ); // Need this since mutex_enter & leave are not MACROS under C#
 #endif
         wsdAutoextInit();
         sqlite3_mutex_enter( mutex );
@@ -707,16 +693,17 @@ if ( wsdAutoext.nExt == 0 )
       {
         string zErrmsg = "";
 #if SQLITE_THREADSAFE
-        sqlite3_mutex mutex = sqlite3MutexAlloc( SQLITE_MUTEX_STATIC_MASTER );
+sqlite3_mutex mutex = sqlite3MutexAlloc( SQLITE_MUTEX_STATIC_MASTER );
 #else
-sqlite3_mutex mutex = sqlite3MutexAlloc( SQLITE_MUTEX_STATIC_MASTER ); // Need this since mutex_enter & leave are not MACROS under C#
+        sqlite3_mutex mutex = sqlite3MutexAlloc( SQLITE_MUTEX_STATIC_MASTER ); // Need this since mutex_enter & leave are not MACROS under C#
 #endif
         sqlite3_mutex_enter( mutex );
         if ( i >= wsdAutoext.nExt )
         {
           xInit = null;
           go = false;
-        } else
+        }
+        else
         {
           xInit = (dxInit)
           wsdAutoext.aExt[i];

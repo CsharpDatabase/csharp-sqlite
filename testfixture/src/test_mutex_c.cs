@@ -377,16 +377,10 @@ namespace Community.CsharpSqlite
       try
       {
         for ( index = 0; index < table.Length; index++ )
-        {
-          if ( table[index].zName == msg )
-            return false;
-        }
+        { if ( table[index].zName == msg ) return false; }
         return true;
       }
-      catch
-      {
-        return true;
-      }
+      catch { return true; }
     }
 
 
@@ -419,7 +413,8 @@ new ConfigOption(null,0)
         {
           return TCL.TCL_ERROR;
         }
-      } else
+      }
+      else
       {
         i = aOpt[i].iValue;
       }

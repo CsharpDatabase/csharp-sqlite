@@ -107,17 +107,20 @@ namespace tcl.lang
       if ( rep is TclLong )
       {
         // Do nothing.
-      } else if ( rep is TclBoolean )
+      }
+      else if ( rep is TclBoolean )
       {
         bool b = TclBoolean.get( interp, tobj );
         if ( b )
         {
           tobj.InternalRep = new TclLong( 1 );
-        } else
+        }
+        else
         {
           tobj.InternalRep = new TclLong( 0 );
         }
-      } else
+      }
+      else
       {
         // (ToDo) other short-cuts
         tobj.InternalRep = new TclLong( interp, tobj.ToString() );
@@ -161,7 +164,8 @@ namespace tcl.lang
       {
         tlong = (TclLong)rep;
         tlong.value = i;
-      } else
+      }
+      else
       {
         tobj.InternalRep = new TclLong( i );
       }

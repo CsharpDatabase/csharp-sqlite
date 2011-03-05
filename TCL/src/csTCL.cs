@@ -22,7 +22,7 @@ class csTCL
   **
   ** $Header$
   */
-  public static void Main( string[] args )
+  public static void Main(string[] args)
   {
     // Array of command-line argument strings.
     {
@@ -38,7 +38,7 @@ class csTCL
       // strip it off and use it as the name of a script file to process.
       // We also set the argv0 and TCL.Tcl_interactive vars here.
 
-      if ( ( args.Length > 0 ) && !( args[0].StartsWith( "-" ) ) )
+      if ((args.Length > 0) && !(args[0].StartsWith("-")))
       {
         fileName = args[0];
       }
@@ -49,27 +49,28 @@ class csTCL
       {
         int i = 0;
         int argc = args.Length;
-        if ( (System.Object)fileName == null )
+        if ((System.Object)fileName == null)
         {
-          interp.setVar( "argv0", "tcl.lang.Shell", TCL.VarFlag.GLOBAL_ONLY );
-          interp.setVar( "tcl_interactive", "1", TCL.VarFlag.GLOBAL_ONLY );
-        } else
+          interp.setVar("argv0", "tcl.lang.Shell", TCL.VarFlag.GLOBAL_ONLY);
+          interp.setVar("tcl_interactive", "1", TCL.VarFlag.GLOBAL_ONLY);
+        }
+        else
         {
-          interp.setVar( "argv0", fileName, TCL.VarFlag.GLOBAL_ONLY );
-          interp.setVar( "tcl_interactive", "0", TCL.VarFlag.GLOBAL_ONLY );
+          interp.setVar("argv0", fileName, TCL.VarFlag.GLOBAL_ONLY);
+          interp.setVar("tcl_interactive", "0", TCL.VarFlag.GLOBAL_ONLY);
           i++;
           argc--;
         }
-        for ( ; i < args.Length; i++ )
+        for (; i < args.Length; i++)
         {
-          TclList.append( interp, argv, TclString.newInstance( args[i] ) );
+          TclList.append(interp, argv, TclString.newInstance(args[i]));
         }
-        interp.setVar( "argv", argv, TCL.VarFlag.GLOBAL_ONLY );
-        interp.setVar( "argc", System.Convert.ToString( argc ), TCL.VarFlag.GLOBAL_ONLY );
+        interp.setVar("argv", argv, TCL.VarFlag.GLOBAL_ONLY);
+        interp.setVar("argc", System.Convert.ToString(argc), TCL.VarFlag.GLOBAL_ONLY);
       }
-      catch ( TclException e )
+      catch (TclException e)
       {
-        throw new TclRuntimeError( "unexpected TclException: " + e.Message );
+        throw new TclRuntimeError("unexpected TclException: " + e.Message);
       }
       finally
       {
@@ -81,39 +82,38 @@ class csTCL
       // If a script file was specified then just source that file
       // and quit.
 
-      Console.WriteLine( "C#-TCL version " + Assembly.GetExecutingAssembly().GetName().Version.ToString() );
-      Console.WriteLine( "==============================================================" );
-      Console.WriteLine( "" );
+      Console.WriteLine("C#-TCL version " + Assembly.GetExecutingAssembly().GetName().Version.ToString());
+      Console.WriteLine("==============================================================");
+      Console.WriteLine("");
 
-      if ( (System.Object)fileName != null )
+      if ((System.Object)fileName != null)
       {
         try
         {
-          interp.evalFile( fileName );
+          interp.evalFile(fileName);
         }
-        catch ( TclException e )
+        catch (TclException e)
         {
           TCL.CompletionCode code = e.getCompletionCode();
-          if ( code == TCL.CompletionCode.RETURN )
+          if (code == TCL.CompletionCode.RETURN)
           {
             code = interp.updateReturnInfo();
-            if ( code != TCL.CompletionCode.OK )
+            if (code != TCL.CompletionCode.OK)
             {
-              System.Console.Error.WriteLine( "command returned bad code: " + code );
-              if ( tcl.lang.ConsoleThread.debug )
-                System.Diagnostics.Debug.WriteLine( "command returned bad code: " + code );
+              System.Console.Error.WriteLine("command returned bad code: " + code);
+              if (tcl.lang.ConsoleThread.debug) System.Diagnostics.Debug.WriteLine("command returned bad code: " + code);
             }
-          } else if ( code == TCL.CompletionCode.ERROR )
+          }
+          else if (code == TCL.CompletionCode.ERROR)
           {
-            System.Console.Error.WriteLine( interp.getResult().ToString() );
-            if ( tcl.lang.ConsoleThread.debug )
-              System.Diagnostics.Debug.WriteLine( interp.getResult().ToString() );
-            System.Diagnostics.Debug.Assert( false, interp.getResult().ToString() );
-          } else
+            System.Console.Error.WriteLine(interp.getResult().ToString());
+            if (tcl.lang.ConsoleThread.debug) System.Diagnostics.Debug.WriteLine(interp.getResult().ToString());
+            System.Diagnostics.Debug.Assert(false, interp.getResult().ToString());
+          }
+          else
           {
-            System.Console.Error.WriteLine( "command returned bad code: " + code );
-            if ( tcl.lang.ConsoleThread.debug )
-              System.Diagnostics.Debug.WriteLine( "command returned bad code: " + code );
+            System.Console.Error.WriteLine("command returned bad code: " + code);
+            if (tcl.lang.ConsoleThread.debug) System.Diagnostics.Debug.WriteLine("command returned bad code: " + code);
           }
         }
 
@@ -131,26 +131,26 @@ class csTCL
 
         interp.dispose();
 
-        System.Environment.Exit( 0 );
+        System.Environment.Exit(0);
       }
 
-      if ( (System.Object)fileName == null )
+      if ((System.Object)fileName == null)
       {
         // We are running in interactive mode. Start the ConsoleThread
         // that loops, grabbing stdin and passing it to the interp.
 
-        ConsoleThread consoleThread = new ConsoleThread( interp );
+        ConsoleThread consoleThread = new ConsoleThread(interp);
         consoleThread.IsBackground = true;
         consoleThread.Start();
 
         // Loop forever to handle user input events in the command line.
 
         Notifier notifier = interp.getNotifier();
-        while ( true )
+        while (true)
         {
           // process events until "exit" is called.
 
-          notifier.doOneEvent( TCL.ALL_EVENTS );
+          notifier.doOneEvent(TCL.ALL_EVENTS);
         }
       }
     }
@@ -163,11 +163,11 @@ namespace tcl.lang
   {
     private class AnonymousClassTclEvent : TclEvent
     {
-      public AnonymousClassTclEvent( string command, ConsoleThread enclosingInstance )
+      public AnonymousClassTclEvent(string command, ConsoleThread enclosingInstance)
       {
-        InitBlock( command, enclosingInstance );
+        InitBlock(command, enclosingInstance);
       }
-      private void InitBlock( string command, ConsoleThread enclosingInstance )
+      private void InitBlock(string command, ConsoleThread enclosingInstance)
       {
         this.command = command;
         this.enclosingInstance = enclosingInstance;
@@ -182,53 +182,53 @@ namespace tcl.lang
         }
 
       }
-      public override int processEvent( int flags )
+      public override int processEvent(int flags)
       {
 
         // See if the command is a complete Tcl command
 
-        if ( Interp.commandComplete( command ) )
+        if (Interp.commandComplete(command))
         {
-          if ( tcl.lang.ConsoleThread.debug )
+          if (tcl.lang.ConsoleThread.debug)
           {
-            WriteLine( "line was a complete command" );
+            WriteLine("line was a complete command");
           }
 
           bool eval_exception = true;
-          TclObject commandObj = TclString.newInstance( command );
+          TclObject commandObj = TclString.newInstance(command);
 
           try
           {
             commandObj.preserve();
-            Enclosing_Instance.interp.recordAndEval( commandObj, 0 );
+            Enclosing_Instance.interp.recordAndEval(commandObj, 0);
             eval_exception = false;
           }
-          catch ( TclException e )
+          catch (TclException e)
           {
-            if ( tcl.lang.ConsoleThread.debug )
+            if (tcl.lang.ConsoleThread.debug)
             {
-              WriteLine( "eval returned exceptional condition" );
+              WriteLine("eval returned exceptional condition");
             }
 
             TCL.CompletionCode code = e.getCompletionCode();
-            switch ( code )
+            switch (code)
             {
 
               case TCL.CompletionCode.ERROR:
 
-                Enclosing_Instance.putLine( Enclosing_Instance.err, Enclosing_Instance.interp.getResult().ToString() );
+                Enclosing_Instance.putLine(Enclosing_Instance.err, Enclosing_Instance.interp.getResult().ToString());
                 break;
 
               case TCL.CompletionCode.BREAK:
-                Enclosing_Instance.putLine( Enclosing_Instance.err, "invoked \"break\" outside of a loop" );
+                Enclosing_Instance.putLine(Enclosing_Instance.err, "invoked \"break\" outside of a loop");
                 break;
 
               case TCL.CompletionCode.CONTINUE:
-                Enclosing_Instance.putLine( Enclosing_Instance.err, "invoked \"continue\" outside of a loop" );
+                Enclosing_Instance.putLine(Enclosing_Instance.err, "invoked \"continue\" outside of a loop");
                 break;
 
               default:
-                Enclosing_Instance.putLine( Enclosing_Instance.err, "command returned bad code: " + code );
+                Enclosing_Instance.putLine(Enclosing_Instance.err, "command returned bad code: " + code);
                 break;
 
             }
@@ -238,24 +238,24 @@ namespace tcl.lang
             commandObj.release();
           }
 
-          if ( !eval_exception )
+          if (!eval_exception)
           {
-            if ( tcl.lang.ConsoleThread.debug )
+            if (tcl.lang.ConsoleThread.debug)
             {
-              WriteLine( "eval returned normally" );
+              WriteLine("eval returned normally");
             }
 
 
             string evalResult = Enclosing_Instance.interp.getResult().ToString();
 
-            if ( tcl.lang.ConsoleThread.debug )
+            if (tcl.lang.ConsoleThread.debug)
             {
-              WriteLine( "eval result was \"" + evalResult + "\"" );
+              WriteLine("eval result was \"" + evalResult + "\"");
             }
 
-            if ( evalResult.Length > 0 )
+            if (evalResult.Length > 0)
             {
-              Enclosing_Instance.putLine( Enclosing_Instance.out_Renamed, evalResult );
+              Enclosing_Instance.putLine(Enclosing_Instance.out_Renamed, evalResult);
             }
           }
 
@@ -268,36 +268,38 @@ namespace tcl.lang
 
           try
           {
-            prompt = Enclosing_Instance.interp.getVar( "tcl_prompt1", TCL.VarFlag.GLOBAL_ONLY );
+            prompt = Enclosing_Instance.interp.getVar("tcl_prompt1", TCL.VarFlag.GLOBAL_ONLY);
           }
-          catch ( TclException e )
+          catch (TclException e)
           {
             prompt = null;
           }
-          if ( prompt != null )
+          if (prompt != null)
           {
             try
             {
 
-              Enclosing_Instance.interp.eval( prompt.ToString(), TCL.EVAL_GLOBAL );
+              Enclosing_Instance.interp.eval(prompt.ToString(), TCL.EVAL_GLOBAL);
             }
-            catch ( TclException e )
+            catch (TclException e)
             {
-              Enclosing_Instance.put( Enclosing_Instance.out_Renamed, "% " );
+              Enclosing_Instance.put(Enclosing_Instance.out_Renamed, "% ");
             }
-          } else
+          }
+          else
           {
-            Enclosing_Instance.put( Enclosing_Instance.out_Renamed, "% " );
+            Enclosing_Instance.put(Enclosing_Instance.out_Renamed, "% ");
           }
 
           return 1;
-        } else
+        }
+        else
         {
           // Interp.commandComplete() returned false
 
-          if ( tcl.lang.ConsoleThread.debug )
+          if (tcl.lang.ConsoleThread.debug)
           {
-            WriteLine( "line was not a complete command" );
+            WriteLine("line was not a complete command");
           }
 
           // We don't have a complete command yet. Print out a level 2
@@ -307,26 +309,27 @@ namespace tcl.lang
 
           try
           {
-            prompt = Enclosing_Instance.interp.getVar( "tcl_prompt2", TCL.VarFlag.GLOBAL_ONLY );
+            prompt = Enclosing_Instance.interp.getVar("tcl_prompt2", TCL.VarFlag.GLOBAL_ONLY);
           }
-          catch ( TclException )
+          catch (TclException)
           {
             prompt = null;
           }
-          if ( prompt != null )
+          if (prompt != null)
           {
             try
             {
 
-              Enclosing_Instance.interp.eval( prompt.ToString(), TCL.EVAL_GLOBAL );
+              Enclosing_Instance.interp.eval(prompt.ToString(), TCL.EVAL_GLOBAL);
             }
-            catch ( TclException e )
+            catch (TclException e)
             {
-              Enclosing_Instance.put( Enclosing_Instance.out_Renamed, "" );
+              Enclosing_Instance.put(Enclosing_Instance.out_Renamed, "");
             }
-          } else
+          }
+          else
           {
-            Enclosing_Instance.put( Enclosing_Instance.out_Renamed, "" );
+            Enclosing_Instance.put(Enclosing_Instance.out_Renamed, "");
           }
 
           return 1;
@@ -354,26 +357,26 @@ namespace tcl.lang
     // used to keep track of wether or not System.in.available() works
     private static bool sysInAvailableWorks = false;
 
-    internal ConsoleThread( Interp i )
+    internal ConsoleThread(Interp i)
     {
       Name = "ConsoleThread";
       interp = i;
-      sbuf = new System.Text.StringBuilder( 100 );
+      sbuf = new System.Text.StringBuilder(100);
 
-      out_Renamed = TclIO.getStdChannel( StdChannel.STDOUT );
-      err = TclIO.getStdChannel( StdChannel.STDERR );
+      out_Renamed = TclIO.getStdChannel(StdChannel.STDOUT);
+      err = TclIO.getStdChannel(StdChannel.STDERR);
     }
     override public void Run()
     {
-      if ( debug )
+      if (debug)
       {
-        WriteLine( "entered ConsoleThread run() method" );
+        WriteLine("entered ConsoleThread run() method");
       }
 
 
-      put( out_Renamed, "% " );
+      put(out_Renamed, "% ");
 
-      while ( true )
+      while (true)
       {
         // Loop forever to collect user inputs in a StringBuffer.
         // When we have a complete command, then execute it and print
@@ -386,10 +389,10 @@ namespace tcl.lang
         getLine();
         string command = sbuf.ToString();
 
-        if ( debug )
+        if (debug)
         {
-          WriteLine( "got line from console" );
-          WriteLine( "\"" + command + "\"" );
+          WriteLine("got line from console");
+          WriteLine("\"" + command + "\"");
         }
 
         // When interacting with the interpreter, one must
@@ -403,62 +406,61 @@ namespace tcl.lang
         // to create an event and add it to the thread
         // safe event queue.
 
-        TclEvent Tevent = new AnonymousClassTclEvent( command, this ); // end TclEvent innerclass
+        TclEvent Tevent = new AnonymousClassTclEvent(command, this); // end TclEvent innerclass
 
         // Add the event to the thread safe event queue
-        interp.getNotifier().queueEvent( Tevent, TCL.QUEUE_TAIL );
+        interp.getNotifier().queueEvent(Tevent, TCL.QUEUE_TAIL);
 
         // Tell this thread to wait until the event has been processed.
         Tevent.sync();
       }
     }
-    private static void WriteLine( string s )
+    private static void WriteLine(string s)
     {
-      System.Console.Out.WriteLine( s );
-      if ( debug )
-        System.Diagnostics.Debug.WriteLine( s );
+      System.Console.Out.WriteLine(s);
+      if (debug) System.Diagnostics.Debug.WriteLine(s);
     }
     private void getLine()
     {
-      sbuf.Append( Console.In.ReadLine() );
+      sbuf.Append(Console.In.ReadLine());
     }
-    private void putLine( Channel channel, string s )
+    private void putLine(Channel channel, string s)
     // The String to print.
     {
       try
       {
-        channel.write( interp, s );
-        channel.write( interp, "\n" );
-        channel.flush( interp );
+        channel.write(interp, s);
+        channel.write(interp, "\n");
+        channel.flush(interp);
       }
-      catch ( System.IO.IOException ex )
+      catch (System.IO.IOException ex)
       {
-        System.Console.Error.WriteLine( "IOException in Shell.putLine()" );
-        SupportClass.WriteStackTrace( ex, System.Console.Error );
+        System.Console.Error.WriteLine("IOException in Shell.putLine()");
+        SupportClass.WriteStackTrace(ex, System.Console.Error);
       }
-      catch ( TclException ex )
+      catch (TclException ex)
       {
-        System.Console.Error.WriteLine( "TclException in Shell.putLine()" );
-        SupportClass.WriteStackTrace( ex, System.Console.Error );
+        System.Console.Error.WriteLine("TclException in Shell.putLine()");
+        SupportClass.WriteStackTrace(ex, System.Console.Error);
       }
     }
-    private void put( Channel channel, string s )
+    private void put(Channel channel, string s)
     // The String to print.
     {
       try
       {
-        channel.write( interp, s );
-        channel.flush( interp );
+        channel.write(interp, s);
+        channel.flush(interp);
       }
-      catch ( System.IO.IOException ex )
+      catch (System.IO.IOException ex)
       {
-        System.Console.Error.WriteLine( "IOException in Shell.put()" );
-        SupportClass.WriteStackTrace( ex, System.Console.Error );
+        System.Console.Error.WriteLine("IOException in Shell.put()");
+        SupportClass.WriteStackTrace(ex, System.Console.Error);
       }
-      catch ( TclException ex )
+      catch (TclException ex)
       {
-        System.Console.Error.WriteLine( "TclException in Shell.put()" );
-        SupportClass.WriteStackTrace( ex, System.Console.Error );
+        System.Console.Error.WriteLine("TclException in Shell.put()");
+        SupportClass.WriteStackTrace(ex, System.Console.Error);
       }
     }
     static ConsoleThread()
@@ -476,7 +478,7 @@ namespace tcl.lang
           int generatedAux5 = (int)available;
           sysInAvailableWorks = true;
         }
-        catch ( System.Exception e )
+        catch (System.Exception e)
         {
           // If System.in.available() causes an exception -- it's probably
           // no supported on this platform (e.g. MS Java SDK). We assume
@@ -487,13 +489,13 @@ namespace tcl.lang
         // echo chars to the console unless blocking IO is used.
         // For this reason we need to use blocking IO under Windows.
 
-        if ( Util.Windows )
+        if (Util.Windows)
         {
           sysInAvailableWorks = false;
         }
-        if ( debug )
+        if (debug)
         {
-          WriteLine( "sysInAvailableWorks = " + sysInAvailableWorks );
+          WriteLine("sysInAvailableWorks = " + sysInAvailableWorks);
         }
       }
     }

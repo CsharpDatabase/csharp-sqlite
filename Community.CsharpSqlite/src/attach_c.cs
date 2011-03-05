@@ -65,7 +65,8 @@ namespace Community.CsharpSqlite
             sqlite3ErrorMsg( pName.pParse, "invalid name: \"%s\"", pExpr.u.zToken );
             return SQLITE_ERROR;
           }
-        } else
+        }
+        else
         {
           pExpr.op = TK_STRING;
         }
@@ -146,10 +147,8 @@ namespace Community.CsharpSqlite
       //  if( aNew==0 ) return;
       //  memcpy(aNew, db.aDb, sizeof(db.aDb[0])*2);
       //}else {
-      if ( db.aDb.Length <= db.nDb )
-        Array.Resize( ref db.aDb, db.nDb + 1 );//aNew = sqlite3DbRealloc(db, db.aDb, sizeof(db.aDb[0])*(db.nDb+1) );
-      if ( db.aDb == null )
-        return;   // if( aNew==0 ) return;
+      if ( db.aDb.Length <= db.nDb ) Array.Resize( ref db.aDb, db.nDb + 1 );//aNew = sqlite3DbRealloc(db, db.aDb, sizeof(db.aDb[0])*(db.nDb+1) );
+      if ( db.aDb == null ) return;   // if( aNew==0 ) return;
       //}
       db.aDb[db.nDb] = new Db();//db.aDb = aNew;
       aNew = db.aDb[db.nDb];//memset(aNew, 0, sizeof(*aNew));
@@ -159,21 +158,23 @@ namespace Community.CsharpSqlite
       ** it to obtain the database schema. At this point the schema may
       ** or may not be initialised.
       */
-      rc = sqlite3BtreeOpen( zFile, db, ref aNew.pBt, 0,
-      db.openFlags | SQLITE_OPEN_MAIN_DB );
+      rc = sqlite3BtreeOpen(zFile, db, ref aNew.pBt, 0,
+                        db.openFlags | SQLITE_OPEN_MAIN_DB);
       db.nDb++;
       if ( rc == SQLITE_CONSTRAINT )
       {
         rc = SQLITE_ERROR;
         zErrDyn = sqlite3MPrintf( db, "database is already attached" );
-      } else if ( rc == SQLITE_OK )
+      }
+      else if ( rc == SQLITE_OK )
       {
         Pager pPager;
         aNew.pSchema = sqlite3SchemaGet( db, aNew.pBt );
         if ( aNew.pSchema == null )
         {
           rc = SQLITE_NOMEM;
-        } else if ( aNew.pSchema.file_format != 0 && aNew.pSchema.enc != ENC( db ) )
+        }
+        else if ( aNew.pSchema.file_format != 0 && aNew.pSchema.enc != ENC( db ) )
         {
           zErrDyn = sqlite3MPrintf( db,
           "attached databases must use the same text encoding as main database" );
@@ -181,8 +182,8 @@ namespace Community.CsharpSqlite
         }
         pPager = sqlite3BtreePager( aNew.pBt );
         sqlite3PagerLockingMode( pPager, db.dfltLockMode );
-        sqlite3BtreeSecureDelete( aNew.pBt,
-        sqlite3BtreeSecureDelete( db.aDb[0].pBt, -1 ) );
+        sqlite3BtreeSecureDelete(aNew.pBt,
+                                 sqlite3BtreeSecureDelete(db.aDb[0].pBt, -1));
       }
       aNew.safety_level = 3;
       aNew.zName = zName;//sqlite3DbStrDup(db, zName);
@@ -223,10 +224,10 @@ namespace Community.CsharpSqlite
 #endif
 
       /* If the file was opened successfully, read the schema for the new database.
-** If this fails, or if opening the file failed, then close the file and
-** remove the entry from the db.aDb[] array. i.e. put everything back the way
-** we found it.
-*/
+    ** If this fails, or if opening the file failed, then close the file and
+    ** remove the entry from the db.aDb[] array. i.e. put everything back the way
+    ** we found it.
+    */
       if ( rc == SQLITE_OK )
       {
         sqlite3BtreeEnterAll( db );
@@ -250,7 +251,8 @@ namespace Community.CsharpSqlite
           ////        db.mallocFailed = 1;
           sqlite3DbFree( db, ref zErrDyn );
           zErrDyn = sqlite3MPrintf( db, "out of memory" );
-        } else if ( zErrDyn == "" )
+        }
+        else if ( zErrDyn == "" )
         {
           zErrDyn = sqlite3MPrintf( db, "unable to open database: %s", zFile );
         }
@@ -259,15 +261,14 @@ namespace Community.CsharpSqlite
 
       return;
 
-attach_error:
+    attach_error:
       /* Return an error if we get here */
       if ( zErrDyn != "" )
       {
         sqlite3_result_error( context, zErrDyn, -1 );
         sqlite3DbFree( db, ref zErrDyn );
       }
-      if ( rc != 0 )
-        sqlite3_result_error_code( context, rc );
+      if ( rc != 0 ) sqlite3_result_error_code( context, rc );
     }
 
     /*
@@ -292,15 +293,12 @@ attach_error:
 
       UNUSED_PARAMETER( NotUsed );
 
-      if ( zName == null )
-        zName = "";
+      if ( zName == null ) zName = "";
       for ( i = 0; i < db.nDb; i++ )
       {
         pDb = db.aDb[i];
-        if ( pDb.pBt == null )
-          continue;
-        if ( sqlite3StrICmp( pDb.zName, zName ) == 0 )
-          break;
+        if ( pDb.pBt == null ) continue;
+        if ( sqlite3StrICmp( pDb.zName, zName ) == 0 ) break;
       }
 
       if ( i >= db.nDb )
@@ -331,7 +329,7 @@ attach_error:
       sqlite3ResetInternalSchema( db, 0 );
       return;
 
-detach_error:
+    detach_error:
       sqlite3_result_error( context, zErr.ToString(), -1 );
     }
 
@@ -402,7 +400,7 @@ goto attach_end;
         sqlite3VdbeAddOp1( v, OP_Expire, ( type == SQLITE_ATTACH ) ? 1 : 0 );
       }
 
-attach_end:
+    attach_end:
       sqlite3ExprDelete( db, ref pFilename );
       sqlite3ExprDelete( db, ref pDbname );
       sqlite3ExprDelete( db, ref pKey );
@@ -426,7 +424,7 @@ attach_end:
     null,                /* pHash */
     null                 /* pDestructor */
     );
-    static void sqlite3Detach( Parse pParse, Expr pDbname )
+    static void sqlite3Detach(Parse pParse, Expr pDbname)
     {
       codeAttach( pParse, SQLITE_DETACH, detach_func, pDbname, null, null, pDbname );
     }
@@ -449,7 +447,7 @@ attach_end:
     null,                /* pHash */
     null                 /* pDestructor */
     );
-    static void sqlite3Attach( Parse pParse, Expr p, Expr pDbname, Expr pKey )
+    static void sqlite3Attach(Parse pParse, Expr p, Expr pDbname, Expr pKey)
     {
       codeAttach( pParse, SQLITE_ATTACH, attach_func, p, p, pDbname, pKey );
     }
@@ -472,8 +470,7 @@ attach_end:
     {
       sqlite3 db;
 
-      if ( NEVER( iDb < 0 ) || iDb == 1 )
-        return 0;
+      if ( NEVER( iDb < 0 ) || iDb == 1 ) return 0;
       db = pParse.db;
       Debug.Assert( db.nDb > iDb );
       pFix.pParse = pParse;
@@ -506,8 +503,7 @@ attach_end:
       string zDb;
       SrcList_item pItem;
 
-      if ( NEVER( pList == null ) )
-        return 0;
+      if ( NEVER( pList == null ) ) return 0;
       zDb = pFix.zDb;
       for ( i = 0; i < pList.nSrc; i++ )
       {//, pItem++){
@@ -515,7 +511,8 @@ attach_end:
         if ( pItem.zDatabase == null )
         {
           pItem.zDatabase = zDb;// sqlite3DbStrDup( pFix.pParse.db, zDb );
-        } else if ( sqlite3StrICmp( pItem.zDatabase, zDb ) != 0 )
+        }
+        else if ( sqlite3StrICmp( pItem.zDatabase, zDb ) != 0 )
         {
           sqlite3ErrorMsg( pFix.pParse,
           "%s %T cannot reference objects in database %s",
@@ -523,10 +520,8 @@ attach_end:
           return 1;
         }
 #if !SQLITE_OMIT_VIEW || !SQLITE_OMIT_TRIGGER
-        if ( sqlite3FixSelect( pFix, pItem.pSelect ) != 0 )
-          return 1;
-        if ( sqlite3FixExpr( pFix, pItem.pOn ) != 0 )
-          return 1;
+        if ( sqlite3FixSelect( pFix, pItem.pSelect ) != 0 ) return 1;
+        if ( sqlite3FixExpr( pFix, pItem.pOn ) != 0 ) return 1;
 #endif
       }
       return 0;
@@ -566,16 +561,14 @@ attach_end:
     {
       while ( pExpr != null )
       {
-        if ( ExprHasAnyProperty( pExpr, EP_TokenOnly ) )
-          break;
+        if ( ExprHasAnyProperty( pExpr, EP_TokenOnly ) ) break;
         if ( ExprHasProperty( pExpr, EP_xIsSelect ) )
         {
-          if ( sqlite3FixSelect( pFix, pExpr.x.pSelect ) != 0 )
-            return 1;
-        } else
+          if ( sqlite3FixSelect( pFix, pExpr.x.pSelect ) != 0 ) return 1;
+        }
+        else
         {
-          if ( sqlite3FixExprList( pFix, pExpr.x.pList ) != 0 )
-            return 1;
+          if ( sqlite3FixExprList( pFix, pExpr.x.pList ) != 0 ) return 1;
         }
         if ( sqlite3FixExpr( pFix, pExpr.pRight ) != 0 )
         {
@@ -592,8 +585,7 @@ attach_end:
     {
       int i;
       ExprList_item pItem;
-      if ( pList == null )
-        return 0;
+      if ( pList == null ) return 0;
       for ( i = 0; i < pList.nExpr; i++ )//, pItem++ )
       {
         pItem = pList.a[i];

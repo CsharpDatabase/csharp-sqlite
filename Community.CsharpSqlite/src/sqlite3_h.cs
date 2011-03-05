@@ -41,7 +41,6 @@ namespace Community.CsharpSqlite
     **
     **  SQLITE_SOURCE_ID: 2011-01-28 17:03:50 ed759d5a9edb3bba5f48f243df47be29e3fe8cd7
     **
-    **  $Header$
     *************************************************************************
     */
     //#ifndef _SQLITE3_H_
@@ -1142,9 +1141,7 @@ namespace Community.CsharpSqlite
       /* New fields may be appended in figure versions.  The iVersion
       ** value will increment whenever this happens. */
 
-      public sqlite3_vfs()
-      {
-      }
+      public sqlite3_vfs() { }
 
       public sqlite3_vfs( int iVersion,
       int szOsFile,
@@ -6378,8 +6375,7 @@ namespace Community.CsharpSqlite
       public dxPC_Destroy xDestroy;//public void (*xDestroy)(sqlite3_pcache*);
 
       public sqlite3_pcache_methods()
-      {
-      }
+      { }
 
       public sqlite3_pcache_methods( object pArg, dxPC_Init xInit, dxPC_Shutdown xShutdown, dxPC_Create xCreate, dxPC_Cachesize xCachesize, dxPC_Pagecount xPagecount, dxPC_Fetch xFetch, dxPC_Unpin xUnpin, dxPC_Rekey xRekey, dxPC_Truncate xTruncate, dxPC_Destroy xDestroy )
       {

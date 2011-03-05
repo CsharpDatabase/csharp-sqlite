@@ -238,7 +238,8 @@ namespace Community.CsharpSqlite
           p.isSorted = false;
         }
         pLast.pRight = pEntry;
-      } else
+      }
+      else
       {
         Debug.Assert( p.pEntry == null );/* Fires if INSERT after SMALLEST */
         p.pEntry = pEntry;
@@ -270,12 +271,14 @@ namespace Community.CsharpSqlite
           pTail.pRight = pA;
           pA = pA.pRight;
           pTail = pTail.pRight;
-        } else if ( pB.v < pA.v )
+        }
+        else if ( pB.v < pA.v )
         {
           pTail.pRight = pB;
           pB = pB.pRight;
           pTail = pTail.pRight;
-        } else
+        }
+        else
         {
           pA = pA.pRight;
         }
@@ -284,7 +287,8 @@ namespace Community.CsharpSqlite
       {
         Debug.Assert( pA.pRight == null || pA.v <= pA.pRight.v );
         pTail.pRight = pA;
-      } else
+      }
+      else
       {
         Debug.Assert( pB == null || pB.pRight == null || pB.v <= pB.pRight.v );
         pTail.pRight = pB;
@@ -342,14 +346,16 @@ namespace Community.CsharpSqlite
         var p = new RowSetEntry();
         rowSetTreeToList( pIn.pLeft, ref  ppFirst, ref  p );
         p.pRight = pIn;
-      } else
+      }
+      else
       {
         ppFirst = pIn;
       }
       if ( pIn.pRight != null )
       {
         rowSetTreeToList( pIn.pRight, ref  pIn.pRight, ref   ppLast );
-      } else
+      }
+      else
       {
         ppLast = pIn;
       }
@@ -466,7 +472,8 @@ namespace Community.CsharpSqlite
           sqlite3RowSetClear( p );
         }
         return 1;
-      } else
+      }
+      else
       {
         return 0;
       }
@@ -496,10 +503,12 @@ namespace Community.CsharpSqlite
         if ( p.v < iRowid )
         {
           p = p.pRight;
-        } else if ( p.v > iRowid )
+        }
+        else if ( p.v > iRowid )
         {
           p = p.pLeft;
-        } else
+        }
+        else
         {
           return 1;
         }

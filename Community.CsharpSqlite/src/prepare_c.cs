@@ -102,7 +102,8 @@ namespace Community.CsharpSqlite
       if ( argv[1] == null )
       {
         corruptSchema( pData, argv[0], "" );
-      } else if ( !String.IsNullOrEmpty( argv[2] ) )
+      }
+      else if ( !String.IsNullOrEmpty( argv[2] ) )
       {
         /* Call the parser to process a CREATE TABLE, INDEX or VIEW.
         ** But because db.init.busy is set to 1, no VDBE code is generated
@@ -136,23 +137,27 @@ sqlite3_prepare(db, argv[2], -1, ref pStmt, ref sDummy);
           if ( db.init.orphanTrigger != 0 )
           {
             Debug.Assert( iDb == 1 );
-          } else
+          }
+          else
           {
             pData.rc = rc;
             if ( rc == SQLITE_NOMEM )
             {
               //        db.mallocFailed = 1;
-            } else if ( rc != SQLITE_INTERRUPT && ( rc & 0xFF ) != SQLITE_LOCKED )
+            }
+            else if ( rc != SQLITE_INTERRUPT && ( rc & 0xFF ) != SQLITE_LOCKED )
             {
               corruptSchema( pData, argv[0], sqlite3_errmsg( db ) );
             }
           }
         }
         sqlite3_finalize( pStmt );
-      } else if ( argv[0] == null || argv[0] == "" )
+      }
+      else if ( argv[0] == null || argv[0] == "" )
       {
         corruptSchema( pData, null, null );
-      } else
+      }
+      else
       {
         /* If the SQL column is blank it means this is an index that
         ** was created to be the PRIMARY KEY or to fulfill a UNIQUE
@@ -171,7 +176,8 @@ sqlite3_prepare(db, argv[2], -1, ref pStmt, ref sDummy);
           */
           /* Do Nothing */
           ;
-        } else if ( sqlite3GetInt32( argv[1], ref pIndex.tnum ) == false )
+        }
+        else if ( sqlite3GetInt32( argv[1], ref pIndex.tnum ) == false )
         {
           corruptSchema( pData, argv[0], "invalid rootpage" );
         }
@@ -239,7 +245,8 @@ sqlite3_prepare(db, argv[2], -1, ref pStmt, ref sDummy);
       if ( OMIT_TEMPDB == 0 && iDb == 1 )
       {
         zMasterSchema = temp_master_schema;
-      } else
+      }
+      else
       {
         zMasterSchema = master_schema;
       }
@@ -332,7 +339,8 @@ sqlite3_prepare(db, argv[2], -1, ref pStmt, ref sDummy);
             encoding = SQLITE_UTF8;
           db.aDb[0].pSchema.enc = encoding; //ENC( db ) = encoding;
           db.pDfltColl = sqlite3FindCollSeq( db, SQLITE_UTF8, "BINARY", 0 );
-        } else
+        }
+        else
         {
           /* If opening an attached database, the encoding much match ENC(db) */
           if ( meta[BTREE_TEXT_ENCODING - 1] != ENC( db ) )
@@ -343,7 +351,8 @@ sqlite3_prepare(db, argv[2], -1, ref pStmt, ref sDummy);
             goto initone_error_out;
           }
         }
-      } else
+      }
+      else
       {
         DbSetProperty( db, iDb, DB_Empty );
       }
@@ -352,10 +361,7 @@ sqlite3_prepare(db, argv[2], -1, ref pStmt, ref sDummy);
       if ( pDb.pSchema.cache_size == 0 )
       {
         size = (int)meta[BTREE_DEFAULT_CACHE_SIZE - 1];
-        if ( size == 0 )
-        {
-          size = SQLITE_DEFAULT_CACHE_SIZE;
-        }
+        if ( size == 0 ) { size = SQLITE_DEFAULT_CACHE_SIZE; }
         if ( size < 0 )
           size = -size;
         pDb.pSchema.cache_size = size;
@@ -716,11 +722,13 @@ error_out:
           sqlite3RunParser( pParse, zSqlCopy, ref zErrMsg );
           sqlite3DbFree( db, ref zSqlCopy );
           //pParse->zTail = &zSql[pParse->zTail-zSqlCopy];
-        } else
+        }
+        else
         {
           //pParse->zTail = &zSql[nBytes];
         }
-      } else
+      }
+      else
       {
         sqlite3RunParser( pParse, zSql, ref zErrMsg );
       }
@@ -762,7 +770,8 @@ error_out:
           sqlite3VdbeSetNumCols( pParse.pVdbe, 4 );
           iFirst = 8;
           mx = 12;
-        } else
+        }
+        else
         {
           sqlite3VdbeSetNumCols( pParse.pVdbe, 8 );
           iFirst = 0;
@@ -786,7 +795,8 @@ error_out:
       {
         sqlite3VdbeFinalize( pParse.pVdbe );
         Debug.Assert( ppStmt == null );
-      } else
+      }
+      else
       {
         ppStmt = pParse.pVdbe;
       }
@@ -795,7 +805,8 @@ error_out:
       {
         sqlite3Error( db, rc, "%s", zErrMsg );
         sqlite3DbFree( db, ref zErrMsg );
-      } else
+      }
+      else
       {
         sqlite3Error( db, rc, 0 );
       }
@@ -876,7 +887,8 @@ end_prepare:
         }
         Debug.Assert( pNew == null );
         return rc;
-      } else
+      }
+      else
       {
         Debug.Assert( pNew != null );
       }

@@ -40,7 +40,6 @@ namespace Community.CsharpSqlite
     **
     **  SQLITE_SOURCE_ID: 2010-12-07 20:14:09 a586a4deeb25330037a49df295b36aaf624d0f45
     **
-    **  $Header$
     *************************************************************************
     */
     //#include "sqliteInt.h"
@@ -179,7 +178,8 @@ rc = isnan(x);
           z = sqlite3VMPrintf( db, zFormat, ap );
           va_end( ap );
           sqlite3ValueSetStr( db.pErr, -1, z, SQLITE_UTF8, (dxDel)SQLITE_DYNAMIC );
-        } else
+        }
+        else
         {
           sqlite3ValueSetStr( db.pErr, 0, null, SQLITE_UTF8, SQLITE_STATIC );
         }
@@ -214,7 +214,8 @@ rc = isnan(x);
       if ( db.suppressErr != 0 )
       {
         sqlite3DbFree( db, ref zMsg );
-      } else
+      }
+      else
       {
         pParse.nErr++;
         sqlite3DbFree( db, ref pParse.zErrMsg );
@@ -270,11 +271,13 @@ rc = isnan(x);
           {
             sbZ.Append( quote );
             i++;
-          } else
+          }
+          else
           {
             break;
           }
-        } else
+        }
+        else
         {
           sbZ.Append( z[i] );
         }
@@ -426,7 +429,8 @@ rc = isnan(x);
       {
         sign = -1;
         zDx += incr;
-      } else if ( z[zDx] == '+' )
+      }
+      else if ( z[zDx] == '+' )
       {
         zDx += incr;
       }
@@ -491,7 +495,8 @@ rc = isnan(x);
         {
           esign = -1;
           zDx += incr;
-        } else if ( z[zDx] == '+' )
+        }
+        else if ( z[zDx] == '+' )
         {
           zDx += incr;
         }
@@ -520,7 +525,8 @@ do_atof_calc:
       {
         esign = -1;
         e *= -1;
-      } else
+      }
+      else
       {
         esign = 1;
       }
@@ -531,7 +537,8 @@ do_atof_calc:
         /* In the IEEE 754 standard, zero is signed.
         ** Add the sign if we've seen at least one digit */
         result = ( sign < 0 && nDigits != 0 ) ? -(double)0 : (double)0;
-      } else
+      }
+      else
       {
         /* attempt to reduce exponent */
         if ( esign > 0 )
@@ -541,7 +548,8 @@ do_atof_calc:
             e--;
             s *= 10;
           }
-        } else
+        }
+        else
         {
           while ( 0 == ( s % 10 ) && e > 0 )
           {
@@ -570,12 +578,14 @@ do_atof_calc:
             {
               result = s / scale;
               result /= 1.0e+308;
-            } else
+            }
+            else
             {
               result = s * scale;
               result *= 1.0e+308;
             }
-          } else
+          }
+          else
           {
             /* 1.0e+22 is the largest power of 10 than can be 
             ** represented exactly. */
@@ -592,12 +602,14 @@ do_atof_calc:
             if ( esign < 0 )
             {
               result = s / scale;
-            } else
+            }
+            else
             {
               result = s * scale;
             }
           }
-        } else
+        }
+        else
         {
           result = (double)s;
         }
@@ -687,7 +699,8 @@ return !sqlite3Atoi64(z, pResult, length, enc);
       {
         neg = 1;
         zDx += incr;
-      } else if ( zNum[zDx] == '+' )
+      }
+      else if ( zNum[zDx] == '+' )
       {
         zDx += incr;
       }
@@ -712,11 +725,13 @@ do_atoi_calc:
         /* zNum is empty or contains non-numeric text or is longer
         ** than 19 digits (thus guaranteeing that it is too large) */
         return 1;
-      } else if ( i - zDx < 19 * incr )
+      }
+      else if ( i - zDx < 19 * incr )
       {
         /* Less than 19 digits, so we know that it fits in 64 bits */
         return 0;
-      } else
+      }
+      else
       {
         /* 19-digit numbers must be no larger than 9223372036854775807 if positive
         ** or 9223372036854775808 if negative.  Note that 9223372036854665808
@@ -751,7 +766,8 @@ do_atoi_calc:
       {
         neg = 1;
         iZnum++;
-      } else if ( zNum[iZnum] == '+' )
+      }
+      else if ( zNum[iZnum] == '+' )
       {
         iZnum++;
       }
@@ -865,7 +881,8 @@ do_atoi_calc:
       {
         v = 65535;
         return 2;
-      } else
+      }
+      else
       {
         u64 u64_v = 0;
         int result = sqlite3GetVarint( p, offset, ref u64_v );
@@ -1009,12 +1026,14 @@ do_atoi_calc:
       {
         p[0] = (byte)v;
         return 1;
-      } else if ( ( v & ~0x3fff ) == 0 )
+      }
+      else if ( ( v & ~0x3fff ) == 0 )
       {
         p[0] = (byte)( ( v >> 7 ) | 0x80 );
         p[1] = (byte)( v & 0x7f );
         return 2;
-      } else
+      }
+      else
       {
         return sqlite3PutVarint( p, 0, v );
       }
@@ -1290,7 +1309,8 @@ do_atoi_calc:
         if ( ( v64 & SQLITE_MAX_U32 ) != v64 )
         {
           v = 0xffffffff;
-        } else
+        }
+        else
         {
           v = (u32)v64;
         }
@@ -1511,7 +1531,8 @@ h += 9*(1&~(h>>4));
           logBadConnection( "unopened" );
         }
         return false;
-      } else
+      }
+      else
       {
         return true;
       }
@@ -1527,7 +1548,8 @@ h += 9*(1&~(h>>4));
         testcase( sqlite3GlobalConfig.xLog != null );
         logBadConnection( "invalid" );
         return false;
-      } else
+      }
+      else
       {
         return true;
       }

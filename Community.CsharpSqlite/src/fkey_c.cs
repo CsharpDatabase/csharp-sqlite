@@ -198,11 +198,11 @@ namespace Community.CsharpSqlite
     ** pParse.db.mallocFailed flag is set.
     */
     static int locateFkeyIndex(
-    Parse pParse,                  /* Parse context to store any error in */
-    Table pParent,                 /* Parent table of FK constraint pFKey */
-    FKey pFKey,                    /* Foreign key to find index for */
-    ref Index ppIdx,               /* OUT: Unique index on parent table */
-    ref int[] paiCol               /* OUT: Map of index columns in pFKey */
+      Parse pParse,                  /* Parse context to store any error in */
+      Table pParent,                 /* Parent table of FK constraint pFKey */
+      FKey pFKey,                    /* Foreign key to find index for */
+      ref Index ppIdx,               /* OUT: Unique index on parent table */
+      ref int[] paiCol               /* OUT: Map of index columns in pFKey */
     )
     {
       Index pIdx = null;                 /* Value to return via *ppIdx */
@@ -234,12 +234,11 @@ namespace Community.CsharpSqlite
         */
         if ( pParent.iPKey >= 0 )
         {
-          if ( null == zKey )
-            return 0;
-          if ( 0 == sqlite3StrICmp( pParent.aCol[pParent.iPKey].zName, zKey ) )
-            return 0;
+          if ( null == zKey ) return 0;
+          if ( 0 == sqlite3StrICmp( pParent.aCol[pParent.iPKey].zName, zKey ) ) return 0;
         }
-      } else //if( paiCol ){
+      }
+      else //if( paiCol ){
       {
         Debug.Assert( nCol > 1 );
         aiCol = new int[nCol];// (int*)sqlite3DbMallocRaw( pParse.db, nCol * sizeof( int ) );
@@ -265,12 +264,12 @@ namespace Community.CsharpSqlite
               if ( aiCol != null )
               {
                 int i;
-                for ( i = 0; i < nCol; i++ )
-                  aiCol[i] = pFKey.aCol[i].iFrom;
+                for ( i = 0; i < nCol; i++ ) aiCol[i] = pFKey.aCol[i].iFrom;
               }
               break;
             }
-          } else
+          }
+          else
           {
             /* If zKey is non-NULL, then this foreign key was declared to
             ** map to an explicit list of columns in table pParent. Check if this
@@ -291,24 +290,20 @@ namespace Community.CsharpSqlite
               {
                 zDfltColl = "BINARY";
               }
-              if ( sqlite3StrICmp( pIdx.azColl[i], zDfltColl ) != 0 )
-                break;
+              if ( sqlite3StrICmp( pIdx.azColl[i], zDfltColl ) != 0 ) break;
 
               zIdxCol = pParent.aCol[iCol].zName;
               for ( j = 0; j < nCol; j++ )
               {
                 if ( sqlite3StrICmp( pFKey.aCol[j].zCol, zIdxCol ) == 0 )
                 {
-                  if ( aiCol != null )
-                    aiCol[i] = pFKey.aCol[j].iFrom;
+                  if ( aiCol != null ) aiCol[i] = pFKey.aCol[j].iFrom;
                   break;
                 }
               }
-              if ( j == nCol )
-                break;
+              if ( j == nCol ) break;
             }
-            if ( i == nCol )
-              break;      /* pIdx is usable */
+            if ( i == nCol ) break;      /* pIdx is usable */
           }
         }
       }
@@ -354,15 +349,15 @@ namespace Community.CsharpSqlite
     ** (fkey.c) as "I.1" and "D.1".
     */
     static void fkLookupParent(
-    Parse pParse,         /* Parse context */
-    int iDb,              /* Index of database housing pTab */
-    Table pTab,           /* Parent table of FK pFKey */
-    Index pIdx,           /* Unique index on parent key columns in pTab */
-    FKey pFKey,           /* Foreign key constraint */
-    int[] aiCol,          /* Map from parent key columns to child table columns */
-    int regData,          /* Address of array containing child table row */
-    int nIncr,            /* Increment constraint counter by this */
-    int isIgnore          /* If true, pretend pTab contains all NULL values */
+      Parse pParse,         /* Parse context */
+      int iDb,              /* Index of database housing pTab */
+      Table pTab,           /* Parent table of FK pFKey */
+      Index pIdx,           /* Unique index on parent key columns in pTab */
+      FKey pFKey,           /* Foreign key constraint */
+      int[] aiCol,          /* Map from parent key columns to child table columns */
+      int regData,          /* Address of array containing child table row */
+      int nIncr,            /* Increment constraint counter by this */
+      int isIgnore          /* If true, pretend pTab contains all NULL values */
     )
     {
       int i;                                    /* Iterator variable */
@@ -419,7 +414,8 @@ namespace Community.CsharpSqlite
           sqlite3VdbeJumpHere( v, sqlite3VdbeCurrentAddr( v ) - 2 );
           sqlite3VdbeJumpHere( v, iMustBeInt );
           sqlite3ReleaseTempReg( pParse, regTemp );
-        } else
+        }
+        else
         {
           int nCol = pFKey.nCol;
           int regTemp = sqlite3GetTempRange( pParse, nCol );
@@ -458,7 +454,7 @@ namespace Community.CsharpSqlite
         }
       }
 
-      if ( 0 == pFKey.isDeferred && null == pParse.pToplevel && 0 == pParse.isMultiWrite )
+      if ( 0==pFKey.isDeferred && null==pParse.pToplevel && 0==pParse.isMultiWrite )
       {
         /* Special case: If this is an INSERT statement that will insert exactly
         ** one row into the table, raise a constraint immediately instead of
@@ -466,9 +462,10 @@ namespace Community.CsharpSqlite
         ** generated for will not open a statement transaction.  */
         Debug.Assert( nIncr == 1 );
         sqlite3HaltConstraint(
-        pParse, OE_Abort, "foreign key constraint failed", P4_STATIC
+            pParse, OE_Abort, "foreign key constraint failed", P4_STATIC
         );
-      } else
+      }
+      else
       {
         if ( nIncr > 0 && pFKey.isDeferred == 0 )
         {
@@ -510,14 +507,14 @@ namespace Community.CsharpSqlite
     ** (fkey.c) as "I.2" and "D.2".
     */
     static void fkScanChildren(
-    Parse pParse,                   /* Parse context */
-    SrcList pSrc,                   /* SrcList containing the table to scan */
-    Table pTab,
-    Index pIdx,                     /* Foreign key index */
-    FKey pFKey,                     /* Foreign key relationship */
-    int[] aiCol,                    /* Map from pIdx cols to child table cols */
-    int regData,                    /* Referenced table data starts here */
-    int nIncr                       /* Amount to increment deferred counter by */
+      Parse pParse,                   /* Parse context */
+      SrcList pSrc,                   /* SrcList containing the table to scan */
+      Table pTab,
+      Index pIdx,                     /* Foreign key index */
+      FKey pFKey,                     /* Foreign key relationship */
+      int[] aiCol,                    /* Map from pIdx cols to child table cols */
+      int regData,                    /* Referenced table data starts here */
+      int nIncr                       /* Amount to increment deferred counter by */
     )
     {
       sqlite3 db = pParse.db;        /* Database handle */
@@ -528,7 +525,7 @@ namespace Community.CsharpSqlite
       int iFkIfZero = 0;              /* Address of OP_FkIfZero */
       Vdbe v = sqlite3GetVdbe( pParse );
 
-      Debug.Assert( null == pIdx || pIdx.pTable == pTab );
+      Debug.Assert( null==pIdx || pIdx.pTable == pTab );
 
       if ( nIncr < 0 )
       {
@@ -561,18 +558,18 @@ namespace Community.CsharpSqlite
             Column pCol;
             iCol = pIdx.aiColumn[i];
             pCol = pTab.aCol[iCol];
-            if ( pTab.iPKey == iCol )
-              iCol = -1;
+            if ( pTab.iPKey == iCol ) iCol = -1;
             pLeft.iTable = regData + iCol + 1;
             pLeft.affinity = pCol.affinity;
             pLeft.pColl = sqlite3LocateCollSeq( pParse, pCol.zColl );
-          } else
+          }
+          else
           {
             pLeft.iTable = regData;
             pLeft.affinity = SQLITE_AFF_INTEGER;
           }
         }
-        iCol = aiCol != null ? aiCol[i] : pFKey.aCol[0].iFrom;
+        iCol = aiCol !=null? aiCol[i] : pFKey.aCol[0].iFrom;
         Debug.Assert( iCol >= 0 );
         zCol = pFKey.pFrom.aCol[iCol].zName;
         pRight = sqlite3Expr( db, TK_ID, zCol );
@@ -662,7 +659,7 @@ namespace Community.CsharpSqlite
     */
     static void fkTriggerDelete( sqlite3 dbMem, Trigger p )
     {
-      if ( p != null )
+      if ( p !=null)
       {
         TriggerStep pStep = p.step_list;
         sqlite3ExprDelete( dbMem, ref pStep.pWhere );
@@ -693,13 +690,13 @@ namespace Community.CsharpSqlite
     static void sqlite3FkDropTable( Parse pParse, SrcList pName, Table pTab )
     {
       sqlite3 db = pParse.db;
-      if ( ( db.flags & SQLITE_ForeignKeys ) != 0 && !IsVirtual( pTab ) && null == pTab.pSelect )
+      if ( ( db.flags & SQLITE_ForeignKeys )!=0 && !IsVirtual( pTab ) && null==pTab.pSelect )
       {
         int iSkip = 0;
         Vdbe v = sqlite3GetVdbe( pParse );
 
-        Debug.Assert( v != null );                  /* VDBE has already been allocated */
-        if ( sqlite3FkReferences( pTab ) == null )
+        Debug.Assert( v!=null );                  /* VDBE has already been allocated */
+        if ( sqlite3FkReferences( pTab ) ==null )
         {
           /* Search for a deferred foreign key constraint for which this table
           ** is the child table. If one cannot be found, return without 
@@ -707,13 +704,11 @@ namespace Community.CsharpSqlite
           ** the entire DELETE if there are no outstanding deferred constraints
           ** when this statement is run.  */
           FKey p;
-          for ( p = pTab.pFKey; p != null; p = p.pNextFrom )
+          for ( p = pTab.pFKey; p!=null; p = p.pNextFrom )
           {
-            if ( p.isDeferred != 0 )
-              break;
+            if ( p.isDeferred !=0) break;
           }
-          if ( null == p )
-            return;
+          if ( null==p ) return;
           iSkip = sqlite3VdbeMakeLabel( v );
           sqlite3VdbeAddOp2( v, OP_FkIfZero, 1, iSkip );
         }
@@ -728,10 +723,10 @@ namespace Community.CsharpSqlite
         ** transactions are not able to rollback schema changes.  */
         sqlite3VdbeAddOp2( v, OP_FkIfZero, 0, sqlite3VdbeCurrentAddr( v ) + 2 );
         sqlite3HaltConstraint(
-        pParse, OE_Abort, "foreign key constraint failed", P4_STATIC
+            pParse, OE_Abort, "foreign key constraint failed", P4_STATIC
         );
 
-        if ( iSkip != 0 )
+        if ( iSkip!=0 )
         {
           sqlite3VdbeResolveLabel( v, iSkip );
         }
@@ -759,10 +754,10 @@ namespace Community.CsharpSqlite
     ** but before the new record is inserted using the INSERT convention. 
     */
     static void sqlite3FkCheck(
-    Parse pParse,                   /* Parse context */
-    Table pTab,                     /* Row is being deleted from this table */
-    int regOld,                     /* Previous row data is stored here */
-    int regNew                      /* New row data is stored here */
+      Parse pParse,                   /* Parse context */
+      Table pTab,                     /* Row is being deleted from this table */
+      int regOld,                     /* Previous row data is stored here */
+      int regNew                      /* New row data is stored here */
     )
     {
       sqlite3 db = pParse.db;        /* Database handle */
@@ -776,8 +771,7 @@ namespace Community.CsharpSqlite
       Debug.Assert( ( regOld == 0 ) != ( regNew == 0 ) );
 
       /* If foreign-keys are disabled, this function is a no-op. */
-      if ( ( db.flags & SQLITE_ForeignKeys ) == 0 )
-        return;
+      if ( ( db.flags & SQLITE_ForeignKeys ) == 0 ) return;
 
       v = sqlite3GetVdbe( pParse );
       iDb = sqlite3SchemaToIndex( db, pTab.pSchema );
@@ -799,29 +793,29 @@ namespace Community.CsharpSqlite
         ** on the parent key columns in the parent table. If either of these 
         ** schema items cannot be located, set an error in pParse and return 
         ** early.  */
-        if ( pParse.disableTriggers != 0 )
+        if ( pParse.disableTriggers!=0 )
         {
           pTo = sqlite3FindTable( db, pFKey.zTo, zDb );
-        } else
+        }
+        else
         {
           pTo = sqlite3LocateTable( pParse, 0, pFKey.zTo, zDb );
         }
-        if ( null == pTo || locateFkeyIndex( pParse, pTo, pFKey, ref pIdx, ref aiFree ) != 0 )
+        if ( null==pTo || locateFkeyIndex( pParse, pTo, pFKey, ref pIdx, ref aiFree ) !=0)
         {
-          if ( 0 == isIgnoreErrors /* || db.mallocFailed */)
-            return;
+          if ( 0==isIgnoreErrors /* || db.mallocFailed */) return;
           continue;
         }
         Debug.Assert( pFKey.nCol == 1 || ( aiFree != null && pIdx != null ) );
 
-        if ( aiFree != null )
+        if ( aiFree !=null)
         {
           aiCol = aiFree;
-        } else
+        }
+        else
         {
           iCol = pFKey.aCol[0].iFrom;
-          aiCol = new int[1];
-          aiCol[0] = iCol;
+          aiCol = new int[1]; aiCol[0] = iCol;
         }
         for ( i = 0; i < pFKey.nCol; i++ )
         {
@@ -830,15 +824,15 @@ namespace Community.CsharpSqlite
             aiCol[i] = -1;
           }
 #if !SQLITE_OMIT_AUTHORIZATION
-/* Request permission to read the parent key columns. If the 
-** authorization callback returns SQLITE_IGNORE, behave as if any
-** values read from the parent table are NULL. */
-if( db.xAuth ){
-int rcauth;
-char *zCol = pTo.aCol[pIdx ? pIdx.aiColumn[i] : pTo.iPKey].zName;
-rcauth = sqlite3AuthReadCol(pParse, pTo.zName, zCol, iDb);
-isIgnore = (rcauth==SQLITE_IGNORE);
-}
+      /* Request permission to read the parent key columns. If the 
+      ** authorization callback returns SQLITE_IGNORE, behave as if any
+      ** values read from the parent table are NULL. */
+      if( db.xAuth ){
+        int rcauth;
+        char *zCol = pTo.aCol[pIdx ? pIdx.aiColumn[i] : pTo.iPKey].zName;
+        rcauth = sqlite3AuthReadCol(pParse, pTo.zName, zCol, iDb);
+        isIgnore = (rcauth==SQLITE_IGNORE);
+      }
 #endif
         }
 
@@ -866,13 +860,13 @@ isIgnore = (rcauth==SQLITE_IGNORE);
       }
 
       /* Loop through all the foreign key constraints that refer to this table */
-      for ( pFKey = sqlite3FkReferences( pTab ); pFKey != null; pFKey = pFKey.pNextTo )
+      for ( pFKey = sqlite3FkReferences( pTab ); pFKey!=null; pFKey = pFKey.pNextTo )
       {
         Index pIdx = null;              /* Foreign key index for pFKey */
         SrcList pSrc;
         int[] aiCol = null;
 
-        if ( 0 == pFKey.isDeferred && null == pParse.pToplevel && 0 == pParse.isMultiWrite )
+        if ( 0==pFKey.isDeferred && null==pParse.pToplevel && 0==pParse.isMultiWrite )
         {
           Debug.Assert( regOld == 0 && regNew != 0 );
           /* Inserting a single row into a parent table cannot cause an immediate
@@ -880,13 +874,12 @@ isIgnore = (rcauth==SQLITE_IGNORE);
           continue;
         }
 
-        if ( locateFkeyIndex( pParse, pTab, pFKey, ref pIdx, ref aiCol ) != 0 )
+        if ( locateFkeyIndex( pParse, pTab, pFKey, ref pIdx, ref aiCol )!=0 )
         {
-          if ( 0 == isIgnoreErrors /*|| db.mallocFailed */)
-            return;
+          if ( 0==isIgnoreErrors /*|| db.mallocFailed */) return;
           continue;
         }
-        Debug.Assert( aiCol != null || pFKey.nCol == 1 );
+        Debug.Assert( aiCol!=null || pFKey.nCol == 1 );
 
         /* Create a SrcList structure containing a single table (the table 
         ** the foreign key that refers to this table is attached to). This
@@ -922,29 +915,25 @@ isIgnore = (rcauth==SQLITE_IGNORE);
     }
 
     //#define COLUMN_MASK(x) (((x)>31) ? 0xffffffff : ((u32)1<<(x)))
-    static uint COLUMN_MASK( int x )
-    {
-      return ( ( x ) > 31 ) ? 0xffffffff : ( (u32)1 << ( x ) );
-    }
+    static uint COLUMN_MASK( int x ) { return ( ( x ) > 31 ) ? 0xffffffff : ( (u32)1 << ( x ) ); }
 
     /*
     ** This function is called before generating code to update or delete a 
     ** row contained in table pTab.
     */
     static u32 sqlite3FkOldmask(
-    Parse pParse,                  /* Parse context */
-    Table pTab                     /* Table being modified */
+      Parse pParse,                  /* Parse context */
+      Table pTab                     /* Table being modified */
     )
     {
       u32 mask = 0;
-      if ( ( pParse.db.flags & SQLITE_ForeignKeys ) != 0 )
+      if (( pParse.db.flags & SQLITE_ForeignKeys )!=0)
       {
         FKey p;
         int i;
-        for ( p = pTab.pFKey; p != null; p = p.pNextFrom )
+        for ( p = pTab.pFKey; p!=null; p = p.pNextFrom )
         {
-          for ( i = 0; i < p.nCol; i++ )
-            mask |= COLUMN_MASK( p.aCol[i].iFrom );
+          for ( i = 0; i < p.nCol; i++ ) mask |= COLUMN_MASK( p.aCol[i].iFrom );
         }
         for ( p = sqlite3FkReferences( pTab ); p != null; p = p.pNextTo )
         {
@@ -953,8 +942,7 @@ isIgnore = (rcauth==SQLITE_IGNORE);
           locateFkeyIndex( pParse, pTab, p, ref pIdx, ref iDummy );
           if ( pIdx != null )
           {
-            for ( i = 0; i < pIdx.nColumn; i++ )
-              mask |= COLUMN_MASK( pIdx.aiColumn[i] );
+            for ( i = 0; i < pIdx.nColumn; i++ ) mask |= COLUMN_MASK( pIdx.aiColumn[i] );
           }
         }
       }
@@ -976,21 +964,22 @@ isIgnore = (rcauth==SQLITE_IGNORE);
     ** returns false.
     */
     static int sqlite3FkRequired(
-    Parse pParse,                  /* Parse context */
-    Table pTab,                    /* Table being modified */
-    int[] aChange,                 /* Non-NULL for UPDATE operations */
-    int chngRowid                  /* True for UPDATE that affects rowid */
+      Parse pParse,                  /* Parse context */
+      Table pTab,                    /* Table being modified */
+      int[] aChange,                 /* Non-NULL for UPDATE operations */
+      int chngRowid                  /* True for UPDATE that affects rowid */
     )
     {
-      if ( ( pParse.db.flags & SQLITE_ForeignKeys ) != 0 )
+      if (( pParse.db.flags & SQLITE_ForeignKeys )!=0)
       {
-        if ( null == aChange )
+        if ( null==aChange )
         {
           /* A DELETE operation. Foreign key processing is required if the 
           ** table in question is either the child or parent table for any 
           ** foreign key constraint.  */
-          return ( sqlite3FkReferences( pTab ) != null || pTab.pFKey != null ) ? 1 : 0;
-        } else
+          return ( sqlite3FkReferences( pTab )!=null || pTab.pFKey !=null)?1:0;
+        }
+        else
         {
           /* This is an UPDATE. Foreign key processing is only required if the
           ** operation modifies one or more child or parent key columns. */
@@ -998,15 +987,13 @@ isIgnore = (rcauth==SQLITE_IGNORE);
           FKey p;
 
           /* Check if any child key columns are being modified. */
-          for ( p = pTab.pFKey; p != null; p = p.pNextFrom )
+          for ( p = pTab.pFKey; p!=null; p = p.pNextFrom )
           {
             for ( i = 0; i < p.nCol; i++ )
             {
               int iChildKey = p.aCol[i].iFrom;
-              if ( aChange[iChildKey] >= 0 )
-                return 1;
-              if ( iChildKey == pTab.iPKey && chngRowid != 0 )
-                return 1;
+              if ( aChange[iChildKey] >= 0 ) return 1;
+              if ( iChildKey == pTab.iPKey && chngRowid!=0 ) return 1;
             }
           }
 
@@ -1020,12 +1007,10 @@ isIgnore = (rcauth==SQLITE_IGNORE);
               for ( iKey = 0; iKey < pTab.nCol; iKey++ )
               {
                 Column pCol = pTab.aCol[iKey];
-                if ( ( !String.IsNullOrEmpty( zKey ) ? 0 == sqlite3StrICmp( pCol.zName, zKey ) : pCol.isPrimKey != 0 ) )
+                if ( ( !String.IsNullOrEmpty(zKey )? 0==sqlite3StrICmp( pCol.zName, zKey ): pCol.isPrimKey !=0) )
                 {
-                  if ( aChange[iKey] >= 0 )
-                    return 1;
-                  if ( iKey == pTab.iPKey && chngRowid != 0 )
-                    return 1;
+                  if ( aChange[iKey] >= 0 ) return 1;
+                  if ( iKey == pTab.iPKey && chngRowid!=0 ) return 1;
                 }
               }
             }
@@ -1065,21 +1050,21 @@ isIgnore = (rcauth==SQLITE_IGNORE);
     ** sqlite3FkDelete().
     */
     static Trigger fkActionTrigger(
-    Parse pParse,                  /* Parse context */
-    Table pTab,                    /* Table being updated or deleted from */
-    FKey pFKey,                    /* Foreign key to get action for */
-    ExprList pChanges              /* Change-list for UPDATE, NULL for DELETE */
+      Parse pParse,                  /* Parse context */
+      Table pTab,                    /* Table being updated or deleted from */
+      FKey pFKey,                    /* Foreign key to get action for */
+      ExprList pChanges              /* Change-list for UPDATE, NULL for DELETE */
     )
     {
       sqlite3 db = pParse.db;        /* Database handle */
       int action;                    /* One of OE_None, OE_Cascade etc. */
       Trigger pTrigger;              /* Trigger definition to return */
-      int iAction = ( pChanges != null ) ? 1 : 0;   /* 1 for UPDATE, 0 for DELETE */
+      int iAction = ( pChanges != null )?1:0;   /* 1 for UPDATE, 0 for DELETE */
 
       action = pFKey.aAction[iAction];
       pTrigger = pFKey.apTrigger[iAction];
 
-      if ( action != OE_None && null == pTrigger )
+      if ( action != OE_None && null==pTrigger )
       {
         u8 enableLookaside;           /* Copy of db.lookaside.bEnabled */
         string zFrom;                 /* Name of child table */
@@ -1093,9 +1078,8 @@ isIgnore = (rcauth==SQLITE_IGNORE);
         int i;                        /* Iterator variable */
         Expr pWhen = null;            /* WHEN clause for the trigger */
 
-        if ( locateFkeyIndex( pParse, pTab, pFKey, ref pIdx, ref aiCol ) != 0 )
-          return null;
-        Debug.Assert( aiCol != null || pFKey.nCol == 1 );
+        if ( locateFkeyIndex( pParse, pTab, pFKey, ref pIdx, ref aiCol )!=0 ) return null;
+        Debug.Assert( aiCol!=null || pFKey.nCol == 1 );
 
         for ( i = 0; i < pFKey.nCol; i++ )
         {
@@ -1106,7 +1090,7 @@ isIgnore = (rcauth==SQLITE_IGNORE);
           int iFromCol;               /* Idx of column in child table */
           Expr pEq;                  /* tFromCol = OLD.tToCol */
 
-          iFromCol = aiCol != null ? aiCol[i] : pFKey.aCol[0].iFrom;
+          iFromCol = aiCol!=null ? aiCol[i] : pFKey.aCol[0].iFrom;
           Debug.Assert( iFromCol >= 0 );
           tToCol.z = pIdx != null ? pTab.aCol[pIdx.aiColumn[i]].zName : "oid";
           tFromCol.z = pFKey.pFrom.aCol[iFromCol].zName;
@@ -1119,11 +1103,11 @@ isIgnore = (rcauth==SQLITE_IGNORE);
           ** that the affinity and collation sequence associated with the
           ** parent table are used for the comparison. */
           pEq = sqlite3PExpr( pParse, TK_EQ,
-          sqlite3PExpr( pParse, TK_DOT,
-          sqlite3PExpr( pParse, TK_ID, null, null, tOld ),
-          sqlite3PExpr( pParse, TK_ID, null, null, tToCol )
-          , 0 ),
-          sqlite3PExpr( pParse, TK_ID, null, null, tFromCol )
+              sqlite3PExpr( pParse, TK_DOT,
+                sqlite3PExpr( pParse, TK_ID, null, null, tOld ),
+                sqlite3PExpr( pParse, TK_ID, null, null, tToCol )
+              , 0 ),
+              sqlite3PExpr( pParse, TK_ID, null, null, tFromCol )
           , 0 );
           pWhere = sqlite3ExprAnd( db, pWhere, pEq );
 
@@ -1135,38 +1119,41 @@ isIgnore = (rcauth==SQLITE_IGNORE);
           if ( pChanges != null )
           {
             pEq = sqlite3PExpr( pParse, TK_IS,
-            sqlite3PExpr( pParse, TK_DOT,
-            sqlite3PExpr( pParse, TK_ID, null, null, tOld ),
-            sqlite3PExpr( pParse, TK_ID, null, null, tToCol ),
-            0 ),
-            sqlite3PExpr( pParse, TK_DOT,
-            sqlite3PExpr( pParse, TK_ID, null, null, tNew ),
-            sqlite3PExpr( pParse, TK_ID, null, null, tToCol ),
-            0 ),
-            0 );
+                sqlite3PExpr( pParse, TK_DOT,
+                  sqlite3PExpr( pParse, TK_ID, null, null, tOld ),
+                  sqlite3PExpr( pParse, TK_ID, null, null, tToCol ),
+                  0 ),
+                sqlite3PExpr( pParse, TK_DOT,
+                  sqlite3PExpr( pParse, TK_ID, null, null, tNew ),
+                  sqlite3PExpr( pParse, TK_ID, null, null, tToCol ),
+                  0 ),
+                0 );
             pWhen = sqlite3ExprAnd( db, pWhen, pEq );
           }
 
-          if ( action != OE_Restrict && ( action != OE_Cascade || pChanges != null ) )
+          if ( action != OE_Restrict && ( action != OE_Cascade || pChanges!=null ) )
           {
             Expr pNew;
             if ( action == OE_Cascade )
             {
               pNew = sqlite3PExpr( pParse, TK_DOT,
-              sqlite3PExpr( pParse, TK_ID, null, null, tNew ),
-              sqlite3PExpr( pParse, TK_ID, null, null, tToCol )
+                sqlite3PExpr( pParse, TK_ID, null, null,  tNew ),
+                sqlite3PExpr( pParse, TK_ID, null, null, tToCol )
               , 0 );
-            } else if ( action == OE_SetDflt )
+            }
+            else if ( action == OE_SetDflt )
             {
               Expr pDflt = pFKey.pFrom.aCol[iFromCol].pDflt;
-              if ( pDflt != null )
+              if ( pDflt !=null)
               {
                 pNew = sqlite3ExprDup( db, pDflt, 0 );
-              } else
+              }
+              else
               {
                 pNew = sqlite3PExpr( pParse, TK_NULL, 0, 0, 0 );
               }
-            } else
+            }
+            else
             {
               pNew = sqlite3PExpr( pParse, TK_NULL, 0, 0, 0 );
             }
@@ -1192,10 +1179,10 @@ isIgnore = (rcauth==SQLITE_IGNORE);
             pRaise.affinity = (char)OE_Abort;
           }
           pSelect = sqlite3SelectNew( pParse,
-          sqlite3ExprListAppend( pParse, 0, pRaise ),
-          sqlite3SrcListAppend( db, 0, tFrom, null ),
-          pWhere,
-          null, null, null, 0, null, null
+              sqlite3ExprListAppend( pParse, 0, pRaise ),
+              sqlite3SrcListAppend( db, 0, tFrom, null ),
+              pWhere,
+              null, null, null, 0, null, null
           );
           pWhere = null;
         }
@@ -1213,7 +1200,7 @@ isIgnore = (rcauth==SQLITE_IGNORE);
         //if ( pTrigger )
         {
 
-          pStep = pTrigger.step_list = new TriggerStep();// = (TriggerStep)pTrigger[1];
+          pStep = pTrigger.step_list = new TriggerStep() ;// = (TriggerStep)pTrigger[1];
           //pStep.target.z = pStep[1];
           pStep.target.n = nFrom;
           pStep.target.z = zFrom;// memcpy( (char*)pStep.target.z, zFrom, nFrom );
@@ -1221,7 +1208,7 @@ isIgnore = (rcauth==SQLITE_IGNORE);
           pStep.pWhere = sqlite3ExprDup( db, pWhere, EXPRDUP_REDUCE );
           pStep.pExprList = sqlite3ExprListDup( db, pList, EXPRDUP_REDUCE );
           pStep.pSelect = sqlite3SelectDup( db, pSelect, EXPRDUP_REDUCE );
-          if ( pWhen != null )
+          if ( pWhen!=null )
           {
             pWhen = sqlite3PExpr( pParse, TK_NOT, pWhen, 0, 0 );
             pTrigger.pWhen = sqlite3ExprDup( db, pWhen, EXPRDUP_REDUCE );
@@ -1261,7 +1248,7 @@ isIgnore = (rcauth==SQLITE_IGNORE);
         pTrigger.pSchema = pTab.pSchema;
         pTrigger.pTabSchema = pTab.pSchema;
         pFKey.apTrigger[iAction] = pTrigger;
-        pTrigger.op = (byte)( pChanges != null ? TK_UPDATE : TK_DELETE );
+        pTrigger.op = (byte)( pChanges!=null ? TK_UPDATE : TK_DELETE );
       }
 
       return pTrigger;
@@ -1272,17 +1259,17 @@ isIgnore = (rcauth==SQLITE_IGNORE);
     ** any required CASCADE, SET NULL or SET DEFAULT actions.
     */
     static void sqlite3FkActions(
-    Parse pParse,                  /* Parse context */
-    Table pTab,                    /* Table being updated or deleted from */
-    ExprList pChanges,             /* Change-list for UPDATE, NULL for DELETE */
-    int regOld                     /* Address of array containing old row */
+      Parse pParse,                  /* Parse context */
+      Table pTab,                    /* Table being updated or deleted from */
+      ExprList pChanges,             /* Change-list for UPDATE, NULL for DELETE */
+      int regOld                     /* Address of array containing old row */
     )
     {
       /* If foreign-key support is enabled, iterate through all FKs that 
       ** refer to table pTab. If there is an action a6ssociated with the FK 
       ** for this operation (either update or delete), invoke the associated 
       ** trigger sub-program.  */
-      if ( ( pParse.db.flags & SQLITE_ForeignKeys ) != 0 )
+      if (( pParse.db.flags & SQLITE_ForeignKeys )!=0)
       {
         FKey pFKey;                  /* Iterator variable */
         for ( pFKey = sqlite3FkReferences( pTab ); pFKey != null; pFKey = pFKey.pNextTo )
@@ -1317,7 +1304,8 @@ isIgnore = (rcauth==SQLITE_IGNORE);
           if ( pFKey.pPrevTo != null )
           {
             pFKey.pPrevTo.pNextTo = pFKey.pNextTo;
-          } else
+          }
+          else
           {
             FKey p = pFKey.pNextTo;
             string z = ( p != null ? pFKey.pNextTo.zTo : pFKey.zTo );
@@ -1327,21 +1315,21 @@ isIgnore = (rcauth==SQLITE_IGNORE);
           {
             pFKey.pNextTo.pPrevTo = pFKey.pPrevTo;
           }
-        }
+         }
 
-        /* EV: R-30323-21917 Each foreign key constraint in SQLite is
-        ** classified as either immediate or deferred.
-        */
+    /* EV: R-30323-21917 Each foreign key constraint in SQLite is
+    ** classified as either immediate or deferred.
+    */
         Debug.Assert( pFKey.isDeferred == 0 || pFKey.isDeferred == 1 );
 
-        /* Delete any triggers created to implement actions for this FK. */
+    /* Delete any triggers created to implement actions for this FK. */
 #if !SQLITE_OMIT_TRIGGER
-        fkTriggerDelete( db, pFKey.apTrigger[0] );
-        fkTriggerDelete( db, pFKey.apTrigger[1] );
+    fkTriggerDelete(db, pFKey.apTrigger[0]);
+    fkTriggerDelete(db, pFKey.apTrigger[1]);
 #endif
 
         pNext = pFKey.pNextFrom;
-        sqlite3DbFree( db, ref pFKey );
+        sqlite3DbFree(db, ref pFKey );
       }
     }
 #endif //* ifndef SQLITE_OMIT_FOREIGN_KEY */

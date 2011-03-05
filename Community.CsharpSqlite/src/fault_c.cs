@@ -68,9 +68,7 @@ BenignMallocHooks *x = &GLOBAL(BenignMallocHooks,sqlite3Hooks)
 //# define wsdHooks x[0]
 #else
     //# define wsdHooksInit
-    static void wsdHooksInit()
-    {
-    }
+    static void wsdHooksInit() { }
     //# define wsdHooks sqlite3Hooks
     static BenignMallocHooks wsdHooks = sqlite3Hooks;
 #endif

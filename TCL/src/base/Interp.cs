@@ -398,10 +398,12 @@ namespace tcl.lang
         if ( Util.Windows )
         {
           setVar( "tcl_platform", "host_platform", "windows", TCL.VarFlag.GLOBAL_ONLY );
-        } else if ( Util.Mac )
+        }
+        else if ( Util.Mac )
         {
           setVar( "tcl_platform", "host_platform", "macintosh", TCL.VarFlag.GLOBAL_ONLY );
-        } else
+        }
+        else
         {
           setVar( "tcl_platform", "host_platform", "unix", TCL.VarFlag.GLOBAL_ONLY );
         }
@@ -536,7 +538,7 @@ namespace tcl.lang
 
       // Close any remaining channels
 
-      for ( IDictionaryEnumerator e = interpChanTable.GetEnumerator(); e.MoveNext(); )
+      for ( IDictionaryEnumerator e = interpChanTable.GetEnumerator() ; e.MoveNext() ; )
       {
         Object key = e.Key;
         Channel chan = (Channel)e.Value;
@@ -696,7 +698,8 @@ namespace tcl.lang
       if ( assocData == null )
       {
         return null;
-      } else
+      }
+      else
       {
         return (AssocData)assocData[name];
       }
@@ -838,7 +841,8 @@ namespace tcl.lang
         {
           return;
         }
-      } else
+      }
+      else
       {
         ns = globalNs;
         tail = cmdName;
@@ -901,32 +905,32 @@ namespace tcl.lang
       return;
     }
     /*
-    *----------------------------------------------------------------------
-    *
-    * Tcl_CreateObjCommand --
-    *
-    *	Define a new object-based command in a command table.
-    *
-    * Results:
-    *	The return value is a token for the command, which can
-    *	be used in future calls to Tcl_GetCommandName.
-    *
-    * Side effects:
-    *	If no command named "cmdName" already exists for interp, one is
-    *	created. Otherwise, if a command does exist, then if the
-    *	object-based Tcl_ObjCmdProc is TclInvokeStringCommand, we assume
-    *	Tcl_CreateCommand was called previously for the same command and
-    *	just set its Tcl_ObjCmdProc to the argument "proc"; otherwise, we
-    *	delete the old command.
-    *
-    *	In the future, during bytecode evaluation when "cmdName" is seen as
-    *	the name of a command by Tcl_EvalObj or Tcl_Eval, the object-based
-    *	Tcl_ObjCmdProc proc will be called. When the command is deleted from
-    *	the table, deleteProc will be called. See the manual entry for
-    *	details on the calling sequence.
-    *
-    *----------------------------------------------------------------------
-    */
+     *----------------------------------------------------------------------
+     *
+     * Tcl_CreateObjCommand --
+     *
+     *	Define a new object-based command in a command table.
+     *
+     * Results:
+     *	The return value is a token for the command, which can
+     *	be used in future calls to Tcl_GetCommandName.
+     *
+     * Side effects:
+     *	If no command named "cmdName" already exists for interp, one is
+     *	created. Otherwise, if a command does exist, then if the
+     *	object-based Tcl_ObjCmdProc is TclInvokeStringCommand, we assume
+     *	Tcl_CreateCommand was called previously for the same command and
+     *	just set its Tcl_ObjCmdProc to the argument "proc"; otherwise, we
+     *	delete the old command.
+     *
+     *	In the future, during bytecode evaluation when "cmdName" is seen as
+     *	the name of a command by Tcl_EvalObj or Tcl_Eval, the object-based
+     *	Tcl_ObjCmdProc proc will be called. When the command is deleted from
+     *	the table, deleteProc will be called. See the manual entry for
+     *	details on the calling sequence.
+     *
+     *----------------------------------------------------------------------
+     */
 
     public delegate int dxObjCmdProc( object clientData, Interp interp, int argc, TclObject[] argv );
     public delegate void dxCmdDeleteProc( ref object clientData );
@@ -970,7 +974,8 @@ namespace tcl.lang
         {
           return;
         }
-      } else
+      }
+      else
       {
         ns = globalNs;
         tail = cmdName;
@@ -980,10 +985,10 @@ namespace tcl.lang
       if ( cmd != null )
       {
         /*
-        * Command already exists. If its object-based Tcl_ObjCmdProc is
-        * TclInvokeStringCommand, we just set its Tcl_ObjCmdProc to the
-        * argument "proc". Otherwise, we delete the old command. 
-        */
+ * Command already exists. If its object-based Tcl_ObjCmdProc is
+ * TclInvokeStringCommand, we just set its Tcl_ObjCmdProc to the
+ * argument "proc". Otherwise, we delete the old command. 
+ */
         if ( cmd.objProc != null && cmd.objProc.GetType().Name == "TclInvokeStringCommand" )
         {
           cmd.objProc = proc;
@@ -993,11 +998,11 @@ namespace tcl.lang
           return;
         }
         /*
-        * Otherwise, we delete the old command.  Be careful to preserve
-        * any existing import links so we can restore them down below.
-        * That way, you can redefine a command and its import status
-        * will remain intact.
-        */
+         * Otherwise, we delete the old command.  Be careful to preserve
+         * any existing import links so we can restore them down below.
+         * That way, you can redefine a command and its import status
+         * will remain intact.
+         */
         oldRef = cmd.importRef;
         cmd.importRef = null;
 
@@ -1102,8 +1107,7 @@ namespace tcl.lang
       {
         return -1;
       }
-      if ( cmd.deleteProc != null )
-        cmd.deleteProc( ref cmd.deleteData );
+      if ( cmd.deleteProc != null ) cmd.deleteProc( ref cmd.deleteData );
       return deleteCommandFromToken( cmd );
     }
     protected internal int deleteCommandFromToken( WrappedCommand cmd )
@@ -1152,7 +1156,7 @@ namespace tcl.lang
       // commands were created that refer back to this command. Delete these
       // imported commands now.
 
-      for ( ref_Renamed = cmd.importRef; ref_Renamed != null; ref_Renamed = nextRef )
+      for ( ref_Renamed = cmd.importRef ; ref_Renamed != null ; ref_Renamed = nextRef )
       {
         nextRef = ref_Renamed.next;
         importCmd = ref_Renamed.importedCmd;
@@ -1411,7 +1415,8 @@ namespace tcl.lang
       if ( (System.Object)r == null )
       {
         resetResult();
-      } else
+      }
+      else
       {
         setResult( TclString.newInstance( r ) );
       }
@@ -1462,7 +1467,7 @@ namespace tcl.lang
     }
 
     public void appendElement(
-    string Element )
+      string Element )
     {
       TclObject result;
 
@@ -1503,7 +1508,7 @@ namespace tcl.lang
         {
           result = updateReturnInfo();
         }
-        if ( result != TCL.CompletionCode.EXIT && result != TCL.CompletionCode.OK && result != TCL.CompletionCode.ERROR && ( evalFlags & Parser.TCL_ALLOW_EXCEPTIONS ) == 0 )
+        if (result != TCL.CompletionCode.EXIT && result != TCL.CompletionCode.OK && result != TCL.CompletionCode.ERROR && (evalFlags & Parser.TCL_ALLOW_EXCEPTIONS) == 0)
         {
           processUnexpectedResult( result );
         }
@@ -1719,7 +1724,8 @@ namespace tcl.lang
       if ( content is string )
       {
         return (string)content;
-      } else if ( content is Stream )
+      }
+      else if ( content is Stream )
       {
         // FIXME : use custom stream handler
         Stream fs = (Stream)content;
@@ -1741,7 +1747,8 @@ namespace tcl.lang
         {
           closeInputStream( fs );
         }
-      } else
+      }
+      else
       {
         return null;
       }
@@ -1796,7 +1803,7 @@ namespace tcl.lang
       //				if (System_Renamed.getProperty("java.version").StartsWith("1.2") && stream.GetType().FullName.Equals("java.util.zip.ZipFile$1"))
       //				{
       //					
-      var baos = new MemoryStream( 1024 );
+      var baos = new MemoryStream(1024);
       var buffer = new byte[1024];
       //					int numRead;
       //					
@@ -1910,10 +1917,12 @@ namespace tcl.lang
       if ( returnCode == TCL.CompletionCode.BREAK )
       {
         throw new TclException( this, "invoked \"break\" outside of a loop" );
-      } else if ( returnCode == TCL.CompletionCode.CONTINUE )
+      }
+      else if ( returnCode == TCL.CompletionCode.CONTINUE )
       {
         throw new TclException( this, "invoked \"continue\" outside of a loop" );
-      } else
+      }
+      else
       {
         throw new TclException( this, "command returned bad code: " + returnCode );
       }
@@ -2002,7 +2011,8 @@ namespace tcl.lang
       if ( Directory.Exists( dirObj.FullName ) )
       {
         workingDir = dirObj;
-      } else
+      }
+      else
       {
         throw new TclException( this, "couldn't change working directory to \"" + dirObj.Name + "\": no such file or directory" );
       }
@@ -2311,7 +2321,7 @@ namespace tcl.lang
     }
     internal void hideUnsafeCommands()
     {
-      for ( int ix = 0; ix < unsafeCmds.Length; ix++ )
+      for ( int ix = 0 ; ix < unsafeCmds.Length ; ix++ )
       {
         try
         {
@@ -2362,7 +2372,8 @@ namespace tcl.lang
           throw new TclException( this, "invalid hidden command name \"" + cmdName + "\"" );
         }
         cmd = (WrappedCommand)hiddenCmdTable[cmdName];
-      } else
+      }
+      else
       {
         cmd = NamespaceCmd.findCommand( this, cmdName, null, TCL.VarFlag.GLOBAL_ONLY );
         if ( cmd == null )
@@ -2375,7 +2386,7 @@ namespace tcl.lang
               localObjv = new TclObject[objv.Length + 1];
               localObjv[0] = TclString.newInstance( "unknown" );
               localObjv[0].preserve();
-              for ( int i = 0; i < objv.Length; i++ )
+              for ( int i = 0 ; i < objv.Length ; i++ )
               {
                 localObjv[i + 1] = objv[i];
               }
@@ -2440,18 +2451,20 @@ namespace tcl.lang
         if ( errInProgress )
         {
           ds = new StringBuilder( "\n    while invoking\n\"" );
-        } else
+        }
+        else
         {
           ds = new StringBuilder( "\n    invoked from within\n\"" );
         }
-        for ( int i = 0; i < objv.Length; i++ )
+        for ( int i = 0 ; i < objv.Length ; i++ )
         {
 
           ds.Append( objv[i].ToString() );
           if ( i < ( objv.Length - 1 ) )
           {
             ds.Append( " " );
-          } else if ( ds.Length > 100 )
+          }
+          else if ( ds.Length > 100 )
           {
             ds.Append( "..." );
             break;
@@ -2514,7 +2527,7 @@ namespace tcl.lang
 
       if ( resolvers != null )
       {
-        for ( enum_Renamed = resolvers.GetEnumerator(); enum_Renamed.MoveNext(); )
+        for ( enum_Renamed = resolvers.GetEnumerator() ; enum_Renamed.MoveNext() ; )
         {
           res = (ResolverScheme)enum_Renamed.Current;
           if ( name.Equals( res.name ) )

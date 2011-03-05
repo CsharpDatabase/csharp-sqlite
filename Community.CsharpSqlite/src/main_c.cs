@@ -41,7 +41,6 @@ namespace Community.CsharpSqlite
     **
     **  SQLITE_SOURCE_ID: 2011-01-28 17:03:50 ed759d5a9edb3bba5f48f243df47be29e3fe8cd7
     **
-    **  $Header$
     *************************************************************************
     */
     //#include "sqliteInt.h"
@@ -65,36 +64,24 @@ namespace Community.CsharpSqlite
     /* IMPLEMENTATION-OF: R-53536-42575 The sqlite3_libversion() function returns
 ** a pointer to the to the sqlite3_version[] string constant. 
 */
-    public static string sqlite3_libversion()
-    {
-      return sqlite3_version;
-    }
+    public static string sqlite3_libversion() { return sqlite3_version; }
 
     /* IMPLEMENTATION-OF: R-63124-39300 The sqlite3_sourceid() function returns a
     ** pointer to a string constant whose value is the same as the
     ** SQLITE_SOURCE_ID C preprocessor macro. 
     */
-    public static string sqlite3_sourceid()
-    {
-      return SQLITE_SOURCE_ID;
-    }
+    public static string sqlite3_sourceid() { return SQLITE_SOURCE_ID; }
 
     /* IMPLEMENTATION-OF: R-35210-63508 The sqlite3_libversion_number() function
     ** returns an integer equal to SQLITE_VERSION_NUMBER.
     */
-    public static int sqlite3_libversion_number()
-    {
-      return SQLITE_VERSION_NUMBER;
-    }
+    public static int sqlite3_libversion_number() { return SQLITE_VERSION_NUMBER; }
 
     /* IMPLEMENTATION-OF: R-54823-41343 The sqlite3_threadsafe() function returns
     ** zero if and only if SQLite was compiled mutexing code omitted due to
     ** the SQLITE_THREADSAFE compile-time option being set to 0.
     */
-    public static int sqlite3_threadsafe()
-    {
-      return SQLITE_THREADSAFE;
-    }
+    public static int sqlite3_threadsafe() { return SQLITE_THREADSAFE; }
 
 #if !SQLITE_OMIT_TRACE && SQLITE_ENABLE_IOTRACE
 /*
@@ -419,37 +406,37 @@ memset( pHash, 0, sizeof( sqlite3GlobalFunctions ) );
     }
 
 #if SQLITE_THREADSAFE // && SQLITE_THREADSAFE>0
-    static int sqlite3_config( int op, sqlite3_mutex_methods ap )
-    {
-      //  va_list ap;
-      int rc = SQLITE_OK;
-      switch ( op )
-      {
-        case SQLITE_CONFIG_MUTEX:
-          {
-            /* Specify an alternative mutex implementation */
-            sqlite3GlobalConfig.mutex = ap;// (sqlite3_mutex_methods)va_arg( ap, "sqlite3_mutex_methods" );
-            break;
-          }
-      }
-      return rc;
-    }
+static int sqlite3_config( int op,  sqlite3_mutex_methods ap )
+{
+//  va_list ap;
+int rc = SQLITE_OK;
+switch ( op )
+{
+case SQLITE_CONFIG_MUTEX:
+{
+/* Specify an alternative mutex implementation */
+sqlite3GlobalConfig.mutex = ap;// (sqlite3_mutex_methods)va_arg( ap, "sqlite3_mutex_methods" );
+break;
+}
+}
+return rc;
+}
 
-    static int sqlite3_config( int op, ref sqlite3_mutex_methods ap )
-    {
-      //  va_list ap;
-      int rc = SQLITE_OK;
-      switch ( op )
-      {
-        case SQLITE_CONFIG_GETMUTEX:
-          {
-            /* Retrieve the current mutex implementation */
-            ap = sqlite3GlobalConfig.mutex;// *va_arg(ap, sqlite3_mutex_methods*) =  sqlite3GlobalConfig.mutex;
-            break;
-          }
-      }
-      return rc;
-    }
+static int sqlite3_config( int op, ref sqlite3_mutex_methods ap )
+{
+//  va_list ap;
+int rc = SQLITE_OK;
+switch ( op )
+{
+case SQLITE_CONFIG_GETMUTEX:
+{
+/* Retrieve the current mutex implementation */
+ap =  sqlite3GlobalConfig.mutex;// *va_arg(ap, sqlite3_mutex_methods*) =  sqlite3GlobalConfig.mutex;
+break;
+}
+}
+return rc;
+}
 #endif
 
     static int sqlite3_config( int op, params object[] ap )
@@ -470,40 +457,38 @@ memset( pHash, 0, sizeof( sqlite3GlobalFunctions ) );
         ** compile.
         */
 #if SQLITE_THREADSAFE
-        case SQLITE_CONFIG_SINGLETHREAD:
-          {
-            /* Disable all mutexing */
-            sqlite3GlobalConfig.bCoreMutex = false;
-            sqlite3GlobalConfig.bFullMutex = false;
-            break;
-          }
-        case SQLITE_CONFIG_MULTITHREAD:
-          {
-            /* Disable mutexing of database connections */
-            /* Enable mutexing of core data structures */
-            sqlite3GlobalConfig.bCoreMutex = true;
-            sqlite3GlobalConfig.bFullMutex = false;
-            break;
-          }
-        case SQLITE_CONFIG_SERIALIZED:
-          {
-            /* Enable all mutexing */
-            sqlite3GlobalConfig.bCoreMutex = true;
-            sqlite3GlobalConfig.bFullMutex = true;
-            break;
-          }
-        case SQLITE_CONFIG_MUTEX:
-          {
-            /* Specify an alternative mutex implementation */
-            sqlite3GlobalConfig.mutex = (sqlite3_mutex_methods)va_arg( ap, "sqlite3_mutex_methods" );
-            break;
-          }
-        case SQLITE_CONFIG_GETMUTEX:
-          {
-            /* Retrieve the current mutex implementation */
-            Debugger.Break(); // TODO -- *va_arg(ap, sqlite3_mutex_methods*) = sqlite3GlobalConfig.mutex;
-            break;
-          }
+case SQLITE_CONFIG_SINGLETHREAD:
+{
+/* Disable all mutexing */
+sqlite3GlobalConfig.bCoreMutex = false;
+sqlite3GlobalConfig.bFullMutex = false;
+break;
+}
+case SQLITE_CONFIG_MULTITHREAD:
+{
+/* Disable mutexing of database connections */
+/* Enable mutexing of core data structures */
+sqlite3GlobalConfig.bCoreMutex = true;
+sqlite3GlobalConfig.bFullMutex = false;
+break;
+}
+case SQLITE_CONFIG_SERIALIZED:
+{
+/* Enable all mutexing */
+sqlite3GlobalConfig.bCoreMutex = true;
+sqlite3GlobalConfig.bFullMutex = true;
+break;
+}
+case SQLITE_CONFIG_MUTEX: {
+/* Specify an alternative mutex implementation */
+  sqlite3GlobalConfig.mutex = (sqlite3_mutex_methods)va_arg( ap, "sqlite3_mutex_methods" );
+break;
+}
+case SQLITE_CONFIG_GETMUTEX: {
+/* Retrieve the current mutex implementation */
+  Debugger.Break(); // TODO -- *va_arg(ap, sqlite3_mutex_methods*) = sqlite3GlobalConfig.mutex;
+break;
+}
 #endif
         case SQLITE_CONFIG_MALLOC:
           {
@@ -738,10 +723,7 @@ break;
     */
     static bool allSpaces( string z, int iStart, int n )
     {
-      while ( n > 0 && z[iStart + n - 1] == ' ' )
-      {
-        n--;
-      }
+      while ( n > 0 && z[iStart + n - 1] == ' ' ) { n--; }
       return n == 0;
     }
 
@@ -766,7 +748,8 @@ break;
         if ( (int)padFlag != 0 && allSpaces( pKey1, n, nKey1 - n ) && allSpaces( pKey2, n, nKey2 - n ) )
         {
           /* Leave rc unchanged at 0 */
-        } else
+        }
+        else
         {
           rc = nKey1 - nKey2;
         }
@@ -1088,7 +1071,8 @@ sqlite3HashClear(&db.aModule);
       if ( ALWAYS( rc >= 0 ) && rc < aMsg.Length && aMsg[rc] != "" )//(int)(sizeof(aMsg)/sizeof(aMsg[0]))
       {
         return aMsg[rc];
-      } else
+      }
+      else
       {
         return "unknown error";
       }
@@ -1119,7 +1103,8 @@ sqlite3HashClear(&db.aModule);
       {
         delay = delays[count];
         prior = totals[count];
-      } else
+      }
+      else
       {
         delay = delays[NDELAY - 1];
         prior = totals[NDELAY - 1] + delay * ( count - ( NDELAY - 1 ) );
@@ -1160,7 +1145,8 @@ return 1;
       if ( rc == 0 )
       {
         p.nBusy = -1;
-      } else
+      }
+      else
       {
         p.nBusy++;
       }
@@ -1204,7 +1190,8 @@ return 1;
         db.xProgress = xProgress;
         db.nProgressOps = nOps;
         db.pProgressArg = pArg;
-      } else
+      }
+      else
       {
         db.xProgress = null;
         db.nProgressOps = 0;
@@ -1225,7 +1212,8 @@ return 1;
       {
         db.busyTimeout = ms;
         sqlite3_busy_handler( db, sqliteDefaultBusyCallback, db );
-      } else
+      }
+      else
       {
         sqlite3_busy_handler( db, null, null );
       }
@@ -1314,7 +1302,8 @@ enc = SQLITE_UTF16BE;
           "unable to delete/modify user-function due to active statements" );
           //Debug.Assert( 0 == db.mallocFailed );
           return SQLITE_BUSY;
-        } else
+        }
+        else
         {
           sqlite3ExpirePreparedStatements( db );
         }
@@ -1360,7 +1349,7 @@ enc = SQLITE_UTF16BE;
     )
     {
       return sqlite3_create_function_v2( db, zFunc, nArg, enc, p, xFunc, xStep,
-      xFinal, null );
+                            xFinal, null );
     }
 
     static int sqlite3_create_function_v2(
@@ -1903,7 +1892,7 @@ return z;
         */
         if ( ( pColl.enc & ~SQLITE_UTF16_ALIGNED ) == enc2 )
         {
-          CollSeq[] aColl = sqlite3HashFind( db.aCollSeq, zName, nName, (CollSeq[])null );
+          CollSeq[] aColl = sqlite3HashFind( db.aCollSeq, zName, nName,(CollSeq[])null );
           int j;
           for ( j = 0; j < 3; j++ )
           {
@@ -2014,7 +2003,7 @@ SQLITE_MAX_TRIGGER_DEPTH,
       Debug.Assert( aHardLimit[SQLITE_LIMIT_FUNCTION_ARG] == SQLITE_MAX_FUNCTION_ARG );
       Debug.Assert( aHardLimit[SQLITE_LIMIT_ATTACHED] == SQLITE_MAX_ATTACHED );
       Debug.Assert( aHardLimit[SQLITE_LIMIT_LIKE_PATTERN_LENGTH] ==
-      SQLITE_MAX_LIKE_PATTERN_LENGTH );
+                                           SQLITE_MAX_LIKE_PATTERN_LENGTH );
       Debug.Assert( aHardLimit[SQLITE_LIMIT_VARIABLE_NUMBER] == SQLITE_MAX_VARIABLE_NUMBER );
       Debug.Assert( aHardLimit[SQLITE_LIMIT_TRIGGER_DEPTH] == SQLITE_MAX_TRIGGER_DEPTH );
       Debug.Assert( SQLITE_LIMIT_TRIGGER_DEPTH == ( SQLITE_N_LIMIT - 1 ) );
@@ -2081,20 +2070,24 @@ SQLITE_MAX_TRIGGER_DEPTH,
       if ( sqlite3GlobalConfig.bCoreMutex == false )
       {
         isThreadsafe = 0;
-      } else if ( ( flags & SQLITE_OPEN_NOMUTEX ) != 0 )
+      }
+      else if ( ( flags & SQLITE_OPEN_NOMUTEX ) != 0 )
       {
         isThreadsafe = 0;
-      } else if ( ( flags & SQLITE_OPEN_FULLMUTEX ) != 0 )
+      }
+      else if ( ( flags & SQLITE_OPEN_FULLMUTEX ) != 0 )
       {
         isThreadsafe = 1;
-      } else
+      }
+      else
       {
         isThreadsafe = sqlite3GlobalConfig.bFullMutex ? 1 : 0;
       }
       if ( ( flags & SQLITE_OPEN_PRIVATECACHE ) != 0 )
       {
         flags &= ~SQLITE_OPEN_SHAREDCACHE;
-      } else if ( sqlite3GlobalConfig.sharedCacheEnabled )
+      }
+      else if ( sqlite3GlobalConfig.sharedCacheEnabled )
       {
         flags |= SQLITE_OPEN_SHAREDCACHE;
       }
@@ -2153,10 +2146,10 @@ SQLITE_MAX_TRIGGER_DEPTH,
 | SQLITE_LoadExtension
 #endif
 #if SQLITE_DEFAULT_RECURSIVE_TRIGGERS
-| SQLITE_RecTriggers
+   | SQLITE_RecTriggers
 #endif
 #if (SQLITE_DEFAULT_FOREIGN_KEYS) //&& SQLITE_DEFAULT_FOREIGN_KEYS
-| SQLITE_ForeignKeys
+   | SQLITE_ForeignKeys
 #endif
 ;
       sqlite3HashInit( db.aCollSeq );
@@ -2176,13 +2169,13 @@ sqlite3HashInit( ref db.aModule );
       ** conversions. The only error that can occur here is a malloc() failure.
       */
       createCollation( db, "BINARY", SQLITE_UTF8, SQLITE_COLL_BINARY, 0,
-      binCollFunc, null );
+               binCollFunc, null );
       createCollation( db, "BINARY", SQLITE_UTF16BE, SQLITE_COLL_BINARY, 0,
-      binCollFunc, null );
+              binCollFunc, null );
       createCollation( db, "BINARY", SQLITE_UTF16LE, SQLITE_COLL_BINARY, 0,
-      binCollFunc, null );
+              binCollFunc, null );
       createCollation( db, "RTRIM", SQLITE_UTF8, SQLITE_COLL_USER, 1,
-      binCollFunc, null );
+              binCollFunc, null );
       //if ( db.mallocFailed != 0 )
       //{
       //  goto opendb_out;
@@ -2192,12 +2185,12 @@ sqlite3HashInit( ref db.aModule );
 
       /* Also add a UTF-8 case-insensitive collation sequence. */
       createCollation( db, "NOCASE", SQLITE_UTF8, SQLITE_COLL_NOCASE, 0,
-      nocaseCollatingFunc, null );
+               nocaseCollatingFunc, null );
 
       /* Open the backend database driver */
       db.openFlags = flags;
       rc = sqlite3BtreeOpen( zFilename, db, ref db.aDb[0].pBt, 0,
-      flags | SQLITE_OPEN_MAIN_DB );
+              flags | SQLITE_OPEN_MAIN_DB );
       if ( rc != SQLITE_OK )
       {
         if ( rc == SQLITE_IOERR_NOMEM )
@@ -2305,7 +2298,8 @@ opendb_out:
       {
         sqlite3_close( db );
         db = null;
-      } else if ( rc != SQLITE_OK )
+      }
+      else if ( rc != SQLITE_OK )
       {
         db.magic = SQLITE_MAGIC_SICK;
       }
@@ -2704,7 +2698,8 @@ return rc;
       if ( zDbName == null )
       {
         iDb = 0;
-      } else
+      }
+      else
       {
         for ( iDb = 0; iDb < db.nDb; iDb++ )
         {
@@ -2728,10 +2723,12 @@ return rc;
           {
             pArg = (long)fd.fs.Handle;
             rc = SQLITE_OK;
-          } else if ( fd.pMethods != null )
+          }
+          else if ( fd.pMethods != null )
           {
             rc = sqlite3OsFileControl( fd, (u32)op, ref pArg );
-          } else
+          }
+          else
           {
             rc = SQLITE_NOTFOUND;
           }

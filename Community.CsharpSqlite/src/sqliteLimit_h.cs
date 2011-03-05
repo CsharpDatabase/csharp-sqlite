@@ -119,16 +119,16 @@ namespace Community.CsharpSqlite
     const int SQLITE_DEFAULT_TEMP_CACHE_SIZE = 500;
 #endif
 
-    /*
+/*
 ** The default number of frames to accumulate in the log file before
 ** checkpointing the database in WAL mode.
 */
 #if !SQLITE_DEFAULT_WAL_AUTOCHECKPOINT
     const int SQLITE_DEFAULT_WAL_AUTOCHECKPOINT = 1000;
-    //# define SQLITE_DEFAULT_WAL_AUTOCHECKPOINT  1000
+//# define SQLITE_DEFAULT_WAL_AUTOCHECKPOINT  1000
 #endif
 
-
+    
     /*
 ** The maximum number of attached databases.  This must be between 0
 ** and 30.  The upper bound on 30 is because a 32-bit integer bitmap
@@ -146,7 +146,7 @@ namespace Community.CsharpSqlite
     const int SQLITE_MAX_VARIABLE_NUMBER = 999;
 #endif
 
-    /* Maximum page size.  The upper bound on this value is 65536.  This a limit
+/* Maximum page size.  The upper bound on this value is 65536.  This a limit
 ** imposed by the use of 16-bit offsets within each page.
 **
 **
@@ -158,16 +158,16 @@ namespace Community.CsharpSqlite
 ** compiled with the default page-size limit will not be able to rollback 
 ** the aborted transaction. This could lead to database corruption.
 */
-    //#ifdef SQLITE_MAX_PAGE_SIZE
-    //# undef SQLITE_MAX_PAGE_SIZE
-    //#endif
+//#ifdef SQLITE_MAX_PAGE_SIZE
+//# undef SQLITE_MAX_PAGE_SIZE
+//#endif
     //#define SQLITE_MAX_PAGE_SIZE 65536
     const int SQLITE_MAX_PAGE_SIZE = 65535;
 
 
     /*
-    ** The default size of a database page.
-    */
+** The default size of a database page.
+*/
 #if !SQLITE_DEFAULT_PAGE_SIZE
     const int SQLITE_DEFAULT_PAGE_SIZE = 1024;
 #endif
@@ -221,7 +221,7 @@ const int SQLITE_MAX_DEFAULT_PAGE_SIZE SQLITE_MAX_PAGE_SIZE
 #if !SQLITE_MAX_TRIGGER_DEPTH
     const int SQLITE_MAX_TRIGGER_DEPTH = 1000;  // # define SQLITE_MAX_TRIGGER_DEPTH 1000
 #else
-const int SQLITE_MAX_TRIGGER_DEPTH=1;
+  const int SQLITE_MAX_TRIGGER_DEPTH=1;
 #endif
   }
 }

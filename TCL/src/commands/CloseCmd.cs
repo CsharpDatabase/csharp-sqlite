@@ -15,40 +15,40 @@
 using System;
 namespace tcl.lang
 {
-
-  /// <summary> This class implements the built-in "close" command in Tcl.</summary>
-
-  class CloseCmd : Command
-  {
-    /// <summary> This procedure is invoked to process the "close" Tcl command.
-    /// See the user documentation for details on what it does.
-    /// 
-    /// </summary>
-    /// <param name="interp">the current interpreter.
-    /// </param>
-    /// <param name="argv">command arguments.
-    /// </param>
-
-    public TCL.CompletionCode cmdProc( Interp interp, TclObject[] argv )
-    {
-
-      Channel chan; /* The channel being operated on this method */
-
-      if ( argv.Length != 2 )
-      {
-        throw new TclNumArgsException( interp, 1, argv, "channelId" );
-      }
-
-
-      chan = TclIO.getChannel( interp, argv[1].ToString() );
-      if ( chan == null )
-      {
-
-        throw new TclException( interp, "can not find channel named \"" + argv[1].ToString() + "\"" );
-      }
-
-      TclIO.unregisterChannel( interp, chan );
+	
+	/// <summary> This class implements the built-in "close" command in Tcl.</summary>
+	
+	class CloseCmd : Command
+	{
+		/// <summary> This procedure is invoked to process the "close" Tcl command.
+		/// See the user documentation for details on what it does.
+		/// 
+		/// </summary>
+		/// <param name="interp">the current interpreter.
+		/// </param>
+		/// <param name="argv">command arguments.
+		/// </param>
+		
+		public TCL.CompletionCode cmdProc(Interp interp, TclObject[] argv)
+		{
+			
+			Channel chan; /* The channel being operated on this method */
+			
+			if (argv.Length != 2)
+			{
+				throw new TclNumArgsException(interp, 1, argv, "channelId");
+			}
+			
+			
+			chan = TclIO.getChannel(interp, argv[1].ToString());
+			if (chan == null)
+			{
+				
+				throw new TclException(interp, "can not find channel named \"" + argv[1].ToString() + "\"");
+			}
+			
+			TclIO.unregisterChannel(interp, chan);
       return TCL.CompletionCode.RETURN;
     }
-  }
+	}
 }

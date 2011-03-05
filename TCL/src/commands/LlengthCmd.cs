@@ -16,23 +16,23 @@
 using System;
 namespace tcl.lang
 {
-
-  /// <summary> This class implements the built-in "llength" command in Tcl.</summary>
-
-  class LlengthCmd : Command
-  {
-    /// <summary> See Tcl user documentation for details.</summary>
-    /// <exception cref=""> TclException If incorrect number of arguments.
-    /// </exception>
-
-    public TCL.CompletionCode cmdProc( Interp interp, TclObject[] argv )
-    {
-      if ( argv.Length != 2 )
-      {
-        throw new TclNumArgsException( interp, 1, argv, "list" );
-      }
-      interp.setResult( TclInteger.newInstance( TclList.getLength( interp, argv[1] ) ) );
+	
+	/// <summary> This class implements the built-in "llength" command in Tcl.</summary>
+	
+	class LlengthCmd : Command
+	{
+		/// <summary> See Tcl user documentation for details.</summary>
+		/// <exception cref=""> TclException If incorrect number of arguments.
+		/// </exception>
+		
+		public TCL.CompletionCode cmdProc(Interp interp, TclObject[] argv)
+		{
+			if (argv.Length != 2)
+			{
+				throw new TclNumArgsException(interp, 1, argv, "list");
+			}
+			interp.setResult(TclInteger.newInstance(TclList.getLength(interp, argv[1])));
       return TCL.CompletionCode.RETURN;
     }
-  }
+	}
 }

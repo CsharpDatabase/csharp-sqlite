@@ -46,8 +46,7 @@ namespace Community.CsharpSqlite
         sqlite3SelectDelete( db, ref pTmp.pSelect );
         sqlite3IdListDelete( db, ref pTmp.pIdList );
 
-        pTriggerStep = null;
-        sqlite3DbFree( db, ref pTmp );
+        pTriggerStep = null; sqlite3DbFree( db, ref pTmp );
       }
     }
 
@@ -138,7 +137,8 @@ namespace Community.CsharpSqlite
         }
         iDb = 1;
         pName = pName1;
-      } else
+      }
+      else
       {
         /* Figure out the db that the the trigger will be created in */
         iDb = sqlite3TwoPartName( pParse, pName1, pName2, ref  pName );
@@ -159,7 +159,7 @@ namespace Community.CsharpSqlite
       }
       pTab = sqlite3SrcListLookup( pParse, pTableName );
       if ( db.init.busy == 0 && pName2.n == 0 && pTab != null
-      && pTab.pSchema == db.aDb[1].pSchema )
+            && pTab.pSchema == db.aDb[1].pSchema )
       {
         iDb = 1;
       }
@@ -265,8 +265,7 @@ goto trigger_cleanup;
 
       /* Build the Trigger object */
       pTrigger = new Trigger();// (Trigger*)sqlite3DbMallocZero( db, sizeof(Trigger ))
-      if ( pTrigger == null )
-        goto trigger_cleanup;
+      if ( pTrigger == null ) goto trigger_cleanup;
       pTrigger.zName = zName;
       pTrigger.table = pTableName.a[0].zName;// sqlite3DbStrDup( db, pTableName.a[0].zName );
       pTrigger.pSchema = db.aDb[iDb].pSchema;
@@ -278,7 +277,7 @@ goto trigger_cleanup;
       Debug.Assert( pParse.pNewTrigger == null );
       pParse.pNewTrigger = pTrigger;
 
-trigger_cleanup:
+    trigger_cleanup:
       sqlite3DbFree( db, ref zName );
       sqlite3SrcListDelete( db, ref pTableName );
       sqlite3IdListDelete( db, ref pColumns );
@@ -286,7 +285,8 @@ trigger_cleanup:
       if ( pParse.pNewTrigger == null )
       {
         sqlite3DeleteTrigger( db, ref pTrigger );
-      } else
+      }
+      else
       {
         Debug.Assert( pParse.pNewTrigger == pTrigger );
       }
@@ -312,8 +312,7 @@ trigger_cleanup:
 
       pTrig = pParse.pNewTrigger;
       pParse.pNewTrigger = null;
-      if ( NEVER( pParse.nErr != 0 ) || pTrig == null )
-        goto triggerfinish_cleanup;
+      if ( NEVER( pParse.nErr != 0 ) || pTrig == null ) goto triggerfinish_cleanup;
       zName = pTrig.zName;
       iDb = sqlite3SchemaToIndex( pParse.db, pTrig.pSchema );
       pTrig.step_list = pStepList;
@@ -340,8 +339,7 @@ trigger_cleanup:
 
         /* Make an entry in the sqlite_master table */
         v = sqlite3GetVdbe( pParse );
-        if ( v == null )
-          goto triggerfinish_cleanup;
+        if ( v == null ) goto triggerfinish_cleanup;
         sqlite3BeginWriteOperation( pParse, 0, iDb );
         z = pAll.z.Substring( 0, pAll.n );//sqlite3DbStrNDup( db, (char*)pAll.z, pAll.n );
         sqlite3NestedParse( pParse,
@@ -363,18 +361,19 @@ trigger_cleanup:
         if ( pTrig != null )
         {
           //db.mallocFailed = 1;
-        } else if ( pLink.pSchema == pLink.pTabSchema )
+        }
+        else if ( pLink.pSchema == pLink.pTabSchema )
         {
           Table pTab;
           int n = sqlite3Strlen30( pLink.table );
-          pTab = sqlite3HashFind( pLink.pTabSchema.tblHash, pLink.table, n, (Table)null );
+          pTab = sqlite3HashFind( pLink.pTabSchema.tblHash, pLink.table, n,( Table ) null);
           Debug.Assert( pTab != null );
           pLink.pNext = pTab.pTrigger;
           pTab.pTrigger = pLink;
         }
       }
 
-triggerfinish_cleanup:
+    triggerfinish_cleanup:
       sqlite3DeleteTrigger( db, ref pTrig );
       Debug.Assert( pParse.pNewTrigger == null );
       sqlite3DeleteTriggerStep( db, ref pStepList );
@@ -437,17 +436,11 @@ triggerfinish_cleanup:
     */
     // OVERLOADS, so I don't need to rewrite parse.c
     static TriggerStep sqlite3TriggerInsertStep( sqlite3 db, Token pTableName, IdList pColumn, int null_4, int null_5, u8 orconf )
-    {
-      return sqlite3TriggerInsertStep( db, pTableName, pColumn, null, null, orconf );
-    }
+    { return sqlite3TriggerInsertStep( db, pTableName, pColumn, null, null, orconf ); }
     static TriggerStep sqlite3TriggerInsertStep( sqlite3 db, Token pTableName, IdList pColumn, ExprList pEList, int null_5, u8 orconf )
-    {
-      return sqlite3TriggerInsertStep( db, pTableName, pColumn, pEList, null, orconf );
-    }
+    { return sqlite3TriggerInsertStep( db, pTableName, pColumn, pEList, null, orconf ); }
     static TriggerStep sqlite3TriggerInsertStep( sqlite3 db, Token pTableName, IdList pColumn, int null_4, Select pSelect, u8 orconf )
-    {
-      return sqlite3TriggerInsertStep( db, pTableName, pColumn, null, pSelect, orconf );
-    }
+    { return sqlite3TriggerInsertStep( db, pTableName, pColumn, null, pSelect, orconf ); }
     static TriggerStep sqlite3TriggerInsertStep(
     sqlite3 db,        /* The database connection */
     Token pTableName,  /* Name of the table into which we insert */
@@ -537,15 +530,13 @@ triggerfinish_cleanup:
     */
     static void sqlite3DeleteTrigger( sqlite3 db, ref Trigger pTrigger )
     {
-      if ( pTrigger == null )
-        return;
+      if ( pTrigger == null ) return;
       sqlite3DeleteTriggerStep( db, ref pTrigger.step_list );
       sqlite3DbFree( db, ref pTrigger.zName );
       sqlite3DbFree( db, ref pTrigger.table );
       sqlite3ExprDelete( db, ref pTrigger.pWhen );
       sqlite3IdListDelete( db, ref pTrigger.pColumns );
-      pTrigger = null;
-      sqlite3DbFree( db, ref pTrigger );
+      pTrigger = null; sqlite3DbFree( db, ref pTrigger );
     }
 
     /*
@@ -578,11 +569,9 @@ triggerfinish_cleanup:
       for ( i = OMIT_TEMPDB; i < db.nDb; i++ )
       {
         int j = ( i < 2 ) ? i ^ 1 : i;  /* Search TEMP before MAIN */
-        if ( zDb != null && sqlite3StrICmp( db.aDb[j].zName, zDb ) != 0 )
-          continue;
+        if ( zDb != null && sqlite3StrICmp( db.aDb[j].zName, zDb ) != 0 ) continue;
         pTrigger = sqlite3HashFind( ( db.aDb[j].pSchema.trigHash ), zName, nName, (Trigger)null );
-        if ( pTrigger != null )
-          break;
+        if ( pTrigger != null ) break;
       }
       if ( pTrigger == null )
       {
@@ -595,7 +584,7 @@ triggerfinish_cleanup:
       }
       sqlite3DropTriggerPtr( pParse, pTrigger );
 
-drop_trigger_cleanup:
+    drop_trigger_cleanup:
       sqlite3SrcListDelete( db, ref pName );
     }
 
@@ -606,7 +595,7 @@ drop_trigger_cleanup:
     static Table tableOfTrigger( Trigger pTrigger )
     {
       int n = sqlite3Strlen30( pTrigger.table );
-      return sqlite3HashFind( pTrigger.pTabSchema.tblHash, pTrigger.table, n, (Table)null );
+      return sqlite3HashFind( pTrigger.pTabSchema.tblHash, pTrigger.table, n ,( Table ) null);
     }
 
 
@@ -690,7 +679,8 @@ new VdbeOpList( OP_Next,       0, ADDR(1),  0), /* 8 */
           if ( pTab.pTrigger == pTrigger )
           {
             pTab.pTrigger = pTrigger.pNext;
-          } else
+          }
+          else
           {
             Trigger cc = pTab.pTrigger;
             while ( cc != null )
@@ -722,12 +712,10 @@ new VdbeOpList( OP_Next,       0, ADDR(1),  0), /* 8 */
     static int checkColumnOverlap( IdList pIdList, ExprList pEList )
     {
       int e;
-      if ( pIdList == null || NEVER( pEList == null ) )
-        return 1;
+      if ( pIdList == null || NEVER( pEList == null ) ) return 1;
       for ( e = 0; e < pEList.nExpr; e++ )
       {
-        if ( sqlite3IdListIndex( pIdList, pEList.a[e].zName ) >= 0 )
-          return 1;
+        if ( sqlite3IdListIndex( pIdList, pEList.a[e].zName ) >= 0 ) return 1;
       }
       return 0;
     }
@@ -838,34 +826,33 @@ new VdbeOpList( OP_Next,       0, ADDR(1),  0), /* 8 */
           case TK_UPDATE:
             {
               sqlite3Update( pParse,
-              targetSrcList( pParse, pStep ),
-              sqlite3ExprListDup( db, pStep.pExprList, 0 ),
-              sqlite3ExprDup( db, pStep.pWhere, 0 ),
-              pParse.eOrconf
+                targetSrcList( pParse, pStep ),
+                sqlite3ExprListDup( db, pStep.pExprList, 0 ),
+                sqlite3ExprDup( db, pStep.pWhere, 0 ),
+                pParse.eOrconf
               );
               break;
             }
           case TK_INSERT:
             {
               sqlite3Insert( pParse,
-              targetSrcList( pParse, pStep ),
-              sqlite3ExprListDup( db, pStep.pExprList, 0 ),
-              sqlite3SelectDup( db, pStep.pSelect, 0 ),
-              sqlite3IdListDup( db, pStep.pIdList ),
-              pParse.eOrconf
+                targetSrcList( pParse, pStep ),
+                sqlite3ExprListDup( db, pStep.pExprList, 0 ),
+                sqlite3SelectDup( db, pStep.pSelect, 0 ),
+                sqlite3IdListDup( db, pStep.pIdList ),
+                pParse.eOrconf
               );
               break;
             }
           case TK_DELETE:
             {
               sqlite3DeleteFrom( pParse,
-              targetSrcList( pParse, pStep ),
-              sqlite3ExprDup( db, pStep.pWhere, 0 )
+                targetSrcList( pParse, pStep ),
+                sqlite3ExprDup( db, pStep.pWhere, 0 )
               );
               break;
             }
-          default:
-            Debug.Assert( pStep.op == TK_SELECT );
+          default: Debug.Assert( pStep.op == TK_SELECT );
             {
               var sDest = new SelectDest();
               Select pSelect = sqlite3SelectDup( db, pStep.pSelect, 0 );
@@ -893,18 +880,12 @@ new VdbeOpList( OP_Next,       0, ADDR(1),  0), /* 8 */
     {
       switch ( onError )
       {
-        case OE_Abort:
-          return "abort";
-        case OE_Rollback:
-          return "rollback";
-        case OE_Fail:
-          return "fail";
-        case OE_Replace:
-          return "replace";
-        case OE_Ignore:
-          return "ignore";
-        case OE_Default:
-          return "default";
+        case OE_Abort: return "abort";
+        case OE_Rollback: return "rollback";
+        case OE_Fail: return "fail";
+        case OE_Replace: return "replace";
+        case OE_Ignore: return "ignore";
+        case OE_Default: return "default";
       }
       return "n/a";
     }
@@ -923,7 +904,8 @@ new VdbeOpList( OP_Next,       0, ADDR(1),  0), /* 8 */
       {
         pTo.zErrMsg = pFrom.zErrMsg;
         pTo.nErr = pFrom.nErr;
-      } else
+      }
+      else
       {
         sqlite3DbFree( pFrom.db, ref pFrom.zErrMsg );
       }
@@ -934,10 +916,10 @@ new VdbeOpList( OP_Next,       0, ADDR(1),  0), /* 8 */
     ** implementing trigger pTrigger with ON CONFLICT policy orconf.
     */
     static TriggerPrg codeRowTrigger(
-    Parse pParse,        /* Current parse context */
-    Trigger pTrigger,    /* Trigger to code */
-    Table pTab,          /* The table pTrigger is attached to */
-    int orconf           /* ON CONFLICT policy to code trigger program with */
+      Parse pParse,        /* Current parse context */
+      Trigger pTrigger,    /* Trigger to code */
+      Table pTab,          /* The table pTrigger is attached to */
+      int orconf           /* ON CONFLICT policy to code trigger program with */
     )
     {
       Parse pTop = sqlite3ParseToplevel( pParse );
@@ -987,23 +969,23 @@ new VdbeOpList( OP_Next,       0, ADDR(1),  0), /* 8 */
       {
 #if SQLITE_DEBUG
         VdbeComment( v, "Start: %s.%s (%s %s%s%s ON %s)",
-        pTrigger.zName != null ? pTrigger.zName : "", onErrorText( orconf ),
-        ( pTrigger.tr_tm == TRIGGER_BEFORE ? "BEFORE" : "AFTER" ),
-        ( pTrigger.op == TK_UPDATE ? "UPDATE" : "" ),
-        ( pTrigger.op == TK_INSERT ? "INSERT" : "" ),
-        ( pTrigger.op == TK_DELETE ? "DELETE" : "" ),
-        pTab.zName
+          pTrigger.zName != null ? pTrigger.zName : "", onErrorText( orconf ),
+          ( pTrigger.tr_tm == TRIGGER_BEFORE ? "BEFORE" : "AFTER" ),
+            ( pTrigger.op == TK_UPDATE ? "UPDATE" : "" ),
+            ( pTrigger.op == TK_INSERT ? "INSERT" : "" ),
+            ( pTrigger.op == TK_DELETE ? "DELETE" : "" ),
+          pTab.zName
         );
 #endif
 #if !SQLITE_OMIT_TRACE
         sqlite3VdbeChangeP4( v, -1,
-        sqlite3MPrintf( db, "-- TRIGGER %s", pTrigger.zName ), P4_DYNAMIC
+          sqlite3MPrintf( db, "-- TRIGGER %s", pTrigger.zName ), P4_DYNAMIC
         );
 #endif
 
         /* If one was specified, code the WHEN clause. If it evaluates to false
-** (or NULL) the sub-vdbe is immediately halted by jumping to the 
-** OP_Halt inserted at the end of the program.  */
+    ** (or NULL) the sub-vdbe is immediately halted by jumping to the 
+    ** OP_Halt inserted at the end of the program.  */
         if ( pTrigger.pWhen != null )
         {
           pWhen = sqlite3ExprDup( db, pTrigger.pWhen, 0 );
@@ -1055,10 +1037,10 @@ new VdbeOpList( OP_Next,       0, ADDR(1),  0), /* 8 */
     ** being returned.
     */
     static TriggerPrg getRowTrigger(
-    Parse pParse,        /* Current parse context */
-    Trigger pTrigger,    /* Trigger to code */
-    Table pTab,          /* The table trigger pTrigger is attached to */
-    int orconf           /* ON CONFLICT algorithm. */
+      Parse pParse,        /* Current parse context */
+      Trigger pTrigger,    /* Trigger to code */
+      Table pTab,          /* The table trigger pTrigger is attached to */
+      int orconf           /* ON CONFLICT algorithm. */
     )
     {
       Parse pRoot = sqlite3ParseToplevel( pParse );
@@ -1071,10 +1053,9 @@ new VdbeOpList( OP_Next,       0, ADDR(1),  0), /* 8 */
       ** a matching TriggerPrg.pTrigger field will be present somewhere
       ** in the Parse.pTriggerPrg list. Search for such an entry.  */
       for ( pPrg = pRoot.pTriggerPrg;
-      pPrg != null && ( pPrg.pTrigger != pTrigger || pPrg.orconf != orconf );
-      pPrg = pPrg.pNext
-      )
-        ;
+          pPrg != null && ( pPrg.pTrigger != pTrigger || pPrg.orconf != orconf );
+          pPrg = pPrg.pNext
+      ) ;
 
       /* If an existing TriggerPrg could not be located, create a new one. */
       if ( null == pPrg )
@@ -1092,12 +1073,12 @@ new VdbeOpList( OP_Next,       0, ADDR(1),  0), /* 8 */
     ** sqlite3CodeRowTrigger()
     */
     static void sqlite3CodeRowTriggerDirect(
-    Parse pParse,        /* Parse context */
-    Trigger p,           /* Trigger to code */
-    Table pTab,          /* The table to code triggers from */
-    int reg,             /* Reg array containing OLD.* and NEW.* values */
-    int orconf,          /* ON CONFLICT policy */
-    int ignoreJump       /* Instruction to jump to for RAISE(IGNORE) */
+      Parse pParse,        /* Parse context */
+      Trigger p,           /* Trigger to code */
+      Table pTab,          /* The table to code triggers from */
+      int reg,             /* Reg array containing OLD.* and NEW.* values */
+      int orconf,          /* ON CONFLICT policy */
+      int ignoreJump       /* Instruction to jump to for RAISE(IGNORE) */
     )
     {
       Vdbe v = sqlite3GetVdbe( pParse ); /* Main VM */
@@ -1114,14 +1095,14 @@ new VdbeOpList( OP_Next,       0, ADDR(1),  0), /* 8 */
         sqlite3VdbeChangeP4( v, -1, pPrg.pProgram, P4_SUBPROGRAM );
 #if SQLITE_DEBUG
         VdbeComment
-        ( v, "Call: %s.%s", ( !String.IsNullOrEmpty( p.zName ) ? p.zName : "fkey" ), onErrorText( orconf ) );
+            ( v, "Call: %s.%s", ( !String.IsNullOrEmpty( p.zName ) ? p.zName : "fkey" ), onErrorText( orconf ) );
 #endif
 
         /* Set the P5 operand of the OP_Program instruction to non-zero if
-** recursive invocation of this trigger program is disallowed. Recursive
-** invocation is disallowed if (a) the sub-program is really a trigger,
-** not a foreign key action, and (b) the flag to enable recursive triggers
-** is clear.  */
+    ** recursive invocation of this trigger program is disallowed. Recursive
+    ** invocation is disallowed if (a) the sub-program is really a trigger,
+    ** not a foreign key action, and (b) the flag to enable recursive triggers
+    ** is clear.  */
         sqlite3VdbeChangeP5( v, (u8)( bRecursive ? 1 : 0 ) );
       }
     }
@@ -1193,12 +1174,12 @@ new VdbeOpList( OP_Next,       0, ADDR(1),  0), /* 8 */
         Debug.Assert( p.pSchema != null );
         Debug.Assert( p.pTabSchema != null );
         Debug.Assert( p.pSchema == p.pTabSchema
-        || p.pSchema == pParse.db.aDb[1].pSchema );
+             || p.pSchema == pParse.db.aDb[1].pSchema );
 
         /* Determine whether we should code this trigger */
         if ( p.op == op
-        && p.tr_tm == tr_tm
-        && checkColumnOverlap( p.pColumns, pChanges ) != 0
+         && p.tr_tm == tr_tm
+         && checkColumnOverlap( p.pColumns, pChanges ) != 0
         )
         {
           sqlite3CodeRowTriggerDirect( pParse, p, pTab, reg, orconf, ignoreJump );
@@ -1232,13 +1213,13 @@ new VdbeOpList( OP_Next,       0, ADDR(1),  0), /* 8 */
     ** included in the returned mask if the TRIGGER_AFTER bit is set in tr_tm.
     */
     static u32 sqlite3TriggerColmask(
-    Parse pParse,        /* Parse context */
-    Trigger pTrigger,    /* List of triggers on table pTab */
-    ExprList pChanges,   /* Changes list for any UPDATE OF triggers */
-    int isNew,           /* 1 for new.* ref mask, 0 for old.* ref mask */
-    int tr_tm,           /* Mask of TRIGGER_BEFORE|TRIGGER_AFTER */
-    Table pTab,          /* The table to code triggers from */
-    int orconf           /* Default ON CONFLICT policy for trigger steps */
+      Parse pParse,        /* Parse context */
+      Trigger pTrigger,    /* List of triggers on table pTab */
+      ExprList pChanges,   /* Changes list for any UPDATE OF triggers */
+      int isNew,           /* 1 for new.* ref mask, 0 for old.* ref mask */
+      int tr_tm,           /* Mask of TRIGGER_BEFORE|TRIGGER_AFTER */
+      Table pTab,          /* The table to code triggers from */
+      int orconf           /* Default ON CONFLICT policy for trigger steps */
     )
     {
       int op = pChanges != null ? TK_UPDATE : TK_DELETE;
@@ -1249,7 +1230,7 @@ new VdbeOpList( OP_Next,       0, ADDR(1),  0), /* 8 */
       for ( p = pTrigger; p != null; p = p.pNext )
       {
         if ( p.op == op && ( tr_tm & p.tr_tm ) != 0
-        && checkColumnOverlap( p.pColumns, pChanges ) != 0
+         && checkColumnOverlap( p.pColumns, pChanges ) != 0
         )
         {
           TriggerPrg pPrg;

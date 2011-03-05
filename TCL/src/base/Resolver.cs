@@ -17,18 +17,18 @@
 using System;
 namespace tcl.lang
 {
-
-  /// <summary> The Resolver interface specifies the methods that a new Tcl resolver
-  /// must implement.  See the addInterpResolver method of the Interp class
-  /// to see how to add a new resolver to an interperter or the
-  /// setNamespaceResolver of the NamespaceCmd class.
-  /// </summary>
-
-  public interface Resolver
-  {
-
-    WrappedCommand resolveCmd( Interp interp, string name, NamespaceCmd.Namespace context, TCL.VarFlag flags ); // Tcl exceptions are thrown for Tcl errors.
-
-    Var resolveVar( Interp interp, string name, NamespaceCmd.Namespace context, TCL.VarFlag flags ); // Tcl exceptions are thrown for Tcl errors.
-  } // end Resolver
+	
+	/// <summary> The Resolver interface specifies the methods that a new Tcl resolver
+	/// must implement.  See the addInterpResolver method of the Interp class
+	/// to see how to add a new resolver to an interperter or the
+	/// setNamespaceResolver of the NamespaceCmd class.
+	/// </summary>
+	
+	public interface Resolver
+		{
+			
+			WrappedCommand resolveCmd(Interp interp, string name, NamespaceCmd.Namespace context, TCL.VarFlag flags); // Tcl exceptions are thrown for Tcl errors.
+			
+			Var resolveVar(Interp interp, string name, NamespaceCmd.Namespace context, TCL.VarFlag flags); // Tcl exceptions are thrown for Tcl errors.
+		} // end Resolver
 }
