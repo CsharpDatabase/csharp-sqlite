@@ -30,7 +30,6 @@ namespace Community.CsharpSqlite
     **
     **  SQLITE_SOURCE_ID: 2011-01-28 17:03:50 ed759d5a9edb3bba5f48f243df47be29e3fe8cd7
     **
-    **  $Header$
     *************************************************************************
     */
     //#include "sqliteInt.h"
@@ -107,7 +106,9 @@ return nRet;
       public memstat msMem;
       public memstat msBtCursor;
 
-      public Mem0Global() { }
+      public Mem0Global()
+      {
+      }
 
       public Mem0Global( int nScratchFree, int nPageFree, sqlite3_mutex mutex, sqlite3_int64 alarmThreshold, dxalarmCallback alarmCallback, object alarmArg, int Byte_Allocation, int Int_Allocation, int Mem_Allocation, int BtCursor_Allocation )
       {
@@ -408,7 +409,9 @@ p = sqlite3GlobalConfig.m.xMalloc(nFull);
       return sqlite3GlobalConfig.m.xMallocMem( pMem );
     }
     static int[] sqlite3Malloc( int[] pInt, u32 n )
-    { return sqlite3Malloc( pInt, (int)n ); }
+    {
+      return sqlite3Malloc( pInt, (int)n );
+    }
 
     static int[] sqlite3Malloc( int[] pInt, int n )
     {
@@ -485,7 +488,7 @@ p = sqlite3GlobalConfig.m.xMalloc(nFull);
     ** is outstanding clearing it when the allocation is freed.
     */
 #if SQLITE_THREADSAFE && !(NDEBUG)
-static int scratchAllocOut = 0;
+    static int scratchAllocOut = 0;
 #endif
 
 
@@ -576,7 +579,7 @@ scratch_overflow:
       }
       sqlite3MemdebugSetType( p, MEMTYPE_SCRATCH );
 #if SQLITE_THREADSAFE && !(NDEBUG)
-      scratchAllocOut = (p != null) ? 1 : 0;
+      scratchAllocOut = ( p != null ) ? 1 : 0;
 #endif
       return p;
     }
@@ -617,7 +620,7 @@ scratch_overflow:
           //sqlite3StatusAdd(SQLITE_STATUS_SCRATCH_USED, -1);
           //sqlite3_mutex_leave(mem0.mutex);
 #if SQLITE_THREADSAFE && !(NDEBUG)
-/* Verify that no more than two scratch allocation per thread
+          /* Verify that no more than two scratch allocation per thread
 ** is outstanding at one time.  (This is only checked in the
 ** single-threaded case since checking in the multi-threaded case
 ** would be much more complicated.) */

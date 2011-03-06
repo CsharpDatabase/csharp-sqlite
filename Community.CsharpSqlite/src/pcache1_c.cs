@@ -31,7 +31,6 @@ namespace Community.CsharpSqlite
     **
     **  SQLITE_SOURCE_ID: 2010-08-23 18:52:01 42537b60566f288167f1b5864a5435986838e3a3
     **
-    **  $Header$
     *************************************************************************
     */
 
@@ -184,8 +183,8 @@ namespace Community.CsharpSqlite
       ** (2) even if an incorrect value is read, no great harm is done since this
       ** is really just an optimization. */
       public bool bUnderPressure;            /* True if low on PAGECACHE memory */
-    
-    // C#
+
+      // C#
       public PCacheGlobal()
       {
         grp = new PGroup();
@@ -214,18 +213,30 @@ namespace Community.CsharpSqlite
     **   Debug.Assert( PGHDR1_TO_PAGE(PAGE_TO_PGHDR1(pCache, X))==X );
     */
     //#define PGHDR1_TO_PAGE(p)    (void)(((char)p) - p.pCache.szPage)
-    static PgHdr PGHDR1_TO_PAGE( PgHdr1 p ) { return p.pPgHdr; }
+    static PgHdr PGHDR1_TO_PAGE( PgHdr1 p )
+    {
+      return p.pPgHdr;
+    }
 
     //#define PAGE_TO_PGHDR1(c, p) (PgHdr1)(((char)p) + c.szPage)
-    static PgHdr1 PAGE_TO_PGHDR1( PCache1 c, PgHdr p ) { return p.pPgHdr1; }
+    static PgHdr1 PAGE_TO_PGHDR1( PCache1 c, PgHdr p )
+    {
+      return p.pPgHdr1;
+    }
 
     /*
     ** Macros to enter and leave the PCache LRU mutex.
     */
     //#define pcache1EnterMutex(X) sqlite3_mutex_enter((X).mutex)
-    static void pcache1EnterMutex( PGroup X ) { sqlite3_mutex_enter( X.mutex ); }
+    static void pcache1EnterMutex( PGroup X )
+    {
+      sqlite3_mutex_enter( X.mutex );
+    }
     //#define pcache1LeaveMutex(X) sqlite3_mutex_leave((X).mutex)
-    static void pcache1LeaveMutex( PGroup X ) { sqlite3_mutex_leave( X.mutex ); }
+    static void pcache1LeaveMutex( PGroup X )
+    {
+      sqlite3_mutex_leave( X.mutex );
+    }
 
     /******************************************************************************/
     /******** Page Allocation/SQLITE_CONFIG_PCACHE Related Functions **************/
@@ -483,9 +494,15 @@ static int pcache1MemSize(object p){
       }
 
       pcache1LeaveMutex( p.pGroup );
-      if ( p.nHash != 0 ) { sqlite3BeginBenignMalloc(); }
+      if ( p.nHash != 0 )
+      {
+        sqlite3BeginBenignMalloc();
+      }
       apNew = new PgHdr1[nNew];//(PgHdr1 *)sqlite3_malloc(sizeof(PgHdr1 )*nNew);
-      if ( p.nHash != 0 ) { sqlite3EndBenignMalloc(); }
+      if ( p.nHash != 0 )
+      {
+        sqlite3EndBenignMalloc();
+      }
       pcache1EnterMutex( p.pGroup );
       if ( apNew != null )
       {
@@ -496,7 +513,7 @@ static int pcache1MemSize(object p){
           PgHdr1 pNext = p.apHash[i];
           while ( ( pPage = pNext ) != null )
           {
-            Pgno h = (Pgno)(pPage.iKey % nNew);
+            Pgno h = (Pgno)( pPage.iKey % nNew );
             pNext = pPage.pNext;
             pPage.pNext = apNew[h];
             apNew[h] = pPage;
@@ -568,7 +585,7 @@ static int pcache1MemSize(object p){
       PgHdr1 pPrev = null;
 
       Debug.Assert( sqlite3_mutex_held( pCache.pGroup.mutex ) );
-      h = (int)(pPage.iKey % pCache.nHash);
+      h = (int)( pPage.iKey % pCache.nHash );
       for ( pp = pCache.apHash[h]; pp != pPage; pPrev = pp, pp = pp.pNext )
         ;
       if ( pPrev == null )
@@ -640,7 +657,7 @@ static int pcache1MemSize(object p){
           pPrev = pPage;
         }
       }
-#if !NDEBUG || SQLITE_COVERAGE_TEST 
+#if !NDEBUG || SQLITE_COVERAGE_TEST
       Debug.Assert( pCache.nPage == nPage );
 #endif
     }
@@ -748,7 +765,7 @@ static int pcache1MemSize(object p){
       {
         PGroup pGroup = pCache.pGroup;
         pcache1EnterMutex( pGroup );
-        pGroup.nMaxPage +=  nMax - pCache.nMax ;
+        pGroup.nMaxPage += nMax - pCache.nMax;
         pGroup.mxPinned = pGroup.nMaxPage + 10 - pGroup.nMinPage;
         pCache.nMax = nMax;
         pCache.n90pct = pCache.nMax * 9 / 10;
@@ -840,7 +857,7 @@ static int pcache1MemSize(object p){
       /* Step 1: Search the hash table for an existing entry. */
       if ( pCache.nHash > 0 )
       {
-        int h = (int)(iKey % pCache.nHash);
+        int h = (int)( iKey % pCache.nHash );
         for ( pPage = pCache.apHash[h]; pPage != null && pPage.iKey != iKey; pPage = pPage.pNext )
           ;
       }
@@ -902,7 +919,7 @@ static int pcache1MemSize(object p){
         else
         {
           pGroup.nCurrentPage -=
-                   ( pOtherCache.bPurgeable ? 1 : 0 )-( pCache.bPurgeable ? 1 : 0 );
+                   ( pOtherCache.bPurgeable ? 1 : 0 ) - ( pCache.bPurgeable ? 1 : 0 );
         }
       }
 
@@ -922,7 +939,7 @@ static int pcache1MemSize(object p){
 
       if ( pPage != null )
       {
-        int h = (int)(iKey % pCache.nHash);
+        int h = (int)( iKey % pCache.nHash );
         pCache.nPage++;
         pPage.iKey = iKey;
         pPage.pNext = pCache.apHash[h];
@@ -940,7 +957,7 @@ fetch_out:
         pCache.iMaxKey = iKey;
       }
       pcache1LeaveMutex( pGroup );
-      return ( pPage !=null? PGHDR1_TO_PAGE( pPage ) : null );
+      return ( pPage != null ? PGHDR1_TO_PAGE( pPage ) : null );
     }
 
 
@@ -1008,18 +1025,18 @@ fetch_out:
 
       pcache1EnterMutex( pCache.pGroup );
 
-      h = (int)(iOld % pCache.nHash);
+      h = (int)( iOld % pCache.nHash );
       pp = pCache.apHash[h];
       while ( ( pp ) != pPage )
       {
         pp = ( pp ).pNext;
       }
-      if (pp == pCache.apHash[h])
+      if ( pp == pCache.apHash[h] )
         pCache.apHash[h] = pp.pNext;
       else
         pp.pNext = pPage.pNext;
 
-      h = (int)(iNew % pCache.nHash);
+      h = (int)( iNew % pCache.nHash );
       pPage.iKey = iNew;
       pPage.pNext = pCache.apHash[h];
       pCache.apHash[h] = pPage;
@@ -1138,7 +1155,7 @@ int sqlite3PcacheReleaseMemory(int nReq){
     {
       PgHdr1 p;
       int nRecyclable = 0;
-      for ( p = pcache1.grp.pLruHead; p!=null; p = p.pLruNext )
+      for ( p = pcache1.grp.pLruHead; p != null; p = p.pLruNext )
       {
         nRecyclable++;
       }

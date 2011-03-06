@@ -24,7 +24,6 @@ namespace Community.CsharpSqlite
     **
     **  SQLITE_SOURCE_ID: 2010-12-07 20:14:09 a586a4deeb25330037a49df295b36aaf624d0f45
     **
-    **  $Header$
     *************************************************************************
     */
     //#if !_PAGER_H_
@@ -64,7 +63,10 @@ namespace Community.CsharpSqlite
     ** for details.
     */
     //#define PAGER_MJ_PGNO(x) ((Pgno)((PENDING_BYTE/((x)->pageSize))+1))
-    static Pgno PAGER_MJ_PGNO( Pager x ) { return ( (Pgno)( ( PENDING_BYTE / ( ( x ).pageSize ) ) + 1 ) ); }
+    static Pgno PAGER_MJ_PGNO( Pager x )
+    {
+      return ( (Pgno)( ( PENDING_BYTE / ( ( x ).pageSize ) ) + 1 ) );
+    }
     /*
     ** Allowed values for the flags parameter to sqlite3PagerOpen().
     **
@@ -75,7 +77,7 @@ namespace Community.CsharpSqlite
     //#define PAGER_MEMORY        0x0004    /* In-memory database */
     const int PAGER_OMIT_JOURNAL = 0x0001;
     const int PAGER_NO_READLOCK = 0x0002;
-    const int PAGER_MEMORY = 0x0004;  
+    const int PAGER_MEMORY = 0x0004;
 
     /*
     ** Valid values for the second argument to sqlite3PagerLockingMode().
@@ -100,7 +102,7 @@ namespace Community.CsharpSqlite
     const int PAGER_JOURNALMODE_QUERY = -1;
     const int PAGER_JOURNALMODE_DELETE = 0;
     const int PAGER_JOURNALMODE_PERSIST = 1;
-    const int PAGER_JOURNALMODE_OFF = 2;    
+    const int PAGER_JOURNALMODE_OFF = 2;
     const int PAGER_JOURNALMODE_TRUNCATE = 3;
     const int PAGER_JOURNALMODE_MEMORY = 4;
     const int PAGER_JOURNALMODE_WAL = 5;

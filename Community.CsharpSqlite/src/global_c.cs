@@ -27,7 +27,6 @@ namespace Community.CsharpSqlite
     **
     **  SQLITE_SOURCE_ID: 2010-08-23 18:52:01 42537b60566f288167f1b5864a5435986838e3a3
     **
-    **  $Header$
     *************************************************************************
     */
     //#include "sqliteInt.h"
@@ -195,10 +194,10 @@ namespace Community.CsharpSqlite
     ** read-only.
     */
     static FuncDefHash sqlite3GlobalFunctions;
-/*
-** Constant tokens for values 0 and 1.
-*/
-static Token[] sqlite3IntTokens =  {
+    /*
+    ** Constant tokens for values 0 and 1.
+    */
+    static Token[] sqlite3IntTokens =  {
    new Token( "0", 1 ),
    new Token( "1", 1 )
 };

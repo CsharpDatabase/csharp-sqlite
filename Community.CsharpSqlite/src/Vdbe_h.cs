@@ -28,7 +28,6 @@ namespace Community.CsharpSqlite
     **
     **  SQLITE_SOURCE_ID: 2010-08-23 18:52:01 42537b60566f288167f1b5864a5435986838e3a3
     **
-    **  $Header$
     *************************************************************************
     */
     //#if !_SQLITE_VDBE_H_
@@ -220,7 +219,10 @@ const int COLNAME_N = 1;     /* Number of COLNAME_xxx symbols */
 ** the macro again restores the address.
 */
     //#define ADDR(X)  (-1-(X))
-    static int ADDR( int x ) { return -1 - x; }
+    static int ADDR( int x )
+    {
+      return -1 - x;
+    }
     /*
     ** The makefile scans the vdbe.c source file and creates the "opcodes.h"
     ** header file that defines a number for each opcode used by the VDBE.
@@ -287,14 +289,20 @@ const int COLNAME_N = 1;     /* Number of COLNAME_xxx symbols */
     //int sqlite3VdbeRecordCompare(int,const void*,UnpackedRecord*);
 
 #if !SQLITE_OMIT_TRIGGER
-//void sqlite3VdbeLinkSubProgram(Vdbe *, SubProgram *);
+    //void sqlite3VdbeLinkSubProgram(Vdbe *, SubProgram *);
 #endif
 
 #if !NDEBUG
     //void sqlite3VdbeComment(Vdbe*, const char*, ...);
-    static void VdbeComment( Vdbe v, string zFormat, params object[] ap ) { sqlite3VdbeComment( v, zFormat, ap ); }//# define VdbeComment(X)  sqlite3VdbeComment X
+    static void VdbeComment( Vdbe v, string zFormat, params object[] ap )
+    {
+      sqlite3VdbeComment( v, zFormat, ap );
+    }//# define VdbeComment(X)  sqlite3VdbeComment X
     //void sqlite3VdbeNoopComment(Vdbe*, const char*, ...);
-    static void VdbeNoopComment( Vdbe v, string zFormat, params object[] ap ) { sqlite3VdbeNoopComment( v, zFormat, ap ); }//# define VdbeNoopComment(X)  sqlite3VdbeNoopComment X
+    static void VdbeNoopComment( Vdbe v, string zFormat, params object[] ap )
+    {
+      sqlite3VdbeNoopComment( v, zFormat, ap );
+    }//# define VdbeNoopComment(X)  sqlite3VdbeNoopComment X
 #else
 //# define VdbeComment(X)
 static void VdbeComment( Vdbe v, string zFormat, params object[] ap ) { }

@@ -22,7 +22,6 @@ namespace Community.CsharpSqlite
     **
     **  SQLITE_SOURCE_ID: 2010-08-23 18:52:01 42537b60566f288167f1b5864a5435986838e3a3
     **
-    **  $Header$
     *************************************************************************
     */
     /* Hash score: 175 */
@@ -39,7 +38,7 @@ namespace Community.CsharpSqlite
       /*   CURRENT_TIMESTAMPRIMARYDEFERREDISTINCTDROPFAILFROMFULLGLOBYIF      */
       /*   ISNULLORDERESTRICTOUTERIGHTROLLBACKROWUNIONUSINGVACUUMVIEW         */
       /*   INITIALLY                                                          */
-      var zText = new string( new char[540]  {
+      string zText = new string( new char[540]  {
 'R','E','I','N','D','E','X','E','D','E','S','C','A','P','E','A','C','H',
 'E','C','K','E','Y','B','E','F','O','R','E','I','G','N','O','R','E','G',
 'E','X','P','L','A','I','N','S','T','E','A','D','D','A','T','A','B','A',
@@ -159,13 +158,14 @@ namespace Community.CsharpSqlite
     TK_ALL,        
 };
       int h, i;
-      if ( n < 2 ) return TK_ID;
+      if ( n < 2 )
+        return TK_ID;
       h = ( ( sqlite3UpperToLower[z[iOffset + 0]] ) * 4 ^//(charMap(z[iOffset+0]) * 4) ^
       ( sqlite3UpperToLower[z[iOffset + n - 1]] * 3 ) ^ //(charMap(z[iOffset+n - 1]) * 3) ^
       n ) % 127;
       for ( i = ( aHash[h] ) - 1; i >= 0; i = ( aNext[i] ) - 1 )
       {
-        if ( aLen[i] == n && 0 == sqlite3StrNICmp( zText.Substring( aOffset[i],n), z.Substring( iOffset, n ), n ) )
+        if ( aLen[i] == n && 0 == sqlite3StrNICmp( zText.Substring( aOffset[i], n ), z.Substring( iOffset, n ), n ) )
         {
           testcase( i == 0 ); /* REINDEX */
           testcase( i == 1 ); /* INDEXED */

@@ -31,7 +31,6 @@ namespace Community.CsharpSqlite
     **
     **  SQLITE_SOURCE_ID: 2011-01-28 17:03:50 ed759d5a9edb3bba5f48f243df47be29e3fe8cd7
     **
-    **  $Header$
     *************************************************************************
     */
     //#include "sqliteInt.h"
@@ -98,8 +97,8 @@ namespace Community.CsharpSqlite
       int nToken = 0;          /* Length of the parameter token */
       int i;                   /* Loop counter */
       Mem pVar;                /* Value of a host parameter */
-      var _out = new StrAccum( 1000 );               /* Accumulate the _output here */
-      var zBase = new StringBuilder( 100 ); /* Initial working space */
+      StrAccum _out = new StrAccum( 1000 );               /* Accumulate the _output here */
+      StringBuilder zBase = new StringBuilder( 100 ); /* Initial working space */
       int izRawSql = 0;
 
       db = p.db;

@@ -1,5 +1,5 @@
-using System;
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 
 using FILE = System.IO.TextWriter;
@@ -23,6 +23,7 @@ namespace Community.CsharpSqlite
   using Op = Sqlite3.VdbeOp;
   using sqlite3_stmt = Sqlite3.Vdbe;
   using sqlite3_value = Sqlite3.Mem;
+  using System;
 
   public partial class Sqlite3
   {
@@ -113,7 +114,7 @@ if( 0==isPrepareV2 ) return;
     */
     static void sqlite3VdbeSwap( Vdbe pA, Vdbe pB )
     {
-      var tmp = new Vdbe();
+      Vdbe tmp = new Vdbe();
       Vdbe pTmp = new Vdbe();
       string zTmp;
       pA.CopyTo( tmp );
@@ -248,7 +249,7 @@ pOp.cnt = 0;
     //P4_INT32
     static int sqlite3VdbeAddOp4( Vdbe p, int op, int p1, int p2, int p3, i32 pP4, int p4type )
     {
-      var _p4 = new union_p4();
+      union_p4 _p4 = new union_p4();
       _p4.i = pP4;
       int addr = sqlite3VdbeAddOp3( p, op, p1, p2, p3 );
       sqlite3VdbeChangeP4( p, addr, _p4, p4type );
@@ -258,7 +259,7 @@ pOp.cnt = 0;
     //char
     static int sqlite3VdbeAddOp4( Vdbe p, int op, int p1, int p2, int p3, char pP4, int p4type )
     {
-      var _p4 = new union_p4();
+      union_p4 _p4 = new union_p4();
       _p4.z = pP4.ToString();
       int addr = sqlite3VdbeAddOp3( p, op, p1, p2, p3 );
       sqlite3VdbeChangeP4( p, addr, _p4, p4type );
@@ -269,7 +270,7 @@ pOp.cnt = 0;
     static int sqlite3VdbeAddOp4( Vdbe p, int op, int p1, int p2, int p3, StringBuilder pP4, int p4type )
     {
       //      Debug.Assert( pP4 != null );
-      var _p4 = new union_p4();
+      union_p4 _p4 = new union_p4();
       _p4.z = pP4.ToString();
       int addr = sqlite3VdbeAddOp3( p, op, p1, p2, p3 );
       sqlite3VdbeChangeP4( p, addr, _p4, p4type );
@@ -280,7 +281,7 @@ pOp.cnt = 0;
     static int sqlite3VdbeAddOp4( Vdbe p, int op, int p1, int p2, int p3, string pP4, int p4type )
     {
       //      Debug.Assert( pP4 != null );
-      var _p4 = new union_p4();
+      union_p4 _p4 = new union_p4();
       _p4.z = pP4;
       int addr = sqlite3VdbeAddOp3( p, op, p1, p2, p3 );
       sqlite3VdbeChangeP4( p, addr, _p4, p4type );
@@ -290,7 +291,7 @@ pOp.cnt = 0;
     static int sqlite3VdbeAddOp4( Vdbe p, int op, int p1, int p2, int p3, byte[] pP4, int p4type )
     {
       Debug.Assert( op == OP_Null || pP4 != null );
-      var _p4 = new union_p4();
+      union_p4 _p4 = new union_p4();
       _p4.z = Encoding.UTF8.GetString( pP4, 0, pP4.Length );
       int addr = sqlite3VdbeAddOp3( p, op, p1, p2, p3 );
       sqlite3VdbeChangeP4( p, addr, _p4, p4type );
@@ -301,7 +302,7 @@ pOp.cnt = 0;
     static int sqlite3VdbeAddOp4( Vdbe p, int op, int p1, int p2, int p3, int[] pP4, int p4type )
     {
       Debug.Assert( pP4 != null );
-      var _p4 = new union_p4();
+      union_p4 _p4 = new union_p4();
       _p4.ai = pP4;
       int addr = sqlite3VdbeAddOp3( p, op, p1, p2, p3 );
       sqlite3VdbeChangeP4( p, addr, _p4, p4type );
@@ -310,7 +311,7 @@ pOp.cnt = 0;
     //P4_INT64
     static int sqlite3VdbeAddOp4( Vdbe p, int op, int p1, int p2, int p3, i64 pP4, int p4type )
     {
-      var _p4 = new union_p4();
+      union_p4 _p4 = new union_p4();
       _p4.pI64 = pP4;
       int addr = sqlite3VdbeAddOp3( p, op, p1, p2, p3 );
       sqlite3VdbeChangeP4( p, addr, _p4, p4type );
@@ -320,7 +321,7 @@ pOp.cnt = 0;
     //DOUBLE (REAL)
     static int sqlite3VdbeAddOp4( Vdbe p, int op, int p1, int p2, int p3, double pP4, int p4type )
     {
-      var _p4 = new union_p4();
+      union_p4 _p4 = new union_p4();
       _p4.pReal = pP4;
       int addr = sqlite3VdbeAddOp3( p, op, p1, p2, p3 );
       sqlite3VdbeChangeP4( p, addr, _p4, p4type );
@@ -330,7 +331,7 @@ pOp.cnt = 0;
     //FUNCDEF
     static int sqlite3VdbeAddOp4( Vdbe p, int op, int p1, int p2, int p3, FuncDef pP4, int p4type )
     {
-      var _p4 = new union_p4();
+      union_p4 _p4 = new union_p4();
       _p4.pFunc = pP4;
       int addr = sqlite3VdbeAddOp3( p, op, p1, p2, p3 );
       sqlite3VdbeChangeP4( p, addr, _p4, p4type );
@@ -340,7 +341,7 @@ pOp.cnt = 0;
     //CollSeq
     static int sqlite3VdbeAddOp4( Vdbe p, int op, int p1, int p2, int p3, CollSeq pP4, int p4type )
     {
-      var _p4 = new union_p4();
+      union_p4 _p4 = new union_p4();
       _p4.pColl = pP4;
       int addr = sqlite3VdbeAddOp3( p, op, p1, p2, p3 );
       sqlite3VdbeChangeP4( p, addr, _p4, p4type );
@@ -350,7 +351,7 @@ pOp.cnt = 0;
     //KeyInfo
     static int sqlite3VdbeAddOp4( Vdbe p, int op, int p1, int p2, int p3, KeyInfo pP4, int p4type )
     {
-      var _p4 = new union_p4();
+      union_p4 _p4 = new union_p4();
       _p4.pKeyInfo = pP4;
       int addr = sqlite3VdbeAddOp3( p, op, p1, p2, p3 );
       sqlite3VdbeChangeP4( p, addr, _p4, p4type );
@@ -384,7 +385,7 @@ pOp.cnt = 0;
     int p4              /* The P4 operand as an integer */
     )
     {
-      var _p4 = new union_p4();
+      union_p4 _p4 = new union_p4();
       _p4.i = p4;
       int addr = sqlite3VdbeAddOp3( p, op, p1, p2, p3 );
       sqlite3VdbeChangeP4( p, addr, _p4, P4_INT32 );
@@ -955,21 +956,21 @@ if( n>nMaxArgs ) nMaxArgs = n;
     //P4_COLLSEQ
     static void sqlite3VdbeChangeP4( Vdbe p, int addr, CollSeq pColl, int n )
     {
-      var _p4 = new union_p4();
+      union_p4 _p4 = new union_p4();
       _p4.pColl = pColl;
       sqlite3VdbeChangeP4( p, addr, _p4, n );
     }
     //P4_FUNCDEF
     static void sqlite3VdbeChangeP4( Vdbe p, int addr, FuncDef pFunc, int n )
     {
-      var _p4 = new union_p4();
+      union_p4 _p4 = new union_p4();
       _p4.pFunc = pFunc;
       sqlite3VdbeChangeP4( p, addr, _p4, n );
     }
     //P4_INT32
     static void sqlite3VdbeChangeP4( Vdbe p, int addr, int i32n, int n )
     {
-      var _p4 = new union_p4();
+      union_p4 _p4 = new union_p4();
       _p4.i = i32n;
       sqlite3VdbeChangeP4( p, addr, _p4, n );
     }
@@ -977,14 +978,14 @@ if( n>nMaxArgs ) nMaxArgs = n;
     //P4_KEYINFO
     static void sqlite3VdbeChangeP4( Vdbe p, int addr, KeyInfo pKeyInfo, int n )
     {
-      var _p4 = new union_p4();
+      union_p4 _p4 = new union_p4();
       _p4.pKeyInfo = pKeyInfo;
       sqlite3VdbeChangeP4( p, addr, _p4, n );
     }
     //CHAR
     static void sqlite3VdbeChangeP4( Vdbe p, int addr, char c, int n )
     {
-      var _p4 = new union_p4();
+      union_p4 _p4 = new union_p4();
       _p4.z = c.ToString();
       sqlite3VdbeChangeP4( p, addr, _p4, n );
     }
@@ -992,7 +993,7 @@ if( n>nMaxArgs ) nMaxArgs = n;
     //MEM
     static void sqlite3VdbeChangeP4( Vdbe p, int addr, Mem m, int n )
     {
-      var _p4 = new union_p4();
+      union_p4 _p4 = new union_p4();
       _p4.pMem = m;
       sqlite3VdbeChangeP4( p, addr, _p4, n );
     }
@@ -1002,7 +1003,7 @@ if( n>nMaxArgs ) nMaxArgs = n;
     //STRING + Type
     static void sqlite3VdbeChangeP4( Vdbe p, int addr, string z, dxDel P4_Type )
     {
-      var _p4 = new union_p4();
+      union_p4 _p4 = new union_p4();
       _p4.z = z;
       sqlite3VdbeChangeP4( p, addr, _p4, P4_DYNAMIC );
     }
@@ -1010,14 +1011,14 @@ if( n>nMaxArgs ) nMaxArgs = n;
     //SUBPROGRAM
     static void sqlite3VdbeChangeP4( Vdbe p, int addr, SubProgram pProgram, int n )
     {
-      var _p4 = new union_p4();
+      union_p4 _p4 = new union_p4();
       _p4.pProgram = pProgram;
       sqlite3VdbeChangeP4( p, addr, _p4, n );
     }
 
     static void sqlite3VdbeChangeP4( Vdbe p, int addr, string z, int n )
     {
-      var _p4 = new union_p4();
+      union_p4 _p4 = new union_p4();
       if ( n > 0 && n <= z.Length )
         _p4.z = z.Substring( 0, n );
       else
@@ -3282,7 +3283,7 @@ fclose(out);
       }
       else
       {
-        var aSize = new u32[] { 0, 1, 2, 3, 4, 6, 8, 8, 0, 0, 0, 0 };
+        u32[] aSize = new u32[] { 0, 1, 2, 3, 4, 6, 8, 8, 0, 0, 0, 0 };
         return aSize[serial_type];
       }
     }
@@ -3832,7 +3833,7 @@ pMem.r = BitConverter.ToDouble(BitConverter.GetBytes((long)x), 0);
       int nField;
       int rc = 0;
 
-      var aKey1 = new byte[pKey1.Length - offset];
+      byte[] aKey1 = new byte[pKey1.Length - offset];
       //Buffer.BlockCopy( pKey1, offset, aKey1, 0, aKey1.Length );
       KeyInfo pKeyInfo;
 

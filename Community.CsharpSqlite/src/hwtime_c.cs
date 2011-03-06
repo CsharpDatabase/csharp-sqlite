@@ -25,7 +25,6 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  $Header$
     *************************************************************************
     */
     //#if !_HWTIME_H_
@@ -92,7 +91,10 @@ return retval;
     ** of the debugging and testing utilities, but it should at
     ** least compile and run.
     */
-    static sqlite_u3264 sqlite3Hwtime() { return (sqlite_u3264)System.DateTime.Now.Ticks; }// (sqlite_u3264)0 ); }
+    static sqlite_u3264 sqlite3Hwtime()
+    {
+      return (sqlite_u3264)System.DateTime.Now.Ticks;
+    }// (sqlite_u3264)0 ); }
 
 #endif
 

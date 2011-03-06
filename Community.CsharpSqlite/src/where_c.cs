@@ -54,7 +54,9 @@ namespace Community.CsharpSqlite
 static void WHERETRACE( string X, params object[] ap ) { if ( sqlite3WhereTrace ) sqlite3DebugPrintf( X, ap ); }
 #else
     //# define WHERETRACE(X)
-    static void WHERETRACE( string X, params object[] ap ) { }
+    static void WHERETRACE( string X, params object[] ap )
+    {
+    }
 #endif
 
     /* Forward reference
@@ -796,7 +798,7 @@ public WhereTerm[] aStatic = new WhereTerm[1];    /* Initial static space for a[
       ExprList pList;            /* List of operands to the LIKE operator */
       int c = 0;                 /* One character in z[] */
       int cnt;                   /* Number of non-wildcard prefix characters */
-      var wc = new char[3];   /* Wildcard characters */
+      char[] wc = new char[3];   /* Wildcard characters */
       sqlite3 db = pParse.db;    /* Data_base connection */
       sqlite3_value pVal = null;
       int op;                    /* Opcode of pRight */
@@ -850,7 +852,7 @@ if( pnoCase ) return 0;
         if ( cnt != 0 && 255 != (u8)z[cnt - 1] )
         {
           Expr pPrefix;
-          pisComplete = c == wc[0] && cnt == z.Length-1;
+          pisComplete = c == wc[0] && cnt == z.Length - 1;
           pPrefix = sqlite3Expr( db, TK_STRING, z );
           if ( pPrefix != null )
             pPrefix.u.zToken = pPrefix.u.zToken.Substring( 0, cnt );
@@ -1425,7 +1427,7 @@ return 1;
       {
         ExprList pList = pExpr.x.pList;
         int i;
-        var ops = new u8[] { TK_GE, TK_LE };
+        u8[] ops = new u8[] { TK_GE, TK_LE };
         Debug.Assert( pList != null );
         Debug.Assert( pList.nExpr == 2 );
         for ( i = 0; i < 2; i++ )
@@ -1897,7 +1899,7 @@ sqlite3DebugPrintf( "  estimatedCost=%g\n", p.estimatedCost );
             }
             else if ( pOrTerm.leftCursor == iCur )
             {
-              var tempWC = new WhereClause();
+              WhereClause tempWC = new WhereClause();
               tempWC.pParse = pWC.pParse;
               tempWC.pMaskSet = pWC.pMaskSet;
               tempWC.op = TK_AND;
@@ -2176,7 +2178,7 @@ WhereCost pCost            /* Lowest cost query plan */
             idxCols |= cMask;
             pIdx.aiColumn[n] = pTerm.u.leftColumn;
             pColl = sqlite3BinaryCompareCollSeq( pParse, pX.pLeft, pX.pRight );
-            pIdx.azColl[n] = ALWAYS(pColl != null) ? pColl.zName : "BINARY";
+            pIdx.azColl[n] = ALWAYS( pColl != null ) ? pColl.zName : "BINARY";
             n++;
           }
         }
@@ -2869,7 +2871,7 @@ UNUSED_PARAMETER(nEq);
       u32 eqTermMask;             /* Current mask of valid equality operators */
       u32 idxEqTermMask;          /* Index mask of valid equality operators */
       Index sPk;                  /* A fake index object for the primary key */
-      var aiRowEstPk = new int[2]; /* The aiRowEst[] value for the sPk index */
+      int[] aiRowEstPk = new int[2]; /* The aiRowEst[] value for the sPk index */
       int aiColumnPk = -1;        /* The aColumn[] value for the sPk index */
       int wsFlagMask;             /* Allowed flags in pCost.plan.wsFlag */
 
@@ -3729,30 +3731,30 @@ else
         || ( flags & ( WHERE_BTM_LIMIT | WHERE_TOP_LIMIT ) ) != 0
         || ( wctrlFlags & ( WHERE_ORDERBY_MIN | WHERE_ORDERBY_MAX ) ) != 0;
 
-        zMsg.Append( sqlite3MPrintf( db, "%s", isSearch ? "SEARCH" : "SCAN" ));
+        zMsg.Append( sqlite3MPrintf( db, "%s", isSearch ? "SEARCH" : "SCAN" ) );
         if ( pItem.pSelect != null )
         {
-          zMsg.Append( sqlite3MAppendf( db, null, " SUBQUERY %d", pItem.iSelectId ));
+          zMsg.Append( sqlite3MAppendf( db, null, " SUBQUERY %d", pItem.iSelectId ) );
         }
         else
         {
-                    zMsg.Append(  sqlite3MAppendf( db, null, " TABLE %s",  pItem.zName ));
+          zMsg.Append( sqlite3MAppendf( db, null, " TABLE %s", pItem.zName ) );
         }
 
         if ( pItem.zAlias != null )
         {
-          zMsg.Append( sqlite3MAppendf( db, null, " AS %s",  pItem.zAlias ));
+          zMsg.Append( sqlite3MAppendf( db, null, " AS %s", pItem.zAlias ) );
         }
         if ( ( flags & WHERE_INDEXED ) != 0 )
         {
           string zWhere = explainIndexRange( db, pLevel, pItem.pTab );
-          zMsg.Append( sqlite3MAppendf( db, null, " USING %s%sINDEX%s%s%s", 
+          zMsg.Append( sqlite3MAppendf( db, null, " USING %s%sINDEX%s%s%s",
           ( ( flags & WHERE_TEMP_INDEX ) != 0 ? "AUTOMATIC " : "" ),
           ( ( flags & WHERE_IDX_ONLY ) != 0 ? "COVERING " : "" ),
           ( ( flags & WHERE_TEMP_INDEX ) != 0 ? "" : " " ),
           ( ( flags & WHERE_TEMP_INDEX ) != 0 ? "" : pLevel.plan.u.pIdx.zName ),
-          zWhere != null?zWhere :""
-          ));
+          zWhere != null ? zWhere : ""
+          ) );
           sqlite3DbFree( db, ref zWhere );
         }
         else if ( ( flags & ( WHERE_ROWID_EQ | WHERE_ROWID_RANGE ) ) != 0 )
@@ -3765,15 +3767,15 @@ else
           }
           else if ( ( flags & WHERE_BOTH_LIMIT ) == WHERE_BOTH_LIMIT )
           {
-            zMsg.Append(" (rowid>? AND rowid<?)");
+            zMsg.Append( " (rowid>? AND rowid<?)" );
           }
           else if ( ( flags & WHERE_BTM_LIMIT ) != 0 )
           {
-            zMsg.Append( " (rowid>?)");
+            zMsg.Append( " (rowid>?)" );
           }
           else if ( ( flags & WHERE_TOP_LIMIT ) != 0 )
           {
-            zMsg.Append( " (rowid<?)");
+            zMsg.Append( " (rowid<?)" );
           }
         }
 #if !SQLITE_OMIT_VIRTUALTABLE
@@ -3792,7 +3794,7 @@ pVtabIdx.idxNum, pVtabIdx.idxStr);
         {
           nRow = (sqlite3_int64)pLevel.plan.nRow;
         }
-        zMsg.Append( sqlite3MAppendf( db, null, " (~%lld rows)",  nRow ));
+        zMsg.Append( sqlite3MAppendf( db, null, " (~%lld rows)", nRow ) );
         sqlite3VdbeAddOp4( v, OP_Explain, iId, iLevel, iFrom, zMsg, P4_DYNAMIC );
       }
     }
@@ -3966,7 +3968,7 @@ else
           /* The following constant maps TK_xx codes into corresponding
           ** seek opcodes.  It depends on a particular ordering of TK_xx
           */
-          var aMoveOp = new u8[]{
+          u8[] aMoveOp = new u8[]{
 /* TK_GT */  OP_SeekGt,
 /* TK_LE */  OP_SeekLe,
 /* TK_LT */  OP_SeekLt,
@@ -4066,7 +4068,7 @@ else
         **         constraints but an index is selected anyway, in order
         **         to force the output order to conform to an ORDER BY.
         */
-        var aStartOp = new u8[]  {
+        u8[] aStartOp = new u8[]  {
 0,
 0,
 OP_Rewind,           /* 2: (!start_constraints && startEq &&  !bRev) */
@@ -4076,7 +4078,7 @@ OP_SeekLt,           /* 5: (start_constraints  && !startEq &&  bRev) */
 OP_SeekGe,           /* 6: (start_constraints  &&  startEq && !bRev) */
 OP_SeekLe            /* 7: (start_constraints  &&  startEq &&  bRev) */
 };
-        var aEndOp = new u8[]  {
+        u8[] aEndOp = new u8[]  {
 OP_Noop,             /* 0: (!end_constraints) */
 OP_IdxGE,            /* 1: (end_constraints && !bRev) */
 OP_IdxLT             /* 2: (end_constraints && bRev) */
@@ -4095,7 +4097,7 @@ OP_IdxLT             /* 2: (end_constraints && bRev) */
         int iIdxCur;                   /* The VDBE cursor for the index */
         int nExtraReg = 0;             /* Number of extra registers needed */
         int op;                        /* Instruction opcode */
-        var zStartAff = new StringBuilder( "" );
+        StringBuilder zStartAff = new StringBuilder( "" );
         ;/* Affinity for start of range constraint */
         StringBuilder zEndAff;         /* Affinity for end of range constraint */
 
@@ -4449,8 +4451,8 @@ OP_IdxLT             /* 2: (end_constraints && bRev) */
           /* Case 5:  There is no usable index.  We must do a complete
           **          scan of the entire table.
           */
-          var aStep = new u8[] { OP_Next, OP_Prev };
-          var aStart = new u8[] { OP_Rewind, OP_Last };
+          u8[] aStep = new u8[] { OP_Next, OP_Prev };
+          u8[] aStart = new u8[] { OP_Rewind, OP_Last };
           Debug.Assert( bRev == 0 || bRev == 1 );
           Debug.Assert( omitTable == 0 );
           pLevel.op = aStep[bRev];
@@ -4679,7 +4681,7 @@ OP_IdxLT             /* 2: (end_constraints && bRev) */
       Vdbe v = pParse.pVdbe;     /* The virtual data_base engine */
       Bitmask notReady;          /* Cursors that are not yet positioned */
       WhereMaskSet pMaskSet;     /* The expression mask set */
-      var pWC = new WhereClause();               /* Decomposition of the WHERE clause */
+      WhereClause pWC = new WhereClause();               /* Decomposition of the WHERE clause */
       SrcList_item pTabItem;     /* A single entry from pTabList */
       WhereLevel pLevel;         /* A single level in the pWInfo list */
       int iFrom;                 /* First unused FROM clause element */
@@ -4899,7 +4901,7 @@ pWC.vmask |= ( (Bitmask)1 << i );
           {
             pTabItem = pTabList.a[j];
             int doNotReorder;       /* True if this table should not be reordered */
-            var sCost = new WhereCost(); /* Cost information from best[Virtual]Index() */
+            WhereCost sCost = new WhereCost(); /* Cost information from best[Virtual]Index() */
             ExprList pOrderBy;      /* ORDER BY clause for index to optimize */
 
             doNotReorder = ( pTabItem.jointype & ( JT_LEFT | JT_CROSS ) ) != 0 ? 1 : 0;
@@ -5110,7 +5112,9 @@ pVTab, P4_VTAB);
             {
               Bitmask b = pTabItem.colUsed;
               int n = 0;
-              for ( ; b != 0; b = b >> 1, n++ ) { }
+              for ( ; b != 0; b = b >> 1, n++ )
+              {
+              }
               sqlite3VdbeChangeP4( v, sqlite3VdbeCurrentAddr( v ) - 1,
                       n, P4_INT32 );//SQLITE_INT_TO_PTR(n)
               Debug.Assert( n <= pTab.nCol );

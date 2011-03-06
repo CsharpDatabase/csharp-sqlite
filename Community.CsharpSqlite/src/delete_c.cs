@@ -28,7 +28,6 @@ namespace Community.CsharpSqlite
     **
     **  SQLITE_SOURCE_ID: 2010-08-23 18:52:01 42537b60566f288167f1b5864a5435986838e3a3
     **
-    **  $Header$
     *************************************************************************
     */
     //#include "sqliteInt.h"
@@ -110,7 +109,7 @@ namespace Community.CsharpSqlite
     int iCur           /* VdbeCursor number for ephemerial table */
     )
     {
-      var dest = new SelectDest();
+      SelectDest dest = new SelectDest();
       Select pDup;
       sqlite3 db = pParse.db;
 
@@ -123,11 +122,11 @@ namespace Community.CsharpSqlite
         pFrom = sqlite3SrcListAppend( db, null, null, null );
         //if ( pFrom != null )
         //{
-          Debug.Assert( pFrom.nSrc == 1 );
-          pFrom.a[0].zAlias = pView.zName;// sqlite3DbStrDup( db, pView.zName );
-          pFrom.a[0].pSelect = pDup;
-          Debug.Assert( pFrom.a[0].pOn == null );
-          Debug.Assert( pFrom.a[0].pUsing == null );
+        Debug.Assert( pFrom.nSrc == 1 );
+        pFrom.a[0].zAlias = pView.zName;// sqlite3DbStrDup( db, pView.zName );
+        pFrom.a[0].pSelect = pDup;
+        Debug.Assert( pFrom.a[0].pOn == null );
+        Debug.Assert( pFrom.a[0].pUsing == null );
         //}
         //else
         //{
@@ -283,7 +282,8 @@ return null;
       ** an SrcList* parameter instead of just a Table* parameter.
       */
       pTab = sqlite3SrcListLookup( pParse, pTabList );
-      if ( pTab == null ) goto delete_from_cleanup;
+      if ( pTab == null )
+        goto delete_from_cleanup;
 
       /* Figure out if we have any triggers and if the table being
       ** deleted from is a view
@@ -350,7 +350,8 @@ sqlite3AuthContextPush(pParse, sContext, pTab.zName);
       {
         goto delete_from_cleanup;
       }
-      if ( pParse.nested == 0 ) sqlite3VdbeCountChanges( v );
+      if ( pParse.nested == 0 )
+        sqlite3VdbeCountChanges( v );
       sqlite3BeginWriteOperation( pParse, 1, iDb );
 
       /* If we are trying to delete from a view, realize that view into
@@ -415,7 +416,8 @@ sqlite3AuthContextPush(pParse, sContext, pTab.zName);
         sqlite3VdbeAddOp2( v, OP_Null, 0, iRowSet );
         ExprList elDummy = null;
         pWInfo = sqlite3WhereBegin( pParse, pTabList, pWhere, ref elDummy, WHERE_DUPLICATES_OK );
-        if ( pWInfo == null ) goto delete_from_cleanup;
+        if ( pWInfo == null )
+          goto delete_from_cleanup;
         regRowid = sqlite3ExprCodeGetColumn( pParse, pTab, -1, iCur, iRowid );
         sqlite3VdbeAddOp2( v, OP_RowSetAdd, iRowSet, regRowid );
         if ( ( db.flags & SQLITE_CountRows ) != 0 )
@@ -491,7 +493,7 @@ sqlite3MayAbort(pParse);
         sqlite3VdbeSetColName( v, 0, COLNAME_NAME, "rows deleted", SQLITE_STATIC );
       }
 
-    delete_from_cleanup:
+delete_from_cleanup:
 #if !SQLITE_OMIT_AUTHORIZATION
 sqlite3AuthContextPop(sContext);
 #endif
@@ -575,7 +577,7 @@ sqlite3AuthContextPop(sContext);
         {
           if ( mask == 0xffffffff || ( mask & ( 1 << iCol ) ) != 0 )
           {
-            sqlite3ExprCodeGetColumnOfTable(v, pTab, iCur, iCol, iOld + iCol + 1);
+            sqlite3ExprCodeGetColumnOfTable( v, pTab, iCur, iCol, iOld + iCol + 1 );
           }
         }
 
@@ -665,7 +667,8 @@ sqlite3AuthContextPop(sContext);
 
       for ( i = 1, pIdx = pTab.pIndex; pIdx != null; i++, pIdx = pIdx.pNext )
       {
-        if ( aRegIdx != null && aRegIdx[i - 1] == 0 ) continue;
+        if ( aRegIdx != null && aRegIdx[i - 1] == 0 )
+          continue;
         r1 = sqlite3GenerateIndexKey( pParse, pIdx, iCur, 0, false );
         sqlite3VdbeAddOp3( pParse.pVdbe, OP_IdxDelete, iCur + i, r1, pIdx.nColumn + 1 );
       }

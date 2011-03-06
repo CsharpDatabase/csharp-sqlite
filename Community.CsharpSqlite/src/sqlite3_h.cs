@@ -1141,7 +1141,9 @@ namespace Community.CsharpSqlite
       /* New fields may be appended in figure versions.  The iVersion
       ** value will increment whenever this happens. */
 
-      public sqlite3_vfs() { }
+      public sqlite3_vfs()
+      {
+      }
 
       public sqlite3_vfs( int iVersion,
       int szOsFile,
@@ -6375,7 +6377,8 @@ namespace Community.CsharpSqlite
       public dxPC_Destroy xDestroy;//public void (*xDestroy)(sqlite3_pcache*);
 
       public sqlite3_pcache_methods()
-      { }
+      {
+      }
 
       public sqlite3_pcache_methods( object pArg, dxPC_Init xInit, dxPC_Shutdown xShutdown, dxPC_Create xCreate, dxPC_Cachesize xCachesize, dxPC_Pagecount xPagecount, dxPC_Fetch xFetch, dxPC_Unpin xUnpin, dxPC_Rekey xRekey, dxPC_Truncate xTruncate, dxPC_Destroy xDestroy )
       {

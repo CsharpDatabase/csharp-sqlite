@@ -27,7 +27,6 @@ namespace Community.CsharpSqlite
     **
     **  SQLITE_SOURCE_ID: 2010-12-07 20:14:09 a586a4deeb25330037a49df295b36aaf624d0f45
     **
-    **  $Header$
     *************************************************************************
     */
     //#include "sqliteInt.h"
@@ -63,7 +62,7 @@ namespace Community.CsharpSqlite
       string zTableName = sqlite3_value_text( argv[1] );
 
       int token = 0;
-      var tname = new Token();
+      Token tname = new Token();
       int zCsr = 0;
       int zLoc = 0;
       int len = 0;
@@ -158,12 +157,13 @@ namespace Community.CsharpSqlite
           } while ( token == TK_SPACE );
 
           zParent = zIdx + n < zInput.Length ? zInput.Substring( zIdx, n ) : "";//sqlite3DbStrNDup(db, zIdx, n);
-          if ( String.IsNullOrEmpty( zParent ) ) break;
+          if ( String.IsNullOrEmpty( zParent ) )
+            break;
           sqlite3Dequote( ref zParent );
           if ( 0 == sqlite3StrICmp( zOld, zParent ) )
           {
             string zOut = sqlite3MPrintf( db, "%s%.*s\"%w\"",
-                zOutput, zIdx-zLeft, zInput.Substring(zLeft), zNew
+                zOutput, zIdx - zLeft, zInput.Substring( zLeft ), zNew
             );
             sqlite3DbFree( db, ref zOutput );
             zOutput = zOut;
@@ -174,7 +174,7 @@ namespace Community.CsharpSqlite
         }
       }
 
-      zResult = sqlite3MPrintf( db, "%s%s", zOutput , zInput.Substring(zLeft)   );
+      zResult = sqlite3MPrintf( db, "%s%s", zOutput, zInput.Substring( zLeft ) );
       sqlite3_result_text( context, zResult, -1, SQLITE_DYNAMIC );
       sqlite3DbFree( db, ref zOutput );
     }
@@ -198,7 +198,7 @@ namespace Community.CsharpSqlite
       string zTableName = sqlite3_value_text( argv[1] );
 
       int token = 0;
-      var tname = new Token();
+      Token tname = new Token();
       int dist = 3;
       int zCsr = 0;
       int zLoc = 0;
@@ -270,8 +270,9 @@ namespace Community.CsharpSqlite
 ** Register built-in functions used to help implement ALTER TABLE
 */
     static FuncDef[] aAlterTableFuncs;
-    static void sqlite3AlterFunctions(){
-  aAlterTableFuncs = new FuncDef[] {
+    static void sqlite3AlterFunctions()
+    {
+      aAlterTableFuncs = new FuncDef[] {
     FUNCTION("sqlite_rename_table",   2, 0, 0, renameTableFunc),
 #if !SQLITE_OMIT_TRIGGER
     FUNCTION("sqlite_rename_trigger", 2, 0, 0, renameTriggerFunc),
@@ -280,18 +281,19 @@ namespace Community.CsharpSqlite
     FUNCTION("sqlite_rename_parent",  3, 0, 0, renameParentFunc),
 #endif
   };
-  int i;
+      int i;
 #if SQLITE_OMIT_WSD
   FuncDefHash pHash = GLOBAL(FuncDefHash, sqlite3GlobalFunctions);
   FuncDef[] aFunc = GLOBAL(FuncDef, aAlterTableFuncs);
 #else
-  FuncDefHash pHash = sqlite3GlobalFunctions;
-  FuncDef[] aFunc = aAlterTableFuncs;
+      FuncDefHash pHash = sqlite3GlobalFunctions;
+      FuncDef[] aFunc = aAlterTableFuncs;
 #endif
 
-  for(i=0; i<ArraySize(aAlterTableFuncs); i++){
-    sqlite3FuncDefInsert(pHash, aFunc[i]);
-  }
+      for ( i = 0; i < ArraySize( aAlterTableFuncs ); i++ )
+      {
+        sqlite3FuncDefInsert( pHash, aFunc[i] );
+      }
     }
 
     /*
@@ -326,20 +328,22 @@ namespace Community.CsharpSqlite
     }
 
 #if !(SQLITE_OMIT_FOREIGN_KEY) && !(SQLITE_OMIT_TRIGGER)
-/*
+    /*
 ** Generate the text of a WHERE expression which can be used to select all
 ** tables that have foreign key constraints that refer to table pTab (i.e.
 ** constraints for which pTab is the parent table) from the sqlite_master
 ** table.
 */
-static string whereForeignKeys(Parse pParse, Table pTab){
-  FKey p;
-  string zWhere = "";
-  for(p=sqlite3FkReferences(pTab); p!= null; p=p.pNextTo){
-    zWhere = whereOrName(pParse.db, zWhere, p.pFrom.zName);
-  }
-  return zWhere;
-}
+    static string whereForeignKeys( Parse pParse, Table pTab )
+    {
+      FKey p;
+      string zWhere = "";
+      for ( p = sqlite3FkReferences( pTab ); p != null; p = p.pNextTo )
+      {
+        zWhere = whereOrName( pParse.db, zWhere, p.pFrom.zName );
+      }
+      return zWhere;
+    }
 #endif
 
     /*
@@ -370,7 +374,7 @@ static string whereForeignKeys(Parse pParse, Table pTab){
           }
         }
       }
-      if ( !String.IsNullOrEmpty(zWhere) )
+      if ( !String.IsNullOrEmpty( zWhere ) )
       {
         zWhere = sqlite3MPrintf( pParse.db, "type='trigger' AND (%s)", zWhere );
         //sqlite3DbFree( pParse.db, ref zWhere );
@@ -397,14 +401,15 @@ static string whereForeignKeys(Parse pParse, Table pTab){
 #endif
 
       v = sqlite3GetVdbe( pParse );
-      if ( NEVER( v == null ) ) return;
+      if ( NEVER( v == null ) )
+        return;
       Debug.Assert( sqlite3BtreeHoldsAllMutexes( pParse.db ) );
       iDb = sqlite3SchemaToIndex( pParse.db, pTab.pSchema );
       Debug.Assert( iDb >= 0 );
 
 #if !SQLITE_OMIT_TRIGGER
       /* Drop any table triggers from the internal schema. */
-      for ( pTrig = sqlite3TriggerList( pParse, pTab ) ; pTrig != null ; pTrig = pTrig.pNext )
+      for ( pTrig = sqlite3TriggerList( pParse, pTab ); pTrig != null; pTrig = pTrig.pNext )
       {
         int iTrigDb = sqlite3SchemaToIndex( pParse.db, pTrig.pSchema );
         Debug.Assert( iTrigDb == iDb || iTrigDb == 1 );
@@ -417,7 +422,8 @@ static string whereForeignKeys(Parse pParse, Table pTab){
 
       /* Reload the table, index and permanent trigger schemas. */
       zWhere = sqlite3MPrintf( pParse.db, "tbl_name=%Q", zName );
-      if ( zWhere == null ) return;
+      if ( zWhere == null )
+        return;
       sqlite3VdbeAddOp4( v, OP_ParseSchema, iDb, 0, 0, zWhere, P4_DYNAMIC );
 
 #if !SQLITE_OMIT_TRIGGER
@@ -455,20 +461,22 @@ static string whereForeignKeys(Parse pParse, Table pTab){
       VTable pVTab = null;         /* Non-zero if this is a v-tab with an xRename() */
       int savedDbFlags;         /* Saved value of db->flags */
 
-      savedDbFlags = db.flags;  
+      savedDbFlags = db.flags;
 
       //if ( NEVER( db.mallocFailed != 0 ) ) goto exit_rename_table;
       Debug.Assert( pSrc.nSrc == 1 );
       Debug.Assert( sqlite3BtreeHoldsAllMutexes( pParse.db ) );
       pTab = sqlite3LocateTable( pParse, 0, pSrc.a[0].zName, pSrc.a[0].zDatabase );
-      if ( pTab == null ) goto exit_rename_table;
+      if ( pTab == null )
+        goto exit_rename_table;
       iDb = sqlite3SchemaToIndex( pParse.db, pTab.pSchema );
       zDb = db.aDb[iDb].zName;
       db.flags |= SQLITE_PreferBuiltin;
 
       /* Get a NULL terminated version of the new table name. */
       zName = sqlite3NameFromToken( db, pName );
-      if ( zName == null ) goto exit_rename_table;
+      if ( zName == null )
+        goto exit_rename_table;
 
       /* Check that a table or index named 'zName' does not already exist
       ** in database iDb. If so, this is an error.
@@ -554,18 +562,20 @@ sqlite3MayAbort(pParse);
       nTabName = sqlite3Utf8CharLen( zTabName, -1 );
 
 #if !(SQLITE_OMIT_FOREIGN_KEY) && !(SQLITE_OMIT_TRIGGER)
-  if(( db.flags&SQLITE_ForeignKeys )!=0){
-    /* If foreign-key support is enabled, rewrite the CREATE TABLE 
-    ** statements corresponding to all child tables of foreign key constraints
-    ** for which the renamed table is the parent table.  */
-    if( (zWhere=whereForeignKeys(pParse, pTab))!=null ){
-      sqlite3NestedParse(pParse, 
-          "UPDATE \"%w\".%s SET "+
-              "sql = sqlite_rename_parent(sql, %Q, %Q) "+
-              "WHERE %s;", zDb, SCHEMA_TABLE(iDb), zTabName, zName, zWhere);
-      sqlite3DbFree(db, ref zWhere);
-    }
-  }
+      if ( ( db.flags & SQLITE_ForeignKeys ) != 0 )
+      {
+        /* If foreign-key support is enabled, rewrite the CREATE TABLE 
+        ** statements corresponding to all child tables of foreign key constraints
+        ** for which the renamed table is the parent table.  */
+        if ( ( zWhere = whereForeignKeys( pParse, pTab ) ) != null )
+        {
+          sqlite3NestedParse( pParse,
+              "UPDATE \"%w\".%s SET " +
+                  "sql = sqlite_rename_parent(sql, %Q, %Q) " +
+                  "WHERE %s;", zDb, SCHEMA_TABLE( iDb ), zTabName, zName, zWhere );
+          sqlite3DbFree( db, ref zWhere );
+        }
+      }
 #endif
 
       /* Modify the sqlite_master table to use the new table name. */
@@ -623,21 +633,24 @@ sqlite3MayAbort(pParse);
 #endif
 
 #if !(SQLITE_OMIT_FOREIGN_KEY) && !(SQLITE_OMIT_TRIGGER)
-  if(( db.flags&SQLITE_ForeignKeys )!=0){
-    FKey p;
-    for(p=sqlite3FkReferences(pTab); p!=null; p=p.pNextTo){
-      Table pFrom = p.pFrom;
-      if( pFrom!=pTab ){
-        reloadTableSchema(pParse, p.pFrom, pFrom.zName);
+      if ( ( db.flags & SQLITE_ForeignKeys ) != 0 )
+      {
+        FKey p;
+        for ( p = sqlite3FkReferences( pTab ); p != null; p = p.pNextTo )
+        {
+          Table pFrom = p.pFrom;
+          if ( pFrom != pTab )
+          {
+            reloadTableSchema( pParse, p.pFrom, pFrom.zName );
+          }
+        }
       }
-    }
-  }
 #endif
 
       /* Drop and reload the internal table schema. */
       reloadTableSchema( pParse, pTab, zName );
 
-    exit_rename_table:
+exit_rename_table:
       sqlite3SrcListDelete( db, ref pSrc );
       sqlite3DbFree( db, ref zName );
       db.flags = savedDbFlags;
@@ -691,7 +704,8 @@ sqlite3MayAbort(pParse);
       sqlite3 db;              /* The database connection; */
 
       db = pParse.db;
-      if ( pParse.nErr != 0 /*|| db.mallocFailed != 0 */ ) return;
+      if ( pParse.nErr != 0 /*|| db.mallocFailed != 0 */ )
+        return;
       pNew = pParse.pNewTable;
       Debug.Assert( pNew != null );
       Debug.Assert( sqlite3BtreeHoldsAllMutexes( db ) );
@@ -775,7 +789,7 @@ return;
         //    zEnd-- = '\0';
         //  }
         db.flags |= SQLITE_PreferBuiltin;
-        sqlite3NestedParse(pParse,
+        sqlite3NestedParse( pParse,
         "UPDATE \"%w\".%s SET " +
         "sql = substr(sql,1,%d) || ', ' || %Q || substr(sql,%d) " +
         "WHERE type = 'table' AND name = %Q",
@@ -826,7 +840,8 @@ return;
       Debug.Assert( sqlite3BtreeHoldsAllMutexes( db ) );
       //      if ( db.mallocFailed != 0 ) goto exit_begin_add_column;
       pTab = sqlite3LocateTable( pParse, 0, pSrc.a[0].zName, pSrc.a[0].zDatabase );
-      if ( pTab == null ) goto exit_begin_add_column;
+      if ( pTab == null )
+        goto exit_begin_add_column;
 
       if ( IsVirtual( pTab ) )
       {
@@ -852,7 +867,8 @@ return;
       ** prefix on their name.
       */
       pNew = new Table();// (Table*)sqlite3DbMallocZero( db, sizeof(Table))
-      if ( pNew == null ) goto exit_begin_add_column;
+      if ( pNew == null )
+        goto exit_begin_add_column;
       pParse.pNewTable = pNew;
       pNew.nRef = 1;
       pNew.nCol = pTab.nCol;
@@ -884,10 +900,11 @@ return;
       /* Begin a transaction and increment the schema cookie.  */
       sqlite3BeginWriteOperation( pParse, 0, iDb );
       v = sqlite3GetVdbe( pParse );
-      if ( v == null ) goto exit_begin_add_column;
+      if ( v == null )
+        goto exit_begin_add_column;
       sqlite3ChangeCookie( pParse, iDb );
 
-    exit_begin_add_column:
+exit_begin_add_column:
       sqlite3SrcListDelete( db, ref pSrc );
       return;
     }

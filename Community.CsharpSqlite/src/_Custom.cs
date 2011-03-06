@@ -1,6 +1,6 @@
 /*
 *************************************************************************
-**  $Header$
+**  Custom classes used by C#
 *************************************************************************
 */
 using System;
@@ -25,33 +25,45 @@ namespace Community.CsharpSqlite
   {
 
     static int atoi( byte[] inStr )
-    { return atoi(Encoding.UTF8.GetString(inStr,0,inStr.Length)); }
+    {
+      return atoi( Encoding.UTF8.GetString( inStr, 0, inStr.Length ) );
+    }
 
     static int atoi( string inStr )
     {
       int i;
       for ( i = 0; i < inStr.Length; i++ )
       {
-        if ( !sqlite3Isdigit( inStr[i] ) && inStr[i] != '-' ) break;
+        if ( !sqlite3Isdigit( inStr[i] ) && inStr[i] != '-' )
+          break;
       }
       int result = 0;
 
       return ( Int32.TryParse( inStr.Substring( 0, i ), out result ) ? result : 0 );
     }
 
-    static void fprintf( TextWriter tw, string zFormat, params object[] ap ) { tw.Write( sqlite3_mprintf( zFormat, ap ) ); }
-    static void printf( string zFormat, params object[] ap ) { Console.Out.Write( sqlite3_mprintf( zFormat, ap ) ); }
+    static void fprintf( TextWriter tw, string zFormat, params object[] ap )
+    {
+      tw.Write( sqlite3_mprintf( zFormat, ap ) );
+    }
+    static void printf( string zFormat, params object[] ap )
+    {
+      Console.Out.Write( sqlite3_mprintf( zFormat, ap ) );
+    }
 
 
     //Byte Buffer Testing
 
     static int memcmp( byte[] bA, byte[] bB, int Limit )
     {
-      if ( bA.Length < Limit ) return ( bA.Length < bB.Length ) ? -1 : +1;
-      if ( bB.Length < Limit ) return +1;
+      if ( bA.Length < Limit )
+        return ( bA.Length < bB.Length ) ? -1 : +1;
+      if ( bB.Length < Limit )
+        return +1;
       for ( int i = 0; i < Limit; i++ )
       {
-        if ( bA[i] != bB[i] ) return ( bA[i] < bB[i] ) ? -1 : 1;
+        if ( bA[i] != bB[i] )
+          return ( bA[i] < bB[i] ) ? -1 : 1;
       }
       return 0;
     }
@@ -59,11 +71,14 @@ namespace Community.CsharpSqlite
     //Byte Buffer  & String Testing
     static int memcmp( byte[] bA, string B, int Limit )
     {
-      if ( bA.Length < Limit ) return ( bA.Length < B.Length ) ? -1 : +1;
-      if ( B.Length < Limit ) return +1;
+      if ( bA.Length < Limit )
+        return ( bA.Length < B.Length ) ? -1 : +1;
+      if ( B.Length < Limit )
+        return +1;
       for ( int i = 0; i < Limit; i++ )
       {
-        if ( bA[i] != B[i] ) return ( bA[i] < B[i] ) ? -1 : 1;
+        if ( bA[i] != B[i] )
+          return ( bA[i] < B[i] ) ? -1 : 1;
       }
       return 0;
     }
@@ -71,11 +86,14 @@ namespace Community.CsharpSqlite
     //Byte Buffer  & String Testing
     static int memcmp( string A, byte[] bB, int Limit )
     {
-      if ( A.Length < Limit ) return ( A.Length < bB.Length ) ? -1 : +1;
-      if ( bB.Length < Limit ) return +1;
+      if ( A.Length < Limit )
+        return ( A.Length < bB.Length ) ? -1 : +1;
+      if ( bB.Length < Limit )
+        return +1;
       for ( int i = 0; i < Limit; i++ )
       {
-        if ( A[i] != bB[i] ) return ( A[i] < bB[i] ) ? -1 : 1;
+        if ( A[i] != bB[i] )
+          return ( A[i] < bB[i] ) ? -1 : 1;
       }
       return 0;
     }
@@ -83,45 +101,57 @@ namespace Community.CsharpSqlite
     //byte with Offset & String Testing
     static int memcmp( byte[] a, int Offset, byte[] b, int Limit )
     {
-      if ( a.Length < Offset + Limit ) return ( a.Length - Offset < b.Length ) ? -1 : +1;
-      if ( b.Length < Limit ) return +1;
+      if ( a.Length < Offset + Limit )
+        return ( a.Length - Offset < b.Length ) ? -1 : +1;
+      if ( b.Length < Limit )
+        return +1;
       for ( int i = 0; i < Limit; i++ )
       {
-        if ( a[i + Offset] != b[i] ) return ( a[i + Offset] < b[i] ) ? -1 : 1;
+        if ( a[i + Offset] != b[i] )
+          return ( a[i + Offset] < b[i] ) ? -1 : 1;
       }
       return 0;
     }
 
     //byte with Offset & String Testing
-    static int memcmp(byte[] a, int Aoffset, byte[] b, int Boffset, int Limit)
+    static int memcmp( byte[] a, int Aoffset, byte[] b, int Boffset, int Limit )
     {
-      if (a.Length < Aoffset + Limit) return (a.Length - Aoffset < b.Length - Boffset) ? -1 : +1;
-      if (b.Length < Boffset + Limit) return +1;
-      for (int i = 0; i < Limit; i++)
+      if ( a.Length < Aoffset + Limit )
+        return ( a.Length - Aoffset < b.Length - Boffset ) ? -1 : +1;
+      if ( b.Length < Boffset + Limit )
+        return +1;
+      for ( int i = 0; i < Limit; i++ )
       {
-        if (a[i + Aoffset] != b[i + Boffset]) return (a[i + Aoffset] < b[i + Boffset]) ? -1 : 1;
+        if ( a[i + Aoffset] != b[i + Boffset] )
+          return ( a[i + Aoffset] < b[i + Boffset] ) ? -1 : 1;
       }
       return 0;
     }
 
-    static int memcmp(string a, int Offset, byte[] b, int Limit)
+    static int memcmp( string a, int Offset, byte[] b, int Limit )
     {
-      if ( a.Length < Offset + Limit ) return ( a.Length - Offset < b.Length ) ? -1 : +1;
-      if ( b.Length < Limit ) return +1;
+      if ( a.Length < Offset + Limit )
+        return ( a.Length - Offset < b.Length ) ? -1 : +1;
+      if ( b.Length < Limit )
+        return +1;
       for ( int i = 0; i < Limit; i++ )
       {
-        if ( a[i + Offset] != b[i] ) return ( a[i + Offset] < b[i] ) ? -1 : 1;
+        if ( a[i + Offset] != b[i] )
+          return ( a[i + Offset] < b[i] ) ? -1 : 1;
       }
       return 0;
     }
 
     static int memcmp( byte[] a, int Offset, string b, int Limit )
     {
-      if ( a.Length < Offset + Limit ) return ( a.Length - Offset < b.Length ) ? -1 : +1;
-      if ( b.Length < Limit ) return +1;
+      if ( a.Length < Offset + Limit )
+        return ( a.Length - Offset < b.Length ) ? -1 : +1;
+      if ( b.Length < Limit )
+        return +1;
       for ( int i = 0; i < Limit; i++ )
       {
-        if ( a[i + Offset] != b[i] ) return ( a[i + Offset] < b[i] ) ? -1 : 1;
+        if ( a[i + Offset] != b[i] )
+          return ( a[i + Offset] < b[i] ) ? -1 : 1;
       }
       return 0;
     }
@@ -130,11 +160,14 @@ namespace Community.CsharpSqlite
     //String Testing
     static int memcmp( string A, string B, int Limit )
     {
-      if ( A.Length < Limit ) return ( A.Length < B.Length ) ? -1 : +1;
-      if ( B.Length < Limit ) return +1;
+      if ( A.Length < Limit )
+        return ( A.Length < B.Length ) ? -1 : +1;
+      if ( B.Length < Limit )
+        return +1;
       for ( int i = 0; i < Limit; i++ )
       {
-        if ( A[i] != B[i] ) return ( A[i] < B[i] ) ? -1 : 1;
+        if ( A[i] != B[i] )
+          return ( A[i] < B[i] ) ? -1 : 1;
       }
       return 0;
     }
@@ -164,11 +197,15 @@ namespace Community.CsharpSqlite
         case "long int":
         case "longlong int":
         case "i64":
-          if ( ap[vaNEXT - 1].GetType().BaseType.Name == "Object" ) return (i64)( ap[vaNEXT - 1].GetHashCode() ); ;
+          if ( ap[vaNEXT - 1].GetType().BaseType.Name == "Object" )
+            return (i64)( ap[vaNEXT - 1].GetHashCode() );
+          ;
           return Convert.ToInt64( ap[vaNEXT - 1] );
         case "int":
-          if ( Convert.ToInt64( ap[vaNEXT - 1] ) > 0 && ( Convert.ToUInt32( ap[vaNEXT - 1] ) > Int32.MaxValue ) ) return (Int32)( Convert.ToUInt32( ap[vaNEXT - 1] ) - System.UInt32.MaxValue - 1 );
-          else return (Int32)Convert.ToInt32( ap[vaNEXT - 1] );
+          if ( Convert.ToInt64( ap[vaNEXT - 1] ) > 0 && ( Convert.ToUInt32( ap[vaNEXT - 1] ) > Int32.MaxValue ) )
+            return (Int32)( Convert.ToUInt32( ap[vaNEXT - 1] ) - System.UInt32.MaxValue - 1 );
+          else
+            return (Int32)Convert.ToInt32( ap[vaNEXT - 1] );
         case "SrcList":
           return (SrcList)ap[vaNEXT - 1];
         case "char":
@@ -183,7 +220,8 @@ namespace Community.CsharpSqlite
               {
                 return (char)'0';
               }
-              else return (char)( (i64)ap[vaNEXT - 1] );
+              else
+                return (char)( (i64)ap[vaNEXT - 1] );
             else
               return (char)ap[vaNEXT - 1];
           }
@@ -196,15 +234,16 @@ namespace Community.CsharpSqlite
           else
           {
             if ( ap[vaNEXT - 1].GetType().Name == "Byte[]" )
-              if ( Encoding.UTF8.GetString( (byte[])ap[vaNEXT - 1], 0, ((byte[])ap[vaNEXT - 1]).Length) == "\0" )
+              if ( Encoding.UTF8.GetString( (byte[])ap[vaNEXT - 1], 0, ( (byte[])ap[vaNEXT - 1] ).Length ) == "\0" )
                 return "";
               else
-                return Encoding.UTF8.GetString((byte[])ap[vaNEXT - 1], 0, ((byte[])ap[vaNEXT - 1]).Length);
+                return Encoding.UTF8.GetString( (byte[])ap[vaNEXT - 1], 0, ( (byte[])ap[vaNEXT - 1] ).Length );
             else if ( ap[vaNEXT - 1].GetType().Name == "Int32" )
               return null;
             else if ( ap[vaNEXT - 1].GetType().Name == "StringBuilder" )
               return (string)ap[vaNEXT - 1].ToString();
-            else return (string)ap[vaNEXT - 1];
+            else
+              return (string)ap[vaNEXT - 1];
           }
         case "byte[]":
           if ( ap[vaNEXT - 1] == null )
@@ -276,9 +315,9 @@ namespace Community.CsharpSqlite
 
     public static tm localtime( time_t baseTime )
     {
-      var RefTime = new System.DateTime( 1970, 1, 1, 0, 0, 0, 0 );
+      System.DateTime RefTime = new System.DateTime( 1970, 1, 1, 0, 0, 0, 0 );
       RefTime = RefTime.AddSeconds( Convert.ToDouble( baseTime ) ).ToLocalTime();
-      var tm = new tm();
+      tm tm = new tm();
       tm.tm_sec = RefTime.Second;
       tm.tm_min = RefTime.Minute;
       tm.tm_hour = RefTime.Hour;
@@ -293,14 +332,14 @@ namespace Community.CsharpSqlite
 
     public static long ToUnixtime( System.DateTime date )
     {
-      var unixStartTime = new System.DateTime( 1970, 1, 1, 0, 0, 0, 0 );
+      System.DateTime unixStartTime = new System.DateTime( 1970, 1, 1, 0, 0, 0, 0 );
       System.TimeSpan timeSpan = date - unixStartTime;
       return Convert.ToInt64( timeSpan.TotalSeconds );
     }
 
     public static System.DateTime ToCSharpTime( long unixTime )
     {
-      var unixStartTime = new System.DateTime( 1970, 1, 1, 0, 0, 0, 0 );
+      System.DateTime unixStartTime = new System.DateTime( 1970, 1, 1, 0, 0, 0, 0 );
       return unixStartTime.AddSeconds( Convert.ToDouble( unixTime ) );
     }
 
@@ -327,26 +366,33 @@ namespace Community.CsharpSqlite
     public static int GetbytesPerSector( StringBuilder diskPath )
     {
 #if !SQLITE_SILVERLIGHT
-      var mosLogicalDisks = new ManagementObjectSearcher( "select * from Win32_LogicalDisk where DeviceID = '" + diskPath.ToString().Remove( diskPath.Length - 1, 1 ) + "'" );
+      ManagementObjectSearcher mosLogicalDisks = new ManagementObjectSearcher( "select * from Win32_LogicalDisk where DeviceID = '" + diskPath.ToString().Remove( diskPath.Length - 1, 1 ) + "'" );
       try
       {
         foreach ( ManagementObject moLogDisk in mosLogicalDisks.Get() )
         {
-          var mosDiskDrives = new ManagementObjectSearcher( "select * from Win32_DiskDrive where SystemName = '" + moLogDisk["SystemName"] + "'" );
+          ManagementObjectSearcher mosDiskDrives = new ManagementObjectSearcher( "select * from Win32_DiskDrive where SystemName = '" + moLogDisk["SystemName"] + "'" );
           foreach ( ManagementObject moPDisk in mosDiskDrives.Get() )
           {
             return int.Parse( moPDisk["BytesPerSector"].ToString() );
           }
         }
       }
-      catch { }
+      catch
+      {
+      }
       return 4096;
 #else
       return 4096;
 #endif
     }
 
-    static void SWAP<T>( ref T A, ref T B ) { T t = A; A = B; B = t; }
+    static void SWAP<T>( ref T A, ref T B )
+    {
+      T t = A;
+      A = B;
+      B = t;
+    }
 
     static void x_CountStep(
     sqlite3_context context,
@@ -359,9 +405,11 @@ namespace Community.CsharpSqlite
       int type;
       Debug.Assert( argc <= 1 );
       Mem pMem = sqlite3_aggregate_context( context, 1 );//sizeof(*p));
-      if ( pMem._SumCtx == null ) pMem._SumCtx = new SumCtx();
+      if ( pMem._SumCtx == null )
+        pMem._SumCtx = new SumCtx();
       p = pMem._SumCtx;
-      if ( p.Context == null ) p.Context = pMem;
+      if ( p.Context == null )
+        p.Context = pMem;
       if ( argc == 0 || SQLITE_NULL == sqlite3_value_type( argv[0] ) )
       {
         p.cnt++;
@@ -459,8 +507,8 @@ Monitor.Exit(mtx);
 }
 #endif
 
-  // Miscellaneous Windows Constants
-  //#define ERROR_HANDLE_DISK_FULL           39L
+    // Miscellaneous Windows Constants
+    //#define ERROR_HANDLE_DISK_FULL           39L
     const long ERROR_HANDLE_DISK_FULL = 39L;
   }
 }

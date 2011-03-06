@@ -262,7 +262,7 @@ rc = isnan(x);
         default:
           return -1;
       }
-      var sbZ = new StringBuilder( z.Length );
+      StringBuilder sbZ = new StringBuilder( z.Length );
       for ( i = 1; i < z.Length; i++ ) //z[i] != 0; i++)
       {
         if ( z[i] == quote )

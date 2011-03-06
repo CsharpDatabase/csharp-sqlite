@@ -35,7 +35,6 @@ namespace Community.CsharpSqlite
     **
     **  SQLITE_SOURCE_ID: 2010-12-07 20:14:09 a586a4deeb25330037a49df295b36aaf624d0f45
     **
-    **  $Header$
     *************************************************************************
     */
 
@@ -62,8 +61,14 @@ namespace Community.CsharpSqlite
     //#if ! MIN
     //# define MIN(x,y) ((x)<(y)?(x):(y))
     //#endif
-    static int MIN( int x, int y ) { return ( x < y ) ? x : y; }
-    static int MIN( int x, u32 y ) { return ( x < y ) ? x : (int)y; }
+    static int MIN( int x, int y )
+    {
+      return ( x < y ) ? x : y;
+    }
+    static int MIN( int x, u32 y )
+    {
+      return ( x < y ) ? x : (int)y;
+    }
 
     /*
     ** The rollback journal is composed of a linked list of these structures.
@@ -179,7 +184,7 @@ namespace Community.CsharpSqlite
         if ( iChunkOffset == 0 )
         {
           /* New chunk is required to extend the file. */
-          var pNew = new FileChunk();// sqlite3_malloc( sizeof( FileChunk ) );
+          FileChunk pNew = new FileChunk();// sqlite3_malloc( sizeof( FileChunk ) );
           if ( null == pNew )
           {
             return SQLITE_IOERR_NOMEM;

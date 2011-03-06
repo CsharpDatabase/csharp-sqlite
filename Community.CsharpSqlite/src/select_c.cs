@@ -182,13 +182,13 @@ namespace Community.CsharpSqlite
     static int sqlite3JoinType( Parse pParse, Token pA, Token pB, Token pC )
     {
       int jointype = 0;
-      var apAll = new Token[3];
+      Token[] apAll = new Token[3];
       Token p;
 
       /*   0123456789 123456789 123456789 123 */
       string zKeyText = "naturaleftouterightfullinnercross";
 
-      var aKeyword = new Keyword[]{
+      Keyword[] aKeyword = new Keyword[]{
 /* natural */ new Keyword( 0,  7, JT_NATURAL                ),
 /* left    */ new Keyword( 6,  4, JT_LEFT|JT_OUTER          ),
 /* outer   */ new Keyword( 10, 5, JT_OUTER                  ),
@@ -1248,7 +1248,7 @@ static void explainSetInteger(ref byte a, int b) {}
                 ** rowid of the sub-select or view. This expression is legal (see
                 ** test case misc2.2.2) - it always evaluates to NULL.
                 */
-                var sNC = new NameContext();
+                NameContext sNC = new NameContext();
                 Expr p = pS.pEList.a[iCol].pExpr;
                 sNC.pSrcList = pS.pSrc;
                 sNC.pNext = pNC;
@@ -1289,7 +1289,7 @@ static void explainSetInteger(ref byte a, int b) {}
             ** origin info for the single column in the result set of the SELECT
             ** statement.
             */
-            var sNC = new NameContext();
+            NameContext sNC = new NameContext();
             Select pS = pExpr.x.pSelect;
             Expr p = pS.pEList.a[0].pExpr;
             Debug.Assert( ExprHasProperty( pExpr, EP_xIsSelect ) );
@@ -1325,7 +1325,7 @@ static void explainSetInteger(ref byte a, int b) {}
 #if !SQLITE_OMIT_DECLTYPE
       Vdbe v = pParse.pVdbe;
       int i;
-      var sNC = new NameContext();
+      NameContext sNC = new NameContext();
       sNC.pSrcList = pTabList;
       sNC.pParse = pParse;
       for ( i = 0; i < pEList.nExpr; i++ )
@@ -1837,7 +1837,7 @@ sqlite3VdbeSetColName(v, i, COLNAME_COLUMN, zOrigCol, SQLITE_TRANSIENT);
       int rc = SQLITE_OK;       /* Success code from a subroutine */
       Select pPrior;            /* Another SELECT immediately to our left */
       Vdbe v;                   /* Generate code to this VDBE */
-      var dest = new SelectDest(); /* Alternative data destination */
+      SelectDest dest = new SelectDest(); /* Alternative data destination */
       Select pDelete = null;    /* Chain of simple selects to delete */
       sqlite3 db;               /* Database connection */
 #if !SQLITE_OMIT_EXPLAIN
@@ -1957,7 +1957,7 @@ sqlite3VdbeSetColName(v, i, COLNAME_COLUMN, zOrigCol, SQLITE_TRANSIENT);
             int priorOp;     /* The SRT_ operation to apply to prior selects */
             Expr pLimit, pOffset; /* Saved values of p.nLimit and p.nOffset */
             int addr;
-            var uniondest = new SelectDest();
+            SelectDest uniondest = new SelectDest();
 
             testcase( p.op == TK_EXCEPT );
             testcase( p.op == TK_UNION );
@@ -2068,7 +2068,7 @@ sqlite3VdbeSetColName(v, i, COLNAME_COLUMN, zOrigCol, SQLITE_TRANSIENT);
             int iCont, iBreak, iStart;
             Expr pLimit, pOffset;
             int addr;
-            var intersectdest = new SelectDest();
+            SelectDest intersectdest = new SelectDest();
             int r1;
 
             /* INTERSECT is different from the others since it requires
@@ -2478,8 +2478,8 @@ break;
       int i, j;             /* Loop counters */
       Select pPrior;        /* Another SELECT immediately to our left */
       Vdbe v;               /* Generate code to this VDBE */
-      var destA = new SelectDest();     /* Destination for coroutine A */
-      var destB = new SelectDest();     /* Destination for coroutine B */
+      SelectDest destA = new SelectDest();     /* Destination for coroutine A */
+      SelectDest destB = new SelectDest();     /* Destination for coroutine B */
       int regAddrA;         /* Address register for select-A coroutine */
       int regEofA;          /* Flag to indicate when select-A is complete */
       int regAddrB;         /* Address register for select-B coroutine */
@@ -3834,7 +3834,7 @@ break;
                 string zName = pTab.aCol[j].zName;
                 string zColname;  /* The computed column name */
                 string zToFree;   /* Malloced string that needs to be freed */
-                var sColname = new Token();   /* Computed column name as a token */
+                Token sColname = new Token();   /* Computed column name as a token */
 
                 /* If a column is marked as 'hidden' (currently only possible
                 ** for virtual tables), do not include it in the expanded
@@ -3943,7 +3943,7 @@ sqlite3ErrorMsg(pParse, "too many columns in result set");
     */
     static void sqlite3SelectExpand( Parse pParse, Select pSelect )
     {
-      var w = new Walker();
+      Walker w = new Walker();
       w.xSelectCallback = selectExpander;
       w.xExprCallback = exprWalkNoop;
       w.pParse = pParse;
@@ -4008,7 +4008,7 @@ sqlite3ErrorMsg(pParse, "too many columns in result set");
     static void sqlite3SelectAddTypeInfo( Parse pParse, Select pSelect )
     {
 #if !SQLITE_OMIT_SUBQUERY
-      var w = new Walker();
+      Walker w = new Walker();
       w.xSelectCallback = selectAddSubqueryTypeInfo;
       w.xExprCallback = exprWalkNoop;
       w.pParse = pParse;
@@ -4296,8 +4296,8 @@ sqlite3ErrorMsg(pParse, "too many columns in result set");
       WhereInfo pWInfo;       /* Return from sqlite3WhereBegin() */
       Vdbe v;                 /* The virtual machine under construction */
       bool isAgg;             /* True for select lists like "count(*)" */
-      var pEList = new ExprList();      /* List of columns to extract. */
-      var pTabList = new SrcList();     /* List of tables to select from */
+      ExprList pEList = new ExprList();      /* List of columns to extract. */
+      SrcList pTabList = new SrcList();     /* List of tables to select from */
       Expr pWhere;            /* The WHERE clause.  May be NULL */
       ExprList pOrderBy;      /* The ORDER BY clause.  May be NULL */
       ExprList pGroupBy;      /* The GROUP BY clause.  May be NULL */
@@ -4368,7 +4368,7 @@ if (sqlite3AuthCheck(pParse, SQLITE_SELECT, 0, 0, 0)) return 1;
       for ( i = 0; p.pPrior == null && i < pTabList.nSrc; i++ )
       {
         SrcList_item pItem = pTabList.a[i];
-        var dest = new SelectDest();
+        SelectDest dest = new SelectDest();
         Select pSub = pItem.pSelect;
         bool isAggSub;
 

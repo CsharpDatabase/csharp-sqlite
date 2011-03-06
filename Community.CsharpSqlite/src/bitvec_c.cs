@@ -53,7 +53,6 @@ namespace Community.CsharpSqlite
     **
     **  SQLITE_SOURCE_ID: 2010-08-23 18:52:01 42537b60566f288167f1b5864a5435986838e3a3
     **
-    **  $Header$
     *************************************************************************
     */
     //#include "sqliteInt.h"
@@ -100,7 +99,10 @@ namespace Community.CsharpSqlite
     ** (an arbitrary prime)in the hash function provided
     ** no fewer collisions than the no-op *1. */
     //#define BITVEC_HASH(X)   (((X)*1)%BITVEC_NINT)
-    static u32 BITVEC_HASH( u32 X ) { return (u32)( ( ( X ) * 1 ) % BITVEC_NINT ); }
+    static u32 BITVEC_HASH( u32 X )
+    {
+      return (u32)( ( ( X ) * 1 ) % BITVEC_NINT );
+    }
 
     static int BITVEC_NPTR = (int)( BITVEC_USIZE / 4 );//sizeof(Bitvec *));
 
@@ -174,8 +176,10 @@ namespace Community.CsharpSqlite
     */
     static int sqlite3BitvecTest( Bitvec p, u32 i )
     {
-      if ( p == null || i == 0 ) return 0;
-      if ( i > p.iSize ) return 0;
+      if ( p == null || i == 0 )
+        return 0;
+      if ( i > p.iSize )
+        return 0;
       i--;
       while ( p.iDivisor != 0 )
       {
@@ -196,7 +200,8 @@ namespace Community.CsharpSqlite
         u32 h = BITVEC_HASH( i++ );
         while ( p.u.aHash[h] != 0 )
         {
-          if ( p.u.aHash[h] == i ) return 1;
+          if ( p.u.aHash[h] == i )
+            return 1;
           h = ( h + 1 ) % BITVEC_NINT;
         }
         return 0;
@@ -218,7 +223,8 @@ namespace Community.CsharpSqlite
     static int sqlite3BitvecSet( Bitvec p, u32 i )
     {
       u32 h;
-      if ( p == null ) return SQLITE_OK;
+      if ( p == null )
+        return SQLITE_OK;
       Debug.Assert( i > 0 );
       Debug.Assert( i <= p.iSize );
       i--;
@@ -229,7 +235,8 @@ namespace Community.CsharpSqlite
         if ( p.u.apSub[bin] == null )
         {
           p.u.apSub[bin] = sqlite3BitvecCreate( p.iDivisor );
-          if ( p.u.apSub[bin] == null ) return SQLITE_NOMEM;
+          if ( p.u.apSub[bin] == null )
+            return SQLITE_NOMEM;
         }
         p = p.u.apSub[bin];
       }
@@ -257,19 +264,21 @@ namespace Community.CsharpSqlite
       /* in hash, if not, try to find a spot for it */
       do
       {
-        if ( p.u.aHash[h] == i ) return SQLITE_OK;
+        if ( p.u.aHash[h] == i )
+          return SQLITE_OK;
         h++;
-        if ( h >= BITVEC_NINT ) h = 0;
+        if ( h >= BITVEC_NINT )
+          h = 0;
       } while ( p.u.aHash[h] != 0 );
-    /* we didn't find it in the hash.  h points to the first */
-    /* available free spot. check to see if this is going to */
-    /* make our hash too "full".  */
-    bitvec_set_rehash:
+/* we didn't find it in the hash.  h points to the first */
+/* available free spot. check to see if this is going to */
+/* make our hash too "full".  */
+bitvec_set_rehash:
       if ( p.nSet >= BITVEC_MXHASH )
       {
         u32 j;
         int rc;
-        var aiValues = new u32[BITVEC_NINT];// = sqlite3StackAllocRaw(0, sizeof(p->u.aHash));
+        u32[] aiValues = new u32[BITVEC_NINT];// = sqlite3StackAllocRaw(0, sizeof(p->u.aHash));
         if ( aiValues == null )
         {
           return SQLITE_NOMEM;
@@ -283,13 +292,14 @@ namespace Community.CsharpSqlite
           rc = sqlite3BitvecSet( p, i );
           for ( j = 0; j < BITVEC_NINT; j++ )
           {
-            if ( aiValues[j] != 0 ) rc |= sqlite3BitvecSet( p, aiValues[j] );
+            if ( aiValues[j] != 0 )
+              rc |= sqlite3BitvecSet( p, aiValues[j] );
           }
           //sqlite3StackFree( null, aiValues );
           return rc;
         }
       }
-    bitvec_set_end:
+bitvec_set_end:
       p.nSet++;
       p.u.aHash[h] = i;
       return SQLITE_OK;
@@ -303,7 +313,8 @@ namespace Community.CsharpSqlite
     */
     static void sqlite3BitvecClear( Bitvec p, u32 i, u32[] pBuf )
     {
-      if ( p == null ) return;
+      if ( p == null )
+        return;
       Debug.Assert( i > 0 );
       i--;
       while ( p.iDivisor != 0 )
@@ -336,7 +347,8 @@ namespace Community.CsharpSqlite
             while ( p.u.aHash[h] != 0 )
             {
               h++;
-              if ( h >= BITVEC_NINT ) h = 0;
+              if ( h >= BITVEC_NINT )
+                h = 0;
             }
             p.u.aHash[h] = aiValues[j];
           }
@@ -349,7 +361,8 @@ namespace Community.CsharpSqlite
     */
     static void sqlite3BitvecDestroy( ref Bitvec p )
     {
-      if ( p == null ) return;
+      if ( p == null )
+        return;
       if ( p.iDivisor != 0 )
       {
         u32 i;
@@ -378,13 +391,22 @@ namespace Community.CsharpSqlite
 ** individual bits within V.
 */
     //#define SETBIT(V,I)      V[I>>3] |= (1<<(I&7))
-    static void SETBIT( byte[] V, int I ) { V[I >> 3] |= (byte)( 1 << ( I & 7 ) ); }
+    static void SETBIT( byte[] V, int I )
+    {
+      V[I >> 3] |= (byte)( 1 << ( I & 7 ) );
+    }
 
     //#define CLEARBIT(V,I)    V[I>>3] &= ~(1<<(I&7))
-    static void CLEARBIT( byte[] V, int I ) { V[I >> 3] &= (byte)~( 1 << ( I & 7 ) ); }
+    static void CLEARBIT( byte[] V, int I )
+    {
+      V[I >> 3] &= (byte)~( 1 << ( I & 7 ) );
+    }
 
     //#define TESTBIT(V,I)     (V[I>>3]&(1<<(I&7)))!=0
-    static int TESTBIT( byte[] V, int I ) { return ( V[I >> 3] & ( 1 << ( I & 7 ) ) ) != 0 ? 1 : 0; }
+    static int TESTBIT( byte[] V, int I )
+    {
+      return ( V[I >> 3] & ( 1 << ( I & 7 ) ) ) != 0 ? 1 : 0;
+    }
 
     /*
     ** This routine runs an extensive test of the Bitvec code.
@@ -429,7 +451,8 @@ namespace Community.CsharpSqlite
       pBitvec = sqlite3BitvecCreate( sz );
       pV = sqlite3_malloc( (int)( sz + 7 ) / 8 + 1 );
       pTmpSpace = new u32[BITVEC_SZ];// sqlite3_malloc( BITVEC_SZ );
-      if ( pBitvec == null || pV == null || pTmpSpace == null ) goto bitvec_end;
+      if ( pBitvec == null || pV == null || pTmpSpace == null )
+        goto bitvec_end;
       Array.Clear( pV, 0, (int)( sz + 7 ) / 8 + 1 );// memset( pV, 0, ( sz + 7 ) / 8 + 1 );
 
       /* NULL pBitvec tests */
@@ -462,7 +485,8 @@ namespace Community.CsharpSqlite
               break;
             }
         }
-        if ( ( --aOp[pc + 1] ) > 0 ) nx = 0;
+        if ( ( --aOp[pc + 1] ) > 0 )
+          nx = 0;
         pc += nx;
         i = (int)( ( i & 0x7fffffff ) % sz );
         if ( ( op & 1 ) != 0 )
@@ -470,7 +494,8 @@ namespace Community.CsharpSqlite
           SETBIT( pV, ( i + 1 ) );
           if ( op != 5 )
           {
-            if ( sqlite3BitvecSet( pBitvec, (u32)i + 1 ) != 0 ) goto bitvec_end;
+            if ( sqlite3BitvecSet( pBitvec, (u32)i + 1 ) != 0 )
+              goto bitvec_end;
           }
         }
         else
@@ -498,7 +523,7 @@ namespace Community.CsharpSqlite
       }
 
           /* Free allocated structure */
-    bitvec_end:
+bitvec_end:
       //sqlite3_free( ref pTmpSpace );
       //sqlite3_free( ref pV );
       sqlite3BitvecDestroy( ref pBitvec );

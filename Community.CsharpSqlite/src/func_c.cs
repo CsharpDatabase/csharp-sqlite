@@ -38,7 +38,6 @@ namespace Community.CsharpSqlite
     **
     **  SQLITE_SOURCE_ID: 2011-01-28 17:03:50 ed759d5a9edb3bba5f48f243df47be29e3fe8cd7
     **
-    **  $Header$
     *************************************************************************
     */
     //#include "sqliteInt.h"
@@ -345,12 +344,15 @@ namespace Community.CsharpSqlite
           if ( p2 < 0 )
             p2 = 0;
         }
-        var sb = new StringBuilder( zBLOB.Length );
+        StringBuilder sb = new StringBuilder( zBLOB.Length );
         if ( zBLOB.Length == 0 || p1 > zBLOB.Length )
           sb.Length = 0;
         else
         {
-          for ( int i = p1; i < p1 + p2; i++ ) { sb.Append( (char)zBLOB[i] ); }
+          for ( int i = p1; i < p1 + p2; i++ )
+          {
+            sb.Append( (char)zBLOB[i] );
+          }
         }
 
         sqlite3_result_blob( context, sb.ToString(), (int)p2, SQLITE_TRANSIENT );
@@ -1116,7 +1118,11 @@ break;
 
             if ( zArg == null || zArg.Length == 0 )
               return;
-            for ( i = 0, n = 0; i < zArg.Length; i++ ) { if ( zArg[i] == '\'' ) n++; }
+            for ( i = 0, n = 0; i < zArg.Length; i++ )
+            {
+              if ( zArg[i] == '\'' )
+                n++;
+            }
             z = new StringBuilder( i + n + 3 );// contextMalloc(context, ((i64)i)+((i64)n)+3);
             if ( z != null )
             {
@@ -1165,7 +1171,7 @@ break;
       pBlob = sqlite3_value_blob( argv[0] );
       n = sqlite3_value_bytes( argv[0] );
       Debug.Assert( n == ( pBlob == null ? 0 : pBlob.Length ) );  /* No encoding change */
-      var zHex = new StringBuilder( n * 2 + 1 );
+      StringBuilder zHex = new StringBuilder( n * 2 + 1 );
       //  z = zHex = contextMalloc(context, ((i64)n)*2 + 1);
       if ( zHex != null )
       {
@@ -1333,8 +1339,8 @@ break;
       //Debug.Assert( zIn == sqlite3_value_text( argv[0] ) );
       if ( argc == 1 )
       {
-        var lenOne = new int[] { 1 };
-        var azOne = new byte[] { (u8)' ' };//static unsigned char * const azOne[] = { (u8*)" " };
+        int[] lenOne = new int[] { 1 };
+        byte[] azOne = new byte[] { (u8)' ' };//static unsigned char * const azOne[] = { (u8*)" " };
         nChar = 1;
         aLen = lenOne;
         azChar = new byte[1][];
@@ -1417,7 +1423,7 @@ break;
           //sqlite3_free( ref  azChar );
         }
       }
-      var sb = new StringBuilder( nIn );
+      StringBuilder sb = new StringBuilder( nIn );
       for ( i = 0; i < nIn; i++ )
         sb.Append( (char)zBlob[izIn + i] );
       sqlite3_result_text( context, sb, nIn, SQLITE_TRANSIENT );
@@ -1531,7 +1537,10 @@ sqlite3_result_text(context, "?000", 4, SQLITE_STATIC);
       public Mem _M;
       public Mem Context
       {
-        get { return _M; }
+        get
+        {
+          return _M;
+        }
         set
         {
           _M = value;
@@ -1652,7 +1661,10 @@ sqlite3_result_text(context, "?000", 4, SQLITE_STATIC);
       Mem _M;
       public Mem Context
       {
-        get { return _M; }
+        get
+        {
+          return _M;
+        }
         set
         {
           _M = value;
@@ -1664,7 +1676,10 @@ sqlite3_result_text(context, "?000", 4, SQLITE_STATIC);
       }
       public i64 n
       {
-        get { return _n; }
+        get
+        {
+          return _n;
+        }
         set
         {
           _n = value;
@@ -1683,7 +1698,7 @@ sqlite3_result_text(context, "?000", 4, SQLITE_STATIC);
     sqlite3_value[] argv
     )
     {
-      var p = new CountCtx();
+      CountCtx p = new CountCtx();
       p.Context = sqlite3_aggregate_context( context, 1 );//sizeof(*p));
       if ( ( argc == 0 || SQLITE_NULL != sqlite3_value_type( argv[0] ) ) && p.Context != null )
       {
@@ -1701,7 +1716,7 @@ Debug.Assert( argc == 1 || p == null || p.n > 0x7fffffff
 
     static void countFinalize( sqlite3_context context )
     {
-      var p = new CountCtx();
+      CountCtx p = new CountCtx();
       p.Context = sqlite3_aggregate_context( context, 0 );
       sqlite3_result_int64( context, p != null ? p.n : 0 );
     }
@@ -1783,32 +1798,33 @@ Debug.Assert( argc == 1 || p == null || p.n > 0x7fffffff
       Mem pMem = sqlite3_aggregate_context( context, 1 );//sizeof(*pAccum));
       if ( pMem._StrAccum == null )
         pMem._StrAccum = new StrAccum( 100 );
-        //pAccum = pMem._StrAccum;
+      //pAccum = pMem._StrAccum;
 
       //if ( pMem._StrAccum != null )
       //{
-        sqlite3 db = sqlite3_context_db_handle( context );
-        //int firstTerm = pMem._StrAccum.useMalloc == 0 ? 1 : 0;
-        //pMem._StrAccum.useMalloc = 2;
-        pMem._StrAccum.mxAlloc = db.aLimit[SQLITE_LIMIT_LENGTH];
-        if ( pMem._StrAccum.Context == null ) // first term
-          pMem._StrAccum.Context = pMem;
-        else {
-          if (argc == 2)
-          {
-            zSep = sqlite3_value_text( argv[1] );
-            nSep = sqlite3_value_bytes( argv[1] );
-          }
-          else
-          {
-            zSep = ",";
-            nSep = 1;
-          }
-          sqlite3StrAccumAppend( pMem._StrAccum, zSep, nSep );
+      sqlite3 db = sqlite3_context_db_handle( context );
+      //int firstTerm = pMem._StrAccum.useMalloc == 0 ? 1 : 0;
+      //pMem._StrAccum.useMalloc = 2;
+      pMem._StrAccum.mxAlloc = db.aLimit[SQLITE_LIMIT_LENGTH];
+      if ( pMem._StrAccum.Context == null ) // first term
+        pMem._StrAccum.Context = pMem;
+      else
+      {
+        if ( argc == 2 )
+        {
+          zSep = sqlite3_value_text( argv[1] );
+          nSep = sqlite3_value_bytes( argv[1] );
         }
-        zVal = sqlite3_value_text( argv[0] );
-        nVal = sqlite3_value_bytes( argv[0] );
-        sqlite3StrAccumAppend( pMem._StrAccum, zVal, nVal );
+        else
+        {
+          zSep = ",";
+          nSep = 1;
+        }
+        sqlite3StrAccumAppend( pMem._StrAccum, zSep, nSep );
+      }
+      zVal = sqlite3_value_text( argv[0] );
+      nVal = sqlite3_value_bytes( argv[0] );
+      sqlite3StrAccumAppend( pMem._StrAccum, zVal, nVal );
       //}
     }
 
@@ -1820,7 +1836,7 @@ Debug.Assert( argc == 1 || p == null || p.n > 0x7fffffff
       {
         if ( pMem._StrAccum == null )
           pMem._StrAccum = new StrAccum( 100 );
-        var pAccum = pMem._StrAccum;
+        StrAccum pAccum = pMem._StrAccum;
         //}
         //if ( pAccum != null )
         //{

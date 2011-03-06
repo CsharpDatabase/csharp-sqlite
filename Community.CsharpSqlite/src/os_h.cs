@@ -29,7 +29,6 @@ namespace Community.CsharpSqlite
     **
     **  SQLITE_SOURCE_ID: 2010-08-23 18:52:01 42537b60566f288167f1b5864a5435986838e3a3
     **
-    **  $Header$
     *************************************************************************
     */
 #if !_SQLITE_OS_H_
@@ -241,7 +240,7 @@ namespace Community.CsharpSqlite
     static int PENDING_BYTE = 0x40000000; 
 #else
     //# define PENDING_BYTE      sqlite3PendingByte
-    static int PENDING_BYTE = 0x40000000; 
+    static int PENDING_BYTE = 0x40000000;
 #endif
 
     static int RESERVED_BYTE = ( PENDING_BYTE + 1 );

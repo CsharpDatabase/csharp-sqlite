@@ -738,7 +738,7 @@ p.eState = CURSOR_INVALID;
     {
       int rc;                    /* Status code */
       UnpackedRecord pIdxKey;   /* Unpacked index key */
-      var aSpace = new UnpackedRecord();//char aSpace[150]; /* Temp space for pIdxKey - to avoid a malloc */
+      UnpackedRecord aSpace = new UnpackedRecord();//char aSpace[150]; /* Temp space for pIdxKey - to avoid a malloc */
 
       if ( pKey != null )
       {
@@ -868,7 +868,7 @@ p.eState = CURSOR_INVALID;
     */
     static void ptrmapPut( BtShared pBt, Pgno key, u8 eType, Pgno parent, ref int pRC )
     {
-      var pDbPage = new PgHdr(); /* The pointer map page */
+      PgHdr pDbPage = new PgHdr(); /* The pointer map page */
       u8[] pPtrmap;                 /* The pointer map data */
       Pgno iPtrmap;                 /* The pointer map page number */
       int offset;                   /* Offset in pointer map page */
@@ -926,7 +926,7 @@ ptrmap_exit:
     */
     static int ptrmapGet( BtShared pBt, Pgno key, ref u8 pEType, ref Pgno pPgno )
     {
-      var pDbPage = new PgHdr();/* The pointer map page */
+      PgHdr pDbPage = new PgHdr();/* The pointer map page */
       int iPtrmap;                 /* Pointer map page index */
       u8[] pPtrmap;                /* Pointer map page data */
       int offset;                  /* Offset of entry in pointer map */
@@ -1136,8 +1136,8 @@ ptrmap_exit:
     // Alternative form for C#
     static u16 cellSizePtr( MemPage pPage, int iCell )
     {
-      var info = new CellInfo();
-      var pCell = new byte[13];
+      CellInfo info = new CellInfo();
+      byte[] pCell = new byte[13];
       // Minimum Size = (2 bytes of Header  or (4) Child Pointer) + (maximum of) 9 bytes data
       if ( iCell < 0 )// Overflow Cell
         Buffer.BlockCopy( pPage.aOvfl[-( iCell + 1 )].pCell, 0, pCell, 0, pCell.Length < pPage.aOvfl[-( iCell + 1 )].pCell.Length ? pCell.Length : pPage.aOvfl[-( iCell + 1 )].pCell.Length );
@@ -1152,7 +1152,7 @@ ptrmap_exit:
     // Alternative form for C#
     static u16 cellSizePtr( MemPage pPage, byte[] pCell, int offset )
     {
-      var info = new CellInfo();
+      CellInfo info = new CellInfo();
       info.pCell = sqlite3Malloc( pCell.Length );
       Buffer.BlockCopy( pCell, offset, info.pCell, 0, pCell.Length - offset );
       btreeParseCellPtr( pPage, info.pCell, ref info );
@@ -1169,7 +1169,7 @@ ptrmap_exit:
 ** the (CellInfo.nSize) value found by doing a full parse of the
 ** cell. If SQLITE_DEBUG is defined, an Debug.Assert() at the bottom of
 ** this function verifies that this invariant is not violated. */
-      var debuginfo = new CellInfo();
+      CellInfo debuginfo = new CellInfo();
       btreeParseCellPtr( pPage, pCell, ref debuginfo );
 #else
 CellInfo debuginfo = new CellInfo();
@@ -1246,7 +1246,7 @@ static int cellSize(MemPage pPage, int iCell) { return -1; }
     {
       if ( pRC != 0 )
         return;
-      var info = new CellInfo();
+      CellInfo info = new CellInfo();
       Debug.Assert( pCell != 0 );
       btreeParseCellPtr( pPage, pCell, ref info );
       Debug.Assert( ( info.nData + ( pPage.intKey != 0 ? 0 : info.nKey ) ) == info.nPayload );
@@ -1261,7 +1261,7 @@ static int cellSize(MemPage pPage, int iCell) { return -1; }
     {
       if ( pRC != 0 )
         return;
-      var info = new CellInfo();
+      CellInfo info = new CellInfo();
       Debug.Assert( pCell != null );
       btreeParseCellPtr( pPage, pCell, ref info );
       Debug.Assert( ( info.nData + ( pPage.intKey != 0 ? 0 : info.nKey ) ) == info.nPayload );
@@ -2013,7 +2013,7 @@ return SQLITE_CORRUPT_BKPT();
       sqlite3_mutex mutexOpen = null;  /* Prevents a race condition. Ticket #3537 */
       int rc = SQLITE_OK;            /* Result code from this function */
       u8 nReserve;                   /* Byte of unused space on each page */
-      var zDbHeader = new byte[100]; /* Database header content */
+      byte[] zDbHeader = new byte[100]; /* Database header content */
 
       /* True if opening an ephemeral, temporary database */
       bool isTempDb = String.IsNullOrEmpty( zFilename );//zFilename==0 || zFilename[0]==0;
@@ -3140,7 +3140,7 @@ set_child_ptrmaps_out:
           int pCell = findCell( pPage, i );
           if ( eType == PTRMAP_OVERFLOW1 )
           {
-            var info = new CellInfo();
+            CellInfo info = new CellInfo();
             btreeParseCellPtr( pPage, pCell, ref info );
             if ( info.iOverflow != 0 )
             {
@@ -3195,7 +3195,7 @@ set_child_ptrmaps_out:
     int isCommit             /* isCommit flag passed to sqlite3PagerMovepage */
     )
     {
-      var pPtrPage = new MemPage();   /* The page that contains a pointer to pDbPage */
+      MemPage pPtrPage = new MemPage();   /* The page that contains a pointer to pDbPage */
       Pgno iDbPage = pDbPage.pgno;
       Pager pPager = pBt.pPager;
       int rc;
@@ -3331,7 +3331,7 @@ set_child_ptrmaps_out:
             ** matter if it still contains some garbage entries.
             */
             Pgno iFreePg = 0;
-            var pFreePg = new MemPage();
+            MemPage pFreePg = new MemPage();
             rc = allocateBtreePage( pBt, ref pFreePg, ref iFreePg, iLastPg, 1 );
             if ( rc != SQLITE_OK )
             {
@@ -3344,7 +3344,7 @@ set_child_ptrmaps_out:
         else
         {
           Pgno iFreePg = 0;             /* Index of free page to move pLastPg to */
-          var pLastPg = new MemPage();
+          MemPage pLastPg = new MemPage();
 
           rc = btreeGetPage( pBt, iLastPg, ref pLastPg, 0 );
           if ( rc != SQLITE_OK )
@@ -3361,7 +3361,7 @@ set_child_ptrmaps_out:
           */
           do
           {
-            var pFreePg = new MemPage();
+            MemPage pFreePg = new MemPage();
             rc = allocateBtreePage( pBt, ref pFreePg, ref iFreePg, 0, 0 );
             if ( rc != SQLITE_OK )
             {
@@ -3392,7 +3392,7 @@ set_child_ptrmaps_out:
         {
           if ( PTRMAP_ISPAGE( pBt, iLastPg ) )
           {
-            var pPg = new MemPage();
+            MemPage pPg = new MemPage();
             rc = btreeGetPage( pBt, iLastPg, ref pPg, 0 );
             if ( rc != SQLITE_OK )
             {
@@ -3761,7 +3761,7 @@ static int countWriteCursors(BtShared pBt) { return -1; }
     {
       int rc;
       BtShared pBt = p.pBt;
-      var pPage1 = new MemPage();
+      MemPage pPage1 = new MemPage();
 
       sqlite3BtreeEnter( p );
       rc = saveAllCursors( pBt, 0, null );
@@ -4495,7 +4495,7 @@ nextPage = pCur.aOverflow[iIdx+1];
             /* Need to read this page properly. It contains some of the
             ** range of data that is being read (eOp==null) or written (eOp!=null).
             */
-            var pDbPage = new PgHdr();
+            PgHdr pDbPage = new PgHdr();
             int a = (int)amt;
             rc = sqlite3PagerGet( pBt.pPager, nextPage, ref pDbPage );
             if ( rc == SQLITE_OK )
@@ -4696,7 +4696,7 @@ return SQLITE_ABORT;
     {
       int rc;
       int i = pCur.iPage;
-      var pNewPage = new MemPage();
+      MemPage pNewPage = new MemPage();
       BtShared pBt = pCur.pBt;
 
       Debug.Assert( cursorHoldsMutex( pCur ) );
@@ -5173,7 +5173,7 @@ static void assertParentIndex(MemPage pParent, int iIdx, Pgno iChild) { }
               ** and accessPayload() used to retrieve the record into the
               ** buffer before VdbeRecordCompare() can be called. */
               u8[] pCellKey;
-              var pCellBody = new u8[pPage.aData.Length - pCell + pPage.childPtrSize];
+              u8[] pCellBody = new u8[pPage.aData.Length - pCell + pPage.childPtrSize];
               Buffer.BlockCopy( pPage.aData, pCell - pPage.childPtrSize, pCellBody, 0, pCellBody.Length );//          u8 * const pCellBody = pCell - pPage->childPtrSize;
               btreeParseCellPtr( pPage, pCellBody, ref pCur.info );
               nCell = (int)pCur.info.nKey;
@@ -5606,7 +5606,7 @@ moveto_finish:
               ** pointers to free-list leaves. The first leaf becomes a trunk
               ** page in this case.
               */
-              var pNewTrunk = new MemPage();
+              MemPage pNewTrunk = new MemPage();
               Pgno iNewTrunk = sqlite3Get4byte( pTrunk.aData, 8 );
               if ( iNewTrunk > mxPage )
               {
@@ -5968,7 +5968,7 @@ freepage_out:
     static int clearCell( MemPage pPage, int pCell )
     {
       BtShared pBt = pPage.pBt;
-      var info = new CellInfo();
+      CellInfo info = new CellInfo();
       Pgno ovflPgno;
       int rc;
       int nOvfl;
@@ -6069,7 +6069,7 @@ freepage_out:
       BtShared pBt = pPage.pBt;
       Pgno pgnoOvfl = 0;
       int nHeader;
-      var info = new CellInfo();
+      CellInfo info = new CellInfo();
 
       Debug.Assert( sqlite3_mutex_held( pPage.pBt.mutex ) );
 
@@ -6563,7 +6563,7 @@ freepage_out:
     static int balance_quick( MemPage pParent, MemPage pPage, u8[] pSpace )
     {
       BtShared pBt = pPage.pBt;    /* B-Tree Database */
-      var pNew = new MemPage();/* Newly allocated page */
+      MemPage pNew = new MemPage();/* Newly allocated page */
       int rc;                      /* Return Code */
       Pgno pgnoNew = 0;              /* Page number of pNew */
 
@@ -6586,7 +6586,7 @@ freepage_out:
 
         int pOut = 4;//u8 pOut = &pSpace[4];
         u8[] pCell = pPage.aOvfl[0].pCell;
-        var szCell = new int[1];
+        int[] szCell = new int[1];
         szCell[0] = cellSizePtr( pPage, pCell );
         int pStop;
 
@@ -6813,13 +6813,13 @@ if (false)
     int isRoot                     /* True if pParent is a root-page */
     )
     {
-      var apOld = new MemPage[NB];    /* pPage and up to two siblings */
-      var apCopy = new MemPage[NB];   /* Private copies of apOld[] pages */
-      var apNew = new MemPage[NB + 2];/* pPage and up to NB siblings after balancing */
-      var apDiv = new int[NB - 1];        /* Divider cells in pParent */
-      var cntNew = new int[NB + 2];       /* Index in aCell[] of cell after i-th page */
-      var szNew = new int[NB + 2];        /* Combined size of cells place on i-th page */
-      var szCell = new u16[1];            /* Local size of all cells in apCell[] */
+      MemPage[] apOld = new MemPage[NB];    /* pPage and up to two siblings */
+      MemPage[] apCopy = new MemPage[NB];   /* Private copies of apOld[] pages */
+      MemPage[] apNew = new MemPage[NB + 2];/* pPage and up to NB siblings after balancing */
+      int[] apDiv = new int[NB - 1];        /* Divider cells in pParent */
+      int[] cntNew = new int[NB + 2];       /* Index in aCell[] of cell after i-th page */
+      int[] szNew = new int[NB + 2];        /* Combined size of cells place on i-th page */
+      u16[] szCell = new u16[1];            /* Local size of all cells in apCell[] */
       BtShared pBt;                /* The whole database */
       int nCell = 0;               /* Number of cells in apCell[] */
       int nMaxCells = 0;           /* Allocated size of apCell, szCell, aFrom. */
@@ -7170,7 +7170,7 @@ TRACE("BALANCE: begin page %d child of %d\n", pPage.pgno, pParent.pgno);
       pageFlags = apOld[0].aData[0];
       for ( i = 0; i < k; i++ )
       {
-        var pNew = new MemPage();
+        MemPage pNew = new MemPage();
         if ( i < nOld )
         {
           pNew = apNew[i] = apOld[i];
@@ -7305,7 +7305,7 @@ if (false)
             ** cell consists of the integer key for the right-most cell of
             ** the sibling-page assembled above only.
             */
-            var info = new CellInfo();
+            CellInfo info = new CellInfo();
             j--;
             btreeParseCellPtr( pNew, apCell[j], ref info );
             pCell = pTemp;
@@ -7707,7 +7707,7 @@ int balance_deeper_called = 0;
               ** copied either into the body of a database page or into the new
               ** pSpace buffer passed to the latter call to balance_nonroot().
               */
-              var pSpace = new u8[pCur.pBt.pageSize];// u8 pSpace = sqlite3PageMalloc( pCur.pBt.pageSize );
+              u8[] pSpace = new u8[pCur.pBt.pageSize];// u8 pSpace = sqlite3PageMalloc( pCur.pBt.pageSize );
               rc = balance_nonroot( pParent, iIdx, null, iPage == 1 ? 1 : 0 );
               //if (pFree != null)
               //{
@@ -8066,7 +8066,7 @@ end_insert:
     static int btreeCreateTable( Btree p, ref int piTable, int createTabFlags )
     {
       BtShared pBt = p.pBt;
-      var pRoot = new MemPage();
+      MemPage pRoot = new MemPage();
       Pgno pgnoRoot = 0;
       int rc;
       int ptfFlags;          /* Page-type flage for the root page of new table */
@@ -8084,7 +8084,7 @@ return rc;
       if ( pBt.autoVacuum )
       {
         Pgno pgnoMove = 0;                    /* Move a page here to make room for the root-page */
-        var pPageMove = new MemPage();  /* The page to move to. */
+        MemPage pPageMove = new MemPage();  /* The page to move to. */
 
         /* Creating a new table may probably require moving an existing database
         ** to make room for the new tables root page. In case this page turns
@@ -8239,7 +8239,7 @@ return rc;
     ref int pnChange      /* Add number of Cells freed to this counter */
     )
     {
-      var pPage = new MemPage();
+      MemPage pPage = new MemPage();
       int rc;
       byte[] pCell;
       int i;
@@ -8411,7 +8411,7 @@ releasePage(pPage);
             ** number in the database. So move the page that does into the
             ** gap left by the deleted root-page.
             */
-            var pMove = new MemPage();
+            MemPage pMove = new MemPage();
             releasePage( pPage );
             rc = btreeGetPage( pBt, maxRootPgno, ref pMove, 0 );
             if ( rc != SQLITE_OK )
@@ -8767,7 +8767,7 @@ if( idx==BTREE_LARGEST_ROOT_PAGE && pMeta>0 ) pBt.readOnly = 1;
       int iFirst = iPage;
       while ( N-- > 0 && pCheck.mxErr != 0 )
       {
-        var pOvflPage = new PgHdr();
+        PgHdr pOvflPage = new PgHdr();
         byte[] pOvflData;
         if ( iPage < 1 )
         {
@@ -8867,7 +8867,7 @@ if( idx==BTREE_LARGEST_ROOT_PAGE && pMeta>0 ) pBt.readOnly = 1;
     object _pnParentMaxKey  /* C# Needed to determine if content passed*/
     )
     {
-      var pPage = new MemPage();
+      MemPage pPage = new MemPage();
       int i, rc, depth, d2, pgno, cnt;
       int hdr, cellStart;
       int nCell;
@@ -8916,7 +8916,7 @@ if( idx==BTREE_LARGEST_ROOT_PAGE && pMeta>0 ) pBt.readOnly = 1;
       {
         u8[] pCell;
         u32 sz;
-        var info = new CellInfo();
+        CellInfo info = new CellInfo();
 
         /* Check payload overflow pages
         */
@@ -9145,9 +9145,9 @@ if( idx==BTREE_LARGEST_ROOT_PAGE && pMeta>0 ) pBt.readOnly = 1;
     {
       Pgno i;
       int nRef;
-      var sCheck = new IntegrityCk();
+      IntegrityCk sCheck = new IntegrityCk();
       BtShared pBt = p.pBt;
-      var zErr = new StringBuilder( 100 );//char zErr[100];
+      StringBuilder zErr = new StringBuilder( 100 );//char zErr[100];
 
       sqlite3BtreeEnter( p );
       Debug.Assert( p.inTrans > TRANS_NONE && pBt.inTransaction > TRANS_NONE );

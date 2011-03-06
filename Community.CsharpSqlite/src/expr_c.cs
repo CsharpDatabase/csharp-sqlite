@@ -534,7 +534,7 @@ sqlite3Dequote(ref pNew.u._zToken);
     string zToken         /* Token argument.  Might be NULL */
     )
     {
-      var x = new Token();
+      Token x = new Token();
       x.z = zToken;
       x.n = !String.IsNullOrEmpty( zToken ) ? sqlite3Strlen30( zToken ) : 0;
       return sqlite3ExprAlloc( db, op, x, 0 );
@@ -762,7 +762,7 @@ sqlite3Dequote(ref pNew.u._zToken);
             int oldLength = pParse.nVarExprAlloc;
             pParse.nVarExprAlloc += pParse.nVarExprAlloc + 10;
 
-            var newXper = new Expr[pParse.nVarExprAlloc];
+            Expr[] newXper = new Expr[pParse.nVarExprAlloc];
             for ( int iter = 0; iter < newXper.Length && iter < oldLength; iter++ )
             {
               newXper[iter] = pParse.apVarExpr[iter];
@@ -951,7 +951,7 @@ sqlite3DbFree( db, ref p.u._zToken );
       if ( p != null )
       {
         bool isReduced = ( flags & EXPRDUP_REDUCE ) != 0;
-        var zAlloc = new Expr();
+        Expr zAlloc = new Expr();
         u32 staticFlag = 0;
 
         Debug.Assert( pzBuffer == null || isReduced );
@@ -964,7 +964,7 @@ sqlite3DbFree( db, ref p.u._zToken );
         //}
         //else
         //{
-        ///var  zAlloc = new Expr();//sqlite3DbMallocRaw( db, dupedExprSize( p, flags ) );
+        ///Expr  zAlloc = new Expr();//sqlite3DbMallocRaw( db, dupedExprSize( p, flags ) );
         //}
         // (Expr*)zAlloc;
 
@@ -1437,7 +1437,7 @@ return null;
     }
     static int exprIsConst( Expr p, int initFlag )
     {
-      var w = new Walker();
+      Walker w = new Walker();
       w.u.i = initFlag;
       w.xExprCallback = exprNodeIsConstant;
       w.xSelectCallback = selectNodeIsConstant;
@@ -1496,7 +1496,7 @@ return null;
       /* If an expression is an integer literal that fits in a signed 32-bit
       ** integer, then the EP_IntValue flag will have already been set */
       Debug.Assert( p.op != TK_INTEGER || ( p.flags & EP_IntValue ) != 0
-               || !sqlite3GetInt32( p.u.zToken, ref rc )  );
+               || !sqlite3GetInt32( p.u.zToken, ref rc ) );
 
       if ( ( p.flags & EP_IntValue ) != 0 )
       {
@@ -2016,7 +2016,7 @@ return null;
               ** Generate code to write the results of the select into the temporary
               ** table allocated and opened above.
               */
-              var dest = new SelectDest();
+              SelectDest dest = new SelectDest();
               ExprList pEList;
 
               Debug.Assert( !isRowid );
@@ -2119,7 +2119,7 @@ return null;
             ** and record that memory cell in iColumn.
             */
             Select pSel;                        /* SELECT statement to encode */
-            var dest = new SelectDest(); /* How to deal with SELECt result */
+            SelectDest dest = new SelectDest(); /* How to deal with SELECt result */
 
             testcase( pExpr.op == TK_EXISTS );
             testcase( pExpr.op == TK_SELECT );
@@ -2415,7 +2415,7 @@ sqlite3ErrorMsg(pParse, "oversized integer: %s%s", negFlag ? "-" : "", z);
       int i;
       int minLru;
       int idxLru;
-      var p = new yColCache();
+      yColCache p = new yColCache();
 
       Debug.Assert( iReg > 0 );  /* Register numbers are always positive */
       Debug.Assert( iCol >= -1 && iCol < 32768 );  /* Finite column numbers */
@@ -3297,7 +3297,7 @@ pDef = sqlite3VtabOverloadFunction( db, pDef, nFarg, pFarg.a[0].pExpr );
             int i;                            /* Loop counter */
             ExprList pEList;                  /* List of WHEN terms */
             ExprList_item[] aListelem;        /* Array of WHEN terms */
-            var opCompare = new Expr();      /* The X==Ei expression */
+            Expr opCompare = new Expr();      /* The X==Ei expression */
             Expr cacheX;                      /* Cached expression X */
             Expr pX;                          /* The X expression */
             Expr pTest = null;                /* X==Ei (form A) or just Ei (form B) */
@@ -3700,9 +3700,9 @@ pDef = sqlite3VtabOverloadFunction( db, pDef, nFarg, pFarg.a[0].pExpr );
     int jumpIfNull    /* Take the jump if the BETWEEN is NULL */
     )
     {
-      var exprAnd = new Expr();   /* The AND operator in  x>=y AND x<=z  */
-      var compLeft = new Expr();  /* The  x>=y  term */
-      var compRight = new Expr(); /* The  x<=z  term */
+      Expr exprAnd = new Expr();   /* The AND operator in  x>=y AND x<=z  */
+      Expr compLeft = new Expr();  /* The  x>=y  term */
+      Expr compRight = new Expr(); /* The  x<=z  term */
       Expr exprX;       /* The  x  subexpression */
       int regFree1 = 0; /* Temporary use register */
 
@@ -4351,7 +4351,7 @@ pDef = sqlite3VtabOverloadFunction( db, pDef, nFarg, pFarg.a[0].pExpr );
     */
     static void sqlite3ExprAnalyzeAggregates( NameContext pNC, ref  Expr pExpr )
     {
-      var w = new Walker();
+      Walker w = new Walker();
       w.xExprCallback = (dxExprCallback)analyzeAggregate;
       w.xSelectCallback = (dxSelectCallback)analyzeAggregatesInSelect;
       w.u.pNC = pNC;

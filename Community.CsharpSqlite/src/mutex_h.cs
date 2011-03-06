@@ -30,7 +30,6 @@ namespace Community.CsharpSqlite
     **
     **  SQLITE_SOURCE_ID: 2010-12-07 20:14:09 a586a4deeb25330037a49df295b36aaf624d0f45
     **
-    **  $Header$
     *************************************************************************
     */
 
@@ -74,18 +73,46 @@ namespace Community.CsharpSqlite
     /*
 ** If this is a no-op implementation, implement everything as macros.
 */
-    public class sqlite3_mutex { }
+    public class sqlite3_mutex
+    {
+    }
     static sqlite3_mutex mutex = null;  //sqlite3_mutex sqlite3_mutex;
-    static sqlite3_mutex sqlite3MutexAlloc( int iType ) { return new sqlite3_mutex(); }//#define sqlite3MutexAlloc(X)      ((sqlite3_mutex*)8)
-    static sqlite3_mutex sqlite3_mutex_alloc( int iType ) { return new sqlite3_mutex(); }//#define sqlite3_mutex_alloc(X)    ((sqlite3_mutex*)8)
-    static void sqlite3_mutex_free( ref sqlite3_mutex m ) { }          //#define sqlite3_mutex_free(X)
-    static void sqlite3_mutex_enter( sqlite3_mutex m ) { }            //#define sqlite3_mutex_enter(X)
-    static int sqlite3_mutex_try( int iType ) { return SQLITE_OK; }   //#define sqlite3_mutex_try(X)      SQLITE_OK
-    static void sqlite3_mutex_leave( sqlite3_mutex m ) { }            //#define sqlite3_mutex_leave(X)
-    static bool sqlite3_mutex_held( sqlite3_mutex m ) { return true; }//#define sqlite3_mutex_held(X)     ((void)(X),1)
-    static bool sqlite3_mutex_notheld( sqlite3_mutex m ) { return true; }   //#define sqlite3_mutex_notheld(X)  ((void)(X),1)
-    static int sqlite3MutexInit() { return SQLITE_OK; }              //#define sqlite3MutexInit()        SQLITE_OK
-    static void sqlite3MutexEnd() { }                                //#define sqlite3MutexEnd()
+    static sqlite3_mutex sqlite3MutexAlloc( int iType )
+    {
+      return new sqlite3_mutex();
+    }//#define sqlite3MutexAlloc(X)      ((sqlite3_mutex*)8)
+    static sqlite3_mutex sqlite3_mutex_alloc( int iType )
+    {
+      return new sqlite3_mutex();
+    }//#define sqlite3_mutex_alloc(X)    ((sqlite3_mutex*)8)
+    static void sqlite3_mutex_free( ref sqlite3_mutex m )
+    {
+    }          //#define sqlite3_mutex_free(X)
+    static void sqlite3_mutex_enter( sqlite3_mutex m )
+    {
+    }            //#define sqlite3_mutex_enter(X)
+    static int sqlite3_mutex_try( int iType )
+    {
+      return SQLITE_OK;
+    }   //#define sqlite3_mutex_try(X)      SQLITE_OK
+    static void sqlite3_mutex_leave( sqlite3_mutex m )
+    {
+    }            //#define sqlite3_mutex_leave(X)
+    static bool sqlite3_mutex_held( sqlite3_mutex m )
+    {
+      return true;
+    }//#define sqlite3_mutex_held(X)     ((void)(X),1)
+    static bool sqlite3_mutex_notheld( sqlite3_mutex m )
+    {
+      return true;
+    }   //#define sqlite3_mutex_notheld(X)  ((void)(X),1)
+    static int sqlite3MutexInit()
+    {
+      return SQLITE_OK;
+    }              //#define sqlite3MutexInit()        SQLITE_OK
+    static void sqlite3MutexEnd()
+    {
+    }                                //#define sqlite3MutexEnd()
 #endif //* defined(SQLITE_MUTEX_OMIT) */
   }
 }

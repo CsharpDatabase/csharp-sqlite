@@ -29,7 +29,6 @@ namespace Community.CsharpSqlite
     **
     **  SQLITE_SOURCE_ID: 2010-08-23 18:52:01 42537b60566f288167f1b5864a5435986838e3a3
     **
-    **  $Header$
     *************************************************************************
     */
     //#if !_OS_COMMON_H_
@@ -46,7 +45,11 @@ namespace Community.CsharpSqlite
 #if SQLITE_DEBUG || TRACE
     static bool sqlite3OsTrace = false;
     //#define OSTRACE(X)          if( sqlite3OSTrace ) sqlite3DebugPrintf X
-    static void OSTRACE(string X, params va_list[] ap) { if (sqlite3OsTrace) sqlite3DebugPrintf(X, ap); }
+    static void OSTRACE( string X, params va_list[] ap )
+    {
+      if ( sqlite3OsTrace )
+        sqlite3DebugPrintf( X, ap );
+    }
 #else
     //#define OSTRACE(X)
     static void OSTRACE( string X, params object[] ap) { }
@@ -89,7 +92,10 @@ static sqlite_u3264 g_elapsed;
     static int sqlite3_io_error_benign = 0;         /* True if errors are benign */
     //static int sqlite3_diskfull_pending = 0;
     //static int sqlite3_diskfull = 0;
-    static void SimulateIOErrorBenign( int X ) { sqlite3_io_error_benign = ( X ); }
+    static void SimulateIOErrorBenign( int X )
+    {
+      sqlite3_io_error_benign = ( X );
+    }
     //#define SimulateIOError(CODE)  \
     //  if( (sqlite3_io_error_persist && sqlite3_io_error_hit) \
     //       || sqlite3_io_error_pending-- == 1 )  \
@@ -111,7 +117,8 @@ static sqlite_u3264 g_elapsed;
       IOTRACE( "IOERR\n" );
 #endif
       sqlite3_io_error_hit.iValue++;
-      if ( sqlite3_io_error_benign == 0 ) sqlite3_io_error_hardhit.iValue++;
+      if ( sqlite3_io_error_benign == 0 )
+        sqlite3_io_error_hardhit.iValue++;
     }
     //#define SimulateDiskfullError(CODE) \
     //   if( sqlite3_diskfull_pending ){ \

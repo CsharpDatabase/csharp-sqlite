@@ -71,7 +71,6 @@ namespace Community.CsharpSqlite
     **
     **  SQLITE_SOURCE_ID: 2011-01-28 17:03:50 ed759d5a9edb3bba5f48f243df47be29e3fe8cd7
     **
-    **  $Header$
     *************************************************************************
     */
     //#include "sqliteInt.h"
@@ -317,7 +316,7 @@ const int SQLITE_PRINT_BUF_SIZE = 50;
       i64 longvalue;
       LONGDOUBLE_TYPE realvalue; /* Value for real types */
       et_info infop;      /* Pointer to the appropriate info structure */
-      var buf = new char[etBUFSIZE];       /* Conversion buffer */
+      char[] buf = new char[etBUFSIZE];       /* Conversion buffer */
       char prefix;                /* Prefix character.  "+" or "-" or " " or '\0'. */
       byte xtype = 0;             /* Conversion paradigm */
       // Not used in C# -- string zExtra;              /* Extra memory used for etTCLESCAPE conversions */
@@ -662,7 +661,9 @@ length = 0;
 for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
 #else
             /* It makes more sense to use 0.5 */
-            for ( idx = precision, rounder = 0.5; idx > 0; idx--, rounder *= 0.1 ) { }
+            for ( idx = precision, rounder = 0.5; idx > 0; idx--, rounder *= 0.1 )
+            {
+            }
 #endif
             if ( xtype == etFLOAT )
               realvalue += rounder;
@@ -679,11 +680,31 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
             }
             if ( realvalue > 0.0 )
             {
-              while ( realvalue >= 1e32 && exp <= 350 ) { realvalue *= 1e-32; exp += 32; }
-              while ( realvalue >= 1e8 && exp <= 350 ) { realvalue *= 1e-8; exp += 8; }
-              while ( realvalue >= 10.0 && exp <= 350 ) { realvalue *= 0.1; exp++; }
-              while ( realvalue < 1e-8 ) { realvalue *= 1e8; exp -= 8; }
-              while ( realvalue < 1.0 ) { realvalue *= 10.0; exp--; }
+              while ( realvalue >= 1e32 && exp <= 350 )
+              {
+                realvalue *= 1e-32;
+                exp += 32;
+              }
+              while ( realvalue >= 1e8 && exp <= 350 )
+              {
+                realvalue *= 1e-8;
+                exp += 8;
+              }
+              while ( realvalue >= 10.0 && exp <= 350 )
+              {
+                realvalue *= 0.1;
+                exp++;
+              }
+              while ( realvalue < 1e-8 )
+              {
+                realvalue *= 1e8;
+                exp -= 8;
+              }
+              while ( realvalue < 1.0 )
+              {
+                realvalue *= 10.0;
+                exp--;
+              }
               if ( exp > 350 )
               {
                 if ( prefix == '-' )
@@ -723,7 +744,11 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
             if ( xtype != etFLOAT )
             {
               realvalue += rounder;
-              if ( realvalue >= 10.0 ) { realvalue *= 0.1; exp++; }
+              if ( realvalue >= 10.0 )
+              {
+                realvalue *= 0.1;
+                exp++;
+              }
             }
             if ( xtype == etGENERIC )
             {
@@ -894,7 +919,9 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
             }
             if ( precision >= 0 )
             {
-              for ( length = 0; length < precision && length < bufStr.Length && buf[length] != 0; length++ ) { }
+              for ( length = 0; length < precision && length < bufStr.Length && buf[length] != 0; length++ )
+              {
+              }
               //length += precision;
             }
             else
@@ -1220,7 +1247,7 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
     */
     static string sqlite3_vmprintf( string zFormat, params  va_list[] ap )
     {
-      //var acc = new StrAccum( SQLITE_PRINT_BUF_SIZE );
+      //StrAccum acc = new StrAccum( SQLITE_PRINT_BUF_SIZE );
 #if !SQLITE_OMIT_AUTOINIT
       if ( sqlite3_initialize() != 0 )
         return "";
@@ -1264,14 +1291,15 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
     */
     static public void sqlite3_vsnprintf( int n, StringBuilder zBuf, string zFormat, params va_list[] ap )
     {
-      //var acc = new StrAccum( SQLITE_PRINT_BUF_SIZE );
+      //StrAccum acc = new StrAccum( SQLITE_PRINT_BUF_SIZE );
       if ( n <= 0 )
         return;
       sqlite3StrAccumInit( acc, null, n, 0 );
       //acc.useMalloc = 0;
       sqlite3VXPrintf( acc, 0, zFormat, ap );
       zBuf.Length = 0;
-      if (n > 1 && n <= acc.zText.Length) acc.zText.Length = n-1;
+      if ( n > 1 && n <= acc.zText.Length )
+        acc.zText.Length = n - 1;
       zBuf.Append( sqlite3StrAccumFinish( acc ) );
       return;
     }
@@ -1280,7 +1308,7 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
     {
       //string z;
       //va_list ap;
-      //var acc = new StrAccum( SQLITE_PRINT_BUF_SIZE );
+      //StrAccum acc = new StrAccum( SQLITE_PRINT_BUF_SIZE );
       zBuf.EnsureCapacity( SQLITE_PRINT_BUF_SIZE );
       va_start( ap, zFormat );
       sqlite3_vsnprintf( n, zBuf, zFormat, ap );
@@ -1292,7 +1320,7 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
     //{
     //  string z;
     //  //va_list ap;
-    //  var acc = new StrAccum( SQLITE_PRINT_BUF_SIZE );
+    //  StrAccum acc = new StrAccum( SQLITE_PRINT_BUF_SIZE );
 
     //  if ( n <= 0 )
     //  {
@@ -1351,7 +1379,7 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
     static void sqlite3DebugPrintf( string zFormat, params va_list[] ap )
     {
       //va_list ap;
-      //var acc = new StrAccum( SQLITE_PRINT_BUF_SIZE );
+      //StrAccum acc = new StrAccum( SQLITE_PRINT_BUF_SIZE );
       sqlite3StrAccumInit( acc, null, SQLITE_PRINT_BUF_SIZE, 0 );
       //acc.useMalloc = 0;
       va_start( ap, zFormat );

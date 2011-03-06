@@ -7,6 +7,7 @@ using u8 = System.Byte;
 
 using Pgno = System.UInt32;
 using sqlite3_int64 = System.Int64;
+using System.Globalization;
 
 namespace Community.CsharpSqlite
 {
@@ -30,7 +31,6 @@ namespace Community.CsharpSqlite
     **
     **  SQLITE_SOURCE_ID: 2010-12-07 20:14:09 a586a4deeb25330037a49df295b36aaf624d0f45
     **
-    **  $Header$
     *************************************************************************
     */
     //#include "sqliteInt.h"
@@ -53,9 +53,9 @@ namespace Community.CsharpSqlite
     {
       //                             /* 123456789 123456789 */
       string zText = "onoffalseyestruefull";
-      var iOffset = new int[] { 0, 1, 2, 4, 9, 12, 16 };
-      var iLength = new int[] { 2, 2, 3, 5, 3, 4, 4 };
-      var iValue = new u8[] { 1, 0, 0, 0, 1, 1, 2 };
+      int[] iOffset = new int[] { 0, 1, 2, 4, 9, 12, 16 };
+      int[] iLength = new int[] { 2, 2, 3, 5, 3, 4, 4 };
+      u8[] iValue = new u8[] { 1, 0, 0, 0, 1, 1, 2 };
       int i, n;
       if ( sqlite3Isdigit( z[0] ) )
       {
@@ -225,7 +225,7 @@ namespace Community.CsharpSqlite
     }
     static int flagPragma( Parse pParse, string zLeft, string zRight )
     {
-      var aPragma = new sPragmaType[]{
+      sPragmaType[] aPragma = new sPragmaType[]{
 new sPragmaType( "full_column_names",        SQLITE_FullColNames  ),
 new sPragmaType( "short_column_names",       SQLITE_ShortColNames ),
 new sPragmaType( "count_changes",            SQLITE_CountRows     ),
@@ -395,7 +395,9 @@ new sPragmaType( "foreign_keys",             SQLITE_ForeignKeys ),
 
     // OVERLOADS, so I don't need to rewrite parse.c
     static void sqlite3Pragma( Parse pParse, Token pId1, Token pId2, int null_4, int minusFlag )
-    { sqlite3Pragma( pParse, pId1, pId2, null, minusFlag ); }
+    {
+      sqlite3Pragma( pParse, pId1, pId2, null, minusFlag );
+    }
     static void sqlite3Pragma(
     Parse pParse,
     Token pId1,        /* First part of [database.]id field */
@@ -407,7 +409,7 @@ new sPragmaType( "foreign_keys",             SQLITE_ForeignKeys ),
       string zLeft = null;    /* Nul-terminated UTF-8 string <id> */
       string zRight = null;   /* Nul-terminated UTF-8 string <value>, or NULL */
       string zDb = null;      /* The database name */
-      var pId = new Token();/* Pointer to <id> token */
+      Token pId = new Token();/* Pointer to <id> token */
       int iDb;                /* Database index for <database> */
       sqlite3 db = pParse.db;
       Db pDb;
@@ -471,7 +473,7 @@ goto pragma_out;
 */
       if ( sqlite3StrICmp( zLeft, "default_cache_size" ) == 0 )
       {
-        var getCacheSize = new VdbeOpList[]{
+        VdbeOpList[] getCacheSize = new VdbeOpList[]{
 new VdbeOpList( OP_Transaction, 0, 0,        0),                         /* 0 */
 new VdbeOpList( OP_ReadCookie,  0, 1,        BTREE_DEFAULT_CACHE_SIZE),  /* 1 */
 new VdbeOpList( OP_IfPos,       1, 7,        0),
@@ -569,7 +571,6 @@ new VdbeOpList( OP_ResultRow,   1, 1,        0),
             b = sqlite3BtreeSecureDelete( pBt, b );
             returnSingleInt( pParse, "secure_delete", b );
           }
-
           else
             /*
             **  PRAGMA [database.]max_page_count
@@ -813,7 +814,7 @@ new VdbeOpList( OP_ResultRow,   1, 1,        0),
                               ** file. Before writing to meta[6], check that meta[3] indicates
                               ** that this really is an auto-vacuum capable database.
                               */
-                              var setMeta6 = new VdbeOpList[] {
+                              VdbeOpList[] setMeta6 = new VdbeOpList[] {
 new VdbeOpList( OP_Transaction,    0,               1,        0),    /* 0 */
 new VdbeOpList( OP_ReadCookie,     0,               1,        BTREE_LARGEST_ROOT_PAGE),    /* 1 */
 new VdbeOpList( OP_If,             1,               0,        0),    /* 2 */
@@ -1353,7 +1354,7 @@ else
                                                       ** messages have been generated, output OK.  Otherwise output the
                                                       ** error message
                                                       */
-                                                      var endCode = new VdbeOpList[]  {
+                                                      VdbeOpList[] endCode = new VdbeOpList[]  {
 new VdbeOpList( OP_AddImm,      1, 0,        0),    /* 0 */
 new                    VdbeOpList( OP_IfNeg,       1, 0,        0),    /* 1 */
 new    VdbeOpList( OP_String8,     0, 3,        0),    /* 2 */
@@ -1455,7 +1456,7 @@ new  VdbeOpList( OP_ResultRow,   3, 1,        0),
                                                           {
                                                             int jmp2;
                                                             int r1;
-                                                            var idxErr = new VdbeOpList[]  {
+                                                            VdbeOpList[] idxErr = new VdbeOpList[]  {
 new VdbeOpList( OP_AddImm,      1, -1,  0),
 new VdbeOpList( OP_String8,     0,  3,  0),    /* 1 */
 new VdbeOpList( OP_Rowid,       1,  4,  0),
@@ -1481,7 +1482,7 @@ new VdbeOpList(  OP_Halt,        0,  0,  0),
                                                           sqlite3VdbeJumpHere( v, loopTop );
                                                           for ( j = 0, pIdx = pTab.pIndex; pIdx != null; pIdx = pIdx.pNext, j++ )
                                                           {
-                                                            var cntIdx = new VdbeOpList[] {
+                                                            VdbeOpList[] cntIdx = new VdbeOpList[] {
 new VdbeOpList( OP_Integer,      0,  3,  0),
 new VdbeOpList( OP_Rewind,       0,  0,  0),  /* 1 */
 new VdbeOpList( OP_AddImm,       3,  1,  0),
@@ -1540,7 +1541,7 @@ new VdbeOpList( OP_ResultRow,    2,  1,  0),
 */
                                                       if ( sqlite3StrICmp( zLeft, "encoding" ) == 0 )
                                                       {
-                                                        var encnames = new EncName[]  {
+                                                        EncName[] encnames = new EncName[]  {
 new EncName( "UTF8",     SQLITE_UTF8        ),
 new EncName( "UTF-8",    SQLITE_UTF8        ),/* Must be element [1] */
 new EncName( "UTF-16le", SQLITE_UTF16LE     ),/* Must be element [2] */
@@ -1648,7 +1649,7 @@ sqlite3ErrorMsg( pParse, "unsupported encoding: %s", zRight );
                                                           if ( zRight != null && iCookie != BTREE_FREE_PAGE_COUNT )
                                                           {
                                                             /* Write the specified cookie value */
-                                                            var setCookie = new VdbeOpList[] {
+                                                            VdbeOpList[] setCookie = new VdbeOpList[] {
 new VdbeOpList( OP_Transaction,    0,  1,  0),    /* 0 */
 new   VdbeOpList( OP_Integer,        0,  1,  0),    /* 1 */
 new VdbeOpList( OP_SetCookie,      0,  0,  1),    /* 2 */
@@ -1662,7 +1663,7 @@ new VdbeOpList( OP_SetCookie,      0,  0,  1),    /* 2 */
                                                           else
                                                           {
                                                             /* Read the specified cookie value */
-                                                            var readCookie = new VdbeOpList[]  {
+                                                            VdbeOpList[] readCookie = new VdbeOpList[]  {
 new VdbeOpList( OP_Transaction,     0,  0,  0),    /* 0 */
 new VdbeOpList( OP_ReadCookie,      0,  1,  0),    /* 1 */
 new VdbeOpList( OP_ResultRow,       1,  1,  0)
@@ -1685,7 +1686,6 @@ new VdbeOpList( OP_ResultRow,       1,  1,  0)
                                                           pDb.pSchema.file_format = (u8)atoi( zRight );
                                                           sqlite3ResetInternalSchema( db, 0 );
                                                         }
-
                                                         else
 #endif // * SQLITE_OMIT_SCHEMA_VERSION_PRAGMAS */
 
@@ -1797,8 +1797,8 @@ SQLITE_PTR_TO_INT(db->pWalArg) : 0);
                                                                   if ( !String.IsNullOrEmpty( zRight ) && ( sqlite3StrICmp( zLeft, "hexkey" ) == 0 ||
                                                                   sqlite3StrICmp( zLeft, "hexrekey" ) == 0 ) )
                                                                   {
-                                                                    var zKey = new StringBuilder( 40 );
-                                                                    zRight.ToLower( new System.Globalization.CultureInfo( "en-us" ) );
+                                                                    StringBuilder zKey = new StringBuilder( 40 );
+                                                                    zRight.ToLower( new CultureInfo( "en-us" ) );
                                                                     // expected '0x0102030405060708090a0b0c0d0e0f10'
                                                                     if ( zRight.Length != 34 )
                                                                       return;
@@ -1839,7 +1839,8 @@ sqlite3_activate_cerod(&zRight[6]);
                                                                     }
                                                                     else
 #endif
-                                                                    { /* Empty ELSE clause */}
+                                                                    { /* Empty ELSE clause */
+                                                                    }
 
       /*
       ** Reset the safety level, in case the fullfsync flag or synchronous

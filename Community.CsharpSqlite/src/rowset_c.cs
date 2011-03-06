@@ -81,7 +81,6 @@ namespace Community.CsharpSqlite
     **
     **  SQLITE_SOURCE_ID: 2010-08-23 18:52:01 42537b60566f288167f1b5864a5435986838e3a3
     **
-    **  $Header$
     *************************************************************************
     */
     //#include "sqliteInt.h"
@@ -165,7 +164,7 @@ namespace Community.CsharpSqlite
     */
     static RowSet sqlite3RowSetInit( sqlite3 db, object pSpace, u32 N )
     {
-      var p = new RowSet( db, (int)N );
+      RowSet p = new RowSet( db, (int)N );
       //Debug.Assert(N >= ROUND8(sizeof(*p)) );
       //  p = pSpace;
       //  p.pChunk = 0;
@@ -258,7 +257,7 @@ namespace Community.CsharpSqlite
     RowSetEntry pB     /* Second sorted list to be merged */
     )
     {
-      var head = new RowSetEntry();
+      RowSetEntry head = new RowSetEntry();
       RowSetEntry pTail;
 
       pTail = head;
@@ -303,7 +302,7 @@ namespace Community.CsharpSqlite
     {
       u32 i;
       RowSetEntry pEntry;
-      var aBucket = new RowSetEntry[40];
+      RowSetEntry[] aBucket = new RowSetEntry[40];
 
       Debug.Assert( p.isSorted == false );
       //memset(aBucket, 0, sizeof(aBucket));
@@ -343,7 +342,7 @@ namespace Community.CsharpSqlite
       Debug.Assert( pIn != null );
       if ( pIn.pLeft != null )
       {
-        var p = new RowSetEntry();
+        RowSetEntry p = new RowSetEntry();
         rowSetTreeToList( pIn.pLeft, ref  ppFirst, ref  p );
         p.pRight = pIn;
       }
@@ -444,8 +443,8 @@ namespace Community.CsharpSqlite
       }
       if ( p.pTree != null )
       {
-        var pHead = new RowSetEntry();
-        var pTail = new RowSetEntry();
+        RowSetEntry pHead = new RowSetEntry();
+        RowSetEntry pTail = new RowSetEntry();
         rowSetTreeToList( p.pTree, ref  pHead, ref  pTail );
         p.pTree = null;
         p.pEntry = rowSetMerge( p.pEntry, pHead );

@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 
 using FILE = System.IO.TextWriter;
@@ -370,7 +371,7 @@ static void memAboutToChange(Vdbe P, Mem M) {}
         }
         if ( ( pRec.flags & ( MEM_Blob | MEM_Str ) ) == ( MEM_Blob | MEM_Str ) )
         {
-          var sb = new StringBuilder( pRec.zBLOB.Length );
+          StringBuilder sb = new StringBuilder( pRec.zBLOB.Length );
           for ( int i = 0; i < pRec.zBLOB.Length; i++ )
             sb.Append( (char)pRec.zBLOB[i] );
           pRec.z = sb.ToString();
@@ -433,7 +434,7 @@ static void memAboutToChange(Vdbe P, Mem M) {}
       zCsr.Length = 0;
       int f = pMem.flags;
 
-      var encnames = new string[] { "(X)", "(8)", "(16LE)", "(16BE)" };
+      string[] encnames = new string[] { "(X)", "(8)", "(16LE)", "(16BE)" };
 
       if ( ( f & MEM_Blob ) != 0 )
       {
@@ -565,7 +566,7 @@ static void memAboutToChange(Vdbe P, Mem M) {}
       }
       else
       {
-        var zBuf = new StringBuilder( 200 );
+        StringBuilder zBuf = new StringBuilder( 200 );
         sqlite3VdbeMemPrettyPrint( p, zBuf );
         fprintf( _out, " " );
         fprintf( _out, "%s", zBuf );
@@ -1632,7 +1633,7 @@ arithmetic_result_is_null:
             {
               int i;
               Mem pArg;
-              var ctx = new sqlite3_context();
+              sqlite3_context ctx = new sqlite3_context();
               sqlite3_value[] apVal;
               int n;
 
@@ -2308,12 +2309,12 @@ arithmetic_result_is_null:
               }
               if ( pOp.opcode == OP_And )
               {
-                var and_logic = new byte[] { 0, 0, 0, 0, 1, 2, 0, 2, 2 };
+                byte[] and_logic = new byte[] { 0, 0, 0, 0, 1, 2, 0, 2, 2 };
                 v1 = and_logic[v1 * 3 + v2];
               }
               else
               {
-                var or_logic = new byte[] { 0, 1, 2, 1, 1, 1, 2, 1, 2 };
+                byte[] or_logic = new byte[] { 0, 1, 2, 1, 1, 1, 2, 1, 2 };
                 v1 = or_logic[v1 * 3 + v2];
               }
               pOut = aMem[pOp.p3];
@@ -4071,8 +4072,8 @@ op_column_out:
               VdbeCursor pC;
               int res = 0;
               UnpackedRecord pIdxKey;
-              var r = new UnpackedRecord();
-              var aTempRec = new UnpackedRecord();//char aTempRec[ROUND8(sizeof(UnpackedRecord)) + sizeof(Mem)*3 + 7];
+              UnpackedRecord r = new UnpackedRecord();
+              UnpackedRecord aTempRec = new UnpackedRecord();//char aTempRec[ROUND8(sizeof(UnpackedRecord)) + sizeof(Mem)*3 + 7];
 
 #if SQLITE_TEST
               sqlite3_found_count.iValue++;
@@ -4169,7 +4170,7 @@ op_column_out:
           case OP_IsUnique:
             {        /* jump, in3 */
               u16 ii;
-              var pCx = new VdbeCursor();
+              VdbeCursor pCx = new VdbeCursor();
               BtCursor pCrsr;
               u16 nField;
               Mem[] aMx;
@@ -6041,7 +6042,7 @@ iCnt++;
               int i;
               Mem pMem;
               Mem pRec;
-              var ctx = new sqlite3_context();
+              sqlite3_context ctx = new sqlite3_context();
               sqlite3_value[] apVal;
 
               n = pOp.p5;

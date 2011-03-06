@@ -6,30 +6,29 @@ namespace Community.CsharpSqlite
 {
   public partial class Sqlite3
   {
-/*
-** 2007 August 14
-**
-** The author disclaims copyright to this source code.  In place of
-** a legal notice, here is a blessing:
-**
-**    May you do good and not evil.
-**    May you find forgiveness for yourself and forgive others.
-**    May you share freely, never taking more than you give.
-**
-*************************************************************************
-** This file contains the C functions that implement mutexes.
-**
-** This file contains code that is common across all mutex implementations.
-*************************************************************************
-**  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
-**  C#-SQLite is an independent reimplementation of the SQLite software library
-**
-**  SQLITE_SOURCE_ID: 2009-12-07 16:39:13 1ed88e9d01e9eda5cbc622e7614277f29bcc551c
-**
-**  $Header$
-*************************************************************************
-*/
-//#include "sqliteInt.h"
+    /*
+    ** 2007 August 14
+    **
+    ** The author disclaims copyright to this source code.  In place of
+    ** a legal notice, here is a blessing:
+    **
+    **    May you do good and not evil.
+    **    May you find forgiveness for yourself and forgive others.
+    **    May you share freely, never taking more than you give.
+    **
+    *************************************************************************
+    ** This file contains the C functions that implement mutexes.
+    **
+    ** This file contains code that is common across all mutex implementations.
+    *************************************************************************
+    **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
+    **  C#-SQLite is an independent reimplementation of the SQLite software library
+    **
+    **  SQLITE_SOURCE_ID: 2009-12-07 16:39:13 1ed88e9d01e9eda5cbc622e7614277f29bcc551c
+    **
+    *************************************************************************
+    */
+    //#include "sqliteInt.h"
 
 #if (SQLITE_DEBUG) && !(SQLITE_MUTEX_OMIT)
 /*

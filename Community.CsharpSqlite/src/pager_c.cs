@@ -147,7 +147,9 @@ static bool sqlite3PagerTrace = false;  /* True to enable tracing */
 static void PAGERTRACE( string T, params object[] ap ) { if ( sqlite3PagerTrace )sqlite3DebugPrintf( T, ap ); }
 #else
     //#define PAGERTRACE(X)
-    static void PAGERTRACE( string T, params object[] ap ) { }
+    static void PAGERTRACE( string T, params object[] ap )
+    {
+    }
 #endif
 
     /*
@@ -159,10 +161,16 @@ static void PAGERTRACE( string T, params object[] ap ) { if ( sqlite3PagerTrace 
 ** struct as its argument.
 */
     //#define PAGERID(p) ((int)(p.fd))
-    static int PAGERID( Pager p ) { return p.GetHashCode(); }
+    static int PAGERID( Pager p )
+    {
+      return p.GetHashCode();
+    }
 
     //#define FILEHANDLEID(fd) ((int)fd)
-    static int FILEHANDLEID( sqlite3_file fd ) { return fd.GetHashCode(); }
+    static int FILEHANDLEID( sqlite3_file fd )
+    {
+      return fd.GetHashCode();
+    }
 
     /*
     ** The Pager.eState variable stores the current 'state' of a pager. A
@@ -785,7 +793,10 @@ public string zWal;                    /* File name for write-ahead log */
     //static int sqlite3_pager_readdb_count = 0;    /* Number of full pages read from DB */
     //static int sqlite3_pager_writedb_count = 0;   /* Number of full pages written to DB */
     //static int sqlite3_pager_writej_count = 0;    /* Number of pages written to journal */
-    static void PAGER_INCR( ref int v ) { v++; }
+    static void PAGER_INCR( ref int v )
+    {
+      v++;
+    }
 #else
 //# define PAGER_INCR(v)
 static void PAGER_INCR(ref int v) {}
@@ -823,7 +834,9 @@ static void PAGER_INCR(ref int v) {}
     */
     //#define JOURNAL_PG_SZ(pPager)  ((pPager.pageSize) + 8)
     static int JOURNAL_PG_SZ( Pager pPager )
-    { return ( pPager.pageSize + 8 ); }
+    {
+      return ( pPager.pageSize + 8 );
+    }
 
     /*
     ** The journal header size for this pager. This is usually the same
@@ -831,7 +844,9 @@ static void PAGER_INCR(ref int v) {}
     */
     //#define JOURNAL_HDR_SZ(pPager) (pPager.sectorSize)
     static u32 JOURNAL_HDR_SZ( Pager pPager )
-    { return ( pPager.sectorSize ); }
+    {
+      return ( pPager.sectorSize );
+    }
 
     /*
     ** The macro MEMDB is true if we are dealing with an in-memory database.
@@ -865,7 +880,10 @@ const int MEMDB = 0;
     **   if( pPager->jfd->pMethods ){ ...
     */
     //#define isOpen(pFd) ((pFd)->pMethods)
-    static bool isOpen( sqlite3_file pFd ) { return pFd.pMethods != null; }
+    static bool isOpen( sqlite3_file pFd )
+    {
+      return pFd.pMethods != null;
+    }
 
     /*
     ** Return true if this pager uses a write-ahead log instead of the usual
@@ -877,15 +895,30 @@ return (pPager->pWal!=0);
 }
 #else
     //# define pagerUseWal(x) 0
-    static bool pagerUseWal( Pager x ) { return false; }
+    static bool pagerUseWal( Pager x )
+    {
+      return false;
+    }
     //# define pagerRollbackWal(x) 0
-    static int pagerRollbackWal( Pager x ) { return 0; }
+    static int pagerRollbackWal( Pager x )
+    {
+      return 0;
+    }
     //# define pagerWalFrames(v,w,x,y,z) 0
-    static int pagerWalFrames( Pager v, PgHdr w, Pgno x, int y, int z ) { return 0; }
+    static int pagerWalFrames( Pager v, PgHdr w, Pgno x, int y, int z )
+    {
+      return 0;
+    }
     //# define pagerOpenWalIfPresent(z) SQLITE_OK
-    static int pagerOpenWalIfPresent( Pager z ) { return SQLITE_OK; }
+    static int pagerOpenWalIfPresent( Pager z )
+    {
+      return SQLITE_OK;
+    }
     //# define pagerBeginReadTransaction(z) SQLITE_OK
-    static int pagerBeginReadTransaction( Pager z ) { return SQLITE_OK; }
+    static int pagerBeginReadTransaction( Pager z )
+    {
+      return SQLITE_OK;
+    }
 #endif
 
 #if NDEBUG
@@ -1042,7 +1075,10 @@ return (pPager->pWal!=0);
       return true;
     }
 #else
-static bool assert_pager_state(Pager pPager) { return true; }
+    static bool assert_pager_state( Pager pPager )
+    {
+      return true;
+    }
 #endif //* ifndef NDEBUG */
 
 #if SQLITE_DEBUG
@@ -1151,7 +1187,7 @@ static bool assert_pager_state(Pager pPager) { return true; }
     }
     static int read32bits( sqlite3_file fd, int offset, ref u32 pRes )
     {
-      var ac = new byte[4];
+      byte[] ac = new byte[4];
       int rc = sqlite3OsRead( fd, ac, ac.Length, offset );
       if ( rc == SQLITE_OK )
       {
@@ -1166,7 +1202,7 @@ static bool assert_pager_state(Pager pPager) { return true; }
     //#define put32bits(A,B)  sqlite3sqlite3Put4byte((u8*)A,B)
     static void put32bits( string ac, int offset, int val )
     {
-      var A = new byte[4];
+      byte[] A = new byte[4];
       A[0] = (byte)ac[offset + 0];
       A[1] = (byte)ac[offset + 1];
       A[2] = (byte)ac[offset + 2];
@@ -1174,11 +1210,17 @@ static bool assert_pager_state(Pager pPager) { return true; }
       sqlite3Put4byte( A, 0, val );
     }
     static void put32bits( byte[] ac, int offset, int val )
-    { sqlite3Put4byte( ac, offset, (u32)val ); }
+    {
+      sqlite3Put4byte( ac, offset, (u32)val );
+    }
     static void put32bits( byte[] ac, u32 val )
-    { sqlite3Put4byte( ac, 0U, val ); }
+    {
+      sqlite3Put4byte( ac, 0U, val );
+    }
     static void put32bits( byte[] ac, int offset, u32 val )
-    { sqlite3Put4byte( ac, offset, val ); }
+    {
+      sqlite3Put4byte( ac, offset, val );
+    }
 
     /*
     ** Write a 32-bit integer into the given file descriptor.  Return SQLITE_OK
@@ -1186,7 +1228,7 @@ static bool assert_pager_state(Pager pPager) { return true; }
     */
     static int write32bits( sqlite3_file fd, i64 offset, u32 val )
     {
-      var ac = new byte[4];
+      byte[] ac = new byte[4];
       put32bits( ac, val );
       return sqlite3OsWrite( fd, ac, 4, offset );
     }
@@ -1326,13 +1368,21 @@ assert( (pPg->flags&PGHDR_DIRTY) || pPg->pageHash==pager_pagehash(pPg) );
 
 #else
     //#define pager_datahash(X,Y)  0
-    static int pager_datahash( int X, byte[] Y ) { return 0; }
+    static int pager_datahash( int X, byte[] Y )
+    {
+      return 0;
+    }
 
     //#define pager_pagehash(X)  0
-    static int pager_pagehash( PgHdr X ) { return 0; }
+    static int pager_pagehash( PgHdr X )
+    {
+      return 0;
+    }
 
     //#define pager_set_pagehash(X)
-    static void pager_set_pagehash( PgHdr X ) { }
+    static void pager_set_pagehash( PgHdr X )
+    {
+    }
 
     //#define CHECK_PAGE(x)
 #endif //* SQLITE_CHECK_PAGES */
@@ -1370,7 +1420,7 @@ assert( (pPg->flags&PGHDR_DIRTY) || pPg->pageHash==pager_pagehash(pPg) );
       i64 szJ = 0;                 /* Total size in bytes of journal file pJrnl */
       u32 cksum = 0;                /* MJ checksum value read from journal */
       int u;                        /* Unsigned loop counter */
-      var aMagic = new byte[8];  /* A buffer to hold the magic header */
+      byte[] aMagic = new byte[8];  /* A buffer to hold the magic header */
 
       zMaster[0] = 0;
 
@@ -1476,7 +1526,7 @@ assert( (pPg->flags&PGHDR_DIRTY) || pPg->pageHash==pager_pagehash(pPg) );
         }
         else
         {
-          var zeroHdr = new byte[28];// = {0};
+          byte[] zeroHdr = new byte[28];// = {0};
           rc = sqlite3OsWrite( pPager.jfd, zeroHdr, zeroHdr.Length, 0 );
         }
         if ( rc == SQLITE_OK && !pPager.noSync )
@@ -1653,7 +1703,7 @@ assert( (pPg->flags&PGHDR_DIRTY) || pPg->pageHash==pager_pagehash(pPg) );
     )
     {
       int rc;                      /* Return code */
-      var aMagic = new byte[8]; /* A buffer to hold the magic header */
+      byte[] aMagic = new byte[8]; /* A buffer to hold the magic header */
       i64 iHdrOff;                 /* Offset of journal header being read */
 
       Debug.Assert( isOpen( pPager.jfd ) );      /* Journal file must be open. */
@@ -3886,8 +3936,8 @@ return rc;
         }
         //if ( rc == SQLITE_OK )
         //{
-          //pNew = (char *)sqlite3PageMalloc(pageSize);
-          //if( !pNew ) rc = SQLITE_NOMEM;
+        //pNew = (char *)sqlite3PageMalloc(pageSize);
+        //if( !pNew ) rc = SQLITE_NOMEM;
         //}
         if ( rc == SQLITE_OK )
         {
@@ -4319,15 +4369,15 @@ static Pgno sqlite3PagerPagenumber( DbPage pPg )    {      return pPg.pgno;    }
             ** the potential journal header.
             */
             i64 iNextHdrOffset;
-            var aMagic = new u8[8];
-            var zHeader = new u8[aJournalMagic.Length + 4];
+            u8[] aMagic = new u8[8];
+            u8[] zHeader = new u8[aJournalMagic.Length + 4];
             aJournalMagic.CopyTo( zHeader, 0 );// memcpy(zHeader, aJournalMagic, sizeof(aJournalMagic));
             put32bits( zHeader, aJournalMagic.Length, pPager.nRec );
             iNextHdrOffset = journalHdrOffset( pPager );
             rc = sqlite3OsRead( pPager.jfd, aMagic, 8, iNextHdrOffset );
             if ( rc == SQLITE_OK && 0 == memcmp( aMagic, aJournalMagic, 8 ) )
             {
-              var zerobyte = new u8[1];
+              u8[] zerobyte = new u8[1];
               rc = sqlite3OsWrite( pPager.jfd, zerobyte, 1, iNextHdrOffset );
             }
             if ( rc != SQLITE_OK && rc != SQLITE_IOERR_SHORT_READ )
@@ -5156,7 +5206,7 @@ Debug.Assert(pPager.state == (tempFile != 0 ? PAGER_EXCLUSIVE : PAGER_UNLOCK));
               }
               if ( rc == SQLITE_OK )
               {
-                var first = new u8[1];
+                u8[] first = new u8[1];
                 rc = sqlite3OsRead( pPager.jfd, first, 1, 0 );
                 if ( rc == SQLITE_IOERR_SHORT_READ )
                 {
@@ -5236,7 +5286,10 @@ Debug.Assert(pPager.state == (tempFile != 0 ? PAGER_EXCLUSIVE : PAGER_UNLOCK));
 #else
  0 != pPager.memDb
 #endif
- && pPager.errCode != 0 ) ) { return pPager.errCode; }
+ && pPager.errCode != 0 ) )
+      {
+        return pPager.errCode;
+      }
 
       if ( !pagerUseWal( pPager ) && pPager.eState == PAGER_OPEN )
       {
@@ -5401,7 +5454,7 @@ Debug.Assert(pPager.state == (tempFile != 0 ? PAGER_EXCLUSIVE : PAGER_UNLOCK));
           ** it can be neglected.
           */
           Pgno nPage = 0;
-          var dbFileVers = new byte[pPager.dbFileVers.Length];
+          byte[] dbFileVers = new byte[pPager.dbFileVers.Length];
 
           rc = pagerPagecount( pPager, ref nPage );
           if ( rc != 0 )
@@ -6150,7 +6203,7 @@ CHECK_PAGE(pPg);
         for ( ii = 0; ii < nPage && rc == SQLITE_OK; ii++ )
         {
           u32 pg = (u32)( pg1 + ii );
-          var pPage = new PgHdr();
+          PgHdr pPage = new PgHdr();
           if ( pg == pPg.pgno || sqlite3BitvecTest( pPager.pInJournal, pg ) == 0 )
           {
             if ( pg != ( ( PENDING_BYTE / ( pPager.pageSize ) ) + 1 ) ) //PAGER_MJ_PGNO(pPager))
@@ -6844,7 +6897,7 @@ commit_phase_one_exit:
 */
     static int[] sqlite3PagerStats( Pager pPager )
     {
-      var a = new int[11];
+      int[] a = new int[11];
       a[0] = sqlite3PcacheRefCount( pPager.pPCache );
       a[1] = sqlite3PcachePagecount( pPager.pPCache );
       a[2] = sqlite3PcacheGetCachesize( pPager.pPCache );
@@ -7266,7 +7319,7 @@ return MEMDB != 0;
           if ( needSyncPgno <= pPager.dbOrigSize )
           {
             Debug.Assert( pPager.pTmpSpace != null );
-            var pTemp = new u32[pPager.pTmpSpace.Length];
+            u32[] pTemp = new u32[pPager.pTmpSpace.Length];
             sqlite3BitvecClear( pPager.pInJournal, needSyncPgno, pTemp );//pPager.pTmpSpace );
           }
           return rc;

@@ -43,7 +43,6 @@ namespace Community.CsharpSqlite
     **
     **  SQLITE_SOURCE_ID: 2010-12-07 20:14:09 a586a4deeb25330037a49df295b36aaf624d0f45
     **
-    **  $Header$
     *************************************************************************
     */
     //#include "sqliteInt.h"
@@ -145,7 +144,9 @@ p.zName, P4_STATIC );
 }
 #else
     //  #define codeTableLocks(x)
-    static void codeTableLocks( Parse pParse ) { }
+    static void codeTableLocks( Parse pParse )
+    {
+    }
 #endif
 
     /*
@@ -165,8 +166,10 @@ p.zName, P4_STATIC );
 
       db = pParse.db;
       //      if ( db.mallocFailed != 0 ) return;
-      if ( pParse.nested != 0 ) return;
-      if ( pParse.nErr != 0 ) return;
+      if ( pParse.nested != 0 )
+        return;
+      if ( pParse.nErr != 0 )
+        return;
 
       /* Begin by generating some termination code at the end of the
       ** vdbe program
@@ -191,7 +194,8 @@ p.zName, P4_STATIC );
           sqlite3VdbeJumpHere( v, pParse.cookieGoto - 1 );
           for ( iDb = 0, mask = 1; iDb < db.nDb; mask <<= 1, iDb++ )
           {
-            if ( ( mask & pParse.cookieMask ) == 0 ) continue;
+            if ( ( mask & pParse.cookieMask ) == 0 )
+              continue;
             sqlite3VdbeUsesBtree( v, iDb );
             sqlite3VdbeAddOp2( v, OP_Transaction, iDb, ( mask & pParse.writeMask ) != 0 );
             if ( db.init.busy == 0 )
@@ -237,14 +241,15 @@ pParse.nVtabLock = 0;
         Debug.Assert( pParse.iCacheLevel == 0 );  /* Disables and re-enables match */
         /* A minimum of one cursor is required if autoincrement is used
         *  See ticket [a696379c1f08866] */
-        if ( pParse.pAinc != null && pParse.nTab == 0 ) pParse.nTab = 1;
+        if ( pParse.pAinc != null && pParse.nTab == 0 )
+          pParse.nTab = 1;
         sqlite3VdbeMakeReady( v, pParse.nVar, pParse.nMem,
                          pParse.nTab, pParse.nMaxArg, pParse.explain,
                          ( pParse.isMultiWrite != 0 && pParse.mayAbort != 0 ) ? 1 : 0 );
         pParse.rc = SQLITE_DONE;
         pParse.colNamesSet = 0;
       }
-      else 
+      else
       {
         pParse.rc = SQLITE_ERROR;
       }
@@ -277,7 +282,8 @@ pParse.nVtabLock = 0;
       //# define SAVE_SZ  (Parse.Length - offsetof(Parse,nVar))
       //  char saveBuf[SAVE_SZ];
 
-      if ( pParse.nErr != 0 ) return;
+      if ( pParse.nErr != 0 )
+        return;
       Debug.Assert( pParse.nested < 10 );  /* Nesting should only be of limited depth */
       va_start( ap, zFormat );
       zSql = sqlite3VMPrintf( db, zFormat, ap );
@@ -317,9 +323,11 @@ pParse.nVtabLock = 0;
       for ( i = OMIT_TEMPDB; i < db.nDb; i++ )
       {
         int j = ( i < 2 ) ? i ^ 1 : i;   /* Search TEMP before MAIN */
-        if ( zDatabase != null && sqlite3StrICmp( zDatabase, db.aDb[j].zName ) != 0 ) continue;
-        p = sqlite3HashFind( db.aDb[j].pSchema.tblHash, zName, nName, ( Table )null );
-        if ( p != null ) break;
+        if ( zDatabase != null && sqlite3StrICmp( zDatabase, db.aDb[j].zName ) != 0 )
+          continue;
+        p = sqlite3HashFind( db.aDb[j].pSchema.tblHash, zName, nName, (Table)null );
+        if ( p != null )
+          break;
       }
       return p;
     }
@@ -389,9 +397,11 @@ pParse.nVtabLock = 0;
         int j = ( i < 2 ) ? i ^ 1 : i;  /* Search TEMP before MAIN */
         Schema pSchema = db.aDb[j].pSchema;
         Debug.Assert( pSchema != null );
-        if ( zDb != null && sqlite3StrICmp( zDb, db.aDb[j].zName ) != 0 ) continue;
+        if ( zDb != null && sqlite3StrICmp( zDb, db.aDb[j].zName ) != 0 )
+          continue;
         p = sqlite3HashFind( pSchema.idxHash, zName, nName, (Index)null );
-        if ( p != null ) break;
+        if ( p != null )
+          break;
       }
       return p;
     }
@@ -402,7 +412,7 @@ pParse.nVtabLock = 0;
     static void freeIndex( sqlite3 db, ref Index p )
     {
 #if !SQLITE_OMIT_ANALYZE
-      sqlite3DeleteIndexSamples(db, p );
+      sqlite3DeleteIndexSamples( db, p );
 #endif
       sqlite3DbFree( db, ref p.zColAff );
       sqlite3DbFree( db, ref p );
@@ -434,7 +444,10 @@ pParse.nVtabLock = 0;
           /* Justification of ALWAYS();  The index must be on the list of
           ** indices. */
           p = pIndex.pTable.pIndex;
-          while ( ALWAYS( p != null ) && p.pNext != pIndex ) { p = p.pNext; }
+          while ( ALWAYS( p != null ) && p.pNext != pIndex )
+          {
+            p = p.pNext;
+          }
           if ( ALWAYS( p != null && p.pNext == pIndex ) )
           {
             p.pNext = pIndex.pNext;
@@ -474,7 +487,8 @@ pParse.nVtabLock = 0;
           Debug.Assert( i == 1 || ( pDb.pBt != null ) );
           sqlite3SchemaFree( pDb.pSchema );
         }
-        if ( iDb > 0 ) return;
+        if ( iDb > 0 )
+          return;
       }
       Debug.Assert( iDb == 0 );
       db.flags &= ~SQLITE_InternChanges;
@@ -500,7 +514,8 @@ pParse.nVtabLock = 0;
         }
         j++;
       }
-      if ( db.nDb != j ) db.aDb[j] = new Db();//memset(db.aDb[j], 0, (db.nDb-j)*sizeof(db.aDb[j]));
+      if ( db.nDb != j )
+        db.aDb[j] = new Db();//memset(db.aDb[j], 0, (db.nDb-j)*sizeof(db.aDb[j]));
       db.nDb = j;
       if ( db.nDb <= 2 && db.aDb != db.aDbStatic )
       {
@@ -552,12 +567,14 @@ pParse.nVtabLock = 0;
     */
     static void sqlite3DeleteTable( sqlite3 db, ref Table pTable )
     {
-      Index pIndex; Index pNext;
+      Index pIndex;
+      Index pNext;
 
-      Debug.Assert( null==pTable || pTable.nRef > 0 );
+      Debug.Assert( null == pTable || pTable.nRef > 0 );
 
       /* Do not delete the table until the reference count reaches zero. */
-      if ( null == pTable ) return;
+      if ( null == pTable )
+        return;
       if ( (// ( !db || db->pnBytesFreed == 0 ) && 
         ( --pTable.nRef ) > 0 ) )
         return;
@@ -567,17 +584,17 @@ pParse.nVtabLock = 0;
       {
         pNext = pIndex.pNext;
         Debug.Assert( pIndex.pSchema == pTable.pSchema );
-    //if( null==db || db.pnBytesFreed==0 ){
-      string zName = pIndex.zName; 
-//
+        //if( null==db || db.pnBytesFreed==0 ){
+        string zName = pIndex.zName;
+        //
 #if !NDEBUG || SQLITE_COVERAGE_TEST
-    //  TESTONLY ( Index pOld = ) sqlite3HashInsert(
-    //ref pIndex.pSchema.idxHash, zName, sqlite3Strlen30(zName), 0
-    //  );
-      Index pOld = sqlite3HashInsert(
-    ref pIndex.pSchema.idxHash, zName, sqlite3Strlen30( zName ), (Index)null
-      );
-        Debug.Assert( pOld==pIndex || pOld==null );
+        //  TESTONLY ( Index pOld = ) sqlite3HashInsert(
+        //ref pIndex.pSchema.idxHash, zName, sqlite3Strlen30(zName), 0
+        //  );
+        Index pOld = sqlite3HashInsert(
+      ref pIndex.pSchema.idxHash, zName, sqlite3Strlen30( zName ), (Index)null
+        );
+        Debug.Assert( pOld == pIndex || pOld == null );
 #else
     //  TESTONLY ( Index pOld = ) sqlite3HashInsert(
     //ref pIndex.pSchema.idxHash, zName, sqlite3Strlen30(zName), 0
@@ -586,8 +603,8 @@ pParse.nVtabLock = 0;
     ref pIndex.pSchema.idxHash, zName, sqlite3Strlen30(zName),(Index)null
       );
 #endif
-    //}
-    freeIndex(db, ref pIndex);
+        //}
+        freeIndex( db, ref pIndex );
       }
 
       /* Delete any foreign keys attached to this table. */
@@ -595,7 +612,7 @@ pParse.nVtabLock = 0;
 
       /* Delete the Table structure itself.
 */
-      sqliteDeleteColumnNames(db, pTable );
+      sqliteDeleteColumnNames( db, pTable );
       sqlite3DbFree( db, ref pTable.zName );
       sqlite3DbFree( db, ref pTable.zColAff );
       sqlite3SelectDelete( db, ref pTable.pSelect );
@@ -624,7 +641,7 @@ pParse.nVtabLock = 0;
       pDb = db.aDb[iDb];
       p = sqlite3HashInsert( ref pDb.pSchema.tblHash, zTabName,
       sqlite3Strlen30( zTabName ), (Table)null );
-      sqlite3DeleteTable(db, ref p );
+      sqlite3DeleteTable( db, ref p );
       db.flags |= SQLITE_InternChanges;
     }
 
@@ -816,7 +833,7 @@ pParse.nVtabLock = 0;
       sqlite3 db = pParse.db;
       Vdbe v;
       int iDb;         /* Database number to create the table in */
-      var pName = new Token();    /* Unqualified name of the table to create */
+      Token pName = new Token();    /* Unqualified name of the table to create */
 
       /* The table or view name to create is passed to this routine via tokens
       ** pName1 and pName2. If the table name was fully qualified, for example:
@@ -836,25 +853,29 @@ pParse.nVtabLock = 0;
       ** created in.
       */
       iDb = sqlite3TwoPartName( pParse, pName1, pName2, ref pName );
-      if ( iDb < 0 ) return;
+      if ( iDb < 0 )
+        return;
       if ( 0 == OMIT_TEMPDB && isTemp != 0 && pName2.n > 0 && iDb != 1 )
       {
-          /* If creating a temp table, the name may not be qualified. Unless 
-          ** the database name is "temp" anyway.  */
+        /* If creating a temp table, the name may not be qualified. Unless 
+        ** the database name is "temp" anyway.  */
 
         sqlite3ErrorMsg( pParse, "temporary table name must be unqualified" );
         return;
       }
-      if ( OMIT_TEMPDB == 0 && isTemp != 0 ) iDb = 1;
+      if ( OMIT_TEMPDB == 0 && isTemp != 0 )
+        iDb = 1;
 
       pParse.sNameToken = pName;
       zName = sqlite3NameFromToken( db, pName );
-      if ( zName == null ) return;
+      if ( zName == null )
+        return;
       if ( SQLITE_OK != sqlite3CheckObjectName( pParse, zName ) )
       {
         goto begin_table_error;
       }
-      if ( db.init.iDb == 1 ) isTemp = 1;
+      if ( db.init.iDb == 1 )
+        isTemp = 1;
 #if !SQLITE_OMIT_AUTHORIZATION
 Debug.Assert( (isTemp & 1)==isTemp );
 {
@@ -1005,7 +1026,7 @@ goto begin_table_error;
       return;
 
       /* If an error occurs, we jump here */
-    begin_table_error:
+begin_table_error:
       sqlite3DbFree( db, ref zName );
       return;
     }
@@ -1038,7 +1059,8 @@ goto begin_table_error;
       string z;
       Column pCol;
       sqlite3 db = pParse.db;
-      if ( ( p = pParse.pNewTable ) == null ) return;
+      if ( ( p = pParse.pNewTable ) == null )
+        return;
 #if SQLITE_MAX_COLUMN || !SQLITE_MAX_COLUMN
       if ( p.nCol + 1 > db.aLimit[SQLITE_LIMIT_COLUMN] )
       {
@@ -1047,7 +1069,8 @@ goto begin_table_error;
       }
 #endif
       z = sqlite3NameFromToken( db, pName );
-      if ( z == null ) return;
+      if ( z == null )
+        return;
       for ( i = 0; i < p.nCol; i++ )
       {
         if ( 0 == sqlite3StrICmp( z, p.aCol[i].zName ) )
@@ -1089,7 +1112,8 @@ goto begin_table_error;
     {
       Table p;
       p = pParse.pNewTable;
-      if ( p == null || NEVER( p.nCol < 1 ) ) return;
+      if ( p == null || NEVER( p.nCol < 1 ) )
+        return;
       p.aCol[p.nCol - 1].notNull = (u8)onError;
     }
 
@@ -1123,10 +1147,14 @@ goto begin_table_error;
       //u32 h = 0;
       //char aff = SQLITE_AFF_NUMERIC;
       zIn = zIn.ToLower();
-      if ( zIn.Contains( "char" ) || zIn.Contains( "clob" ) || zIn.Contains( "text" ) ) return SQLITE_AFF_TEXT;
-      if ( zIn.Contains( "blob" ) ) return SQLITE_AFF_NONE;
-      if ( zIn.Contains( "doub" ) || zIn.Contains( "floa" ) || zIn.Contains( "real" ) ) return SQLITE_AFF_REAL;
-      if ( zIn.Contains( "int" ) ) return SQLITE_AFF_INTEGER;
+      if ( zIn.Contains( "char" ) || zIn.Contains( "clob" ) || zIn.Contains( "text" ) )
+        return SQLITE_AFF_TEXT;
+      if ( zIn.Contains( "blob" ) )
+        return SQLITE_AFF_NONE;
+      if ( zIn.Contains( "doub" ) || zIn.Contains( "floa" ) || zIn.Contains( "real" ) )
+        return SQLITE_AFF_REAL;
+      if ( zIn.Contains( "int" ) )
+        return SQLITE_AFF_INTEGER;
       return SQLITE_AFF_NUMERIC;
       //      string zEnd = pType.z.Substring(pType.n);
 
@@ -1177,7 +1205,8 @@ goto begin_table_error;
       Column pCol;
 
       p = pParse.pNewTable;
-      if ( p == null || NEVER( p.nCol < 1 ) ) return;
+      if ( p == null || NEVER( p.nCol < 1 ) )
+        return;
       pCol = p.aCol[p.nCol - 1];
       Debug.Assert( pCol.zType == null );
       pCol.zType = sqlite3NameFromToken( pParse.db, pType );
@@ -1246,7 +1275,9 @@ goto begin_table_error;
     */
     // OVERLOADS, so I don't need to rewrite parse.c
     static void sqlite3AddPrimaryKey( Parse pParse, int null_2, int onError, int autoInc, int sortOrder )
-    { sqlite3AddPrimaryKey( pParse, null, onError, autoInc, sortOrder ); }
+    {
+      sqlite3AddPrimaryKey( pParse, null, onError, autoInc, sortOrder );
+    }
     static void sqlite3AddPrimaryKey(
     Parse pParse,    /* Parsing context */
     ExprList pList,  /* List of field names to be indexed */
@@ -1258,7 +1289,8 @@ goto begin_table_error;
       Table pTab = pParse.pNewTable;
       string zType = null;
       int iCol = -1, i;
-      if ( pTab == null || IN_DECLARE_VTAB ) goto primary_key_exit;
+      if ( pTab == null || IN_DECLARE_VTAB )
+        goto primary_key_exit;
       if ( ( pTab.tabFlags & TF_HasPrimaryKey ) != 0 )
       {
         sqlite3ErrorMsg( pParse,
@@ -1287,7 +1319,8 @@ goto begin_table_error;
             pTab.aCol[iCol].isPrimKey = 1;
           }
         }
-        if ( pList.nExpr > 1 ) iCol = -1;
+        if ( pList.nExpr > 1 )
+          iCol = -1;
       }
       if ( iCol >= 0 && iCol < pTab.nCol )
       {
@@ -1319,7 +1352,7 @@ goto begin_table_error;
         pList = null;
       }
 
-    primary_key_exit:
+primary_key_exit:
       sqlite3ExprListDelete( pParse.db, ref pList );
       return;
     }
@@ -1356,11 +1389,13 @@ goto begin_table_error;
       string zColl;              /* Dequoted name of collation sequence */
       sqlite3 db;
 
-      if ( ( p = pParse.pNewTable ) == null ) return;
+      if ( ( p = pParse.pNewTable ) == null )
+        return;
       i = p.nCol - 1;
       db = pParse.db;
       zColl = sqlite3NameFromToken( db, pToken );
-      if ( zColl == null ) return;
+      if ( zColl == null )
+        return;
 
       if ( sqlite3LocateCollSeq( pParse, zColl ) != null )
       {
@@ -1466,7 +1501,10 @@ goto begin_table_error;
       int n;
       for ( n = 0; n < z.Length; n++ )
       {
-        if ( z[n] == (byte)'"' ) { n++; }
+        if ( z[n] == (byte)'"' )
+        {
+          n++;
+        }
       }
       return n + 2;
     }
@@ -1488,25 +1526,44 @@ goto begin_table_error;
     static void identPut( StringBuilder z, ref int pIdx, string zSignedIdent )
     {
       string zIdent = zSignedIdent;
-      int i; int j; bool needQuote;
+      int i;
+      int j;
+      bool needQuote;
       i = pIdx;
       for ( j = 0; j < zIdent.Length; j++ )
       {
-        if ( !sqlite3Isalnum( zIdent[j] ) && zIdent[j] != '_' ) break;
+        if ( !sqlite3Isalnum( zIdent[j] ) && zIdent[j] != '_' )
+          break;
       }
       needQuote = sqlite3Isdigit( zIdent[0] ) || sqlite3KeywordCode( zIdent, j ) != TK_ID;
       if ( !needQuote )
       {
         needQuote = ( j < zIdent.Length && zIdent[j] != 0 );
       }
-      if ( needQuote ) { if ( i == z.Length ) z.Append( '\0' ); z[i++] = '"'; }
+      if ( needQuote )
+      {
+        if ( i == z.Length )
+          z.Append( '\0' );
+        z[i++] = '"';
+      }
       for ( j = 0; j < zIdent.Length; j++ )
       {
-        if ( i == z.Length ) z.Append( '\0' );
+        if ( i == z.Length )
+          z.Append( '\0' );
         z[i++] = zIdent[j];
-        if ( zIdent[j] == '"' ) { if ( i == z.Length ) z.Append( '\0' ); z[i++] = '"'; }
+        if ( zIdent[j] == '"' )
+        {
+          if ( i == z.Length )
+            z.Append( '\0' );
+          z[i++] = '"';
+        }
       }
-      if ( needQuote ) { if ( i == z.Length ) z.Append( '\0' ); z[i++] = '"'; }
+      if ( needQuote )
+      {
+        if ( i == z.Length )
+          z.Append( '\0' );
+        z[i++] = '"';
+      }
       //z[i] = 0;
       pIdx = i;
     }
@@ -1520,7 +1577,9 @@ goto begin_table_error;
     {
       int i, k, n;
       StringBuilder zStmt;
-      string zSep; string zSep2; string zEnd;
+      string zSep;
+      string zSep2;
+      string zEnd;
       Column pCol;
       n = 0;
       for ( i = 0; i < p.nCol; i++ )
@@ -1556,7 +1615,7 @@ goto begin_table_error;
       for ( i = 0; i < p.nCol; i++ )
       {//, pCol++){
         pCol = p.aCol[i];
-        var azType = new string[]  {
+        string[] azType = new string[]  {
 /* SQLITE_AFF_TEXT    */ " TEXT",
 /* SQLITE_AFF_NONE    */ "",
 /* SQLITE_AFF_NUMERIC */ " NUM",
@@ -1612,9 +1671,13 @@ goto begin_table_error;
     */
     // OVERLOADS, so I don't need to rewrite parse.c
     static void sqlite3EndTable( Parse pParse, Token pCons, Token pEnd, int null_4 )
-    { sqlite3EndTable( pParse, pCons, pEnd, null ); }
+    {
+      sqlite3EndTable( pParse, pCons, pEnd, null );
+    }
     static void sqlite3EndTable( Parse pParse, int null_2, int null_3, Select pSelect )
-    { sqlite3EndTable( pParse, null, null, pSelect ); }
+    {
+      sqlite3EndTable( pParse, null, null, pSelect );
+    }
 
     static void sqlite3EndTable(
     Parse pParse,          /* Parse context */
@@ -1632,7 +1695,8 @@ goto begin_table_error;
         return;
       }
       p = pParse.pNewTable;
-      if ( p == null ) return;
+      if ( p == null )
+        return;
 
       Debug.Assert( 0 == db.init.busy || pSelect == null );
 
@@ -1690,7 +1754,8 @@ goto begin_table_error;
         String zStmt = "";    /* Text of the CREATE TABLE or CREATE VIEW statement */
 
         v = sqlite3GetVdbe( pParse );
-        if ( NEVER( v == null ) ) return;
+        if ( NEVER( v == null ) )
+          return;
 
         sqlite3VdbeAddOp1( v, OP_Close, 0 );
 
@@ -1727,7 +1792,7 @@ goto begin_table_error;
         */
         if ( pSelect != null )
         {
-          var dest = new SelectDest();
+          SelectDest dest = new SelectDest();
           Table pSelTab;
 
           Debug.Assert( pParse.nTab == 1 );
@@ -1740,13 +1805,14 @@ goto begin_table_error;
           if ( pParse.nErr == 0 )
           {
             pSelTab = sqlite3ResultSetOfSelect( pParse, pSelect );
-            if ( pSelTab == null ) return;
+            if ( pSelTab == null )
+              return;
             Debug.Assert( p.aCol == null );
             p.nCol = pSelTab.nCol;
             p.aCol = pSelTab.aCol;
             pSelTab.nCol = 0;
             pSelTab.aCol = null;
-            sqlite3DeleteTable(db, ref pSelTab );
+            sqlite3DeleteTable( db, ref pSelTab );
           }
         }
 
@@ -1858,7 +1924,7 @@ goto begin_table_error;
       int n;
       string z;//const char *z;
       Token sEnd;
-      var sFix = new DbFixer();
+      DbFixer sFix = new DbFixer();
       Token pName = null;
       int iDb;
       sqlite3 db = pParse.db;
@@ -1913,7 +1979,10 @@ goto begin_table_error;
       sEnd.n = 0;
       n = (int)( pBegin.z.Length - sEnd.z.Length );//sEnd.z - pBegin.z;
       z = pBegin.z;
-      while ( ALWAYS( n > 0 ) && sqlite3Isspace( z[n - 1] ) ) { n--; }
+      while ( ALWAYS( n > 0 ) && sqlite3Isspace( z[n - 1] ) )
+      {
+        n--;
+      }
       sEnd.z = z.Substring( n - 1 );
       sEnd.n = 1;
 
@@ -1946,13 +2015,15 @@ if ( sqlite3VtabCallConnect( pParse, pTable ) )
 return SQLITE_ERROR;
 }
 #endif
-      if ( IsVirtual( pTable ) ) return 0;
+      if ( IsVirtual( pTable ) )
+        return 0;
 
 #if !SQLITE_OMIT_VIEW
       /* A positive nCol means the columns names for this view are
 ** already known.
 */
-      if ( pTable.nCol > 0 ) return 0;
+      if ( pTable.nCol > 0 )
+        return 0;
 
       /* A negative nCol is a special marker meaning that we are currently
       ** trying to compute the column names.  If we enter this routine with
@@ -2009,7 +2080,7 @@ db.xAuth = xAuth;
           pTable.aCol = pSelTab.aCol;
           pSelTab.nCol = 0;
           pSelTab.aCol = null;
-          sqlite3DeleteTable(db, ref pSelTab );
+          sqlite3DeleteTable( db, ref pSelTab );
           pTable.pSchema.flags |= DB_UnresetViews;
         }
         else
@@ -2035,7 +2106,8 @@ db.xAuth = xAuth;
     static void sqliteViewResetAll( sqlite3 db, int idx )
     {
       HashElem i;
-      if ( !DbHasProperty( db, idx, DB_UnresetViews ) ) return;
+      if ( !DbHasProperty( db, idx, DB_UnresetViews ) )
+        return;
       //for(i=sqliteHashFirst(&db.aDb[idx].pSchema.tblHash); i;i=sqliteHashNext(i)){
       for ( i = db.aDb[idx].pSchema.tblHash.first; i != null; i = i.next )
       {
@@ -2212,10 +2284,12 @@ destroyRootPage( pParse, pIdx.tnum, iDb );
       //}
       Debug.Assert( pParse.nErr == 0 );
       Debug.Assert( pName.nSrc == 1 );
-      if (noErr != 0) db.suppressErr++;
-      pTab = sqlite3LocateTable(pParse, isView,
+      if ( noErr != 0 )
+        db.suppressErr++;
+      pTab = sqlite3LocateTable( pParse, isView,
       pName.a[0].zName, pName.a[0].zDatabase );
-      if (noErr != 0) db.suppressErr--;
+      if ( noErr != 0 )
+        db.suppressErr--;
 
       if ( pTab == null )
       {
@@ -2368,7 +2442,7 @@ goto exit_drop_table;
       }
       sqliteViewResetAll( db, iDb );
 
-    exit_drop_table:
+exit_drop_table:
       sqlite3SrcListDelete( db, ref pName );
     }
 
@@ -2390,7 +2464,9 @@ goto exit_drop_table;
     */
     // OVERLOADS, so I don't need to rewrite parse.c
     static void sqlite3CreateForeignKey( Parse pParse, int null_2, Token pTo, ExprList pToCol, int flags )
-    { sqlite3CreateForeignKey( pParse, null, pTo, pToCol, flags ); }
+    {
+      sqlite3CreateForeignKey( pParse, null, pTo, pToCol, flags );
+    }
     static void sqlite3CreateForeignKey(
     Parse pParse,       /* Parsing context */
     ExprList pFromCol,  /* Columns in this table that point to other table */
@@ -2410,11 +2486,13 @@ goto exit_drop_table;
       //string z;
 
       Debug.Assert( pTo != null );
-      if ( p == null || IN_DECLARE_VTAB ) goto fk_end;
+      if ( p == null || IN_DECLARE_VTAB )
+        goto fk_end;
       if ( pFromCol == null )
       {
         int iCol = p.nCol - 1;
-        if ( NEVER( iCol < 0 ) ) goto fk_end;
+        if ( NEVER( iCol < 0 ) )
+          goto fk_end;
         if ( pToCol != null && pToCol.nExpr != 1 )
         {
           sqlite3ErrorMsg( pParse, "foreign key on %s" +
@@ -2464,7 +2542,8 @@ goto exit_drop_table;
       {
         for ( i = 0; i < nCol; i++ )
         {
-          if ( pFKey.aCol[i] == null ) pFKey.aCol[i] = new FKey.sColMap();
+          if ( pFKey.aCol[i] == null )
+            pFKey.aCol[i] = new FKey.sColMap();
           int j;
           for ( j = 0; j < p.nCol; j++ )
           {
@@ -2488,7 +2567,8 @@ goto exit_drop_table;
         for ( i = 0; i < nCol; i++ )
         {
           int n = sqlite3Strlen30( pToCol.a[i].zName );
-          if ( pFKey.aCol[i] == null ) pFKey.aCol[i] = new FKey.sColMap();
+          if ( pFKey.aCol[i] == null )
+            pFKey.aCol[i] = new FKey.sColMap();
           pFKey.aCol[i].zCol = pToCol.a[i].zName;
           //memcpy( z, pToCol.a[i].zName, n );
           //z[n] = 0;
@@ -2517,7 +2597,7 @@ goto exit_drop_table;
       p.pFKey = pFKey;
       pFKey = null;
 
-    fk_end:
+fk_end:
       sqlite3DbFree( db, ref pFKey );
 #endif // * !SQLITE_OMIT_FOREIGN_KEY) */
       sqlite3ExprListDelete( db, ref pFromCol );
@@ -2536,7 +2616,8 @@ goto exit_drop_table;
 #if !SQLITE_OMIT_FOREIGN_KEY
       Table pTab;
       FKey pFKey;
-      if ( ( pTab = pParse.pNewTable ) == null || ( pFKey = pTab.pFKey ) == null ) return;
+      if ( ( pTab = pParse.pNewTable ) == null || ( pFKey = pTab.pFKey ) == null )
+        return;
       Debug.Assert( isDeferred == 0 || isDeferred == 1 ); /* EV: R-30323-21917 */
       pFKey.isDeferred = (u8)isDeferred;
 #endif
@@ -2577,7 +2658,8 @@ return;
       /* Require a write-lock on the table to perform this operation */
       sqlite3TableLock( pParse, iDb, pTab.tnum, 1, pTab.zName );
       v = sqlite3GetVdbe( pParse );
-      if ( v == null ) return;
+      if ( v == null )
+        return;
       if ( memRootPage >= 0 )
       {
         tnum = memRootPage;
@@ -2644,9 +2726,13 @@ return;
     */
     // OVERLOADS, so I don't need to rewrite parse.c
     static Index sqlite3CreateIndex( Parse pParse, int null_2, int null_3, int null_4, int null_5, int onError, int null_7, int null_8, int sortOrder, int ifNotExist )
-    { return sqlite3CreateIndex( pParse, null, null, null, null, onError, null, null, sortOrder, ifNotExist ); }
+    {
+      return sqlite3CreateIndex( pParse, null, null, null, null, onError, null, null, sortOrder, ifNotExist );
+    }
     static Index sqlite3CreateIndex( Parse pParse, int null_2, int null_3, int null_4, ExprList pList, int onError, int null_7, int null_8, int sortOrder, int ifNotExist )
-    { return sqlite3CreateIndex( pParse, null, null, null, pList, onError, null, null, sortOrder, ifNotExist ); }
+    {
+      return sqlite3CreateIndex( pParse, null, null, null, pList, onError, null, null, sortOrder, ifNotExist );
+    }
     static Index sqlite3CreateIndex(
     Parse pParse,     /* All information about this Parse */
     Token pName1,     /* First part of index name. May be NULL */
@@ -2666,8 +2752,8 @@ return;
       string zName = null;          /* Name of the index */
       int nName;                    /* Number of characters in zName */
       int i, j;
-      var nullId = new Token();   /* Fake token for an empty ID list */
-      var sFix = new DbFixer(); /* For assigning database names to pTable */
+      Token nullId = new Token();   /* Fake token for an empty ID list */
+      DbFixer sFix = new DbFixer(); /* For assigning database names to pTable */
       int sortOrderMask;            /* 1 to honor DESC in index.  0 to ignore. */
       sqlite3 db = pParse.db;
       Db pDb;                       /* The specific table containing the indexed database */
@@ -2676,7 +2762,7 @@ return;
       ExprList_item pListItem;      /* For looping over pList */
       int nCol;
       int nExtra = 0;
-      var zExtra = new StringBuilder();
+      StringBuilder zExtra = new StringBuilder();
 
       Debug.Assert( pStart == null || pEnd != null ); /* pEnd must be non-NULL if pStart is */
       Debug.Assert( pParse.nErr == 0 );      /* Never called with prior errors */
@@ -2701,7 +2787,8 @@ return;
         */
         Debug.Assert( pName1 != null && pName2 != null );
         iDb = sqlite3TwoPartName( pParse, pName1, pName2, ref  pName );
-        if ( iDb < 0 ) goto exit_create_index;
+        if ( iDb < 0 )
+          goto exit_create_index;
 
 #if !SQLITE_OMIT_TEMPDB
         /* If the index name was unqualified, check if the the table
@@ -2728,14 +2815,16 @@ return;
         }
         pTab = sqlite3LocateTable( pParse, 0, pTblName.a[0].zName,
         pTblName.a[0].zDatabase );
-        if ( pTab == null /*|| db.mallocFailed != 0 */ ) goto exit_create_index;
+        if ( pTab == null /*|| db.mallocFailed != 0 */ )
+          goto exit_create_index;
         Debug.Assert( db.aDb[iDb].pSchema == pTab.pSchema );
       }
       else
       {
         Debug.Assert( pName == null );
         pTab = pParse.pNewTable;
-        if ( pTab == null ) goto exit_create_index;
+        if ( pTab == null )
+          goto exit_create_index;
         iDb = sqlite3SchemaToIndex( db, pTab.pSchema );
       }
       pDb = db.aDb[iDb];
@@ -2777,7 +2866,8 @@ return;
       if ( pName != null )
       {
         zName = sqlite3NameFromToken( db, pName );
-        if ( zName == null ) goto exit_create_index;
+        if ( zName == null )
+          goto exit_create_index;
         if ( SQLITE_OK != sqlite3CheckObjectName( pParse, zName ) )
         {
           goto exit_create_index;
@@ -2803,7 +2893,9 @@ return;
       {
         int n = 0;
         Index pLoop;
-        for ( pLoop = pTab.pIndex, n = 1; pLoop != null; pLoop = pLoop.pNext, n++ ) { }
+        for ( pLoop = pTab.pIndex, n = 1; pLoop != null; pLoop = pLoop.pNext, n++ )
+        {
+        }
         zName = sqlite3MPrintf( db, "sqlite_autoindex_%s_%d", pTab.zName, n );
         if ( zName == null )
         {
@@ -2836,7 +2928,8 @@ goto exit_create_index;
         nullId.z = pTab.aCol[pTab.nCol - 1].zName;
         nullId.n = sqlite3Strlen30( nullId.z );
         pList = sqlite3ExprListAppend( pParse, null, null );
-        if ( pList == null ) goto exit_create_index;
+        if ( pList == null )
+          goto exit_create_index;
         sqlite3ExprListSetName( pParse, pList, nullId, 0 );
         pList.a[0].sortOrder = (u8)sortOrder;
       }
@@ -2884,8 +2977,12 @@ goto exit_create_index;
       pIndex.aSortOrder = new byte[nCol + 1];//(u8 *)(pIndex->aiRowEst[nCol+1]);
       //pIndex.zName = null;// (char*)( &pIndex->aSortOrder[nCol] );
       zExtra = new StringBuilder( nName + 1 );// (char*)( &pIndex.zName[nName + 1] );
-      if ( zName.Length == nName ) pIndex.zName = zName;
-      else { pIndex.zName = zName.Substring( 0, nName ); }// memcpy( pIndex.zName, zName, nName + 1 );
+      if ( zName.Length == nName )
+        pIndex.zName = zName;
+      else
+      {
+        pIndex.zName = zName.Substring( 0, nName );
+      }// memcpy( pIndex.zName, zName, nName + 1 );
       pIndex.pTable = pTab;
       pIndex.nColumn = pList.nExpr;
       pIndex.onError = (u8)onError;
@@ -2924,7 +3021,8 @@ goto exit_create_index;
         for ( j = 0; j < pTab.nCol; j++ )
         {//, pTabCol++){
           pTabCol = pTab.aCol[j];
-          if ( sqlite3StrICmp( zColName, pTabCol.zName ) == 0 ) break;
+          if ( sqlite3StrICmp( zColName, pTabCol.zName ) == 0 )
+            break;
         }
         if ( j >= pTab.nCol )
         {
@@ -2999,15 +3097,18 @@ goto exit_create_index;
           Debug.Assert( pIdx.autoIndex != 0 );
           Debug.Assert( pIndex.onError != OE_None );
 
-          if ( pIdx.nColumn != pIndex.nColumn ) continue;
+          if ( pIdx.nColumn != pIndex.nColumn )
+            continue;
           for ( k = 0; k < pIdx.nColumn; k++ )
           {
             string z1;
             string z2;
-            if ( pIdx.aiColumn[k] != pIndex.aiColumn[k] ) break;
+            if ( pIdx.aiColumn[k] != pIndex.aiColumn[k] )
+              break;
             z1 = pIdx.azColl[k];
             z2 = pIndex.azColl[k];
-            if ( z1 != z2 && sqlite3StrICmp( z1, z2 ) != 0 ) break;
+            if ( z1 != z2 && sqlite3StrICmp( z1, z2 ) != 0 )
+              break;
           }
           if ( k == pIdx.nColumn )
           {
@@ -3079,7 +3180,8 @@ goto exit_create_index;
         int iMem = ++pParse.nMem;
 
         v = sqlite3GetVdbe( pParse );
-        if ( v == null ) goto exit_create_index;
+        if ( v == null )
+          goto exit_create_index;
 
 
         /* Create the rootpage for the index
@@ -3160,7 +3262,7 @@ goto exit_create_index;
       }
 
         /* Clean up before exiting */
-    exit_create_index:
+exit_create_index:
       if ( pIndex != null )
       {
         //sqlite3DbFree(db, ref pIndex.zColAff );
@@ -3194,9 +3296,9 @@ goto exit_create_index;
     {
       int[] a = pIdx.aiRowEst;
       int i;
-      int  n;
+      int n;
       Debug.Assert( a != null );
-      a[0] = (int) pIdx.pTable.nRowEst;
+      a[0] = (int)pIdx.pTable.nRowEst;
       if ( a[0] < 10 )
         a[0] = 10;
       n = 10;
@@ -3288,7 +3390,7 @@ goto exit_drop_index;
         sqlite3VdbeAddOp4( v, OP_DropIndex, iDb, 0, 0, pIndex.zName, 0 );
       }
 
-    exit_drop_index:
+exit_drop_index:
       sqlite3SrcListDelete( db, ref pName );
     }
 
@@ -3349,14 +3451,17 @@ goto exit_drop_index;
     */
     // OVERLOADS, so I don't need to rewrite parse.c
     static IdList sqlite3IdListAppend( sqlite3 db, int null_2, Token pToken )
-    { return sqlite3IdListAppend( db, null, pToken ); }
+    {
+      return sqlite3IdListAppend( db, null, pToken );
+    }
     static IdList sqlite3IdListAppend( sqlite3 db, IdList pList, Token pToken )
     {
       int i = 0;
       if ( pList == null )
       {
         pList = new IdList();//sqlite3DbMallocZero(db, sizeof(IdList));
-        if ( pList == null ) return null;
+        if ( pList == null )
+          return null;
         pList.nAlloc = 0;
       }
       pList.a = (IdList_item[])sqlite3ArrayAllocate(
@@ -3383,7 +3488,8 @@ goto exit_drop_index;
     static void sqlite3IdListDelete( sqlite3 db, ref IdList pList )
     {
       int i;
-      if ( pList == null ) return;
+      if ( pList == null )
+        return;
       for ( i = 0; i < pList.nId; i++ )
       {
         sqlite3DbFree( db, ref pList.a[i].zName );
@@ -3399,10 +3505,12 @@ goto exit_drop_index;
     static int sqlite3IdListIndex( IdList pList, string zName )
     {
       int i;
-      if ( pList == null ) return -1;
+      if ( pList == null )
+        return -1;
       for ( i = 0; i < pList.nId; i++ )
       {
-        if ( sqlite3StrICmp( pList.a[i].zName, zName ) == 0 ) return i;
+        if ( sqlite3StrICmp( pList.a[i].zName, zName ) == 0 )
+          return i;
       }
       return -1;
     }
@@ -3569,7 +3677,8 @@ goto exit_drop_index;
         for ( i = 0; i < pList.nSrc; i++ )
         {
           pItem = pList.a[i];
-          if ( pItem.iCursor >= 0 ) break;
+          if ( pItem.iCursor >= 0 )
+            break;
           pItem.iCursor = pParse.nTab++;
           if ( pItem.pSelect != null )
           {
@@ -3586,7 +3695,8 @@ goto exit_drop_index;
     {
       int i;
       SrcList_item pItem;
-      if ( pList == null ) return;
+      if ( pList == null )
+        return;
       for ( i = 0; i < pList.nSrc; i++ )
       {//, pItem++){
         pItem = pList.a[i];
@@ -3662,7 +3772,7 @@ goto exit_drop_index;
       pItem.pOn = pOn;
       pItem.pUsing = pUsing;
       return p;
-    append_from_error:
+append_from_error:
       Debug.Assert( p == null );
       sqlite3ExprDelete( db, ref pOn );
       sqlite3IdListDelete( db, ref pUsing );
@@ -3740,7 +3850,8 @@ goto exit_drop_index;
         return;
       }
       v = sqlite3GetVdbe( pParse );
-      if ( v == null ) return;
+      if ( v == null )
+        return;
       if ( type != TK_DEFERRED )
       {
         for ( i = 0; i < db.nDb; i++ )
@@ -3805,7 +3916,7 @@ goto exit_drop_index;
 #if !SQLITE_OMIT_AUTHORIZATION
 const string[] az = { "BEGIN", "RELEASE", "ROLLBACK" };
 #endif
-    static void sqlite3Savepoint(Parse pParse, int op, Token pName)
+    static void sqlite3Savepoint( Parse pParse, int op, Token pName )
     {
       string zName = sqlite3NameFromToken( pParse.db, pName );
       if ( zName != null )
@@ -3845,7 +3956,7 @@ Debug.Assert( !SAVEPOINT_BEGIN && SAVEPOINT_RELEASE==1 && SAVEPOINT_ROLLBACK==2 
         SQLITE_OPEN_DELETEONCLOSE |
         SQLITE_OPEN_TEMP_DB;
 
-        rc = sqlite3BtreeOpen( null, db, ref pBt, 0, flags);
+        rc = sqlite3BtreeOpen( null, db, ref pBt, 0, flags );
         if ( rc != SQLITE_OK )
         {
           sqlite3ErrorMsg( pParse, "unable to open a temporary database " +
@@ -3857,7 +3968,7 @@ Debug.Assert( !SAVEPOINT_BEGIN && SAVEPOINT_RELEASE==1 && SAVEPOINT_ROLLBACK==2 
         Debug.Assert( db.aDb[1].pSchema != null );
         if ( SQLITE_NOMEM == sqlite3BtreeSetPageSize( pBt, db.nextPagesize, -1, 0 ) )
         {
-        //  db.mallocFailed = 1;
+          //  db.mallocFailed = 1;
         }
       }
       return 0;
@@ -3892,7 +4003,8 @@ Debug.Assert( !SAVEPOINT_BEGIN && SAVEPOINT_RELEASE==1 && SAVEPOINT_ROLLBACK==2 
       if ( pToplevel.cookieGoto == 0 )
       {
         Vdbe v = sqlite3GetVdbe( pToplevel );
-        if ( v == null ) return;  /* This only happens if there was a prior error */
+        if ( v == null )
+          return;  /* This only happens if there was a prior error */
         pToplevel.cookieGoto = sqlite3VdbeAddOp2( v, OP_Goto, 0, 0 ) + 1;
       }
       if ( iDb >= 0 )
@@ -4082,7 +4194,9 @@ Debug.Assert( !SAVEPOINT_BEGIN && SAVEPOINT_RELEASE==1 && SAVEPOINT_ROLLBACK==2 
 #if !SQLITE_OMIT_REINDEX
     // OVERLOADS, so I don't need to rewrite parse.c
     static void sqlite3Reindex( Parse pParse, int null_2, int null_3 )
-    { sqlite3Reindex( pParse, null, null ); }
+    {
+      sqlite3Reindex( pParse, null, null );
+    }
     static void sqlite3Reindex( Parse pParse, Token pName1, Token pName2 )
     {
       CollSeq pColl;                /* Collating sequence to be reindexed, or NULL */
@@ -4092,7 +4206,7 @@ Debug.Assert( !SAVEPOINT_BEGIN && SAVEPOINT_RELEASE==1 && SAVEPOINT_ROLLBACK==2 
       Index pIndex;                 /* An index associated with pTab */
       int iDb;                      /* The database index number */
       sqlite3 db = pParse.db;       /* The database connection */
-      var pObjName = new Token();  /* Name of the table or index to be reindexed */
+      Token pObjName = new Token();  /* Name of the table or index to be reindexed */
 
       /* Read the database schema. If an error occurs, leave an error message
       ** and code in pParse and return NULL. */
@@ -4111,7 +4225,8 @@ Debug.Assert( !SAVEPOINT_BEGIN && SAVEPOINT_RELEASE==1 && SAVEPOINT_ROLLBACK==2 
         string zColl;
         Debug.Assert( pName1.z != null );
         zColl = sqlite3NameFromToken( pParse.db, pName1 );
-        if ( zColl == null ) return;
+        if ( zColl == null )
+          return;
         pColl = sqlite3FindCollSeq( db, ENC( db ), zColl, 0 );
         if ( pColl != null )
         {
@@ -4122,9 +4237,11 @@ Debug.Assert( !SAVEPOINT_BEGIN && SAVEPOINT_RELEASE==1 && SAVEPOINT_ROLLBACK==2 
         sqlite3DbFree( db, ref zColl );
       }
       iDb = sqlite3TwoPartName( pParse, pName1, pName2, ref pObjName );
-      if ( iDb < 0 ) return;
+      if ( iDb < 0 )
+        return;
       z = sqlite3NameFromToken( db, pObjName );
-      if ( z == null ) return;
+      if ( z == null )
+        return;
       zDb = db.aDb[iDb].zName;
       pTab = sqlite3FindTable( db, z, zDb );
       if ( pTab != null )
@@ -4161,7 +4278,7 @@ Debug.Assert( !SAVEPOINT_BEGIN && SAVEPOINT_RELEASE==1 && SAVEPOINT_ROLLBACK==2 
       int nCol = pIdx.nColumn;
       //int nBytes = KeyInfo.Length + (nCol - 1) * CollSeq*.Length + nCol;
       sqlite3 db = pParse.db;
-      var pKey = new KeyInfo();// (KeyInfo*)sqlite3DbMallocZero(db, nBytes);
+      KeyInfo pKey = new KeyInfo();// (KeyInfo*)sqlite3DbMallocZero(db, nBytes);
 
       if ( pKey != null )
       {
@@ -4181,7 +4298,8 @@ Debug.Assert( !SAVEPOINT_BEGIN && SAVEPOINT_RELEASE==1 && SAVEPOINT_ROLLBACK==2 
 
       if ( pParse.nErr != 0 )
       {
-        pKey = null; sqlite3DbFree( db, ref pKey );
+        pKey = null;
+        sqlite3DbFree( db, ref pKey );
       }
       return pKey;
     }

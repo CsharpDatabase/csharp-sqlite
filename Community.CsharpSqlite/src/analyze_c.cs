@@ -74,8 +74,8 @@ new _aTable( "sqlite_stat2", "tbl,idx,sampleno,sample" ),
     string zWhere       /* Delete entries associated with this table */
     )
     {
-      var aRoot = new int[] { 0, 0 };
-      var aCreateTbl = new u8[] { 0, 0 };
+      int[] aRoot = new int[] { 0, 0 };
+      u8[] aCreateTbl = new u8[] { 0, 0 };
 
       int i;
       sqlite3 db = pParse.db;
@@ -813,13 +813,13 @@ UNUSED_PARAMETER( pIdx );
                     {
                       pSample.u.z = z;
                       pSample.u.zBLOB = zBLOB;
-                    //pSample->u.z = sqlite3DbMallocRaw(dbMem, n);
-                    //if( pSample->u.z ){
-                    //  memcpy(pSample->u.z, z, n);
-                    //}else{
-                    //  db->mallocFailed = 1;
-                    //  break;
-                    //}
+                      //pSample->u.z = sqlite3DbMallocRaw(dbMem, n);
+                      //if( pSample->u.z ){
+                      //  memcpy(pSample->u.z, z, n);
+                      //}else{
+                      //  db->mallocFailed = 1;
+                      //  break;
+                      //}
                     }
                   }
                 }

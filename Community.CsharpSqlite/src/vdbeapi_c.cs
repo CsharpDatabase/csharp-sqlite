@@ -111,12 +111,12 @@ return ( p == null || p.expired ) ? 1 : 0;
         Vdbe v = pStmt;
         sqlite3 db = v.db;
 #if  SQLITE_THREADSAFE
-sqlite3_mutex mutex;
+        sqlite3_mutex mutex;
 #endif
         if ( vdbeSafety( v ) )
           return SQLITE_MISUSE_BKPT();
 #if SQLITE_THREADSAFE
-mutex = v.db.mutex;
+        mutex = v.db.mutex;
 #endif
         sqlite3_mutex_enter( mutex );
         rc = sqlite3VdbeFinalize( v );
@@ -163,7 +163,7 @@ mutex = v.db.mutex;
       int rc = SQLITE_OK;
       Vdbe p = (Vdbe)pStmt;
 #if  SQLITE_THREADSAFE
-sqlite3_mutex mutex = ( (Vdbe)pStmt ).db.mutex;
+      sqlite3_mutex mutex = ( (Vdbe)pStmt ).db.mutex;
 #endif
       sqlite3_mutex_enter( mutex );
       for ( i = 0; i < p.nVar; i++ )
@@ -902,12 +902,12 @@ return p.pMem.n;
         ** using gcc, force nullMem to be 8-byte aligned using the magical
         ** __attribute__((aligned(8))) macro.  */
         //    Mem nullMem
-//#if (SQLITE_DEBUG) && (__GNUC__)
-//__attribute__((aligned(8)))
-//#endif
+        //#if (SQLITE_DEBUG) && (__GNUC__)
+        //__attribute__((aligned(8)))
+        //#endif
         //
         //    public static const Mem nullMem       = {0, "", (double)0, {0}, 0, MEM_Null, SQLITE_NULL, 0, 0, 0 };
-         Mem nullMem = new Mem(null, "", (double)0, 0, 0, MEM_Null, SQLITE_NULL, 0);
+        Mem nullMem = new Mem( null, "", (double)0, 0, 0, MEM_Null, SQLITE_NULL, 0 );
         if ( pVm != null && ALWAYS( pVm.db != null ) )
         {
           sqlite3_mutex_enter( pVm.db.mutex );

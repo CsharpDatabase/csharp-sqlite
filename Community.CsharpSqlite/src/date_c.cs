@@ -63,7 +63,6 @@ namespace Community.CsharpSqlite
     **
     **  SQLITE_SOURCE_ID: 2010-12-07 20:14:09 a586a4deeb25330037a49df295b36aaf624d0f45
     **
-    **  $Header$
     *************************************************************************
     */
     //#include "sqliteInt.h"
@@ -85,9 +84,9 @@ namespace Community.CsharpSqlite
 ** already, check for an MSVC build environment that provides
 ** localtime_s().
 */
-//#if !(HAVE_LOCALTIME_R) && !(HAVE_LOCALTIME_S) &&      (_MSC_VER) && (_CRT_INSECURE_DEPRECATE)
-//#define HAVE_LOCALTIME_S
-//#endif
+    //#if !(HAVE_LOCALTIME_R) && !(HAVE_LOCALTIME_S) &&      (_MSC_VER) && (_CRT_INSECURE_DEPRECATE)
+    //#define HAVE_LOCALTIME_S
+    //#endif
 
     /*
 ** A structure for holding a single date and time.
@@ -148,10 +147,12 @@ namespace Community.CsharpSqlite
     static int getDigits( string zDate, int N0, int min0, int max0, char nextC0, ref int pVal0, int N1, int min1, int max1, char nextC1, ref int pVal1, int N2, int min2, int max2, char nextC2, ref int pVal2 )
     {
       int c0 = getDigits( zDate + '\0', N0, min0, max0, nextC0, ref  pVal0 );
-      if ( c0 == 0 ) return 0;
+      if ( c0 == 0 )
+        return 0;
       string zDate1 = zDate.Substring( zDate.IndexOf( nextC0 ) + 1 );
       int c1 = getDigits( zDate1 + '\0', N1, min1, max1, nextC1, ref  pVal1 );
-      if ( c1 == 0 ) return c0;
+      if ( c1 == 0 )
+        return c0;
       return c0 + c1 + getDigits( zDate1.Substring( zDate1.IndexOf( nextC1 ) + 1 ) + '\0', N2, min2, max2, nextC2, ref  pVal2 );
     }
     static int getDigits( string zDate, int N, int min, int max, char nextC, ref int pVal )
@@ -190,8 +191,8 @@ namespace Community.CsharpSqlite
       pVal = val;
       zIndex++;
       cnt++;
-    //} while ( nextC != 0 && zIndex < zDate.Length );
-    end_getDigits:
+//} while ( nextC != 0 && zIndex < zDate.Length );
+end_getDigits:
       //va_end( ap );
       return cnt;
     }
@@ -216,7 +217,8 @@ namespace Community.CsharpSqlite
     static int parseTimezone( string zDate, DateTime p )
     {
       int sgn = 0;
-      int nHr = 0; int nMn = 0;
+      int nHr = 0;
+      int nMn = 0;
       char c;
       zDate = zDate.Trim();// while ( sqlite3Isspace( *(u8*)zDate ) ) { zDate++; }
       p.tz = 0;
@@ -245,9 +247,11 @@ namespace Community.CsharpSqlite
       }
       //zDate += 5;
       p.tz = sgn * ( nMn + nHr * 60 );
-      if ( zDate.Length == 6 ) zDate = "";
-      else if ( zDate.Length > 6 ) zDate = zDate.Substring( 6 ).Trim();// while ( sqlite3Isspace( *(u8*)zDate ) ) { zDate++; }
-    zulu_time:
+      if ( zDate.Length == 6 )
+        zDate = "";
+      else if ( zDate.Length > 6 )
+        zDate = zDate.Substring( 6 ).Trim();// while ( sqlite3Isspace( *(u8*)zDate ) ) { zDate++; }
+zulu_time:
       return zDate != "" ? 1 : 0;
     }
 
@@ -260,7 +264,9 @@ namespace Community.CsharpSqlite
     */
     static int parseHhMmSs( string zDate, DateTime p )
     {
-      int h = 0; int m = 0; int s = 0;
+      int h = 0;
+      int m = 0;
+      int s = 0;
       double ms = 0.0;
       if ( getDigits( zDate, 2, 0, 24, ':', ref  h, 2, 0, 59, '\0', ref  m ) != 2 )
       {
@@ -298,7 +304,8 @@ namespace Community.CsharpSqlite
       p.h = h;
       p.m = m;
       p.s = s + ms;
-      if ( zIndex < zDate.Length && parseTimezone( zDate.Substring( zIndex ), p ) != 0 ) return 1;
+      if ( zIndex < zDate.Length && parseTimezone( zDate.Substring( zIndex ), p ) != 0 )
+        return 1;
       p.validTZ = (byte)( ( p.tz != 0 ) ? 1 : 0 );
       return 0;
     }
@@ -313,7 +320,8 @@ namespace Community.CsharpSqlite
     {
       int Y, M, D, A, B, X1, X2;
 
-      if ( p.validJD != 0 ) return;
+      if ( p.validJD != 0 )
+        return;
       if ( p.validYMD != 0 )
       {
         Y = p.Y;
@@ -364,7 +372,10 @@ namespace Community.CsharpSqlite
     */
     static int parseYyyyMmDd( string zDate, DateTime p )
     {
-      int Y = 0; int M = 0; int D = 0; bool neg;
+      int Y = 0;
+      int M = 0;
+      int D = 0;
+      bool neg;
 
       int zIndex = 0;
       if ( zDate[zIndex] == '-' )
@@ -381,7 +392,10 @@ namespace Community.CsharpSqlite
         return 1;
       }
       zIndex += 10;// zDate += 10;
-      while ( zIndex < zDate.Length && ( sqlite3Isspace( zDate[zIndex] ) || 'T' == zDate[zIndex] ) ) { zIndex++; }//zDate++; }
+      while ( zIndex < zDate.Length && ( sqlite3Isspace( zDate[zIndex] ) || 'T' == zDate[zIndex] ) )
+      {
+        zIndex++;
+      }//zDate++; }
       if ( zIndex < zDate.Length && parseHhMmSs( zDate.Substring( zIndex ), p ) == 0 )
       {
         /* We got the time */
@@ -412,7 +426,7 @@ namespace Community.CsharpSqlite
     static void setDateTimeToCurrent( sqlite3_context context, DateTime p )
     {
       sqlite3 db = sqlite3_context_db_handle( context );
-      sqlite3OsCurrentTimeInt64(db.pVfs, ref p.iJD);
+      sqlite3OsCurrentTimeInt64( db.pVfs, ref p.iJD );
       p.validJD = 1;
     }
 
@@ -452,7 +466,7 @@ namespace Community.CsharpSqlite
         setDateTimeToCurrent( context, p );
         return 0;
       }
-      else if ( sqlite3AtoF( zDate, ref r, sqlite3Strlen30( zDate ), SQLITE_UTF8 )  )
+      else if ( sqlite3AtoF( zDate, ref r, sqlite3Strlen30( zDate ), SQLITE_UTF8 ) )
       {
         p.iJD = (sqlite3_int64)( r * 86400000.0 + 0.5 );
         p.validJD = 1;
@@ -467,7 +481,8 @@ namespace Community.CsharpSqlite
     static void computeYMD( DateTime p )
     {
       int Z, A, B, C, D, E, X1;
-      if ( p.validYMD != 0 ) return;
+      if ( p.validYMD != 0 )
+        return;
       if ( 0 == p.validJD )
       {
         p.Y = 2000;
@@ -497,7 +512,8 @@ namespace Community.CsharpSqlite
     static void computeHMS( DateTime p )
     {
       int s;
-      if ( p.validHMS != 0 ) return;
+      if ( p.validHMS != 0 )
+        return;
       computeJD( p );
       s = (int)( ( p.iJD + 43200000 ) % 86400000 );
       p.s = s / 1000.0;
@@ -537,7 +553,8 @@ namespace Community.CsharpSqlite
 */
     static int localtimeOffset( DateTime p )
     {
-      DateTime x; DateTime y = new DateTime();
+      DateTime x;
+      DateTime y = new DateTime();
       time_t t;
       x = p;
       computeYMD_HMS( x );
@@ -630,7 +647,7 @@ y.s = sLocal.tm_sec;
       int rc = 1;
       int n;
       double r = 0;
-      var z = new StringBuilder( zMod.ToLower() );
+      StringBuilder z = new StringBuilder( zMod.ToLower() );
       zdtBuf.Length = 0;
       //z = zdtBuf;
       //for(n=0; n<ArraySize(zdtBuf)-1 && zMod[n]; n++){
@@ -694,8 +711,8 @@ y.s = sLocal.tm_sec;
             ** weekday N where 0==Sunday, 1==Monday, and so forth.  If the
             ** date is already on the appropriate weekday, this is a no-op.
             */
-            if ( z.ToString().StartsWith( "weekday " ) 
-            && sqlite3AtoF(z.ToString().Substring(8), ref r, sqlite3Strlen30(z.ToString().Substring(8)), SQLITE_UTF8)
+            if ( z.ToString().StartsWith( "weekday " )
+            && sqlite3AtoF( z.ToString().Substring( 8 ), ref r, sqlite3Strlen30( z.ToString().Substring( 8 ) ), SQLITE_UTF8 )
             && ( n = (int)r ) == r && n >= 0 && r < 7 )
             {
               sqlite3_int64 Z;
@@ -704,7 +721,8 @@ y.s = sLocal.tm_sec;
               p.validJD = 0;
               computeJD( p );
               Z = ( ( p.iJD + 129600000 ) / 86400000 ) % 7;
-              if ( Z > n ) Z -= 7;
+              if ( Z > n )
+                Z -= 7;
               p.iJD += ( n - Z ) * 86400000;
               clearYMD_HMS_TZ( p );
               rc = 0;
@@ -719,7 +737,10 @@ y.s = sLocal.tm_sec;
             ** Move the date backwards to the beginning of the current day,
             ** or month or year.
             */
-            if ( z.Length <= 9 ) z.Length = 0; else z.Remove( 0, 9 );//z += 9;
+            if ( z.Length <= 9 )
+              z.Length = 0;
+            else
+              z.Remove( 0, 9 );//z += 9;
             computeYMD( p );
             p.validHMS = 1;
             p.h = p.m = 0;
@@ -758,11 +779,14 @@ y.s = sLocal.tm_sec;
         case '9':
           {
             double rRounder;
-      for(n=1; n < z.Length && z[n]!=':' && !sqlite3Isspace(z[n]); n++){}
-      if( !sqlite3AtoF(z.ToString(), ref r, n, SQLITE_UTF8) ){
-        rc = 1;
-        break;
-      }
+            for ( n = 1; n < z.Length && z[n] != ':' && !sqlite3Isspace( z[n] ); n++ )
+            {
+            }
+            if ( !sqlite3AtoF( z.ToString(), ref r, n, SQLITE_UTF8 ) )
+            {
+              rc = 1;
+              break;
+            }
             Debug.Assert( n >= 1 );
             if ( z[n] == ':' )
             {
@@ -775,14 +799,17 @@ y.s = sLocal.tm_sec;
               DateTime tx;
               sqlite3_int64 day;
               int z2Index = 0;
-              if ( !sqlite3Isdigit( z2[z2Index] ) ) z2Index++;// z2++;
+              if ( !sqlite3Isdigit( z2[z2Index] ) )
+                z2Index++;// z2++;
               tx = new DateTime();// memset( &tx, 0, sizeof(tx));
-              if ( parseHhMmSs( z2.Substring( z2Index ), tx ) != 0 ) break;
+              if ( parseHhMmSs( z2.Substring( z2Index ), tx ) != 0 )
+                break;
               computeJD( tx );
               tx.iJD -= 43200000;
               day = tx.iJD / 86400000;
               tx.iJD -= day * 86400000;
-              if ( z[0] == '-' ) tx.iJD = -tx.iJD;
+              if ( z[0] == '-' )
+                tx.iJD = -tx.iJD;
               computeJD( p );
               clearYMD_HMS_TZ( p );
               p.iJD += tx.iJD;
@@ -790,11 +817,16 @@ y.s = sLocal.tm_sec;
               break;
             }
             //z += n;
-            while ( sqlite3Isspace( z[n] ) ) n++;// z++;
+            while ( sqlite3Isspace( z[n] ) )
+              n++;// z++;
             z = z.Remove( 0, n );
             n = sqlite3Strlen30( z );
-            if ( n > 10 || n < 3 ) break;
-            if ( z[n - 1] == 's' ) { z.Length = --n; }// z[n - 1] = '\0'; n--; }
+            if ( n > 10 || n < 3 )
+              break;
+            if ( z[n - 1] == 's' )
+            {
+              z.Length = --n;
+            }// z[n - 1] = '\0'; n--; }
             computeJD( p );
             rc = 0;
             rRounder = r < 0 ? -0.5 : +0.5;
@@ -963,7 +995,7 @@ y.s = sLocal.tm_sec;
     sqlite3_value[] argv
     )
     {
-      var x = new DateTime();
+      DateTime x = new DateTime();
       if ( isDate( context, argc, argv, ref x ) == 0 )
       {
         zdtBuf.Length = 0;
@@ -1020,16 +1052,20 @@ y.s = sLocal.tm_sec;
     )
     {
       {
-        var x = new DateTime();
+        DateTime x = new DateTime();
         u64 n;
         int i, j;
         StringBuilder z;
         sqlite3 db;
         string zFmt = sqlite3_value_text( argv[0] );
-        var zdtBuf = new StringBuilder( 100 );
-        var argv1 = new sqlite3_value[argc - 1];
-        for ( i = 0; i < argc - 1; i++ ) { argv[i + 1].CopyTo( ref argv1[i] ); }
-        if ( String.IsNullOrEmpty( zFmt ) || isDate( context, argc - 1, argv1, ref x ) != 0 ) return;
+        StringBuilder zdtBuf = new StringBuilder( 100 );
+        sqlite3_value[] argv1 = new sqlite3_value[argc - 1];
+        for ( i = 0; i < argc - 1; i++ )
+        {
+          argv[i + 1].CopyTo( ref argv1[i] );
+        }
+        if ( String.IsNullOrEmpty( zFmt ) || isDate( context, argc - 1, argv1, ref x ) != 0 )
+          return;
         db = sqlite3_context_db_handle( context );
         for ( i = 0, n = 1; i < zFmt.Length; i++, n++ )
         {
@@ -1104,21 +1140,31 @@ y.s = sLocal.tm_sec;
             zdtTemp.Length = 0;
             switch ( (char)zFmt[i] )
             {
-              case 'd': sqlite3_snprintf( 3,  zdtTemp, "%02d", x.D ); z.Append( zdtTemp ); j += 2; break;
+              case 'd':
+                sqlite3_snprintf( 3, zdtTemp, "%02d", x.D );
+                z.Append( zdtTemp );
+                j += 2;
+                break;
               case 'f':
                 {
                   double s = x.s;
-                  if ( s > 59.999 ) s = 59.999;
-                  sqlite3_snprintf( 7,  zdtTemp, "%06.3f", s ); z.Append( zdtTemp );
+                  if ( s > 59.999 )
+                    s = 59.999;
+                  sqlite3_snprintf( 7, zdtTemp, "%06.3f", s );
+                  z.Append( zdtTemp );
                   j = sqlite3Strlen30( z );
                   break;
                 }
-              case 'H': sqlite3_snprintf( 3,  zdtTemp, "%02d", x.h ); z.Append( zdtTemp ); j += 2; break;
+              case 'H':
+                sqlite3_snprintf( 3, zdtTemp, "%02d", x.h );
+                z.Append( zdtTemp );
+                j += 2;
+                break;
               case 'W': /* Fall thru */
               case 'j':
                 {
                   int nDay;             /* Number of days since 1st day of year */
-                  var y = new DateTime();
+                  DateTime y = new DateTime();
                   x.CopyTo( y );
                   y.validJD = 0;
                   y.M = 1;
@@ -1129,32 +1175,48 @@ y.s = sLocal.tm_sec;
                   {
                     int wd;   /* 0=Monday, 1=Tuesday, ... 6=Sunday */
                     wd = (int)( ( ( x.iJD + 43200000 ) / 86400000 ) % 7 );
-                    sqlite3_snprintf( 3,  zdtTemp, "%02d", ( nDay + 7 - wd ) / 7 ); z.Append( zdtTemp );
+                    sqlite3_snprintf( 3, zdtTemp, "%02d", ( nDay + 7 - wd ) / 7 );
+                    z.Append( zdtTemp );
                     j += 2;
                   }
                   else
                   {
-                    sqlite3_snprintf( 4,  zdtTemp, "%03d", nDay + 1 ); z.Append( zdtTemp );
+                    sqlite3_snprintf( 4, zdtTemp, "%03d", nDay + 1 );
+                    z.Append( zdtTemp );
                     j += 3;
                   }
                   break;
                 }
               case 'J':
                 {
-                  sqlite3_snprintf( 20, zdtTemp, "%.16g", x.iJD / 86400000.0 ); z.Append( zdtTemp );
+                  sqlite3_snprintf( 20, zdtTemp, "%.16g", x.iJD / 86400000.0 );
+                  z.Append( zdtTemp );
                   j = sqlite3Strlen30( z );
                   break;
                 }
-              case 'm': sqlite3_snprintf( 3, zdtTemp, "%02d", x.M ); z.Append( zdtTemp ); j += 2; break;
-              case 'M': sqlite3_snprintf( 3, zdtTemp, "%02d", x.m ); z.Append( zdtTemp ); j += 2; break;
+              case 'm':
+                sqlite3_snprintf( 3, zdtTemp, "%02d", x.M );
+                z.Append( zdtTemp );
+                j += 2;
+                break;
+              case 'M':
+                sqlite3_snprintf( 3, zdtTemp, "%02d", x.m );
+                z.Append( zdtTemp );
+                j += 2;
+                break;
               case 's':
                 {
                   sqlite3_snprintf( 30, zdtTemp, "%lld",
-                               (i64)( x.iJD / 1000 - 21086676 * (i64)10000 ) ); z.Append( zdtTemp );
+                               (i64)( x.iJD / 1000 - 21086676 * (i64)10000 ) );
+                  z.Append( zdtTemp );
                   j = sqlite3Strlen30( z );
                   break;
                 }
-              case 'S': sqlite3_snprintf( 3, zdtTemp, "%02d", (int)x.s ); z.Append( zdtTemp ); j += 2; break;
+              case 'S':
+                sqlite3_snprintf( 3, zdtTemp, "%02d", (int)x.s );
+                z.Append( zdtTemp );
+                j += 2;
+                break;
               case 'w':
                 {
                   z.Append( ( ( ( x.iJD + 129600000 ) / 86400000 ) % 7 ) );
@@ -1162,10 +1224,14 @@ y.s = sLocal.tm_sec;
                 }
               case 'Y':
                 {
-                  sqlite3_snprintf( 5, zdtTemp, "%04d", x.Y ); z.Append( zdtTemp ); j = sqlite3Strlen30( z );
+                  sqlite3_snprintf( 5, zdtTemp, "%04d", x.Y );
+                  z.Append( zdtTemp );
+                  j = sqlite3Strlen30( z );
                   break;
                 }
-              default: z.Append( '%' ); break;
+              default:
+                z.Append( '%' );
+                break;
             }
           }
         }
@@ -1276,7 +1342,7 @@ db = sqlite3_context_db_handle(context);
 */
     static void sqlite3RegisterDateTimeFunctions()
     {
-      var aDateTimeFuncs = new FuncDef[]  {
+      FuncDef[] aDateTimeFuncs = new FuncDef[]  {
 #if !SQLITE_OMIT_DATETIME_FUNCS
 FUNCTION("julianday",        -1, 0, 0, (dxFunc)juliandayFunc ),
 FUNCTION("date",             -1, 0, 0, (dxFunc)dateFunc      ),

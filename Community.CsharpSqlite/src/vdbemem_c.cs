@@ -72,7 +72,7 @@ namespace Community.CsharpSqlite
       || desiredEnc == SQLITE_UTF16BE );
       if ( ( pMem.flags & MEM_Str ) == 0 || pMem.enc == desiredEnc )
       {
-        if ( String.IsNullOrEmpty(pMem.z ) && pMem.zBLOB != null )
+        if ( String.IsNullOrEmpty( pMem.z ) && pMem.zBLOB != null )
           pMem.z = Encoding.UTF8.GetString( pMem.zBLOB, 0, pMem.zBLOB.Length );
         return SQLITE_OK;
       }
@@ -123,7 +123,8 @@ return rc;
         if ( pMem.z == null )
           pMem.z = "";//      sqlite3DbReallocOrFree( pMem.db, pMem.z, n );
         else
-          if( n < pMem.z.Length) pMem.z = pMem.z.Substring( 0, n );
+          if ( n < pMem.z.Length )
+            pMem.z = pMem.z.Substring( 0, n );
         preserve = 0;
       }
       else
@@ -327,7 +328,7 @@ return SQLITE_OK;
       int rc = SQLITE_OK;
       if ( ALWAYS( pFunc != null && pFunc.xFinalize != null ) )
       {
-        var ctx = new sqlite3_context();
+        sqlite3_context ctx = new sqlite3_context();
         Debug.Assert( ( pMem.flags & MEM_Null ) != 0 || pFunc == pMem.u.pDef );
         Debug.Assert( pMem.db == null || sqlite3_mutex_held( pMem.db.mutex ) );
         //memset(&ctx, 0, sizeof(ctx));

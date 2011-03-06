@@ -33,7 +33,6 @@ namespace Community.CsharpSqlite
     **
     **  SQLITE_SOURCE_ID: 2011-01-28 17:03:50 ed759d5a9edb3bba5f48f243df47be29e3fe8cd7
     **
-    **  $Header$
     *************************************************************************
     */
     //#include "sqliteInt.h"
@@ -200,9 +199,9 @@ sqlite3_prepare(db, argv[2], -1, ref pStmt, ref sDummy);
       int size;
       Table pTab;
       Db pDb;
-      var azArg = new string[4];
-      var meta = new u32[5];
-      var initData = new InitData();
+      string[] azArg = new string[4];
+      u32[] meta = new u32[5];
+      InitData initData = new InitData();
       string zMasterSchema;
       string zMasterName = SCHEMA_TABLE( iDb );
       int openedTransaction = 0;
@@ -361,7 +360,10 @@ sqlite3_prepare(db, argv[2], -1, ref pStmt, ref sDummy);
       if ( pDb.pSchema.cache_size == 0 )
       {
         size = (int)meta[BTREE_DEFAULT_CACHE_SIZE - 1];
-        if ( size == 0 ) { size = SQLITE_DEFAULT_CACHE_SIZE; }
+        if ( size == 0 )
+        {
+          size = SQLITE_DEFAULT_CACHE_SIZE;
+        }
         if ( size < 0 )
           size = -size;
         pDb.pSchema.cache_size = size;
@@ -760,7 +762,7 @@ error_out:
 #if !SQLITE_OMIT_EXPLAIN
       if ( rc == SQLITE_OK && pParse.pVdbe != null && pParse.explain != 0 )
       {
-        var azColName = new string[] {
+        string[] azColName = new string[] {
 "addr", "opcode", "p1", "p2", "p3", "p4", "p5", "comment",
 "selectid", "order", "from", "detail"
 };
@@ -868,7 +870,7 @@ end_prepare:
     static int sqlite3Reprepare( Vdbe p )
     {
       int rc;
-      var pNew = new sqlite3_stmt();
+      sqlite3_stmt pNew = new sqlite3_stmt();
       string zSql;
       sqlite3 db;
 

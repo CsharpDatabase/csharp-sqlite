@@ -32,7 +32,6 @@ namespace Community.CsharpSqlite
     **
     **  SQLITE_SOURCE_ID: 2010-12-07 20:14:09 a586a4deeb25330037a49df295b36aaf624d0f45
     **
-    **  $Header$
     *************************************************************************
     */
 
@@ -48,7 +47,8 @@ namespace Community.CsharpSqlite
       if ( db.xCollNeeded != null )
       {
         string zExternal = zName;// sqlite3DbStrDup(db, zName);
-        if ( zExternal == null ) return;
+        if ( zExternal == null )
+          return;
         db.xCollNeeded( db.pCollNeededArg, db, enc, zExternal );
         sqlite3DbFree( db, ref  zExternal );
       }
@@ -198,7 +198,7 @@ sqlite3ValueFree(ref pTmp);
     {
       CollSeq[] pColl;
       int nName = sqlite3Strlen30( zName );
-      pColl = sqlite3HashFind( db.aCollSeq, zName, nName,(CollSeq[])null );
+      pColl = sqlite3HashFind( db.aCollSeq, zName, nName, (CollSeq[])null );
 
       if ( ( null == pColl ) && create != 0 )
       {
@@ -275,7 +275,8 @@ sqlite3ValueFree(ref pTmp);
         enc -= 1; // if (pColl != null) pColl += enc - 1;
         return pColl[enc];
       }
-      else return null;
+      else
+        return null;
     }
 
     /* During the search for the best function definition, this procedure
@@ -440,7 +441,7 @@ sqlite3ValueFree(ref pTmp);
       ** new function.  But the FuncDefs for built-in functions are read-only.
       ** So we must not search for built-ins when creating a new function.
       */
-      if (0 == createFlag && (pBest == null || (db.flags & SQLITE_PreferBuiltin) != 0))
+      if ( 0 == createFlag && ( pBest == null || ( db.flags & SQLITE_PreferBuiltin ) != 0 ) )
       {
 #if SQLITE_OMIT_WSD
 FuncDefHash pHash = GLOBAL( FuncDefHash, sqlite3GlobalFunctions );

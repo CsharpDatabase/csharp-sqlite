@@ -19,8 +19,6 @@ namespace Community.CsharpSqlite
     ** routines specified in the sqlite3_mem_methods object.
     **
     *************************************************************************
-    **  $Header$
-    *************************************************************************
     */
 
     /*
@@ -33,9 +31,18 @@ namespace Community.CsharpSqlite
     */
 #if SQLITE_POOL_MEM
 #if TRUE
-    static byte[] sqlite3MemMalloc(u32 nByte) { return new byte[nByte]; }
-    static byte[] sqlite3MemMalloc(int nByte) { return new byte[nByte]; }
-static int[] sqlite3MemMallocInt(int nInt) { return new int[nInt]; }
+    static byte[] sqlite3MemMalloc( u32 nByte )
+    {
+      return new byte[nByte];
+    }
+    static byte[] sqlite3MemMalloc( int nByte )
+    {
+      return new byte[nByte];
+    }
+    static int[] sqlite3MemMallocInt( int nInt )
+    {
+      return new int[nInt];
+    }
 #else
     static byte[] sqlite3MemMalloc(int nByte)
     {
@@ -110,7 +117,7 @@ static int[] sqlite3MemMallocInt(int nInt) { return new int[nInt]; }
     }
 #endif
 
-static Mem sqlite3MemMallocMem(Mem dummy)
+    static Mem sqlite3MemMallocMem( Mem dummy )
     {
       Mem pMem;
       mem0.msMem.alloc++;
@@ -129,7 +136,7 @@ static Mem sqlite3MemMallocMem(Mem dummy)
     {
       BtCursor pBtCursor;
       mem0.msBtCursor.alloc++;
-      if (mem0.msBtCursor.next > 0 && mem0.aBtCursor[mem0.msBtCursor.next] != null)
+      if ( mem0.msBtCursor.next > 0 && mem0.aBtCursor[mem0.msBtCursor.next] != null )
       {
         pBtCursor = mem0.aBtCursor[mem0.msBtCursor.next];
         Debug.Assert( pBtCursor.pNext == null && pBtCursor.pPrev == null && pBtCursor.wrFlag == 0 );
@@ -146,9 +153,14 @@ static Mem sqlite3MemMallocMem(Mem dummy)
     ** Free memory.
     */
     // -- overloads ---------------------------------------
-    static void sqlite3MemFree<T>(ref T x) where T : class
-    { x = null; }
-    static void sqlite3MemFree(ref  string x) { x = null; }
+    static void sqlite3MemFree<T>( ref T x ) where T : class
+    {
+      x = null;
+    }
+    static void sqlite3MemFree( ref  string x )
+    {
+      x = null;
+    }
     //
 
     /*
@@ -161,7 +173,10 @@ static Mem sqlite3MemMallocMem(Mem dummy)
     */
 #if SQLITE_POOL_MEM
 #if TRUE
-    static void sqlite3MemFreeInt(ref int[] pPrior) { pPrior = null; }
+    static void sqlite3MemFreeInt( ref int[] pPrior )
+    {
+      pPrior = null;
+    }
 #else
     static void sqlite3MemFree(ref byte[] pPrior)
     {
@@ -228,28 +243,31 @@ for (int i = 0; i < mem0.aInt.Length; i++) if (mem0.aInt[i] != null && mem0.aInt
       return;
     }
 #endif
-    static void sqlite3MemFreeMem(ref Mem pPrior)
+    static void sqlite3MemFreeMem( ref Mem pPrior )
     {
-      if (pPrior == null) return;
+      if ( pPrior == null )
+        return;
 #if FALSE && DEBUG
 for (int i = mem0.msMem.next - 1; i >= 0; i--) if (mem0.aMem[i] != null && mem0.aMem[i] == pPrior) Debugger.Break();
 #endif
       mem0.msMem.dealloc++;
       if ( mem0.msMem.next < mem0.aMem.Length - 1 )
-        {
-          pPrior.db = null;
-          pPrior._SumCtx = null;
-          pPrior._MD5Context = null;
-          pPrior._SubProgram = null;
-          pPrior.flags = MEM_Null;
-          pPrior.r = 0;
-          pPrior.u.i = 0;
-          pPrior.n = 0;
-          if (pPrior.zBLOB != null) sqlite3MemFree(ref pPrior.zBLOB);
-          mem0.aMem[++mem0.msMem.next] = pPrior;
-          if ( mem0.msMem.next > mem0.msMem.max ) mem0.msMem.max = mem0.msMem.next;
+      {
+        pPrior.db = null;
+        pPrior._SumCtx = null;
+        pPrior._MD5Context = null;
+        pPrior._SubProgram = null;
+        pPrior.flags = MEM_Null;
+        pPrior.r = 0;
+        pPrior.u.i = 0;
+        pPrior.n = 0;
+        if ( pPrior.zBLOB != null )
+          sqlite3MemFree( ref pPrior.zBLOB );
+        mem0.aMem[++mem0.msMem.next] = pPrior;
+        if ( mem0.msMem.next > mem0.msMem.max )
+          mem0.msMem.max = mem0.msMem.next;
 
-        }
+      }
       //Array.Resize( ref mem0.aMem, (int)(mem0.hw_Mem * 1.5 + 1 ));
       //mem0.aMem[mem0.hw_Mem] = pPrior;
       //mem0.hw_Mem = mem0.aMem.Length;
@@ -258,7 +276,8 @@ for (int i = mem0.msMem.next - 1; i >= 0; i--) if (mem0.aMem[i] != null && mem0.
     }
     static void sqlite3MemFreeBtCursor( ref BtCursor pPrior )
     {
-      if ( pPrior == null ) return;
+      if ( pPrior == null )
+        return;
 #if FALSE && DEBUG
       for ( int i = mem0.msBtCursor.next - 1; i >= 0; i-- ) if ( mem0.aBtCursor[i] != null && mem0.aBtCursor[i] == pPrior ) Debugger.Break();
 #endif
@@ -266,7 +285,8 @@ for (int i = mem0.msMem.next - 1; i >= 0; i--) if (mem0.aMem[i] != null && mem0.
       if ( mem0.msBtCursor.next < mem0.aBtCursor.Length - 1 )
       {
         mem0.aBtCursor[++mem0.msBtCursor.next] = pPrior;
-        if ( mem0.msBtCursor.next > mem0.msBtCursor.max ) mem0.msBtCursor.max = mem0.msBtCursor.next;
+        if ( mem0.msBtCursor.next > mem0.msBtCursor.max )
+          mem0.msBtCursor.max = mem0.msBtCursor.next;
       }
       //Array.Resize( ref mem0.aBtCursor, (int)(mem0.hw_BtCursor * 1.5 + 1 ));
       //mem0.aBtCursor[mem0.hw_BtCursor] = pPrior;
@@ -284,7 +304,7 @@ for (int i = mem0.msMem.next - 1; i >= 0; i--) if (mem0.aMem[i] != null && mem0.
     ** cases where nByte<=0 will have been intercepted by higher-level
     ** routines and redirected to xFree.
     */
-    static byte[] sqlite3MemRealloc(ref byte[] pPrior, int nByte)
+    static byte[] sqlite3MemRealloc( ref byte[] pPrior, int nByte )
     {
       //  sqlite3_int64 p = (sqlite3_int64*)pPrior;
       //  Debug.Assert(pPrior!=0 && nByte>0 );
@@ -297,7 +317,7 @@ for (int i = mem0.msMem.next - 1; i >= 0; i--) if (mem0.aMem[i] != null && mem0.
       //    p++;
       //  }
       //  return (void*)p;
-      Array.Resize(ref pPrior, nByte);
+      Array.Resize( ref pPrior, nByte );
       return pPrior;
     }
 #else
@@ -316,13 +336,17 @@ static BtCursor sqlite3MemMallocBtCursor( BtCursor dummy ){return new BtCursor()
 static void sqlite3MemFreeBtCursor(ref BtCursor pPrior) { pPrior = null; }
 #endif
 
-    static byte[] sqlite3MemRealloc(byte[] pPrior, int nByte) { Array.Resize(ref pPrior, nByte); return pPrior; }
+    static byte[] sqlite3MemRealloc( byte[] pPrior, int nByte )
+    {
+      Array.Resize( ref pPrior, nByte );
+      return pPrior;
+    }
 
     /*
     ** Report the allocated size of a prior return from xMalloc()
     ** or xRealloc().
     */
-    static int sqlite3MemSize(byte[] pPrior)
+    static int sqlite3MemSize( byte[] pPrior )
     {
       //  sqlite3_int64 p;
       //  if( pPrior==0 ) return 0;
@@ -335,7 +359,7 @@ static void sqlite3MemFreeBtCursor(ref BtCursor pPrior) { pPrior = null; }
     /*
     ** Round up a request size to the next valid allocation size.
     */
-    static int sqlite3MemRoundup(int n)
+    static int sqlite3MemRoundup( int n )
     {
       return n;//      ROUND8( n );
     }
@@ -343,14 +367,14 @@ static void sqlite3MemFreeBtCursor(ref BtCursor pPrior) { pPrior = null; }
     /*
     ** Initialize this module.
     */
-    static int sqlite3MemInit(object NotUsed)
+    static int sqlite3MemInit( object NotUsed )
     {
-      UNUSED_PARAMETER(NotUsed);
-      if (!sqlite3GlobalConfig.bMemstat)
+      UNUSED_PARAMETER( NotUsed );
+      if ( !sqlite3GlobalConfig.bMemstat )
       {
         /* If memory status is enabled, then the malloc.c wrapper will already
         ** hold the STATIC_MEM mutex when the routines here are invoked. */
-        mem0.mutex = sqlite3MutexAlloc(SQLITE_MUTEX_STATIC_MEM);
+        mem0.mutex = sqlite3MutexAlloc( SQLITE_MUTEX_STATIC_MEM );
       }
       return SQLITE_OK;
     }
@@ -358,10 +382,10 @@ static void sqlite3MemFreeBtCursor(ref BtCursor pPrior) { pPrior = null; }
     /*
     ** Deinitialize this module.
     */
-    static void sqlite3MemShutdown(object NotUsed)
+    static void sqlite3MemShutdown( object NotUsed )
     {
 
-      UNUSED_PARAMETER(NotUsed);
+      UNUSED_PARAMETER( NotUsed );
       return;
     }
 
@@ -373,7 +397,7 @@ static void sqlite3MemFreeBtCursor(ref BtCursor pPrior) { pPrior = null; }
     */
     static void sqlite3MemSetDefault()
     {
-      var defaultMethods = new sqlite3_mem_methods(
+      sqlite3_mem_methods defaultMethods = new sqlite3_mem_methods(
       sqlite3MemMalloc,
       sqlite3MemMallocInt,
       sqlite3MemMallocMem,
@@ -387,13 +411,30 @@ static void sqlite3MemFreeBtCursor(ref BtCursor pPrior) { pPrior = null; }
       (dxMemShutdown)sqlite3MemShutdown,
       0
       );
-      sqlite3_config(SQLITE_CONFIG_MALLOC, defaultMethods);
+      sqlite3_config( SQLITE_CONFIG_MALLOC, defaultMethods );
     }
 
-    static void sqlite3DbFree(sqlite3 db, ref int[] pPrior) { if (pPrior != null)sqlite3MemFreeInt(ref pPrior); }
-    static void sqlite3DbFree(sqlite3 db, ref Mem pPrior) { if (pPrior != null)sqlite3MemFreeMem(ref pPrior); }
-    static void sqlite3DbFree(sqlite3 db, ref Mem[] pPrior) { if (pPrior != null) for (int i = 0; i < pPrior.Length; i++)sqlite3MemFreeMem(ref pPrior[i]); }
-    static void sqlite3DbFree<T>(sqlite3 db, ref T pT) where T : class { }
-    static void sqlite3DbFree(sqlite3 db, ref string pString) { }
+    static void sqlite3DbFree( sqlite3 db, ref int[] pPrior )
+    {
+      if ( pPrior != null )
+        sqlite3MemFreeInt( ref pPrior );
+    }
+    static void sqlite3DbFree( sqlite3 db, ref Mem pPrior )
+    {
+      if ( pPrior != null )
+        sqlite3MemFreeMem( ref pPrior );
+    }
+    static void sqlite3DbFree( sqlite3 db, ref Mem[] pPrior )
+    {
+      if ( pPrior != null )
+        for ( int i = 0; i < pPrior.Length; i++ )
+          sqlite3MemFreeMem( ref pPrior[i] );
+    }
+    static void sqlite3DbFree<T>( sqlite3 db, ref T pT ) where T : class
+    {
+    }
+    static void sqlite3DbFree( sqlite3 db, ref string pString )
+    {
+    }
   }
 }

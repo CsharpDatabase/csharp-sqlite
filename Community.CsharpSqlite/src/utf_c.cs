@@ -46,7 +46,6 @@ namespace Community.CsharpSqlite
     **
     **  SQLITE_SOURCE_ID: 2010-08-23 18:52:01 42537b60566f288167f1b5864a5435986838e3a3
     **
-    **  $Header$
     *************************************************************************
     */
     //#include "sqliteInt.h"
@@ -188,7 +187,8 @@ namespace Community.CsharpSqlite
       /* Same as READ_UTF8() above but without the zTerm parameter.
       ** For this routine, we assume the UTF8 string is always zero-terminated.
       */
-      if ( String.IsNullOrEmpty(zIn)) return 0;
+      if ( String.IsNullOrEmpty( zIn ) )
+        return 0;
       //c = *( zIn++ );
       //if ( c >= 0xc0 )
       //{
@@ -216,9 +216,13 @@ namespace Community.CsharpSqlite
           }
           if ( c < 0x80
           || ( c & 0xFFFFF800 ) == 0xD800
-          || ( c & 0xFFFFFFFE ) == 0xFFFE ) { c = 0xFFFD; }
+          || ( c & 0xFFFFFFFE ) == 0xFFFE )
+          {
+            c = 0xFFFD;
+          }
         }
-      } pzNext = zIn.Substring( zIndex );
+      }
+      pzNext = zIn.Substring( zIndex );
       return c;
     }
 
@@ -428,7 +432,8 @@ return rc;
     {
       //int r = 0;
       //string z = zIn;
-      if ( zIn.Length == 0 ) return 0;
+      if ( zIn.Length == 0 )
+        return 0;
       int zInLength = zIn.Length;
       int zTerm = ( nByte >= 0 && nByte <= zInLength ) ? nByte : zInLength;
       //Debug.Assert( z<=zTerm );

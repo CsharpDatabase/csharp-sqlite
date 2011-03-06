@@ -28,7 +28,6 @@ namespace Community.CsharpSqlite
     **
     **  SQLITE_SOURCE_ID: 2010-08-23 18:52:01 42537b60566f288167f1b5864a5435986838e3a3
     **
-    **  $Header$
     *************************************************************************
     */
     //#include "sqliteInt.h"
@@ -111,14 +110,23 @@ namespace Community.CsharpSqlite
       {
         pNew.next = pHead;
         pNew.prev = pHead.prev;
-        if ( pHead.prev != null ) { pHead.prev.next = pNew; }
-        else { pH.first = pNew; }
+        if ( pHead.prev != null )
+        {
+          pHead.prev.next = pNew;
+        }
+        else
+        {
+          pH.first = pNew;
+        }
         pHead.prev = pNew;
       }
       else
       {
         pNew.next = pH.first;
-        if ( pH.first != null ) { pH.first.prev = pNew; }
+        if ( pH.first != null )
+        {
+          pH.first.prev = pNew;
+        }
         pNew.prev = null;
         pH.first = pNew;
       }
@@ -150,10 +158,12 @@ if( new_size==pH->htsize ) return false;
 */
       sqlite3BeginBenignMalloc();
       new_ht = new _ht[new_size]; //(struct _ht *)sqlite3Malloc( new_size*sizeof(struct _ht) );
-      for ( int i = 0; i < new_size; i++ ) new_ht[i] = new _ht();
+      for ( int i = 0; i < new_size; i++ )
+        new_ht[i] = new _ht();
       sqlite3EndBenignMalloc();
 
-      if ( new_ht == null ) return false;
+      if ( new_ht == null )
+        return false;
       //sqlite3_free( ref  pH.ht );
       pH.ht = new_ht;
       // pH.htsize = new_size = sqlite3MallocSize(new_ht)/sizeof(struct _ht);
@@ -251,11 +261,11 @@ if( new_size==pH->htsize ) return false;
     ** that matches pKey,nKey.  Return the data for this element if it is
     ** found, or NULL if there is no match.
     */
-    static T sqlite3HashFind <T>( Hash pH, string pKey, int nKey, T nullType ) where T: class
+    static T sqlite3HashFind<T>( Hash pH, string pKey, int nKey, T nullType ) where T : class
     {
       HashElem elem;  /* The element that matches key */
       u32 h;          /* A hash on key */
-      
+
       Debug.Assert( pH != null );
       Debug.Assert( pKey != null );
       Debug.Assert( nKey >= 0 );
@@ -323,7 +333,8 @@ if( new_size==pH->htsize ) return false;
       if ( data == null )
         return data;
       new_elem = new HashElem();//(HashElem*)sqlite3Malloc( sizeof(HashElem) );
-      if ( new_elem == null ) return data;
+      if ( new_elem == null )
+        return data;
       new_elem.pKey = pKey;
       new_elem.nKey = nKey;
       new_elem.data = data;

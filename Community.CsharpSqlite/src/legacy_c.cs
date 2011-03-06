@@ -30,7 +30,6 @@ namespace Community.CsharpSqlite
     **
     **  SQLITE_SOURCE_ID: 2010-08-23 18:52:01 42537b60566f288167f1b5864a5435986838e3a3
     **
-    **  $Header$
     *************************************************************************
     */
 
@@ -46,14 +45,22 @@ namespace Community.CsharpSqlite
     ** argument to xCallback().  If xCallback=NULL then no callback
     ** is invoked, even for queries.
     */
-//C# Alias
-    static public int exec(    sqlite3 db,             /* The database on which the SQL executes */    string zSql,            /* The SQL to be executed */    int NoCallback, int NoArgs, int NoErrors    )
-    {      string Errors = "";      return sqlite3_exec( db, zSql, null, null, ref Errors );    }
+    //C# Alias
+    static public int exec( sqlite3 db,             /* The database on which the SQL executes */    string zSql,            /* The SQL to be executed */    int NoCallback, int NoArgs, int NoErrors )
+    {
+      string Errors = "";
+      return sqlite3_exec( db, zSql, null, null, ref Errors );
+    }
 
-    static public int exec(    sqlite3 db,             /* The database on which the SQL executes */    string zSql,                /* The SQL to be executed */    sqlite3_callback xCallback, /* Invoke this callback routine */    object pArg,                /* First argument to xCallback() */    int NoErrors   )
-    {      string Errors = "";      return sqlite3_exec( db, zSql, xCallback, pArg, ref Errors );    }
-    static public int exec(     sqlite3 db,             /* The database on which the SQL executes */    string zSql,                /* The SQL to be executed */    sqlite3_callback xCallback, /* Invoke this callback routine */    object pArg,                /* First argument to xCallback() */    ref string pzErrMsg         /* Write error messages here */)
-    { return sqlite3_exec(db, zSql, xCallback, pArg, ref pzErrMsg); }
+    static public int exec( sqlite3 db,             /* The database on which the SQL executes */    string zSql,                /* The SQL to be executed */    sqlite3_callback xCallback, /* Invoke this callback routine */    object pArg,                /* First argument to xCallback() */    int NoErrors )
+    {
+      string Errors = "";
+      return sqlite3_exec( db, zSql, xCallback, pArg, ref Errors );
+    }
+    static public int exec( sqlite3 db,             /* The database on which the SQL executes */    string zSql,                /* The SQL to be executed */    sqlite3_callback xCallback, /* Invoke this callback routine */    object pArg,                /* First argument to xCallback() */    ref string pzErrMsg         /* Write error messages here */)
+    {
+      return sqlite3_exec( db, zSql, xCallback, pArg, ref pzErrMsg );
+    }
 
     //OVERLOADS 
     static public int sqlite3_exec(
@@ -93,9 +100,11 @@ namespace Community.CsharpSqlite
       int nRetry = 0;             /* Number of retry attempts */
       int callbackIsInit;         /* True if callback data is initialized */
 
-      if (!sqlite3SafetyCheckOk(db)) return SQLITE_MISUSE_BKPT();
+      if ( !sqlite3SafetyCheckOk( db ) )
+        return SQLITE_MISUSE_BKPT();
 
-      if ( zSql == null ) zSql = "";
+      if ( zSql == null )
+        zSql = "";
 
       sqlite3_mutex_enter( db.mutex );
       sqlite3Error( db, SQLITE_OK, 0 );
@@ -180,8 +189,10 @@ namespace Community.CsharpSqlite
               if ( ( zSql = zLeftover ) != "" )
               {
                 int zindex = 0;
-                while ( zindex < zSql.Length && sqlite3Isspace( zSql[zindex] ) ) zindex++;
-                if ( zindex != 0 ) zSql = zindex < zSql.Length ? zSql.Substring( zindex ) : "";
+                while ( zindex < zSql.Length && sqlite3Isspace( zSql[zindex] ) )
+                  zindex++;
+                if ( zindex != 0 )
+                  zSql = zindex < zSql.Length ? zSql.Substring( zindex ) : "";
               }
             }
             break;
@@ -192,8 +203,9 @@ namespace Community.CsharpSqlite
         azCols = null;
       }
 
-    exec_out:
-      if ( pStmt != null ) sqlite3VdbeFinalize( pStmt );
+exec_out:
+      if ( pStmt != null )
+        sqlite3VdbeFinalize( pStmt );
       sqlite3DbFree( db, ref  azCols );
 
       rc = sqlite3ApiExit( db, rc );

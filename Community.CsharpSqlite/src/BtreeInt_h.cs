@@ -237,7 +237,6 @@ namespace Community.CsharpSqlite
     **
     **  SQLITE_SOURCE_ID: 2011-01-28 17:03:50 ed759d5a9edb3bba5f48f243df47be29e3fe8cd7
     **
-    **  $Header$
     *************************************************************************
     */
     //#include "sqliteInt.h"
@@ -246,7 +245,10 @@ namespace Community.CsharpSqlite
     ** size give above.
     */
     //#define MX_CELL_SIZE(pBt)  (pBt.pageSize-8)
-    static int MX_CELL_SIZE( BtShared pBt ) { return (int)( pBt.pageSize - 8 ); }
+    static int MX_CELL_SIZE( BtShared pBt )
+    {
+      return (int)( pBt.pageSize - 8 );
+    }
 
     /* The maximum number of cells on a single page of the database.  This
     ** assumes a minimum cell size of 6 bytes  (4 bytes for the cell itself
@@ -254,7 +256,10 @@ namespace Community.CsharpSqlite
     ** small cells will be rare, but they are possible.
     */
     //#define MX_CELL(pBt) ((pBt.pageSize-8)/6)
-    static int MX_CELL( BtShared pBt ) { return ( (int)( pBt.pageSize - 8 ) / 6 ); }
+    static int MX_CELL( BtShared pBt )
+    {
+      return ( (int)( pBt.pageSize - 8 ) / 6 );
+    }
 
     /* Forward declarations */
     //typedef struct MemPage MemPage;
@@ -304,7 +309,7 @@ namespace Community.CsharpSqlite
       public u16 idx;            /* Insert this cell before idx-th non-overflow cell */
       public _OvflCell Copy()
       {
-        var cp = new _OvflCell();
+        _OvflCell cp = new _OvflCell();
         if ( pCell != null )
         {
           cp.pCell = sqlite3Malloc( pCell.Length );
@@ -348,7 +353,7 @@ namespace Community.CsharpSqlite
       //    Debug.Assert( pgno != 1 || pDbPage.pData == _aData );
       //  }
       //}
-  
+
       public MemPage Copy()
       {
         MemPage cp = (MemPage)MemberwiseClone();
@@ -665,7 +670,10 @@ aOverflow= null;
     */
     //# define PENDING_BYTE_PAGE(pBt) PAGER_MJ_PGNO(pBt)
     // TODO -- Convert PENDING_BYTE_PAGE to inline
-    static u32 PENDING_BYTE_PAGE( BtShared pBt ) { return (u32)PAGER_MJ_PGNO( pBt.pPager ); }
+    static u32 PENDING_BYTE_PAGE( BtShared pBt )
+    {
+      return (u32)PAGER_MJ_PGNO( pBt.pPager );
+    }
 
     /*
     ** These macros define the location of the pointer-map entry for a
@@ -683,11 +691,20 @@ aOverflow= null;
     ** this test.
     */
     //#define PTRMAP_PAGENO(pBt, pgno) ptrmapPageno(pBt, pgno)
-    static Pgno PTRMAP_PAGENO( BtShared pBt, Pgno pgno ) { return ptrmapPageno( pBt, pgno ); }
+    static Pgno PTRMAP_PAGENO( BtShared pBt, Pgno pgno )
+    {
+      return ptrmapPageno( pBt, pgno );
+    }
     //#define PTRMAP_PTROFFSET(pgptrmap, pgno) (5*(pgno-pgptrmap-1))
-    static u32 PTRMAP_PTROFFSET( u32 pgptrmap, u32 pgno ) { return ( 5 * ( pgno - pgptrmap - 1 ) ); }
+    static u32 PTRMAP_PTROFFSET( u32 pgptrmap, u32 pgno )
+    {
+      return ( 5 * ( pgno - pgptrmap - 1 ) );
+    }
     //#define PTRMAP_ISPAGE(pBt, pgno) (PTRMAP_PAGENO((pBt),(pgno))==(pgno))
-    static bool PTRMAP_ISPAGE( BtShared pBt, u32 pgno ) { return ( PTRMAP_PAGENO( ( pBt ), ( pgno ) ) == ( pgno ) ); }
+    static bool PTRMAP_ISPAGE( BtShared pBt, u32 pgno )
+    {
+      return ( PTRMAP_PAGENO( ( pBt ), ( pgno ) ) == ( pgno ) );
+    }
     /*
     ** The pointer map is a lookup table that identifies the parent page for
     ** each child page in the database file.  The parent page is the page that
@@ -783,13 +800,21 @@ public static bool ISAUTOVACUUM =false;
     */
     //#define get2byte(x)   ((x)[0]<<8 | (x)[1])
     static int get2byte( byte[] p, int offset )
-    { return p[offset + 0] << 8 | p[offset + 1]; }
+    {
+      return p[offset + 0] << 8 | p[offset + 1];
+    }
 
     //#define put2byte(p,v) ((p)[0] = (u8)((v)>>8), (p)[1] = (u8)(v))
     static void put2byte( byte[] pData, int Offset, u32 v )
-    { pData[Offset + 0] = (byte)( v >> 8 ); pData[Offset + 1] = (byte)v; }
+    {
+      pData[Offset + 0] = (byte)( v >> 8 );
+      pData[Offset + 1] = (byte)v;
+    }
     static void put2byte( byte[] pData, int Offset, int v )
-    { pData[Offset + 0] = (byte)( v >> 8 ); pData[Offset + 1] = (byte)v; }
+    {
+      pData[Offset + 0] = (byte)( v >> 8 );
+      pData[Offset + 1] = (byte)v;
+    }
 
     //#define get4byte sqlite3Get4byte
     //#define put4byte sqlite3Put4byte

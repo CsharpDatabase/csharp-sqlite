@@ -24,7 +24,6 @@ namespace Community.CsharpSqlite
     **
     **  SQLITE_SOURCE_ID: 2010-03-09 19:31:43 4ae453ea7be69018d8c16eb8dabe05617397dc4d
     **
-    **  $Header$
     *************************************************************************
     */
     //#include "sqliteInt.h"
