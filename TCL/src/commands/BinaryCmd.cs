@@ -11,12 +11,13 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header$
+*
 * RCS @(#) $Id: BinaryCmd.java,v 1.2 2002/05/07 06:58:06 mdejong Exp $
 *
 */
 using System;
 using System.Text;
+using System.IO;
 namespace tcl.lang
 {
 
@@ -115,13 +116,19 @@ namespace tcl.lang
                     {
 
                       case 'a':
-                      case 'A': offset += count; break;
+                      case 'A':
+                        offset += count;
+                        break;
 
                       case 'b':
-                      case 'B': offset += ( count + 7 ) / 8; break;
+                      case 'B':
+                        offset += ( count + 7 ) / 8;
+                        break;
 
                       case 'h':
-                      case 'H': offset += ( count + 1 ) / 2; break;
+                      case 'H':
+                        offset += ( count + 1 ) / 2;
+                        break;
                     }
                     break;
                   }
@@ -141,17 +148,27 @@ namespace tcl.lang
                     switch ( cmd )
                     {
 
-                      case 'c': size = 1; break;
+                      case 'c':
+                        size = 1;
+                        break;
 
                       case 's':
-                      case 'S': size = 2; break;
+                      case 'S':
+                        size = 2;
+                        break;
 
                       case 'i':
-                      case 'I': size = 4; break;
+                      case 'I':
+                        size = 4;
+                        break;
 
-                      case 'f': size = 4; break;
+                      case 'f':
+                        size = 4;
+                        break;
 
-                      case 'd': size = 8; break;
+                      case 'd':
+                        size = 8;
+                        break;
                     }
 
                     // For number-type specifiers, the count corresponds
@@ -301,7 +318,7 @@ namespace tcl.lang
                     else
                     {
                       Array.Copy( bytes, 0, resultBytes, cursor, length );
-                      for ( int ix = 0 ; ix < count - length ; ix++ )
+                      for ( int ix = 0; ix < count - length; ix++ )
                       {
                         resultBytes[cursor + length + ix] = pad;
                       }
@@ -329,7 +346,7 @@ namespace tcl.lang
                     }
                     if ( cmd == 'B' )
                     {
-                      for ( offset = 0 ; offset < count ; offset++ )
+                      for ( offset = 0; offset < count; offset++ )
                       {
                         value <<= 1;
                         if ( str[offset] == '1' )
@@ -349,7 +366,7 @@ namespace tcl.lang
                     }
                     else
                     {
-                      for ( offset = 0 ; offset < count ; offset++ )
+                      for ( offset = 0; offset < count; offset++ )
                       {
                         value >>= 1;
                         if ( str[offset] == '1' )
@@ -405,7 +422,7 @@ namespace tcl.lang
                     }
                     if ( cmd == 'H' )
                     {
-                      for ( offset = 0 ; offset < count ; offset++ )
+                      for ( offset = 0; offset < count; offset++ )
                       {
                         value <<= 4;
                         int c = HEXDIGITS.IndexOf( Char.ToLower( str[offset] ) );
@@ -423,7 +440,7 @@ namespace tcl.lang
                     }
                     else
                     {
-                      for ( offset = 0 ; offset < count ; offset++ )
+                      for ( offset = 0; offset < count; offset++ )
                       {
                         value >>= 4;
                         int c = HEXDIGITS.IndexOf( Char.ToLower( str[offset] ) );
@@ -482,7 +499,7 @@ namespace tcl.lang
                         count = listv.Length;
                       }
                     }
-                    for ( int ix = 0 ; ix < count ; ix++ )
+                    for ( int ix = 0; ix < count; ix++ )
                     {
                       cursor = FormatNumber( interp, cmd, listv[ix], resultBytes, cursor );
                     }
@@ -495,7 +512,7 @@ namespace tcl.lang
                     {
                       count = 1;
                     }
-                    for ( int ix = 0 ; ix < count ; ix++ )
+                    for ( int ix = 0; ix < count; ix++ )
                     {
                       resultBytes[cursor++] = 0;
                     }
@@ -632,12 +649,12 @@ namespace tcl.lang
                         break;
                       }
                     }
-                    var s = new StringBuilder( count );
+                    StringBuilder s = new StringBuilder( count );
                     int thisOffset = offset;
 
                     if ( cmd == 'b' )
                     {
-                      for ( int ix = 0 ; ix < count ; ix++ )
+                      for ( int ix = 0; ix < count; ix++ )
                       {
                         if ( ( ix % 8 ) != 0 )
                         {
@@ -652,7 +669,7 @@ namespace tcl.lang
                     }
                     else
                     {
-                      for ( int ix = 0 ; ix < count ; ix++ )
+                      for ( int ix = 0; ix < count; ix++ )
                       {
                         if ( ( ix % 8 ) != 0 )
                         {
@@ -694,12 +711,12 @@ namespace tcl.lang
                         break;
                       }
                     }
-                    var s = new StringBuilder( count );
+                    StringBuilder s = new StringBuilder( count );
                     int thisOffset = offset;
 
                     if ( cmd == 'h' )
                     {
-                      for ( int ix = 0 ; ix < count ; ix++ )
+                      for ( int ix = 0; ix < count; ix++ )
                       {
                         if ( ( ix % 2 ) != 0 )
                         {
@@ -714,7 +731,7 @@ namespace tcl.lang
                     }
                     else
                     {
-                      for ( int ix = 0 ; ix < count ; ix++ )
+                      for ( int ix = 0; ix < count; ix++ )
                       {
                         if ( ( ix % 2 ) != 0 )
                         {
@@ -749,17 +766,27 @@ namespace tcl.lang
                     switch ( cmd )
                     {
 
-                      case 'c': size = 1; break;
+                      case 'c':
+                        size = 1;
+                        break;
 
                       case 's':
-                      case 'S': size = 2; break;
+                      case 'S':
+                        size = 2;
+                        break;
 
                       case 'i':
-                      case 'I': size = 4; break;
+                      case 'I':
+                        size = 4;
+                        break;
 
-                      case 'f': size = 4; break;
+                      case 'f':
+                        size = 4;
+                        break;
 
-                      case 'd': size = 8; break;
+                      case 'd':
+                        size = 8;
+                        break;
                     }
                     TclObject valueObj;
                     if ( count == BINARY_NOCOUNT )
@@ -783,7 +810,7 @@ namespace tcl.lang
                       }
                       valueObj = TclList.newInstance();
                       int thisOffset = offset;
-                      for ( int ix = 0 ; ix < count ; ix++ )
+                      for ( int ix = 0; ix < count; ix++ )
                       {
                         TclList.append( null, valueObj, ScanNumber( src, thisOffset, cmd ) );
                         thisOffset += size;
@@ -922,8 +949,8 @@ namespace tcl.lang
       if ( type == 'd' )
       {
         double dvalue = TclDouble.get( interp, src );
-        var ms = new System.IO.MemoryStream( resultBytes, cursor, 8 );
-        var writer = new System.IO.BinaryWriter( ms );
+        MemoryStream ms = new MemoryStream( resultBytes, cursor, 8 );
+        BinaryWriter writer = new BinaryWriter( ms );
         writer.Write( dvalue );
         cursor += 8;
         writer.Close();
@@ -932,8 +959,8 @@ namespace tcl.lang
       else if ( type == 'f' )
       {
         float fvalue = (float)TclDouble.get( interp, src );
-        var ms = new System.IO.MemoryStream( resultBytes, cursor, 4 );
-        var writer = new System.IO.BinaryWriter( ms );
+        MemoryStream ms = new MemoryStream( resultBytes, cursor, 4 );
+        BinaryWriter writer = new BinaryWriter( ms );
         writer.Write( fvalue );
         cursor += 4;
         writer.Close();
@@ -1009,8 +1036,8 @@ namespace tcl.lang
           }
         case 'f':
           {
-            var ms = new System.IO.MemoryStream( src, pos, 4, false );
-            var reader = new System.IO.BinaryReader( ms );
+            MemoryStream ms = new MemoryStream( src, pos, 4, false );
+            BinaryReader reader = new BinaryReader( ms );
             double fvalue = reader.ReadSingle();
             reader.Close();
             ms.Close();
@@ -1018,8 +1045,8 @@ namespace tcl.lang
           }
         case 'd':
           {
-            var ms = new System.IO.MemoryStream( src, pos, 8, false );
-            var reader = new System.IO.BinaryReader( ms );
+            MemoryStream ms = new MemoryStream( src, pos, 8, false );
+            BinaryReader reader = new BinaryReader( ms );
             double dvalue = reader.ReadDouble();
             reader.Close();
             ms.Close();

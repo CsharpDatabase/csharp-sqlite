@@ -10,7 +10,7 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header$
+*
 * RCS @(#) $Id: LsortCmd.java,v 1.3 2003/01/09 02:15:39 mdejong Exp $
 */
 using System;
@@ -63,7 +63,7 @@ namespace tcl.lang
       bool sortIncreasing = true;
       bool unique = false;
 
-      for ( int i = 1 ; i < argv.Length - 1 ; i++ )
+      for ( int i = 1; i < argv.Length - 1; i++ )
       {
         int index = TclIndex.get( interp, argv[i], validOpts, "option", 0 );
 

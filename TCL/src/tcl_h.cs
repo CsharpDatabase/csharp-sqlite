@@ -4,7 +4,7 @@ namespace tcl.lang
   public partial class TCL
   {
 
-    /*
+ /*
   * tcl.h --
   *
   *	This header file describes the externally-visible facilities
@@ -20,8 +20,8 @@ namespace tcl.lang
   * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
   *
   * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header$
-* RCS @(#) $Id: tcl.h,v 1.153.2.34 2008/02/06 15:25:15 dgp Exp $
+  *
+  * RCS @(#) $Id: tcl.h,v 1.153.2.34 2008/02/06 15:25:15 dgp Exp $
   */
 
 #if !_TCL
@@ -1050,14 +1050,14 @@ namespace tcl.lang
     * Special freeProc values that may be passed to Tcl_SetResult (see
     * the man page for details):
     */
-      public const int TCL_VOLATILE = 1;//((Tcl_FreeProc *) 1)
+    public const int TCL_VOLATILE = 1;//((Tcl_FreeProc *) 1)
     public const int TCL_STATIC = 2;//((Tcl_FreeProc *) 0)
     public const int TCL_DYNAMIC = 3;//((Tcl_FreeProc *) 3)
 
     /*
     * Flag values passed to variable-related procedures.
     */
-    public const int TCL_GLOBAL_ONLY		= 1;
+    public const int TCL_GLOBAL_ONLY = 1;
     public const int TCL_NAMESPACE_ONLY = 2;
     public const int TCL_APPEND_VALUE = 4;
     public const int TCL_LIST_ELEMENT = 8;

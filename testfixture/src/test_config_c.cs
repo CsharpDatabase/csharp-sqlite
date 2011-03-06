@@ -32,7 +32,6 @@ namespace Community.CsharpSqlite
     **
     **  SQLITE_SOURCE_ID: 2010-12-07 20:14:09 a586a4deeb25330037a49df295b36aaf624d0f45
     **
-    **  $Header$
     *************************************************************************
     */
 
@@ -49,7 +48,10 @@ namespace Community.CsharpSqlite
     */
     //#define STRINGVALUE2(x) #x
     //#define STRINGVALUE(x) STRINGVALUE2(x)
-    static string STRINGVALUE( int x ) { return x.ToString(); }
+    static string STRINGVALUE( int x )
+    {
+      return x.ToString();
+    }
 
     /*
     ** This routine sets entries in the global ::sqlite_options() array variable

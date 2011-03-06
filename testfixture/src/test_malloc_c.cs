@@ -31,7 +31,6 @@ namespace Community.CsharpSqlite
     **
     **  SQLITE_SOURCE_ID: 2011-01-28 17:03:50 ed759d5a9edb3bba5f48f243df47be29e3fe8cd7
     **
-    **  $Header$
     *************************************************************************
     */
     //#include "sqliteInt.h"
@@ -254,7 +253,7 @@ namespace Community.CsharpSqlite
     */
     static int faultsimInstall( int install )
     {
-      var m = new sqlite3_mem_methods(
+      sqlite3_mem_methods m = new sqlite3_mem_methods(
       (dxMalloc)faultsimMalloc,                 /* xMalloc */
       (dxMallocInt)faultsimMallocInt,           /* xMalloc */
       (dxMallocMem)faultsimMallocMem,           /* xMalloc */
@@ -1200,9 +1199,9 @@ sqlite3MemdebugSettitle(zTitle);
     {
       int rc;
       int sz = 0, cnt = 0;
-      var db = new sqlite3();
+      sqlite3 db = new sqlite3();
       int bufid = 0;
-      var azBuf = new byte[2][];
+      byte[][] azBuf = new byte[2][];
       //int getDbPointer(Tcl_Interp*, const char*, sqlite3**);
       if ( objc != 5 )
       {
@@ -1362,7 +1361,11 @@ sqlite3MemdebugSettitle(zTitle);
     {
       public string zName;
       public int op;
-      public _aOp( string zName, int op ) { this.zName = zName; this.op = op; }
+      public _aOp( string zName, int op )
+      {
+        this.zName = zName;
+        this.op = op;
+      }
     }
 
     static int test_status(
@@ -1377,7 +1380,7 @@ sqlite3MemdebugSettitle(zTitle);
       bool resetFlag = false;
       string zOpName;
 
-      var aOp = new _aOp[] {new _aOp( "SQLITE_STATUS_MEMORY_USED",         SQLITE_STATUS_MEMORY_USED         ),
+      _aOp[] aOp = new _aOp[] {new _aOp( "SQLITE_STATUS_MEMORY_USED",         SQLITE_STATUS_MEMORY_USED         ),
 new _aOp(  "SQLITE_STATUS_MALLOC_SIZE",         SQLITE_STATUS_MALLOC_SIZE         ),
 new _aOp( "SQLITE_STATUS_PAGECACHE_USED",      SQLITE_STATUS_PAGECACHE_USED      ),
 new _aOp( "SQLITE_STATUS_PAGECACHE_OVERFLOW",  SQLITE_STATUS_PAGECACHE_OVERFLOW  ),
@@ -1554,7 +1557,7 @@ new _aOp(  "LOOKASIDE_MISS_FULL", SQLITE_DBSTATUS_LOOKASIDE_MISS_FULL )
       //   Tcl_ObjCmdProc *xProc;
       //   int clientData;
       //} aObjCmd[] = {
-      var aObjCmd = new _aObjCmd[] {
+      _aObjCmd[] aObjCmd = new _aObjCmd[] {
 //{ "sqlite3_malloc",             test_malloc                   ,0 },
 //{ "sqlite3_realloc",            test_realloc                  ,0 },
 //{ "sqlite3_free",               test_free                     ,0 },

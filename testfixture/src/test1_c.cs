@@ -38,7 +38,6 @@ namespace Community.CsharpSqlite
     **
     ** SQLITE_SOURCE_ID: 2011-01-28 17:03:50 ed759d5a9edb3bba5f48f243df47be29e3fe8cd7
     **
-    ** $Header$
     *************************************************************************
     */
     //#include "sqliteInt.h"
@@ -102,9 +101,11 @@ namespace Community.CsharpSqlite
       // v2 = (u32)v;
       // memcpy( &p, v2, sizeof( p ) );
       //}
-      var cmdInfo = new WrappedCommand();
+      WrappedCommand cmdInfo = new WrappedCommand();
       if ( TCL.Tcl_GetCommandInfo( interp, z, ref cmdInfo ) || cmdInfo == null )
-      { return null; }
+      {
+        return null;
+      }
       else
       {
         return cmdInfo.objClientData;
@@ -155,7 +156,7 @@ namespace Community.CsharpSqlite
     static int getDbPointer( Tcl_Interp interp, string zA, ref sqlite3 ppDb )
     {
       SqliteDb p;
-      var cmdInfo = new WrappedCommand();
+      WrappedCommand cmdInfo = new WrappedCommand();
       if ( !TCL.Tcl_GetCommandInfo( interp, zA, ref cmdInfo ) )
       {
         if ( cmdInfo == null )
@@ -272,13 +273,19 @@ namespace Community.CsharpSqlite
       return zName;
     }
     //#define t1ErrorName sqlite3TestErrorName
-    static string t1ErrorName( int i ) { return sqlite3TestErrorName( i ); }
+    static string t1ErrorName( int i )
+    {
+      return sqlite3TestErrorName( i );
+    }
     /*
     ** Convert an sqlite3_stmt* into an sqlite3*. This depends on the
     ** fact that the sqlite3* is the first field in the Vdbe structure.
     */
     //#define StmtToDb(X) sqlite3_db_handle(X)
-    static sqlite3 StmtToDb( Vdbe v ) { return sqlite3_db_handle( v ); }
+    static sqlite3 StmtToDb( Vdbe v )
+    {
+      return sqlite3_db_handle( v );
+    }
 
     /*
     ** Check a return value to make sure it agrees with the results
@@ -310,7 +317,7 @@ namespace Community.CsharpSqlite
     )
     {
       ppStmt = (sqlite3_stmt)sqlite3TestTextToPtr( interp, zArg );
-      var cmdInfo = new WrappedCommand();
+      WrappedCommand cmdInfo = new WrappedCommand();
       if ( !TCL.Tcl_GetCommandInfo( interp, zArg, ref cmdInfo ) )
       {
         ppStmt = cmdInfo == null ? null : (sqlite3_stmt)cmdInfo.objClientData;
@@ -506,7 +513,7 @@ namespace Community.CsharpSqlite
       int rc, i, j;
       string zErr = "";
       string zHex;
-      var zSql = new StringBuilder( 500 );
+      StringBuilder zSql = new StringBuilder( 500 );
       string zBuf = "";
       if ( argc != 3 )
       {
@@ -617,7 +624,7 @@ namespace Community.CsharpSqlite
         return TCL.TCL_ERROR;
       TCL.Tcl_DStringInit( ref str );
       zSql = sqlite3_mprintf( "%s", argv[2].ToString() );
-      var sb = new StringBuilder( zSql.Length );
+      StringBuilder sb = new StringBuilder( zSql.Length );
       for ( i = 0; i < zSql.Length; i++ )
       {
         if ( zSql[i] == '%' )
@@ -743,7 +750,7 @@ namespace Community.CsharpSqlite
       int a1 = atoi( argv[3].ToString() );
       if ( n > zStr.Capacity )
         n = zStr.Capacity;// sizeof( zStr );
-      zStr=new StringBuilder("abcdefghijklmnopqrstuvwxyz");
+      zStr = new StringBuilder( "abcdefghijklmnopqrstuvwxyz" );
       sqlite3_snprintf( n, zStr, zFormat, a1 );
       TCL.Tcl_AppendResult( interp, zStr );
       return TCL.TCL_OK;
@@ -863,7 +870,7 @@ return TCL.TCL_OK;
       zKey = argv[2].ToString();
       nKey = zKey.Length;
 #if SQLITE_HAS_CODEC
-sqlite3_key( db, zKey, nKey );
+      sqlite3_key( db, zKey, nKey );
 #endif
       return TCL.TCL_OK;
     }
@@ -894,7 +901,7 @@ sqlite3_key( db, zKey, nKey );
       zKey = argv[2].ToString();
       nKey = zKey.Length;
 #if SQLITE_HAS_CODEC
-sqlite3_rekey( db, zKey, nKey );
+      sqlite3_rekey( db, zKey, nKey );
 #endif
       return TCL.TCL_OK;
     }
@@ -1059,7 +1066,7 @@ Debugger.Break (); //TODO --
     sqlite3_value[] argv
     )
     {
-      var x = new dstr();
+      dstr x = new dstr();
       //memset(&x, 0, sizeof(x));
       string sDummy = "";
       sqlite3_exec( (sqlite3)sqlite3_context_db_handle( context ),
@@ -1379,7 +1386,7 @@ sqlite3_result_int( context, sqlite3_aggregate_count( context ) );
     Tcl_Obj[] argv /* Text of each argument */
     )
     {
-      var db = new sqlite3();
+      sqlite3 db = new sqlite3();
       int rc;
       if ( argc != 2 )
       {
@@ -1447,7 +1454,7 @@ legacyCountStep, legacyCountFinalize
     Tcl_Obj[] argv /* Text of each argument */
     )
     {
-      var a = new long[3];
+      long[] a = new long[3];
       int i;
       string z;
       if ( argc != 5 )
@@ -1480,7 +1487,7 @@ legacyCountStep, legacyCountFinalize
     )
     {
       int i;
-      var a = new sqlite3_int64[3];
+      sqlite3_int64[] a = new sqlite3_int64[3];
       string z;
       if ( argc != 5 )
       {
@@ -1518,8 +1525,8 @@ legacyCountStep, legacyCountFinalize
     )
     {
       int i;
-      var a = new long[3];
-      var b = new long[3];
+      long[] a = new long[3];
+      long[] b = new long[3];
       string z;
       if ( argc != 5 )
       {
@@ -1552,7 +1559,7 @@ legacyCountStep, legacyCountFinalize
     Tcl_Obj[] argv /* Text of each argument */
     )
     {
-      var a = new long[3];
+      long[] a = new long[3];
       int i;
       string z;
       if ( argc < 4 || argc > 5 )
@@ -1584,7 +1591,7 @@ legacyCountStep, legacyCountFinalize
     Tcl_Obj[] argv /* Text of each argument */
     )
     {
-      var a = new long[3];
+      long[] a = new long[3];
       int i;
       int n = 0;
       StringBuilder z;
@@ -1625,7 +1632,7 @@ legacyCountStep, legacyCountFinalize
     Tcl_Obj[] argv /* Text of each argument */
     )
     {
-      var a = new long[3];
+      long[] a = new long[3];
       int i;
       double r = 0;
       string z;
@@ -1663,7 +1670,7 @@ legacyCountStep, legacyCountFinalize
     )
     {
       int i;
-      var r = new double[2];
+      double[] r = new double[2];
       string z;
       if ( argc != 4 )
       {
@@ -1746,7 +1753,7 @@ legacyCountStep, legacyCountFinalize
 #if WINDOWS_PHONE
       r = BitConverter.ToDouble(BitConverter.GetBytes((long)d), 0);
 #else
-      r = BitConverter.Int64BitsToDouble(d);// memcpy( &r, d, sizeof( r ) );
+      r = BitConverter.Int64BitsToDouble( d );// memcpy( &r, d, sizeof( r ) );
 #endif
       z = sqlite3_mprintf( argv[1].ToString(), r );
       TCL.Tcl_AppendResult( interp, z );
@@ -2294,7 +2301,9 @@ new EncTable("0", 0 )
       // "encoding", 0, ref enc)
       //)
       int iEnc;
-      for ( iEnc = 0; iEnc < aEnc.Length && ( aEnc[iEnc].zEnc != objv[4].ToString()  ); iEnc++ ) { }
+      for ( iEnc = 0; iEnc < aEnc.Length && ( aEnc[iEnc].zEnc != objv[4].ToString() ); iEnc++ )
+      {
+      }
       if ( iEnc >= aEnc.Length )
         return TCL.TCL_ERROR;
       enc = aEnc[iEnc].enc;
@@ -2357,7 +2366,7 @@ new EncTable("0", 0 )
       if ( rc != SQLITE_OK )
       {
         TCL.Tcl_ResetResult( interp );
-        TCL.Tcl_AppendResult( interp, sqlite3TestErrorName( rc ));
+        TCL.Tcl_AppendResult( interp, sqlite3TestErrorName( rc ) );
         return TCL.TCL_ERROR;
       }
       return TCL.TCL_OK;
@@ -3530,7 +3539,7 @@ TCL.Tcl_NewIntObj( pStmt1.nVar == pStmt2.nVar ? sqlite3TransferBindings( pStmt1,
       int rc;
       string zVal;
       int i;
-      var aSpecialFp = new _aSpecialFp[] {
+      _aSpecialFp[] aSpecialFp = new _aSpecialFp[] {
 new _aSpecialFp( "NaN", 0x7fffffff, 0xffffffff ),
 new _aSpecialFp( "SNaN", 0x7ff7ffff, 0xffffffff ),
 new _aSpecialFp( "-NaN", 0xffffffff, 0xffffffff ),
@@ -3574,8 +3583,8 @@ new _aSpecialFp( "-NaN0", 0xfff80000, 0x00000000 ),
 #if WINDOWS_PHONE
           value = BitConverter.ToDouble(BitConverter.GetBytes((long)x), 0);
 #else
-          value = BitConverter.Int64BitsToDouble(x);//memcpy(&value, x, 8);
-#endif          
+          value = BitConverter.Int64BitsToDouble( x );//memcpy(&value, x, 8);
+#endif
           //value = Double.NaN;
           break;
         }
@@ -4378,7 +4387,7 @@ TCL.Tcl_DecrRefCount(pTail);
     )
     {
       string zFilename;
-      var db = new SqliteDb();
+      SqliteDb db = new SqliteDb();
       int rc;
       StringBuilder zBuf = new StringBuilder( 100 );
       if ( objc != 3 && objc != 2 && objc != 1 )
@@ -4601,7 +4610,7 @@ TCL.Tcl_DecrRefCount(pTail);
     Tcl_Obj[] objv
     )
     {
-      var pStmt = new sqlite3_stmt();
+      sqlite3_stmt pStmt = new sqlite3_stmt();
       int col = 0;
       i64 iVal;
 
@@ -4632,7 +4641,7 @@ TCL.Tcl_DecrRefCount(pTail);
     Tcl_Obj[] objv
     )
     {
-      var pStmt = new sqlite3_stmt();
+      sqlite3_stmt pStmt = new sqlite3_stmt();
       int col = 0;
 
       int len;
@@ -4668,7 +4677,7 @@ TCL.Tcl_DecrRefCount(pTail);
     Tcl_Obj[] objv
     )
     {
-      var pStmt = new sqlite3_stmt();
+      sqlite3_stmt pStmt = new sqlite3_stmt();
       int col = 0;
       double rVal;
 
@@ -5040,7 +5049,7 @@ pRet = TCL.Tcl_NewByteArrayObj(zName16, n+2);
     Tcl_Obj[] argv
     )
     {
-      var zBuf = new StringBuilder( 30 );
+      StringBuilder zBuf = new StringBuilder( 30 );
       sqlite3 db = null;
       if ( argc != 2 )
       {
@@ -5281,8 +5290,8 @@ TCL.Tcl_SetObjResult(interp, TCL.Tcl_NewIntObj(amt));
     {
       int i;
       sqlite3_vfs pMain;
-      var one = new sqlite3_vfs();
-      var two = new sqlite3_vfs();
+      sqlite3_vfs one = new sqlite3_vfs();
+      sqlite3_vfs two = new sqlite3_vfs();
 
       sqlite3_vfs_unregister( null ); /* Unregister of NULL is harmless */
       one.zName = "__one";
@@ -5692,7 +5701,7 @@ TCL.Tcl_SetObjResult(interp, TCL.Tcl_NewIntObj(amt));
     {
       sqlite3 db = null;
       int rc = 0;
-      var aId = new _aID[] {
+      _aID[] aId = new _aID[] {
 new _aID( "SQLITE_LIMIT_LENGTH", SQLITE_LIMIT_LENGTH ),
 new _aID( "SQLITE_LIMIT_SQL_LENGTH", SQLITE_LIMIT_SQL_LENGTH ),
 new _aID( "SQLITE_LIMIT_COLUMN", SQLITE_LIMIT_COLUMN ),
@@ -6181,7 +6190,7 @@ extern int sqlite3_hostid_num;
       // static struct {
       // char *zName;
       // TCL.Tcl_CmdProc *xProc;
-      var aCmd = new _aCmd[] {
+      _aCmd[] aCmd = new _aCmd[] {
 new _aCmd( "db_enter", db_enter ),
 new _aCmd( "db_leave", db_leave ),
 new _aCmd( "sqlite3_mprintf_int", sqlite3_mprintf_int ),
@@ -6227,7 +6236,7 @@ new _aCmd( "sqlite3_busy_timeout", test_busy_timeout ),
       // char *zName;
       // Tcl_ObjCmdProc *xProc;
       // void *object;
-      var aObjCmd = new _aObjCmd[]{
+      _aObjCmd[] aObjCmd = new _aObjCmd[]{
 new _aObjCmd( "sqlite3_connection_pointer", get_sqlite_pointer, 0 ),
 new _aObjCmd( "sqlite3_bind_int", test_bind_int, 0 ),
 new _aObjCmd( "sqlite3_bind_zeroblob", test_bind_zeroblob, 0 ),

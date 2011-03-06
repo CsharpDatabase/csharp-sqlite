@@ -9,7 +9,7 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header$
+*
 * RCS @(#) $Id: Extension.java,v 1.2 1999/05/09 21:18:54 dejong Exp $
 *
 */
@@ -153,7 +153,7 @@ namespace tcl.lang
       }
 
       interp.createCommand( argv[0].ToString(), cmd );
-      TCL.CompletionCode rc = cmd.cmdProc(interp, argv);
+      TCL.CompletionCode rc = cmd.cmdProc( interp, argv );
       return rc == TCL.CompletionCode.EXIT ? TCL.CompletionCode.EXIT : TCL.CompletionCode.RETURN;
     }
   }

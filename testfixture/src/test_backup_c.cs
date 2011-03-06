@@ -28,7 +28,6 @@ namespace Community.CsharpSqlite
     **
     **  SQLITE_SOURCE_ID: 2010-08-23 18:52:01 42537b60566f288167f1b5864a5435986838e3a3
     **
-    **  $Header$
     *************************************************************************
     */
     //#include "tcl.h"
@@ -41,7 +40,10 @@ namespace Community.CsharpSqlite
 
     enum BackupSubCommandEnum
     {
-      BACKUP_STEP, BACKUP_FINISH, BACKUP_REMAINING, BACKUP_PAGECOUNT
+      BACKUP_STEP,
+      BACKUP_FINISH,
+      BACKUP_REMAINING,
+      BACKUP_PAGECOUNT
     };
 
     struct BackupSubCommand
@@ -63,9 +65,10 @@ namespace Community.CsharpSqlite
     static int Tcl_GetIndexFromObjStruct( Interp interp, TclObject to, BackupSubCommand[] table, int len, string msg, int flags, ref int index )
     {
       string zCmd = to.ToString();
-      for ( index = 0 ; index < len ; index++ )
+      for ( index = 0; index < len; index++ )
       {
-        if ( zCmd == table[index].zCmd ) return 0;
+        if ( zCmd == table[index].zCmd )
+          return 0;
       }
       return 1;
     }
@@ -77,7 +80,7 @@ namespace Community.CsharpSqlite
     Tcl_Obj[] objv
     )
     {
-      var aSub = new BackupSubCommand[] {
+      BackupSubCommand[] aSub = new BackupSubCommand[] {
 new BackupSubCommand("step",      BackupSubCommandEnum.BACKUP_STEP      , 1, "npage" ),
 new BackupSubCommand("finish",    BackupSubCommandEnum.BACKUP_FINISH    , 0, ""      ),
 new BackupSubCommand("remaining", BackupSubCommandEnum.BACKUP_REMAINING , 0, ""      ),

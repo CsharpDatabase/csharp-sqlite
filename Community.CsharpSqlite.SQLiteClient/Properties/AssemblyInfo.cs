@@ -12,7 +12,7 @@ using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyVersion("3.6.23.2")]
+[assembly: AssemblyVersion("3.7.5.0")]
 
 /* TODO COMPLETE INFORMATION
 

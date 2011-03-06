@@ -29,7 +29,6 @@ namespace Community.CsharpSqlite
     **
     **  SQLITE_SOURCE_ID: 2011-01-28 17:03:50 ed759d5a9edb3bba5f48f243df47be29e3fe8cd7
     **
-    **  $Header$
     *************************************************************************
     */
 
@@ -377,10 +376,16 @@ namespace Community.CsharpSqlite
       try
       {
         for ( index = 0; index < table.Length; index++ )
-        { if ( table[index].zName == msg ) return false; }
+        {
+          if ( table[index].zName == msg )
+            return false;
+        }
         return true;
       }
-      catch { return true; }
+      catch
+      {
+        return true;
+      }
     }
 
 
@@ -391,7 +396,7 @@ namespace Community.CsharpSqlite
     Tcl_Obj[] objv
     )
     {
-      var aOpt = new ConfigOption[] {
+      ConfigOption[] aOpt = new ConfigOption[] {
 new ConfigOption("singlethread", SQLITE_CONFIG_SINGLETHREAD),
 new ConfigOption("multithread",  SQLITE_CONFIG_MULTITHREAD),
 new ConfigOption("serialized",   SQLITE_CONFIG_SERIALIZED),
@@ -480,7 +485,7 @@ new ConfigOption(null,0)
       //  char *zName;
       //  Tcl_ObjCmdProc *xProc;
       //}
-      var aCmd = new _aObjCmd[]{
+      _aObjCmd[] aCmd = new _aObjCmd[]{
 new _aObjCmd( "sqlite3_shutdown",         test_shutdown ),
 new _aObjCmd( "sqlite3_initialize",       test_initialize ),
 new _aObjCmd( "sqlite3_config",           test_config ),

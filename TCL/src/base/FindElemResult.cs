@@ -11,38 +11,38 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header$
+*
 * RCS @(#) $Id: FindElemResult.java,v 1.1.1.1 1998/10/14 21:09:21 cvsadmin Exp $
 *
 */
 using System;
 namespace tcl.lang
 {
-	
-	/*
-	* Result returned by Util.findElement().
-	*/
-	
-	class FindElemResult
-	{
-		
-		/*
-		* The end of the element in the original string -- the index of the
-		* character immediately behind the element.
-		*/
-		
-		internal int elemEnd;
-		
-		/*
-		* The element itself.
-		*/
-		
-		internal string elem;
-		
-		internal FindElemResult(int i, string s)
-		{
-			elemEnd = i;
-			elem = s;
-		}
-	} // end FindElemResult
+
+  /*
+  * Result returned by Util.findElement().
+  */
+
+  class FindElemResult
+  {
+
+    /*
+    * The end of the element in the original string -- the index of the
+    * character immediately behind the element.
+    */
+
+    internal int elemEnd;
+
+    /*
+    * The element itself.
+    */
+
+    internal string elem;
+
+    internal FindElemResult( int i, string s )
+    {
+      elemEnd = i;
+      elem = s;
+    }
+  } // end FindElemResult
 }

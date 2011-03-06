@@ -12,7 +12,7 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header$
+*
 * RCS @(#) $Id: Interp.java,v 1.44 2003/07/25 16:38:35 mdejong Exp $
 *
 */
@@ -538,7 +538,7 @@ namespace tcl.lang
 
       // Close any remaining channels
 
-      for ( IDictionaryEnumerator e = interpChanTable.GetEnumerator() ; e.MoveNext() ; )
+      for ( IDictionaryEnumerator e = interpChanTable.GetEnumerator(); e.MoveNext(); )
       {
         Object key = e.Key;
         Channel chan = (Channel)e.Value;
@@ -828,9 +828,9 @@ namespace tcl.lang
       {
         // Java does not support passing an address so we pass
         // an array of size 1 and then assign arr[0] to the value
-        var nsArr = new NamespaceCmd.Namespace[1];
-        var dummyArr = new NamespaceCmd.Namespace[1];
-        var tailArr = new string[1];
+        NamespaceCmd.Namespace[] nsArr = new NamespaceCmd.Namespace[1];
+        NamespaceCmd.Namespace[] dummyArr = new NamespaceCmd.Namespace[1];
+        string[] tailArr = new string[1];
 
         NamespaceCmd.getNamespaceForQualName( this, cmdName, null, TCL.VarFlag.CREATE_NS_IF_UNKNOWN, nsArr, dummyArr, dummyArr, tailArr );
 
@@ -961,9 +961,9 @@ namespace tcl.lang
       {
         // Java does not support passing an address so we pass
         // an array of size 1 and then assign arr[0] to the value
-        var nsArr = new NamespaceCmd.Namespace[1];
-        var dummyArr = new NamespaceCmd.Namespace[1];
-        var tailArr = new string[1];
+        NamespaceCmd.Namespace[] nsArr = new NamespaceCmd.Namespace[1];
+        NamespaceCmd.Namespace[] dummyArr = new NamespaceCmd.Namespace[1];
+        string[] tailArr = new string[1];
 
         NamespaceCmd.getNamespaceForQualName( this, cmdName, null, TCL.VarFlag.CREATE_NS_IF_UNKNOWN, nsArr, dummyArr, dummyArr, tailArr );
 
@@ -1065,7 +1065,7 @@ namespace tcl.lang
     // Token for the command.
     {
       Interp interp = this;
-      var name = new StringBuilder();
+      StringBuilder name = new StringBuilder();
 
       // Add the full name of the containing namespace, followed by the "::"
       // separator, and the command name.
@@ -1107,7 +1107,8 @@ namespace tcl.lang
       {
         return -1;
       }
-      if ( cmd.deleteProc != null ) cmd.deleteProc( ref cmd.deleteData );
+      if ( cmd.deleteProc != null )
+        cmd.deleteProc( ref cmd.deleteData );
       return deleteCommandFromToken( cmd );
     }
     protected internal int deleteCommandFromToken( WrappedCommand cmd )
@@ -1156,7 +1157,7 @@ namespace tcl.lang
       // commands were created that refer back to this command. Delete these
       // imported commands now.
 
-      for ( ref_Renamed = cmd.importRef ; ref_Renamed != null ; ref_Renamed = nextRef )
+      for ( ref_Renamed = cmd.importRef; ref_Renamed != null; ref_Renamed = nextRef )
       {
         nextRef = ref_Renamed.next;
         importCmd = ref_Renamed.importedCmd;
@@ -1218,9 +1219,9 @@ namespace tcl.lang
       // automatically create the containing namespaces just like
       // Tcl_CreateCommand would.
 
-      var newNsArr = new NamespaceCmd.Namespace[1];
-      var dummyArr = new NamespaceCmd.Namespace[1];
-      var newTailArr = new string[1];
+      NamespaceCmd.Namespace[] newNsArr = new NamespaceCmd.Namespace[1];
+      NamespaceCmd.Namespace[] dummyArr = new NamespaceCmd.Namespace[1];
+      string[] newTailArr = new string[1];
 
       NamespaceCmd.getNamespaceForQualName( interp, newName, null, TCL.VarFlag.CREATE_NS_IF_UNKNOWN, newNsArr, dummyArr, dummyArr, newTailArr );
 
@@ -1484,7 +1485,7 @@ namespace tcl.lang
       int evalFlags = this.evalFlags;
       this.evalFlags &= ~Parser.TCL_ALLOW_EXCEPTIONS;
 
-      var script = new CharPointer( inString );
+      CharPointer script = new CharPointer( inString );
       try
       {
         Parser.eval2( this, script.array, script.index, script.length(), flags );
@@ -1508,7 +1509,7 @@ namespace tcl.lang
         {
           result = updateReturnInfo();
         }
-        if (result != TCL.CompletionCode.EXIT && result != TCL.CompletionCode.OK && result != TCL.CompletionCode.ERROR && (evalFlags & Parser.TCL_ALLOW_EXCEPTIONS) == 0)
+        if ( result != TCL.CompletionCode.EXIT && result != TCL.CompletionCode.OK && result != TCL.CompletionCode.ERROR && ( evalFlags & Parser.TCL_ALLOW_EXCEPTIONS ) == 0 )
         {
           processUnexpectedResult( result );
         }
@@ -1735,7 +1736,7 @@ namespace tcl.lang
           // FIXME : read does not check return values
           long available;
           available = fs.Length - fs.Position;
-          var charArray = new byte[(int)available];
+          byte[] charArray = new byte[(int)available];
           SupportClass.ReadInput( fs, ref charArray, 0, charArray.Length );
           return new string( SupportClass.ToCharArray( charArray ) );
         }
@@ -1803,8 +1804,8 @@ namespace tcl.lang
       //				if (System_Renamed.getProperty("java.version").StartsWith("1.2") && stream.GetType().FullName.Equals("java.util.zip.ZipFile$1"))
       //				{
       //					
-      var baos = new MemoryStream(1024);
-      var buffer = new byte[1024];
+      MemoryStream baos = new MemoryStream( 1024 );
+      byte[] buffer = new byte[1024];
       //					int numRead;
       //					
       //					// Read all data from the stream into a resizable buffer
@@ -1823,7 +1824,7 @@ namespace tcl.lang
       //					long available;
       //					available = stream.Length - stream.Position;
       //					int num = (int) available;
-      //          var byteArray = new byte[num];
+      //          byte[] byteArray = new byte[num];
       //					int offset = 0;
       //					while (num > 0)
       //					{
@@ -1846,7 +1847,7 @@ namespace tcl.lang
     }
     internal static BackSlashResult backslash( string s, int i, int len )
     {
-      var script = new CharPointer( s.Substring( 0, ( len ) - ( 0 ) ) );
+      CharPointer script = new CharPointer( s.Substring( 0, ( len ) - ( 0 ) ) );
       script.index = i;
       return Parser.backslash( script.array, script.index );
     }
@@ -2321,7 +2322,7 @@ namespace tcl.lang
     }
     internal void hideUnsafeCommands()
     {
-      for ( int ix = 0 ; ix < unsafeCmds.Length ; ix++ )
+      for ( int ix = 0; ix < unsafeCmds.Length; ix++ )
       {
         try
         {
@@ -2386,7 +2387,7 @@ namespace tcl.lang
               localObjv = new TclObject[objv.Length + 1];
               localObjv[0] = TclString.newInstance( "unknown" );
               localObjv[0].preserve();
-              for ( int i = 0 ; i < objv.Length ; i++ )
+              for ( int i = 0; i < objv.Length; i++ )
               {
                 localObjv[i + 1] = objv[i];
               }
@@ -2456,7 +2457,7 @@ namespace tcl.lang
         {
           ds = new StringBuilder( "\n    invoked from within\n\"" );
         }
-        for ( int i = 0 ; i < objv.Length ; i++ )
+        for ( int i = 0; i < objv.Length; i++ )
         {
 
           ds.Append( objv[i].ToString() );
@@ -2527,7 +2528,7 @@ namespace tcl.lang
 
       if ( resolvers != null )
       {
-        for ( enum_Renamed = resolvers.GetEnumerator() ; enum_Renamed.MoveNext() ; )
+        for ( enum_Renamed = resolvers.GetEnumerator(); enum_Renamed.MoveNext(); )
         {
           res = (ResolverScheme)enum_Renamed.Current;
           if ( name.Equals( res.name ) )

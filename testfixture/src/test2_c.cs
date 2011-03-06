@@ -28,7 +28,6 @@ namespace Community.CsharpSqlite
     **
     **  SQLITE_SOURCE_ID: 2010-08-23 18:52:01 42537b60566f288167f1b5864a5435986838e3a3
     **
-    **  $Header$
     *************************************************************************
     */
 
@@ -76,7 +75,7 @@ namespace Community.CsharpSqlite
     /*
     ** Dummy page reinitializer
     */
-    static void pager_test_reiniter(DbPage pNotUsed)
+    static void pager_test_reiniter( DbPage pNotUsed )
     {
       return;
     }
@@ -599,15 +598,16 @@ namespace Community.CsharpSqlite
     {
       int pbyte = 0;
       int rc;
-      if (argc != 2)
+      if ( argc != 2 )
       {
-        TCL.Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
-        " PENDING-BYTE\"");
+        TCL.Tcl_AppendResult( interp, "wrong # args: should be \"", argv[0],
+        " PENDING-BYTE\"" );
         return TCL.TCL_ERROR;
       }
-      if (TCL.Tcl_GetInt(interp, argv[1], ref pbyte)) return TCL.TCL_ERROR;
-      rc = sqlite3_test_control(SQLITE_TESTCTRL_PENDING_BYTE, pbyte);
-      TCL.Tcl_SetObjResult(interp, TCL.Tcl_NewIntObj(rc));
+      if ( TCL.Tcl_GetInt( interp, argv[1], ref pbyte ) )
+        return TCL.TCL_ERROR;
+      rc = sqlite3_test_control( SQLITE_TESTCTRL_PENDING_BYTE, pbyte );
+      TCL.Tcl_SetObjResult( interp, TCL.Tcl_NewIntObj( rc ) );
       return TCL.TCL_OK;
     }
 
@@ -626,43 +626,52 @@ namespace Community.CsharpSqlite
     {
       int sz = 0, rc;
       int nProg = 0;
-      var aProg = new int[100];
+      int[] aProg = new int[100];
       string z;
-      if (argc != 3)
+      if ( argc != 3 )
       {
-        TCL.Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
-        " SIZE PROGRAM\"");
+        TCL.Tcl_AppendResult( interp, "wrong # args: should be \"", argv[0],
+        " SIZE PROGRAM\"" );
       }
-      if (TCL.Tcl_GetInt(interp, argv[1], ref sz)) return TCL.TCL_ERROR;
+      if ( TCL.Tcl_GetInt( interp, argv[1], ref sz ) )
+        return TCL.TCL_ERROR;
       z = argv[2].ToString() + '\0';
       int iz = 0;
-      while (nProg < 99 && z[iz] != 0)
+      while ( nProg < 99 && z[iz] != 0 )
       {
-        while (z[iz] != 0 && !sqlite3Isdigit(z[iz])) { iz++; }
-        if (z[iz] == 0) break;
-        while (sqlite3Isdigit(z[iz])) { aProg[nProg] = aProg[nProg] * 10 + (z[iz] - 48); iz++; }
+        while ( z[iz] != 0 && !sqlite3Isdigit( z[iz] ) )
+        {
+          iz++;
+        }
+        if ( z[iz] == 0 )
+          break;
+        while ( sqlite3Isdigit( z[iz] ) )
+        {
+          aProg[nProg] = aProg[nProg] * 10 + ( z[iz] - 48 );
+          iz++;
+        }
         nProg++;
       }
       aProg[nProg] = 0;
-      rc = sqlite3_test_control(SQLITE_TESTCTRL_BITVEC_TEST, sz, aProg);
-      TCL.Tcl_SetObjResult(interp, TCL.Tcl_NewIntObj(rc));
+      rc = sqlite3_test_control( SQLITE_TESTCTRL_BITVEC_TEST, sz, aProg );
+      TCL.Tcl_SetObjResult( interp, TCL.Tcl_NewIntObj( rc ) );
       return TCL.TCL_OK;
     }
 
-    static Var.SQLITE3_GETSET sqlite3_io_error_persist = new Var.SQLITE3_GETSET("sqlite3_io_error_persist");
-    static Var.SQLITE3_GETSET sqlite3_io_error_pending = new Var.SQLITE3_GETSET("sqlite3_io_error_pending");
-    static Var.SQLITE3_GETSET sqlite3_io_error_hit = new Var.SQLITE3_GETSET("sqlite3_io_error_hit");
-    static Var.SQLITE3_GETSET sqlite3_io_error_hardhit = new Var.SQLITE3_GETSET("sqlite3_io_error_hardhit");
-    static Var.SQLITE3_GETSET sqlite3_diskfull_pending = new Var.SQLITE3_GETSET("sqlite3_diskfull_pending");
-    static Var.SQLITE3_GETSET sqlite3_diskfull = new Var.SQLITE3_GETSET("sqlite3_diskfull");
+    static Var.SQLITE3_GETSET sqlite3_io_error_persist = new Var.SQLITE3_GETSET( "sqlite3_io_error_persist" );
+    static Var.SQLITE3_GETSET sqlite3_io_error_pending = new Var.SQLITE3_GETSET( "sqlite3_io_error_pending" );
+    static Var.SQLITE3_GETSET sqlite3_io_error_hit = new Var.SQLITE3_GETSET( "sqlite3_io_error_hit" );
+    static Var.SQLITE3_GETSET sqlite3_io_error_hardhit = new Var.SQLITE3_GETSET( "sqlite3_io_error_hardhit" );
+    static Var.SQLITE3_GETSET sqlite3_diskfull_pending = new Var.SQLITE3_GETSET( "sqlite3_diskfull_pending" );
+    static Var.SQLITE3_GETSET sqlite3_diskfull = new Var.SQLITE3_GETSET( "sqlite3_diskfull" );
 
     /*
     ** Register commands with the TCL interpreter.
     */
-    static Var.SQLITE3_GETSET TCLsqlite3PendingByte = new Var.SQLITE3_GETSET("sqlite_pending_byte");
+    static Var.SQLITE3_GETSET TCLsqlite3PendingByte = new Var.SQLITE3_GETSET( "sqlite_pending_byte" );
 
 
-    public static int Sqlitetest2_Init(Tcl_Interp interp)
+    public static int Sqlitetest2_Init( Tcl_Interp interp )
     {
       //extern int sqlite3_io_error_persist;
       //extern int sqlite3_io_error_pending;
@@ -675,7 +684,7 @@ namespace Community.CsharpSqlite
       //  char *zName;
       //  Tcl_CmdProc *xProc;
       //} aCmd[] = {
-      var aCmd = new _aCmd[] {
+      _aCmd[] aCmd = new _aCmd[] {
 //new _aCmd( "pager_open",              (Tcl_CmdProc)pager_open          ),
 //new _aCmd( "pager_close",             (Tcl_CmdProc)pager_close         ),
 //    { "pager_commit",            (Tcl_CmdProc*)pager_commit        },
@@ -699,26 +708,26 @@ new _aCmd( "sqlite3BitvecBuiltinTest",(Tcl_CmdProc)testBitvecBuiltinTest),
 new _aCmd( "sqlite3_test_control_pending_byte",(Tcl_CmdProc)testPendingByte),
 };
       int i;
-      for (i = 0; i < aCmd.Length; i++)
+      for ( i = 0; i < aCmd.Length; i++ )
       {//sizeof(aCmd)/sizeof(aCmd[0]); i++){
-        TCL.Tcl_CreateCommand(interp, aCmd[i].zName, aCmd[i].xProc, null, null);
+        TCL.Tcl_CreateCommand( interp, aCmd[i].zName, aCmd[i].xProc, null, null );
       }
 
-      TCL.Tcl_LinkVar(interp, "sqlite_io_error_pending",
-      sqlite3_io_error_pending, VarFlags.SQLITE3_LINK_INT);
-      TCL.Tcl_LinkVar(interp, "sqlite_io_error_persist",
-      sqlite3_io_error_persist, VarFlags.SQLITE3_LINK_INT);
-      TCL.Tcl_LinkVar(interp, "sqlite_io_error_hit",
-      sqlite3_io_error_hit, VarFlags.SQLITE3_LINK_INT);
-      TCL.Tcl_LinkVar(interp, "sqlite_io_error_hardhit",
-      sqlite3_io_error_hardhit, VarFlags.SQLITE3_LINK_INT);
-      TCL.Tcl_LinkVar(interp, "sqlite_diskfull_pending",
-      sqlite3_diskfull_pending, VarFlags.SQLITE3_LINK_INT);
-      TCL.Tcl_LinkVar(interp, "sqlite_diskfull",
-      sqlite3_diskfull, VarFlags.SQLITE3_LINK_INT);
+      TCL.Tcl_LinkVar( interp, "sqlite_io_error_pending",
+      sqlite3_io_error_pending, VarFlags.SQLITE3_LINK_INT );
+      TCL.Tcl_LinkVar( interp, "sqlite_io_error_persist",
+      sqlite3_io_error_persist, VarFlags.SQLITE3_LINK_INT );
+      TCL.Tcl_LinkVar( interp, "sqlite_io_error_hit",
+      sqlite3_io_error_hit, VarFlags.SQLITE3_LINK_INT );
+      TCL.Tcl_LinkVar( interp, "sqlite_io_error_hardhit",
+      sqlite3_io_error_hardhit, VarFlags.SQLITE3_LINK_INT );
+      TCL.Tcl_LinkVar( interp, "sqlite_diskfull_pending",
+      sqlite3_diskfull_pending, VarFlags.SQLITE3_LINK_INT );
+      TCL.Tcl_LinkVar( interp, "sqlite_diskfull",
+      sqlite3_diskfull, VarFlags.SQLITE3_LINK_INT );
 #if !SQLITE_OMIT_WSD
-      TCL.Tcl_LinkVar(interp, "sqlite_pending_byte",
-      TCLsqlite3PendingByte, VarFlags.SQLITE3_LINK_INT);
+      TCL.Tcl_LinkVar( interp, "sqlite_pending_byte",
+      TCLsqlite3PendingByte, VarFlags.SQLITE3_LINK_INT );
 #endif
       TCLsqlite3PendingByte.iValue = sqlite3PendingByte;
       return TCL.TCL_OK;

@@ -31,7 +31,6 @@ namespace Community.CsharpSqlite
     **
     **  SQLITE_SOURCE_ID: 2010-08-23 18:52:01 42537b60566f288167f1b5864a5435986838e3a3
     **
-    **  $Header$
     *************************************************************************
     */
     //#include "sqliteInt.h"
@@ -84,49 +83,49 @@ error_out:
       return TCL.TCL_ERROR;
     }
 
-//    /*
-//    ** c_realloc_test
-//    */
-//    static int c_realloc_test(
-//    object clientdata, /* Pointer to sqlite3_enable_XXX function */
-//    Tcl_Interp interp,    /* The TCL interpreter that invoked this command */
-//    int objc,              /* Number of arguments */
-//    Tcl_Obj[] objv /* Command arguments */
-//    )
-//    {
-//      object p;
-//      string zErrFunction = "N/A";
+    //    /*
+    //    ** c_realloc_test
+    //    */
+    //    static int c_realloc_test(
+    //    object clientdata, /* Pointer to sqlite3_enable_XXX function */
+    //    Tcl_Interp interp,    /* The TCL interpreter that invoked this command */
+    //    int objc,              /* Number of arguments */
+    //    Tcl_Obj[] objv /* Command arguments */
+    //    )
+    //    {
+    //      object p;
+    //      string zErrFunction = "N/A";
 
-//      if ( objc != 1 )
-//      {
-//        TCL.Tcl_WrongNumArgs( interp, 1, objv, "" );
-//        return TCL.TCL_ERROR;
-//      }
+    //      if ( objc != 1 )
+    //      {
+    //        TCL.Tcl_WrongNumArgs( interp, 1, objv, "" );
+    //        return TCL.TCL_ERROR;
+    //      }
 
-//      p = sqlite3Malloc( 5 );
-//      if ( p == null )
-//      {
-//        zErrFunction = "sqlite3Malloc";
-//        goto error_out;
-//      }
+    //      p = sqlite3Malloc( 5 );
+    //      if ( p == null )
+    //      {
+    //        zErrFunction = "sqlite3Malloc";
+    //        goto error_out;
+    //      }
 
-//      /* Test that realloc()ing a block of memory to a negative size is
-//      ** the same as free()ing that memory.
-//      */
-//      //TODO -- ignore realloc
-//      //p = sqlite3_realloc(p, -1);
-//      //if( p!=null ){
-//      //  zErrFunction = "sqlite3_realloc";
-//      //  goto error_out;
-//      //}
+    //      /* Test that realloc()ing a block of memory to a negative size is
+    //      ** the same as free()ing that memory.
+    //      */
+    //      //TODO -- ignore realloc
+    //      //p = sqlite3_realloc(p, -1);
+    //      //if( p!=null ){
+    //      //  zErrFunction = "sqlite3_realloc";
+    //      //  goto error_out;
+    //      //}
 
-//      return TCL.TCL_OK;
+    //      return TCL.TCL_OK;
 
-//error_out:
-//      TCL.Tcl_ResetResult( interp );
-//      TCL.Tcl_AppendResult( interp, "Error testing function: ", zErrFunction );
-//      return TCL.TCL_ERROR;
-//    }
+    //error_out:
+    //      TCL.Tcl_ResetResult( interp );
+    //      TCL.Tcl_AppendResult( interp, "Error testing function: ", zErrFunction );
+    //      return TCL.TCL_ERROR;
+    //    }
 
 
     /*
@@ -170,7 +169,8 @@ error_out:
         goto error_out;
       }
 
-      pStmt = new sqlite3_stmt(); pStmt.pc = 1234;
+      pStmt = new sqlite3_stmt();
+      pStmt.pc = 1234;
       rc = sqlite3_prepare( db, null, 0, ref pStmt, ref dummyS );
       if ( rc != SQLITE_MISUSE )
       {
@@ -180,7 +180,8 @@ error_out:
       Debug.Assert( pStmt == null ); /* Verify that pStmt is zeroed even on a MISUSE error */
 
 
-      pStmt = new sqlite3_stmt(); pStmt.pc = 1234;
+      pStmt = new sqlite3_stmt();
+      pStmt.pc = 1234;
       rc = sqlite3_prepare_v2( db, null, 0, ref pStmt, ref dummyS );
       if ( rc != SQLITE_MISUSE )
       {
@@ -224,13 +225,13 @@ error_out:
       //   Tcl_ObjCmdProc *xProc;
       //   void *object;
       //}
-      var aObjCmd = new _aObjCmd[]  {
+      _aObjCmd[] aObjCmd = new _aObjCmd[]  {
 new _aObjCmd( "c_misuse_test",    c_misuse_test, 0 ),
 //new _aObjCmd( "c_realloc_test",   c_realloc_test, 0 ),
 new _aObjCmd( "c_collation_test", c_collation_test, 0 ),
 };
       int i;
-      for ( i = 0 ; i < aObjCmd.Length ; i++ )
+      for ( i = 0; i < aObjCmd.Length; i++ )
       {//sizeof(aObjCmd)/sizeof(aObjCmd[0]); i++){
         TCL.Tcl_CreateObjCommand( interp, aObjCmd[i].zName,
         aObjCmd[i].xProc, aObjCmd[i].clientData, null );

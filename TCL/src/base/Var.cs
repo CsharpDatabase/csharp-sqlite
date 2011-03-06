@@ -8,7 +8,7 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header$
+*
 * RCS @(#) $Id: Var.java,v 1.11 2003/01/09 02:15:39 mdejong Exp $
 *
 */
@@ -280,13 +280,26 @@ namespace tcl.lang
       }
       public int iValue
       {
-        get { return _Integer; }
-        set { _Integer = value; }
+        get
+        {
+          return _Integer;
+        }
+        set
+        {
+          _Integer = value;
+        }
       }
       public string sValue
       {
-        get { return _StringBuilder.ToString(); }
-        set { _StringBuilder.Length = 0; _StringBuilder.Append( value ); }
+        get
+        {
+          return _StringBuilder.ToString();
+        }
+        set
+        {
+          _StringBuilder.Length = 0;
+          _StringBuilder.Append( value );
+        }
       }
       public void Append( byte[] append )
       {
@@ -304,7 +317,10 @@ namespace tcl.lang
 
       public int Length
       {
-        get { return _StringBuilder.Length; }
+        get
+        {
+          return _StringBuilder.Length;
+        }
       }
     }
     /// <summary> Reference to the object the allows getting & setting the sqlite3 linked variable
@@ -325,7 +341,8 @@ namespace tcl.lang
         else
           to = TclInteger.newInstance( ( (SQLITE3_GETSET)sqlite3_get_set ).iValue );
       }
-      else to = TclString.newInstance( ( (SQLITE3_GETSET)sqlite3_get_set ).sValue );
+      else
+        to = TclString.newInstance( ( (SQLITE3_GETSET)sqlite3_get_set ).sValue );
       to.preserve();
       return to;
     }
@@ -374,7 +391,7 @@ namespace tcl.lang
 
     public override string ToString()
     {
-      var sb = new StringBuilder();
+      StringBuilder sb = new StringBuilder();
       sb.Append( ns );
       if ( sb.Length == 2 )
       {
@@ -403,7 +420,7 @@ namespace tcl.lang
     protected internal SearchId getSearch( string s )
     {
       SearchId sid;
-      for ( int i = 0 ; i < sidVec.Count ; i++ )
+      for ( int i = 0; i < sidVec.Count; i++ )
       {
         sid = (SearchId)sidVec[i];
         if ( sid.equals( s ) )
@@ -425,7 +442,7 @@ namespace tcl.lang
     {
       SearchId curSid;
 
-      for ( int i = 0 ; i < sidVec.Count ; i++ )
+      for ( int i = 0; i < sidVec.Count; i++ )
       {
         curSid = (SearchId)sidVec[i];
         if ( curSid.equals( sid ) )
@@ -538,7 +555,7 @@ namespace tcl.lang
       // the part2's test and error reporting  or move that code in array set)
       elName = part2;
       int len = part1.Length;
-      for ( p = 0 ; p < len ; p++ )
+      for ( p = 0; p < len; p++ )
       {
         if ( part1[p] == '(' )
         {
@@ -639,9 +656,9 @@ namespace tcl.lang
 
             // Java does not support passing an address so we pass
             // an array of size 1 and then assign arr[0] to the value
-            var varNsArr = new NamespaceCmd.Namespace[1];
-            var dummyArr = new NamespaceCmd.Namespace[1];
-            var tailArr = new string[1];
+            NamespaceCmd.Namespace[] varNsArr = new NamespaceCmd.Namespace[1];
+            NamespaceCmd.Namespace[] dummyArr = new NamespaceCmd.Namespace[1];
+            string[] tailArr = new string[1];
 
             NamespaceCmd.getNamespaceForQualName( interp, part1, null, flags, varNsArr, dummyArr, dummyArr, tailArr );
 
@@ -968,7 +985,8 @@ namespace tcl.lang
           return (TclObject)var.value;
         }
 
-        if ( var.isSQLITE3_Link() ) return var.sqlite3_get();
+        if ( var.isSQLITE3_Link() )
+          return var.sqlite3_get();
 
         if ( ( flags & TCL.VarFlag.LEAVE_ERR_MSG ) != 0 )
         {
@@ -1745,7 +1763,7 @@ namespace tcl.lang
       if ( var.traces != null )
       {
         int len = var.traces.Count;
-        for ( int i = 0 ; i < len ; i++ )
+        for ( int i = 0; i < len; i++ )
         {
           TraceRecord rec = (TraceRecord)var.traces[i];
           if ( rec.trace == proc )
@@ -1892,10 +1910,10 @@ namespace tcl.lang
 
         // Java does not support passing an address so we pass
         // an array of size 1 and then assign arr[0] to the value
-        var nsArr = new NamespaceCmd.Namespace[1];
-        var altNsArr = new NamespaceCmd.Namespace[1];
-        var dummyNsArr = new NamespaceCmd.Namespace[1];
-        var tailArr = new string[1];
+        NamespaceCmd.Namespace[] nsArr = new NamespaceCmd.Namespace[1];
+        NamespaceCmd.Namespace[] altNsArr = new NamespaceCmd.Namespace[1];
+        NamespaceCmd.Namespace[] dummyNsArr = new NamespaceCmd.Namespace[1];
+        string[] tailArr = new string[1];
 
         NamespaceCmd.getNamespaceForQualName( interp, myName, null, myFlags, nsArr, altNsArr, dummyNsArr, tailArr );
 
@@ -2034,7 +2052,7 @@ namespace tcl.lang
 
     internal static string getVariableFullName( Interp interp, Var var )
     {
-      var buff = new StringBuilder();
+      StringBuilder buff = new StringBuilder();
 
       // Add the full name of the containing namespace (if any), followed by
       // the "::" separator, then the variable name.
@@ -2126,7 +2144,7 @@ namespace tcl.lang
         {
           if ( part1[len - 1] == ')' )
           {
-            for ( i = 0 ; i < len - 1 ; i++ )
+            for ( i = 0; i < len - 1; i++ )
             {
               if ( part1[i] == '(' )
               {
@@ -2159,7 +2177,7 @@ namespace tcl.lang
         }
         if ( ( array != null ) && ( array.traces != null ) )
         {
-          for ( i = 0 ; ( array.traces != null ) && ( i < array.traces.Count ) ; i++ )
+          for ( i = 0; ( array.traces != null ) && ( i < array.traces.Count ); i++ )
           {
             TraceRecord rec = (TraceRecord)array.traces[i];
             if ( ( rec.flags & flags ) != 0 )
@@ -2187,7 +2205,7 @@ namespace tcl.lang
           flags |= TCL.VarFlag.TRACE_DESTROYED;
         }
 
-        for ( i = 0 ; ( var.traces != null ) && ( i < var.traces.Count ) ; i++ )
+        for ( i = 0; ( var.traces != null ) && ( i < var.traces.Count ); i++ )
         {
           TraceRecord rec = (TraceRecord)var.traces[i];
           if ( ( rec.flags & flags ) != 0 )
@@ -2278,7 +2296,7 @@ namespace tcl.lang
       }
 
 
-      for ( search = table.Values.GetEnumerator() ; search.MoveNext() ; )
+      for ( search = table.Values.GetEnumerator(); search.MoveNext(); )
       {
         var = (Var)search.Current;
 
@@ -2396,7 +2414,7 @@ namespace tcl.lang
       Hashtable table = (Hashtable)var.value;
 
       Var dummyVar;
-      for ( search = table.Values.GetEnumerator() ; search.MoveNext() ; )
+      for ( search = table.Values.GetEnumerator(); search.MoveNext(); )
       {
         el = (Var)search.Current;
 

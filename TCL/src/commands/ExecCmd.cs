@@ -11,12 +11,13 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header$
+*
 * RCS @(#) $Id: ExecCmd.java,v 1.8 2002/01/19 00:15:01 mdejong Exp $
 */
 using System;
-using System.Text;
+using System.Diagnostics;
 using System.IO;
+using System.Text;
 
 namespace tcl.lang
 {
@@ -48,7 +49,7 @@ namespace tcl.lang
       * Check for a leading "-keepnewline" argument.
       */
 
-      for ( firstWord = 1 ; firstWord < argLen ; firstWord++ )
+      for ( firstWord = 1; firstWord < argLen; firstWord++ )
       {
         argStr = argv[firstWord].ToString();
         if ( ( argStr.Length > 0 ) && ( argStr[0] == '-' ) )
@@ -184,7 +185,7 @@ namespace tcl.lang
         //otherwise things went well so set the result
         interp.setResult( sbuf.ToString() );
       }
-      catch ( System.IO.IOException e )
+      catch ( IOException e )
       {
         //if exec fails we end up catching the exception here
 
@@ -201,10 +202,10 @@ namespace tcl.lang
     }
 
 
-    internal static int readStreamIntoBuffer( System.IO.Stream in_Renamed, StringBuilder sbuf )
+    internal static int readStreamIntoBuffer( Stream in_Renamed, StringBuilder sbuf )
     {
       int numRead = 0;
-      var br = new System.IO.StreamReader( new System.IO.StreamReader( in_Renamed ).BaseStream, System.Text.Encoding.UTF7 );
+      StreamReader br = new StreamReader( new StreamReader( in_Renamed ).BaseStream, System.Text.Encoding.UTF7 );
 
       try
       {
@@ -219,7 +220,7 @@ namespace tcl.lang
           line = br.ReadLine();
         }
       }
-      catch ( System.IO.IOException e )
+      catch ( IOException e )
       {
         //do nothing just return numRead
       }
@@ -229,7 +230,7 @@ namespace tcl.lang
         {
           br.Close();
         }
-        catch ( System.IO.IOException e )
+        catch ( IOException e )
         {
         } //ignore IO error
       }
@@ -244,9 +245,9 @@ namespace tcl.lang
         return str;
 
       char[] arr = str.ToCharArray();
-      var sb = new StringBuilder( 50 );
+      StringBuilder sb = new StringBuilder( 50 );
 
-      for ( int i = 0 ; i < arr.Length ; i++ )
+      for ( int i = 0; i < arr.Length; i++ )
       {
         if ( arr[i] == '%' )
         {
@@ -266,8 +267,8 @@ namespace tcl.lang
 
     private System.Diagnostics.Process execWin( Interp interp, TclObject[] argv, int first, int last )
     {
-      var sb = new StringBuilder();
-      for ( int i = ( first + 1 ) ; i < last ; i++ )
+      StringBuilder sb = new StringBuilder();
+      for ( int i = ( first + 1 ); i < last; i++ )
       {
         sb.Append( '"' );
         sb.Append( escapeWinString( argv[i].ToString() ) );
@@ -275,7 +276,7 @@ namespace tcl.lang
         sb.Append( ' ' );
       }
 
-      var proc = new System.Diagnostics.Process();
+      Process proc = new Process();
       proc.StartInfo.UseShellExecute = false;
       proc.StartInfo.RedirectStandardOutput = true;
       proc.StartInfo.RedirectStandardError = true;
@@ -294,15 +295,15 @@ namespace tcl.lang
     private System.Diagnostics.Process execReflection( Interp interp, TclObject[] argv, int first, int last )
     {
 
-      var strv = new string[last - first];
+      string[] strv = new string[last - first];
 
-      for ( int i = first, j = 0 ; i < last ; j++, i++ )
+      for ( int i = first, j = 0; i < last; j++, i++ )
       {
 
         strv[j] = argv[i].ToString();
       }
 
-      var methodArgs = new System.Object[3];
+      Object[] methodArgs = new Object[3];
       methodArgs[0] = strv; // exec command arguments
       methodArgs[1] = null; // inherit all environment variables
       methodArgs[2] = interp.getWorkingDir();
@@ -321,15 +322,15 @@ namespace tcl.lang
       }
       catch ( System.Reflection.TargetInvocationException ex )
       {
-                System.Exception t = ex.GetBaseException();
+        System.Exception t = ex.GetBaseException();
 
         if ( t is System.ApplicationException )
         {
           throw (System.ApplicationException)t;
         }
-        else if ( t is System.IO.IOException )
+        else if ( t is IOException )
         {
-          throw (System.IO.IOException)t;
+          throw (IOException)t;
         }
         else
         {
@@ -341,7 +342,7 @@ namespace tcl.lang
     {
       {
         // Runtime.exec(String[] cmdArr, String[] envArr, File currDir)
-        var parameterTypes = new System.Type[] { typeof( string[] ), typeof( string[] ), typeof( System.IO.FileInfo ) };
+        Type[] parameterTypes = new Type[] { typeof( string[] ), typeof( string[] ), typeof( FileInfo ) };
         try
         {
           execMethod = System.Diagnostics.Process.GetCurrentProcess().GetType().GetMethod( "exec", (System.Type[])parameterTypes );

@@ -12,7 +12,7 @@
 * WARRANTIES.
 * 
 * Included in SQLite3 port to C# for use in testharness only;  2008 Noah B Hart
-* $Header$
+*
 * RCS @(#) $Id: SetCmd.java,v 1.2 1999/05/09 01:23:19 dejong Exp $
 *
 */
