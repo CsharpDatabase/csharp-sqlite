@@ -136,7 +136,7 @@ namespace SQLiteClientTests
         Console.WriteLine("    ID: {0}", i);
 
         string s = reader.GetString(reader.GetOrdinal("NAME"));
-        Console.WriteLine("    NAME: {0}", s);
+        Console.WriteLine("    NAME: {0} = {1}", s, s == "中文");
         r++;
       }
       Console.WriteLine("Rows retrieved: {0}", r);
@@ -269,7 +269,72 @@ namespace SQLiteClientTests
       }
 
     }
-    public void DisplayDataTable(DataTable table, string name)
+
+    //Issue 76 Encryption is not implemented in C#SQLite client connection and command objects 
+    public void Issue_76()
+    {
+      Console.WriteLine( "Test for Issue_76 Start." );
+
+      Console.WriteLine( "Create connection..." );
+      SqliteConnection con = new SqliteConnection();
+
+      string dbFilename = @"SqliteTest3.db";
+      string cs = string.Format( "Version=3,uri=file:{0}", dbFilename );
+
+      Console.WriteLine( "Set connection String: {0}", cs );
+
+      if ( File.Exists( dbFilename ) )
+        File.Delete( dbFilename );
+
+      con.ConnectionString = cs;
+
+      Console.WriteLine( "Open database..." );
+      con.Open();
+
+      Console.WriteLine( "create command..." );
+      SqliteCommand cmd = con.CreateCommand();
+
+      cmd.CommandText = "pragma hexkey='0x73656372657470617373776F72640f11'";
+      Console.WriteLine( cmd.CommandText );
+      cmd.ExecuteNonQuery();
+
+      cmd.CommandText = "create table a (b); insert into a values ('row 1');select * from a;";
+      Console.WriteLine( cmd.CommandText );
+      Console.WriteLine( "Result {0}", cmd.ExecuteScalar() );
+
+      Console.WriteLine( "Close & Reopen Connection" );
+      con.Close();
+      con.Open();
+
+      cmd.CommandText = "select * from a;";
+      Console.WriteLine( cmd.CommandText );
+      Console.WriteLine( "Result {0}", cmd.ExecuteScalar() );
+
+      Console.WriteLine( "Close & Reopen Connection" );
+      con.Close();
+      con.Open();
+      cmd.CommandText = "pragma hexkey='0x73656372657470617373776F72640f11'";
+      Console.WriteLine( cmd.CommandText );
+      cmd.ExecuteNonQuery();
+
+      cmd.CommandText = "select * from a;";
+      Console.WriteLine( cmd.CommandText );
+      Console.WriteLine( "Result {0}", cmd.ExecuteScalar() );
+
+      Console.WriteLine( "Close & Reopen Connection with password" );
+      con.Close();
+
+      con.ConnectionString = cs + ",Password=0x73656372657470617373776F72640f11";
+      con.Open();
+      cmd.CommandText = "select * from a;";
+      Console.WriteLine( cmd.CommandText );
+      Console.WriteLine( "Result {0}", cmd.ExecuteScalar() );
+      
+      con = null;
+
+      Console.WriteLine( "Issue_76 Done." );
+    }
+    public void DisplayDataTable( DataTable table, string name )
     {
       Console.WriteLine("Display DataTable: {0}", name);
       int r = 0;
@@ -294,7 +359,7 @@ namespace SQLiteClientTests
     {
       SQLiteClientTestDriver tests = new SQLiteClientTestDriver();
 
-      int Test =2;
+      int Test =76;
       switch (Test)
       {
         case 1:
@@ -305,6 +370,9 @@ namespace SQLiteClientTests
           tests.Test3(); break;
         case 65:
           tests.Issue_65(); break;
+        case 76:
+          tests.Issue_76();
+          break;
       }
       Console.WriteLine("Press Enter to Continue");
       Console.ReadKey();

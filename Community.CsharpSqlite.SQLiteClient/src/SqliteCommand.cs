@@ -612,6 +612,11 @@ return (DbDataReader) ExecuteReader (behavior);
 
         return null;
       }
+      catch ( Exception ex )
+      {
+        Console.WriteLine( ex.Message );
+        return null;
+      }
       finally
       {
         parent_conn.EndExec();

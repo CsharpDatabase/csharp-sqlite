@@ -54,6 +54,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 		private string db_file;
 		private int db_mode;
 		private int db_version;
+    private string db_password;
 		private IntPtr sqlite_handle;
         private Sqlite3.sqlite3 sqlite_handle2;
 		private ConnectionState state;
@@ -261,7 +262,13 @@ namespace Community.CsharpSqlite.SQLiteClient
 						case "busy_timeout":
 							busy_timeout = Convert.ToInt32 (tvalue);
 							break;
-					}
+
+            case "password":
+              if (!String.IsNullOrEmpty(db_password) && ( db_password.Length != 34 || !db_password.StartsWith("0x")))
+        					throw new InvalidOperationException ("Invalid password string: must be 34 hex digits starting with 0x");
+                  db_password =  tvalue ;
+              break;
+          }
 				}
 				
 				if (db_file == null) {
@@ -420,7 +427,16 @@ namespace Community.CsharpSqlite.SQLiteClient
                 if (busy_timeout != 0)
                     Sqlite3.sqlite3_busy_timeout(sqlite_handle2, busy_timeout);
 					//Sqlite.sqlite3_busy_timeout (sqlite_handle, busy_timeout);
-			} else {
+                if ( !String.IsNullOrEmpty( db_password ) )
+                {
+                  SqliteCommand cmd = (SqliteCommand)this.CreateCommand();
+                  cmd.CommandText = "pragma hexkey='" + db_password + "'";
+                  cmd.ExecuteNonQuery();
+                }
+      }
+      else
+      
+      {
 			}
 			state = ConnectionState.Open;
 		}
