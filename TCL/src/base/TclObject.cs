@@ -174,6 +174,12 @@ namespace tcl.lang
 
     protected internal string stringRep;
 
+ 	// Return true if the TclObject contains a TclList.
+ 	
+	public bool isListType() {
+ 	return (internalRep.GetType().ToString().Contains("TclList"));
+ 	} 
+    
     /// <summary> Creates a TclObject with the given InternalRep. This method should be
     /// called only by an InternalRep implementation.
     /// 

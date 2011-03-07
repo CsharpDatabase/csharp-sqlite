@@ -206,7 +206,10 @@ namespace tcl.lang
       TclList tlist = (TclList)tobj.InternalRep;
 
       if ( !String.IsNullOrEmpty( elemObj.stringRep ) && elemObj.stringRep.StartsWith( "{" ) && elemObj.stringRep.EndsWith( "}" ) )
-        elemObj = TclString.newInstance( elemObj.stringRep.Substring( 1, elemObj.stringRep.Length - 2 ) );
+      { // Strip leading and ending braces if entire string rep is a list
+        if ( elemObj.stringRep.IndexOf( "{", 1 ) == -1 || elemObj.stringRep.IndexOf( "{", 1 ) < elemObj.stringRep.IndexOf( "}", 1 ) )
+          elemObj = TclString.newInstance( elemObj.stringRep.Substring( 1, elemObj.stringRep.Length - 2 ) );
+      }
       elemObj.preserve();
       tlist.vector.Add( elemObj );
     }
