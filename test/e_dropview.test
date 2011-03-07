@@ -49,7 +49,7 @@ proc list_all_views {{db db}} {
 
     set sql "SELECT '$name.' || name FROM $tbl WHERE type = 'view'"
 #    lappend res {*}[$db eval $sql]
-    lappend res [split [$db eval $sql]]
+    set res [concat [split $res] [split [$db eval $sql]]]
   }
   set res
 }
