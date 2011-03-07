@@ -157,8 +157,6 @@ static void sqlite3IoTrace( string X, params object[] ap ) {  }
         sqlite3OpcodeProperty = OPFLG_INITIALIZER;
       if ( sqlite3GlobalConfig == null )
         sqlite3GlobalConfig = sqlite3Config;
-      if ( UpperToLower == null )
-        UpperToLower = sqlite3UpperToLower;
       //--------------------------------------------------------------------
 
 

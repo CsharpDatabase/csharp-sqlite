@@ -288,7 +288,6 @@ rc = isnan(x);
 
     /* Convenient short-hand */
     //#define UpperToLower sqlite3UpperToLower
-    static int[] UpperToLower;
 
     /*
     ** Some systems have stricmp().  Others have strcasecmp().  Because

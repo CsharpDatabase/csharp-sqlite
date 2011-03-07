@@ -1,5 +1,6 @@
 #########################################################################################
-# test/^testscripts.txt
+# This file drives the testharness
+#
 #########################################################################################
 set testdir [file dirname $argv0]
 source $testdir/tester.tcl
