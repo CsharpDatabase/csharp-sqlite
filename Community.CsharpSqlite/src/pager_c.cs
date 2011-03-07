@@ -6547,7 +6547,7 @@ int DIRECT_MODE = isDirectMode;
           if ( pList != null )
           {
             rc = pagerWalFrames( pPager, pList, pPager.dbSize, 1,
-            ( pPager.fullSync ? pPager.syncFlags : 0 )
+            ( pPager.fullSync ? pPager.syncFlags : (byte)0 )
             );
           }
           if ( rc == SQLITE_OK )
