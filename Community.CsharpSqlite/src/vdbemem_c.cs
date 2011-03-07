@@ -609,7 +609,7 @@ return r;
         Debug.Assert( pMem.db == null || sqlite3_mutex_held( pMem.db.mutex ) );
         if ( ( pMem.flags & MEM_Blob ) != 0 && pMem.z == null )
         {
-          if ( 0 == sqlite3Atoi64( Encoding.UTF8.GetString( pMem.zBLOB ), ref pMem.u.i, pMem.n, pMem.enc ) )
+          if ( 0 == sqlite3Atoi64( Encoding.UTF8.GetString( pMem.zBLOB, 0, pMem.zBLOB.Length ), ref pMem.u.i, pMem.n, pMem.enc ) )
             MemSetTypeFlag( pMem, MEM_Int );
           else
           {

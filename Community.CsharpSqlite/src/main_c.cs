@@ -2736,7 +2736,11 @@ return rc;
           Debug.Assert( fd != null );
           if ( op == SQLITE_FCNTL_FILE_POINTER )
           {
+#if SQLITE_SILVERLIGHT
+            pArg = (long)-1; // not supported
+#else
             pArg = (long)fd.fs.Handle;
+#endif
             rc = SQLITE_OK;
           }
           else if ( fd.pMethods != null )
