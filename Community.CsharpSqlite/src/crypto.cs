@@ -162,7 +162,11 @@ static void CODEC_TRACE( string T, params object[] ap ) { if ( sqlite3PagerTrace
     const int CIPHER_DECRYPT = 0;        //#define CIPHER_DECRYPT 0
     const int CIPHER_ENCRYPT = 1;        //#define CIPHER_ENCRYPT 1
 
+#if NET_2_0
+    static RijndaelManaged Aes = new RijndaelManaged() { BlockSize = 0x80, FeedbackSize = 8, KeySize = 0x100, Mode = CipherMode.CBC };
+#else
     static AesManaged Aes = new AesManaged();
+#endif
 
     /* BEGIN CRYPTO */
     static void sqlite3pager_get_codec( Pager pPager, ref codec_ctx ctx )
