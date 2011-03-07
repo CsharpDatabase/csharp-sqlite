@@ -543,7 +543,9 @@ namespace Community.CsharpSqlite.SQLiteClient
 #endif
 		public string GetString (int i)
 		{
-			return (((object[]) rows[current_row])[i]).ToString();
+			if (((object[]) rows[current_row])[i] != null) 
+        return (((object[]) rows[current_row])[i]).ToString();
+      else return null;
 		}
 		
 #if NET_2_0
