@@ -180,12 +180,11 @@ namespace Community.CsharpSqlite
       Debug.Assert( pTrigger != null || tmask == 0 );
 #else
       const Trigger pTrigger = null;//# define pTrigger 0
-      const bool isView = false;    //# define isView 0
       const int tmask = 0;          //# define tmask 0
 #endif
-#if SQLITE_OMIT_VIEW
+#if SQLITE_OMIT_TRIGGER || SQLITE_OMIT_VIEW
 //    # undef isView
-const bool isView = false;
+      const bool isView = false;    //# define isView 0
 #endif
 
       if ( sqlite3ViewGetColumnNames( pParse, pTab ) != 0 )

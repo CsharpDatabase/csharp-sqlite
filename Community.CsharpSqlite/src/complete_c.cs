@@ -147,7 +147,7 @@ namespace Community.CsharpSqlite
       /* If triggers are not supported by this compile then the statement machine
   ** used to detect the end of a statement is much simplier
   */
-      u8[] trans = new u8[][]   {
+      u8[][] trans = new u8[][]   {
      /* Token:           */
      /* State:       **  SEMI  WS  OTHER */
      /* 0 INVALID: */new u8[]  {    1,  0,     2, },

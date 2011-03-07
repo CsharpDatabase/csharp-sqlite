@@ -1990,6 +1990,18 @@ primary_key_exit:
       sqlite3EndTable( pParse, null, sEnd, null );
       return;
     }
+#else
+    static void sqlite3CreateView(
+    Parse pParse,     /* The parsing context */
+    Token pBegin,     /* The CREATE token that begins the statement */
+    Token pName1,     /* The token that holds the name of the view */
+    Token pName2,     /* The token that holds the name of the view */
+    Select pSelect,   /* A SELECT statement that will become the new view */
+    int isTemp,      /* TRUE for a TEMPORARY view */
+    int noErr         /* Suppress error messages if VIEW already exists */
+    )
+    {
+    }
 #endif // * SQLITE_OMIT_VIEW */
 
 #if !SQLITE_OMIT_VIEW || !SQLITE_OMIT_VIRTUALTABLE
@@ -2123,7 +2135,10 @@ db.xAuth = xAuth;
       DbClearProperty( db, idx, DB_UnresetViews );
     }
 #else
-//# define sqliteViewResetAll(A,B)
+    //# define sqliteViewResetAll(A,B)
+    static void sqliteViewResetAll( sqlite3 A, int B )
+    {
+    }
 #endif // * SQLITE_OMIT_VIEW */
 
     /*

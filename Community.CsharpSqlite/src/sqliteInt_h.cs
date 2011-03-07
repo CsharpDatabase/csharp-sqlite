@@ -3786,11 +3786,15 @@ const sqlite3_mem_methods *sqlite3MemGetMemsys5(void);
 
     //void sqlite3CreateView(Parse*,Token*,Token*,Token*,Select*,int,int);
 
-    //#if !(SQLITE_OMIT_VIEW) || !SQLITE_OMIT_VIRTUALTABLE)
-    //  int sqlite3ViewGetColumnNames(Parse*,Table*);
-    //#else
+#if !SQLITE_OMIT_VIEW || !SQLITE_OMIT_VIRTUALTABLE
+    //int sqlite3ViewGetColumnNames(Parse*,Table*);
+#else
     //# define sqlite3ViewGetColumnNames(A,B) 0
-    //#endif
+    static int sqlite3ViewGetColumnNames( Parse A, Table B )
+    {
+      return 0;
+    }
+#endif
 
     //void sqlite3DropTable(Parse*, SrcList*, int, int);
     //void sqlite3DeleteTable(sqlite3*, Table*);
@@ -3934,39 +3938,90 @@ const sqlite3_mem_methods *sqlite3MemGetMemsys5(void);
       return p.pToplevel != null ? p.pToplevel : p;
     }
 #else
-static void sqlite3BeginTrigger( Parse A, Token B, Token C, int D, int E, IdList F, SrcList G, Expr H, int I, int J ) { }
-static void sqlite3FinishTrigger( Parse P, TriggerStep TS, Token T ) { }
-static TriggerStep sqlite3TriggerSelectStep( sqlite3 A, Select B ) { return null; }
-static TriggerStep sqlite3TriggerInsertStep( sqlite3 A, Token B, IdList C, ExprList D, Select E, u8 F ) { return null; }
-static TriggerStep sqlite3TriggerUpdateStep( sqlite3 A, Token B, ExprList C, Expr D, u8 E ) { return null; }
-static TriggerStep sqlite3TriggerDeleteStep( sqlite3 A, Token B, Expr C ) { return null; }
-static u32 sqlite3TriggerColmask( Parse A, Trigger B, ExprList C, int D, int E, Table F, int G ) { return 0; }
+    static void sqlite3BeginTrigger( Parse A, Token B, Token C, int D, int E, IdList F, SrcList G, Expr H, int I, int J )
+    {
+    }
+    static void sqlite3FinishTrigger( Parse P, TriggerStep TS, Token T )
+    {
+    }
+    static TriggerStep sqlite3TriggerSelectStep( sqlite3 A, Select B )
+    {
+      return null;
+    }
+    static TriggerStep sqlite3TriggerInsertStep( sqlite3 A, Token B, IdList C, ExprList D, Select E, u8 F )
+    {
+      return null;
+    }
+    static TriggerStep sqlite3TriggerInsertStep( sqlite3 A, Token B, IdList C, int D, Select E, u8 F )
+    {
+      return null;
+    }
+    static TriggerStep sqlite3TriggerInsertStep( sqlite3 A, Token B, IdList C, ExprList D, int E, u8 F )
+    {
+      return null;
+    }
+    static TriggerStep sqlite3TriggerUpdateStep( sqlite3 A, Token B, ExprList C, Expr D, u8 E )
+    {
+      return null;
+    }
+    static TriggerStep sqlite3TriggerDeleteStep( sqlite3 A, Token B, Expr C )
+    {
+      return null;
+    }
+    static u32 sqlite3TriggerColmask( Parse A, Trigger B, ExprList C, int D, int E, Table F, int G )
+    {
+      return 0;
+    }
 
-//# define sqlite3TriggersExist(B,C,D,E,F) 0
-static Trigger sqlite3TriggersExist( Parse B, Table C, int D, ExprList E, ref int F ) { return null; }
+    //# define sqlite3TriggersExist(B,C,D,E,F) 0
+    static Trigger sqlite3TriggersExist( Parse B, Table C, int D, ExprList E, ref int F )
+    {
+      return null;
+    }
 
-//# define sqlite3DeleteTrigger(A,B)
-static void sqlite3DeleteTrigger( sqlite3 A, ref Trigger B ) { }
-static void sqlite3DeleteTriggerStep( sqlite3 A, ref TriggerStep B ) { }
+    //# define sqlite3DeleteTrigger(A,B)
+    static void sqlite3DeleteTrigger( sqlite3 A, ref Trigger B )
+    {
+    }
+    static void sqlite3DeleteTriggerStep( sqlite3 A, ref TriggerStep B )
+    {
+    }
 
-//# define sqlite3DropTriggerPtr(A,B)
-static void sqlite3DropTriggerPtr( Parse A, Trigger B ) { }
-static void sqlite3DropTrigger( Parse A, SrcList B, int C ) { }
+    //# define sqlite3DropTriggerPtr(A,B)
+    static void sqlite3DropTriggerPtr( Parse A, Trigger B )
+    {
+    }
+    static void sqlite3DropTrigger( Parse A, SrcList B, int C )
+    {
+    }
 
-//# define sqlite3UnlinkAndDeleteTrigger(A,B,C)
-static void sqlite3UnlinkAndDeleteTrigger( sqlite3 A, int B, string C ) { }
+    //# define sqlite3UnlinkAndDeleteTrigger(A,B,C)
+    static void sqlite3UnlinkAndDeleteTrigger( sqlite3 A, int B, string C )
+    {
+    }
 
-//# define sqlite3CodeRowTrigger(A,B,C,D,E,F,G,H,I)
-static void sqlite3CodeRowTrigger( Parse A, Trigger B, int C, ExprList D, int E, Table F, int G, int H, int I ) { }
+    //# define sqlite3CodeRowTrigger(A,B,C,D,E,F,G,H,I)
+    static void sqlite3CodeRowTrigger( Parse A, Trigger B, int C, ExprList D, int E, Table F, int G, int H, int I )
+    {
+    }
 
-//# define sqlite3CodeRowTriggerDirect(A,B,C,D,E,F)
-static Trigger sqlite3TriggerList( Parse pParse, Table pTab ) { return null; } //# define sqlite3TriggerList(X, Y) 0
+    //# define sqlite3CodeRowTriggerDirect(A,B,C,D,E,F)
+    static Trigger sqlite3TriggerList( Parse pParse, Table pTab )
+    {
+      return null;
+    } //# define sqlite3TriggerList(X, Y) 0
 
-//# define sqlite3ParseToplevel(p) p
-static Parse sqlite3ParseToplevel( Parse p ) { return p; }
+    //# define sqlite3ParseToplevel(p) p
+    static Parse sqlite3ParseToplevel( Parse p )
+    {
+      return p;
+    }
 
-//# define sqlite3TriggerOldmask(A,B,C,D,E,F) 0
-static u32 sqlite3TriggerOldmask( Parse A, Trigger B, int C, ExprList D, Table E, int F ) { return 0; }
+    //# define sqlite3TriggerOldmask(A,B,C,D,E,F) 0
+    static u32 sqlite3TriggerOldmask( Parse A, Trigger B, int C, ExprList D, Table E, int F )
+    {
+      return 0;
+    }
 #endif
 
     //int sqlite3JoinType(Parse*, Token*, Token*, Token*);
