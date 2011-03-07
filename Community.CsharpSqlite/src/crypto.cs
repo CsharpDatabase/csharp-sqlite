@@ -163,7 +163,7 @@ static void CODEC_TRACE( string T, params object[] ap ) { if ( sqlite3PagerTrace
     const int CIPHER_ENCRYPT = 1;        //#define CIPHER_ENCRYPT 1
 
 #if NET_2_0
-    static RijndaelManaged Aes = new RijndaelManaged() { BlockSize = 0x80, FeedbackSize = 8, KeySize = 0x100, Mode = CipherMode.CBC };
+    static RijndaelManaged Aes = new RijndaelManaged();
 #else
     static AesManaged Aes = new AesManaged();
 #endif
@@ -359,6 +359,12 @@ static void CODEC_TRACE( string T, params object[] ap ) { if ( sqlite3PagerTrace
           c_ctx.key_sz = 32;
           c_ctx.key = k1.GetBytes( c_ctx.key_sz );
         }
+#if NET_2_0
+        Aes.BlockSize = 0x80;
+        Aes.FeedbackSize = 8;
+        Aes.KeySize = 0x100;
+        Aes.Mode = CipherMode.CBC;
+#endif
         c_ctx.encryptor = Aes.CreateEncryptor( c_ctx.key, c_ctx.iv );
         c_ctx.decryptor = Aes.CreateDecryptor( c_ctx.key, c_ctx.iv );
         return SQLITE_OK;
