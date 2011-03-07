@@ -3275,6 +3275,7 @@ fclose(out);
     /*
     ** Return the length of the data corresponding to the supplied serial-type.
     */
+    static u32[] aSize = new u32[] { 0, 1, 2, 3, 4, 6, 8, 8, 0, 0, 0, 0 };
     static u32 sqlite3VdbeSerialTypeLen( u32 serial_type )
     {
       if ( serial_type >= 12 )
@@ -3283,7 +3284,6 @@ fclose(out);
       }
       else
       {
-        u32[] aSize = new u32[] { 0, 1, 2, 3, 4, 6, 8, 8, 0, 0, 0, 0 };
         return aSize[serial_type];
       }
     }

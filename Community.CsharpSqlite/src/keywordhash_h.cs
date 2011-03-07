@@ -25,8 +25,6 @@ namespace Community.CsharpSqlite
     *************************************************************************
     */
     /* Hash score: 175 */
-    static int keywordCode( string z, int iOffset, int n )
-    {
       /* zText[] encodes 811 bytes of keywords in 541 bytes */
       /*   REINDEXEDESCAPEACHECKEYBEFOREIGNOREGEXPLAINSTEADDATABASELECT       */
       /*   ABLEFTHENDEFERRABLELSEXCEPTRANSACTIONATURALTERAISEXCLUSIVE         */
@@ -38,7 +36,7 @@ namespace Community.CsharpSqlite
       /*   CURRENT_TIMESTAMPRIMARYDEFERREDISTINCTDROPFAILFROMFULLGLOBYIF      */
       /*   ISNULLORDERESTRICTOUTERIGHTROLLBACKROWUNIONUSINGVACUUMVIEW         */
       /*   INITIALLY                                                          */
-      string zText = new string( new char[540]  {
+static string zText = new string( new char[540]  {
 'R','E','I','N','D','E','X','E','D','E','S','C','A','P','E','A','C','H',
 'E','C','K','E','Y','B','E','F','O','R','E','I','G','N','O','R','E','G',
 'E','X','P','L','A','I','N','S','T','E','A','D','D','A','T','A','B','A',
@@ -82,7 +80,7 @@ namespace Community.CsharpSqlite
 'A','C','U','U','M','V','I','E','W','I','N','I','T','I','A','L','L','Y',
 } );
 
-      byte[] aHash = { //aHash[127]
+static      byte[] aHash = { //aHash[127]
       72, 101, 114,  70,   0,  45,   0,   0,  78,   0,  73,   0,   0,
       42,  12,  74,  15,   0, 113,  81,  50, 108,   0,  19,   0,   0,
      118,   0, 116, 111,   0,  22,  89,   0,   9,   0,   0,  66,  67,
@@ -94,7 +92,7 @@ namespace Community.CsharpSqlite
       58,  46,  80,   0,   0,  90,  40,   0, 112,   0,  36,   0,   0,
       29,   0,  82,  59,  60,   0,  20,  57,   0,  52,
 };
-      byte[] aNext = { //aNext[121]
+static      byte[] aNext = { //aNext[121]
        0,   0,   0,   0,   4,   0,   0,   0,   0,   0,   0,   0,   0,
        0,   2,   0,   0,   0,   0,   0,   0,  13,   0,   0,   0,   0,
        0,   7,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
@@ -106,7 +104,7 @@ namespace Community.CsharpSqlite
      103,   0,  83,   0,  71,   0,   0, 110,  27,  37,  69,  79,   0,
       35,  64,   0,   0,
 };
-      byte[] aLen = { //aLen[121]
+static      byte[] aLen = { //aLen[121]
        7,   7,   5,   4,   6,   4,   5,   3,   6,   7,   3,   6,   6,
        7,   7,   3,   8,   2,   6,   5,   4,   4,   3,  10,   4,   6,
       11,   6,   2,   7,   5,   5,   9,   6,   9,   9,   7,  10,  10,
@@ -118,7 +116,7 @@ namespace Community.CsharpSqlite
        4,   4,   2,   2,   6,   5,   8,   5,   5,   8,   3,   5,   5,
        6,   4,   9,   3,
 };
-      int[] aOffset = { //aOffset[121]
+      static int[] aOffset = { //aOffset[121]
        0,   2,   2,   8,   9,  14,  16,  20,  23,  25,  25,  29,  33,
       36,  41,  46,  48,  53,  54,  59,  62,  65,  67,  69,  78,  81,
       86,  91,  95,  96, 101, 105, 109, 117, 122, 128, 136, 142, 152,
@@ -130,7 +128,7 @@ namespace Community.CsharpSqlite
      462, 466, 469, 471, 473, 479, 483, 491, 495, 500, 508, 511, 516,
      521, 527, 531, 536,
 };
-      byte[] aCode = { //aCode[121
+static      byte[] aCode = { //aCode[121
     TK_REINDEX,    TK_INDEXED,    TK_INDEX,      TK_DESC,       TK_ESCAPE,     
     TK_EACH,       TK_CHECK,      TK_KEY,        TK_BEFORE,     TK_FOREIGN,    
     TK_FOR,        TK_IGNORE,     TK_LIKE_KW,    TK_EXPLAIN,    TK_INSTEAD,    
@@ -157,7 +155,9 @@ namespace Community.CsharpSqlite
     TK_UNION,      TK_USING,      TK_VACUUM,     TK_VIEW,       TK_INITIALLY,  
     TK_ALL,        
 };
-      int h, i;
+static int keywordCode( string z, int iOffset, int n )
+{
+  int h, i;
       if ( n < 2 )
         return TK_ID;
       h = ( ( sqlite3UpperToLower[z[iOffset + 0]] ) * 4 ^//(charMap(z[iOffset+0]) * 4) ^
