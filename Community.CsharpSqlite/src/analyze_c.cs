@@ -775,7 +775,7 @@ UNUSED_PARAMETER( pIdx );
                   pIdx.aSample = new IndexSample[SQLITE_INDEX_SAMPLES];//memset(pIdx->aSample, 0, sz);
                 }
 
-                Debug.Assert( pIdx.aSample != null );
+                //Debug.Assert( pIdx.aSample != null );
                 if ( pIdx.aSample[iSample] == null )
                   pIdx.aSample[iSample] = new IndexSample();
                 IndexSample pSample = pIdx.aSample[iSample];
