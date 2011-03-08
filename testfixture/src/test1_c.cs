@@ -6310,9 +6310,9 @@ new _aObjCmd( "sqlite3_column_bytes", test_stmt_int, (dxColumn_I)sqlite3_column_
 new _aObjCmd( "sqlite3_column_decltype", test_stmt_utf8, (dxColumn) sqlite3_column_decltype ),
 #endif
 #if SQLITE_ENABLE_COLUMN_METADATA
-//{ "sqlite3_column_database_name", test_stmt_utf8, sqlite3_column_database_name),
-//{ "sqlite3_column_table_name", test_stmt_utf8, sqlite3_column_table_name),
-//{ "sqlite3_column_origin_name", test_stmt_utf8, sqlite3_column_origin_name),
+new _aObjCmd( "sqlite3_column_database_name", test_stmt_utf8, (dxColumn)sqlite3_column_database_name),
+new _aObjCmd( "sqlite3_column_table_name", test_stmt_utf8, (dxColumn)sqlite3_column_table_name),
+new _aObjCmd( "sqlite3_column_origin_name", test_stmt_utf8, (dxColumn)sqlite3_column_origin_name),
 #endif
 
 #if !SQLITE_OMIT_UTF16

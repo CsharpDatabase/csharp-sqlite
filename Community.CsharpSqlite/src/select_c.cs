@@ -1302,9 +1302,9 @@ static void explainSetInteger(ref byte a, int b) {}
 #endif
       }
 
-      if ( pzOriginDb != null )
+      //if ( pzOriginDb != null )
       {
-        Debug.Assert( pzOriginTab != null && pzOriginCol != null );
+        //Debug.Assert( pzOriginTab != null && pzOriginCol != null );
         pzOriginDb = zOriginDb;
         pzOriginTab = zOriginTab;
         pzOriginCol = zOriginCol;
