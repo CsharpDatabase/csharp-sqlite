@@ -128,7 +128,7 @@ namespace Community.CsharpSqlite
       {
         string z = db.aDb[i].zName;
         Debug.Assert( z != null && zName != null );
-        if ( sqlite3StrICmp( z, zName ) == 0 )
+        if ( z.Equals( zName, StringComparison.InvariantCultureIgnoreCase ) )
         {
           zErrDyn = sqlite3MPrintf( db, "database %s is already in use", zName );
           goto attach_error;
@@ -302,7 +302,7 @@ attach_error:
         pDb = db.aDb[i];
         if ( pDb.pBt == null )
           continue;
-        if ( sqlite3StrICmp( pDb.zName, zName ) == 0 )
+        if ( pDb.zName.Equals( zName, StringComparison.InvariantCultureIgnoreCase ) )
           break;
       }
 
@@ -519,7 +519,7 @@ attach_end:
         {
           pItem.zDatabase = zDb;// sqlite3DbStrDup( pFix.pParse.db, zDb );
         }
-        else if ( sqlite3StrICmp( pItem.zDatabase, zDb ) != 0 )
+        else if ( !pItem.zDatabase.Equals( zDb ,StringComparison.InvariantCultureIgnoreCase )  )
         {
           sqlite3ErrorMsg( pFix.pParse,
           "%s %T cannot reference objects in database %s",

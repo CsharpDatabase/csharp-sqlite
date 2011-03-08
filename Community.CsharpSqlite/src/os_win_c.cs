@@ -1764,7 +1764,7 @@ for(pShmNode = winShmNodeList; pShmNode; pShmNode=pShmNode.pNext){
 /* TBD need to come up with better match here.  Perhaps
 ** use FILE_ID_BOTH_DIR_INFO Structure.
 */
-if( sqlite3StrICmp(pShmNode.zFilename, pNew.zFilename)==0 ) break;
+if( pShmNode.zFilename.Equals(pNew.zFilename, StringComparison.InvariantCultureIgnoreCase )) break;
 }
 if( pShmNode ){
 sqlite3_free(pNew);

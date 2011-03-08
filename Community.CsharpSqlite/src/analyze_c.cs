@@ -181,7 +181,7 @@ new _aTable( "sqlite_stat2", "tbl,idx,sampleno,sample" ),
         /* Do not gather statistics on views or virtual tables */
         return;
       }
-      if ( memcmp( pTab.zName, "sqlite_", 7 ) == 0 )
+      if ( pTab.zName.StartsWith( "sqlite_", StringComparison.InvariantCultureIgnoreCase ) )
       {
         /* Do not gather statistics on system tables */
         return;

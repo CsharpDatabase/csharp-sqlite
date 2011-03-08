@@ -300,38 +300,6 @@ rc = isnan(x);
     ** comparing identifiers.
     */
 
-    static int sqlite3StrICmp( string zLeft, string zRight )
-    {
-      //register unsigned char *a, *b;
-      //a = (unsigned char *)zLeft;
-      //b = (unsigned char *)zRight;
-      //while( *a!=0 && UpperToLower[*a]==UpperToLower[*b]){ a++; b++; }
-      //return UpperToLower[*a] - UpperToLower[*b];
-      int a = 0, b = 0;
-      if ( zRight == null )
-        return 0;
-      while ( a < zLeft.Length && b < zRight.Length && UpperToLower[zLeft[a]] == UpperToLower[zRight[b]] )
-      {
-        a++;
-        b++;
-      }
-      if ( a == zLeft.Length && b == zRight.Length )
-        return 0;
-      else
-      {
-        if ( a == zLeft.Length )
-          return -UpperToLower[zRight[b]];
-        if ( b == zRight.Length )
-          return UpperToLower[zLeft[a]];
-        return UpperToLower[zLeft[a]] - UpperToLower[zRight[b]];
-      }
-    }
-
-    static int sqlite3_strnicmp( string zLeft, int offsetLeft, string zRight, int N )
-    {
-      return sqlite3StrNICmp( zLeft, offsetLeft, zRight, N );
-    }
-
     static int sqlite3StrNICmp( string zLeft, int offsetLeft, string zRight, int N )
     {
       //register unsigned char *a, *b;

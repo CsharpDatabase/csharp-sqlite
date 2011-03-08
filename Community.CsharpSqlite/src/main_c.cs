@@ -2612,7 +2612,7 @@ pCol = pTab.aCol[iCol];
 }else{
 for(iCol=0; iCol<pTab.nCol; iCol++){
 pCol = pTab.aCol[iCol];
-if( 0==sqlite3StrICmp(pCol.zName, zColumnName) ){
+if( pCol.zName.Equals(zColumnName, StringComparison.InvariantCultureIgnoreCase ) ){
 break;
 }
 }

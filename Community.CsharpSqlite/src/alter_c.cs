@@ -160,7 +160,7 @@ namespace Community.CsharpSqlite
           if ( String.IsNullOrEmpty( zParent ) )
             break;
           sqlite3Dequote( ref zParent );
-          if ( 0 == sqlite3StrICmp( zOld, zParent ) )
+          if ( zOld.Equals( zParent, StringComparison.InvariantCultureIgnoreCase ) )
           {
             string zOut = sqlite3MPrintf( db, "%s%.*s\"%w\"",
                 zOutput, zIdx - zLeft, zInput.Substring( zLeft ), zNew
@@ -491,9 +491,7 @@ namespace Community.CsharpSqlite
       /* Make sure it is not a system table being altered, or a reserved name
       ** that the table is being renamed to.
       */
-      if ( sqlite3Strlen30( pTab.zName ) > 6
-      && 0 == sqlite3StrNICmp( pTab.zName, "sqlite_", 7 )
-      )
+      if ( pTab.zName.StartsWith( "sqlite_", System.StringComparison.InvariantCultureIgnoreCase ) )
       {
         sqlite3ErrorMsg( pParse, "table %s may not be altered", pTab.zName );
         goto exit_rename_table;

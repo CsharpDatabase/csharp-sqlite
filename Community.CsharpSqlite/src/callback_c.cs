@@ -339,7 +339,7 @@ sqlite3ValueFree(ref pTmp);
       FuncDef p;
       for ( p = pHash.a[h]; p != null; p = p.pHash )
       {
-        if ( sqlite3StrNICmp( p.zName, zFunc, nFunc ) == 0 && p.zName.Length == nFunc )
+        if ( p.zName.Length == nFunc && p.zName.StartsWith( zFunc, StringComparison.InvariantCultureIgnoreCase ) )
         {
           return p;
         }

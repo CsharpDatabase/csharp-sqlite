@@ -207,7 +207,7 @@ namespace Community.CsharpSqlite
         for ( j = 0; j < ArraySize( aKeyword ); j++ )
         {
           if ( p.n == aKeyword[j].nChar
-          && sqlite3StrNICmp( p.z.ToString(), zKeyText.Substring( aKeyword[j].i ), p.n ) == 0 )
+          && p.z.StartsWith( zKeyText.Substring( aKeyword[j].i, aKeyword[j].nChar ), StringComparison.InvariantCultureIgnoreCase ) )
           {
             jointype |= aKeyword[j].code;
             break;
@@ -254,7 +254,7 @@ namespace Community.CsharpSqlite
       int i;
       for ( i = 0; i < pTab.nCol; i++ )
       {
-        if ( sqlite3StrICmp( pTab.aCol[i].zName, zCol ) == 0 )
+        if ( pTab.aCol[i].zName.Equals( zCol ,StringComparison.InvariantCultureIgnoreCase )  )
           return i;
       }
       return -1;
@@ -1533,7 +1533,7 @@ sqlite3VdbeSetColName(v, i, COLNAME_COLUMN, zOrigCol, SQLITE_TRANSIENT);
         nName = sqlite3Strlen30( zName );
         for ( j = cnt = 0; j < i; j++ )
         {
-          if ( sqlite3StrICmp( aCol[j].zName, zName ) == 0 )
+          if ( aCol[j].zName.Equals( zName ,StringComparison.InvariantCultureIgnoreCase )  )
           {
             string zNewName;
             //zName[nName] = 0;
@@ -3542,11 +3542,11 @@ break;
       if ( pEList.a[0].pExpr.op != TK_AGG_COLUMN )
         return WHERE_ORDERBY_NORMAL;
       Debug.Assert( !ExprHasProperty( pExpr, EP_IntValue ) );
-      if ( String.Compare( pExpr.u.zToken, "min", StringComparison.InvariantCultureIgnoreCase ) == 0 )//sqlite3StrICmp(pExpr->u.zToken,"min")==0 )
+      if ( pExpr.u.zToken.Equals( "min", StringComparison.InvariantCultureIgnoreCase ) )
       {
         return WHERE_ORDERBY_MIN;
       }
-      else if ( String.Compare( pExpr.u.zToken, "max", StringComparison.InvariantCultureIgnoreCase ) == 0 )//sqlite3StrICmp(pExpr->u.zToken,"max")==0 )
+      else if ( pExpr.u.zToken.Equals( "max", StringComparison.InvariantCultureIgnoreCase ) )
       {
         return WHERE_ORDERBY_MAX;
       }
@@ -3608,7 +3608,7 @@ break;
         string zIndex = pFrom.zIndex;
         Index pIdx;
         for ( pIdx = pTab.pIndex;
-        pIdx != null && sqlite3StrICmp( pIdx.zName, zIndex ) != 0;
+        pIdx != null && !pIdx.zName.Equals( zIndex ,StringComparison.InvariantCultureIgnoreCase ) ;
         pIdx = pIdx.pNext
         )
           ;
@@ -3823,7 +3823,7 @@ break;
                 zTabName = pTab.zName;
               }
               ///if ( db.mallocFailed != 0 ) break;
-              if ( zTName != null && sqlite3StrICmp( zTName, zTabName ) != 0 )
+              if ( zTName != null && !zTName.Equals( zTabName ,StringComparison.InvariantCultureIgnoreCase )  )
               {
                 continue;
               }

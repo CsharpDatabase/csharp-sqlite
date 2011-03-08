@@ -231,7 +231,7 @@ namespace Community.CsharpSqlite
         }
         for ( j = 0; j < pTab.nCol; j++ )
         {
-          if ( sqlite3StrICmp( pTab.aCol[j].zName, pChanges.a[i].zName ) == 0 )
+          if ( pTab.aCol[j].zName.Equals( pChanges.a[i].zName ,StringComparison.InvariantCultureIgnoreCase )  )
           {
             if ( j == pTab.iPKey )
             {

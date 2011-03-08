@@ -217,17 +217,17 @@ namespace Community.CsharpSqlite
               if ( pItem.zAlias != null )
               {
                 string zTabName = pItem.zAlias;
-                if ( sqlite3StrICmp( zTabName, zTab ) != 0 )
+                if ( !zTabName.Equals( zTab, StringComparison.InvariantCultureIgnoreCase ) )
                   continue;
               }
               else
               {
                 string zTabName = pTab.zName;
-                if ( NEVER( zTabName == null ) || sqlite3StrICmp( zTabName, zTab ) != 0 )
+                if ( NEVER( zTabName == null ) || !zTabName.Equals( zTab ,StringComparison.InvariantCultureIgnoreCase )  )
                 {
                   continue;
                 }
-                if ( zDb != null && sqlite3StrICmp( db.aDb[iDb].zName, zDb ) != 0 )
+                if ( zDb != null && !db.aDb[iDb].zName.Equals( zDb ,StringComparison.InvariantCultureIgnoreCase )  )
                 {
                   continue;
                 }
@@ -243,7 +243,7 @@ namespace Community.CsharpSqlite
             for ( j = 0; j < pTab.nCol; j++ )//, pCol++ )
             {
               pCol = pTab.aCol[j];
-              if ( sqlite3StrICmp( pCol.zName, zCol ) == 0 )
+              if ( pCol.zName.Equals( zCol, StringComparison.InvariantCultureIgnoreCase ) )
               {
                 IdList pUsing;
                 cnt++;
@@ -270,7 +270,7 @@ namespace Community.CsharpSqlite
                     int k;
                     for ( k = 0; k < pUsing.nId; k++ )
                     {
-                      if ( sqlite3StrICmp( pUsing.a[k].zName, zCol ) == 0 )
+                      if ( pUsing.a[k].zName.Equals( zCol ,StringComparison.InvariantCultureIgnoreCase )  )
                       {
                         //pItem++;
                         i++;
@@ -294,12 +294,12 @@ namespace Community.CsharpSqlite
           int op = pParse.eTriggerOp;
           Table pTab = null;
           Debug.Assert( op == TK_DELETE || op == TK_UPDATE || op == TK_INSERT );
-          if ( op != TK_DELETE && sqlite3StrICmp( "new", zTab ) == 0 )
+          if ( op != TK_DELETE && "new".Equals( zTab ,StringComparison.InvariantCultureIgnoreCase )  )
           {
             pExpr.iTable = 1;
             pTab = pParse.pTriggerTab;
           }
-          else if ( op != TK_INSERT && sqlite3StrICmp( "old", zTab ) == 0 )
+          else if ( op != TK_INSERT && "old".Equals( zTab ,StringComparison.InvariantCultureIgnoreCase )  )
           {
             pExpr.iTable = 0;
             pTab = pParse.pTriggerTab;
@@ -313,7 +313,7 @@ namespace Community.CsharpSqlite
             for ( iCol = 0; iCol < pTab.nCol; iCol++ )
             {
               Column pCol = pTab.aCol[iCol];
-              if ( sqlite3StrICmp( pCol.zName, zCol ) == 0 )
+              if ( pCol.zName.Equals( zCol ,StringComparison.InvariantCultureIgnoreCase )  )
               {
                 if ( iCol == pTab.iPKey )
                 {
@@ -380,7 +380,7 @@ namespace Community.CsharpSqlite
           for ( j = 0; j < pEList.nExpr; j++ )
           {
             string zAs = pEList.a[j].zName;
-            if ( zAs != null && sqlite3StrICmp( zAs, zCol ) == 0 )
+            if ( zAs != null && zAs.Equals( zCol ,StringComparison.InvariantCultureIgnoreCase )  )
             {
               Expr pOrig;
               Debug.Assert( pExpr.pLeft == null && pExpr.pRight == null );
@@ -774,7 +774,7 @@ return WRC_Prune;
         for ( i = 0; i < pEList.nExpr; i++ )
         {
           string zAs = pEList.a[i].zName;
-          if ( zAs != null && sqlite3StrICmp( zAs, zCol ) == 0 )
+          if ( zAs != null && zAs.Equals( zCol ,StringComparison.InvariantCultureIgnoreCase )  )
           {
             return i + 1;
           }

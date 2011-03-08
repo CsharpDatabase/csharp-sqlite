@@ -344,7 +344,7 @@ static void CODEC_TRACE( string T, params object[] ap ) { if ( sqlite3PagerTrace
 
       if ( c_ctx.pass != null && c_ctx.pass_sz > 0 )
       { // if pass is not null
-        if ( ( c_ctx.pass_sz == ( c_ctx.key_sz * 2 ) + 3 ) && sqlite3StrNICmp( c_ctx.pass, "x'", 2 ) == 0 )
+        if ( ( c_ctx.pass_sz == ( c_ctx.key_sz * 2 ) + 3 ) && c_ctx.pass.StartsWith( "x'", StringComparison.InvariantCultureIgnoreCase ) )
         {
           int n = c_ctx.pass_sz - 3; /* adjust for leading x' and tailing ' */
           string z = c_ctx.pass.Substring( 2 );// + 2; /* adjust lead offset of x' */

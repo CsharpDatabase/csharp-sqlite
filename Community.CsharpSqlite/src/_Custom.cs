@@ -53,7 +53,6 @@ namespace Community.CsharpSqlite
 
 
     //Byte Buffer Testing
-
     static int memcmp( byte[] bA, byte[] bB, int Limit )
     {
       if ( bA.Length < Limit )
@@ -69,31 +68,17 @@ namespace Community.CsharpSqlite
     }
 
     //Byte Buffer  & String Testing
-    static int memcmp( byte[] bA, string B, int Limit )
-    {
-      if ( bA.Length < Limit )
-        return ( bA.Length < B.Length ) ? -1 : +1;
-      if ( B.Length < Limit )
-        return +1;
-      for ( int i = 0; i < Limit; i++ )
-      {
-        if ( bA[i] != B[i] )
-          return ( bA[i] < B[i] ) ? -1 : 1;
-      }
-      return 0;
-    }
-
-    //Byte Buffer  & String Testing
     static int memcmp( string A, byte[] bB, int Limit )
     {
       if ( A.Length < Limit )
         return ( A.Length < bB.Length ) ? -1 : +1;
       if ( bB.Length < Limit )
         return +1;
+      char[] cA = A.ToCharArray();
       for ( int i = 0; i < Limit; i++ )
       {
-        if ( A[i] != bB[i] )
-          return ( A[i] < bB[i] ) ? -1 : 1;
+        if ( cA[i] != bB[i] )
+          return ( cA[i] < bB[i] ) ? -1 : 1;
       }
       return 0;
     }
@@ -128,20 +113,6 @@ namespace Community.CsharpSqlite
       return 0;
     }
 
-    static int memcmp( string a, int Offset, byte[] b, int Limit )
-    {
-      if ( a.Length < Offset + Limit )
-        return ( a.Length - Offset < b.Length ) ? -1 : +1;
-      if ( b.Length < Limit )
-        return +1;
-      for ( int i = 0; i < Limit; i++ )
-      {
-        if ( a[i + Offset] != b[i] )
-          return ( a[i + Offset] < b[i] ) ? -1 : 1;
-      }
-      return 0;
-    }
-
     static int memcmp( byte[] a, int Offset, string b, int Limit )
     {
       if ( a.Length < Offset + Limit )
@@ -155,8 +126,6 @@ namespace Community.CsharpSqlite
       }
       return 0;
     }
-
-
     //String Testing
     static int memcmp( string A, string B, int Limit )
     {
@@ -164,13 +133,12 @@ namespace Community.CsharpSqlite
         return ( A.Length < B.Length ) ? -1 : +1;
       if ( B.Length < Limit )
         return +1;
-      for ( int i = 0; i < Limit; i++ )
-      {
-        if ( A[i] != B[i] )
-          return ( A[i] < B[i] ) ? -1 : 1;
-      }
-      return 0;
+      int rc;
+      if ( (rc = String.Compare( A, 0, B, 0, Limit, StringComparison.Ordinal )) == 0 )
+        return 0;
+      return rc < 0 ? -1 : +1;
     }
+    
 
     // ----------------------------
     // ** Convertion routines

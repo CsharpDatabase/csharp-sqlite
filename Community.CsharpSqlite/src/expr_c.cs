@@ -748,7 +748,7 @@ sqlite3Dequote(ref pNew.u._zToken);
         {
           Expr pE = pParse.apVarExpr[i];
           Debug.Assert( pE != null );
-          if ( memcmp( pE.u.zToken, z, n ) == 0 && pE.u.zToken.Length == n )
+          if ( pE.u.zToken.Length == n && pE.u.zToken.Equals( z ) )
           {
             pExpr.iColumn = pE.iColumn;
             break;
@@ -1648,11 +1648,11 @@ return null;
     */
     static bool sqlite3IsRowid( string z )
     {
-      if ( sqlite3StrICmp( z, "_ROWID_" ) == 0 )
+      if ( z.Equals( "_ROWID_", StringComparison.InvariantCultureIgnoreCase ) )
         return true;
-      if ( sqlite3StrICmp( z, "ROWID" ) == 0 )
+      if ( z.Equals( "ROWID", StringComparison.InvariantCultureIgnoreCase ) )
         return true;
-      if ( sqlite3StrICmp( z, "OID" ) == 0 )
+      if ( z.Equals( "OID", StringComparison.InvariantCultureIgnoreCase ) )
         return true;
       return false;
     }
@@ -4085,7 +4085,7 @@ pDef = sqlite3VtabOverloadFunction( db, pDef, nFarg, pFarg.a[0].pExpr );
       {
         if ( ExprHasProperty( pB, EP_IntValue ) || NEVER( pB.u.zToken == null ) )
           return 2;
-        if ( sqlite3StrICmp( pA.u.zToken, pB.u.zToken ) != 0 )
+        if ( !pA.u.zToken.Equals( pB.u.zToken ,StringComparison.InvariantCultureIgnoreCase )  )
         {
           return 2;
         }

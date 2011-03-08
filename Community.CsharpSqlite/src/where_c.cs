@@ -747,7 +747,7 @@ public WhereTerm[] aStatic = new WhereTerm[1];    /* Initial static space for a[
               if ( NEVER( j >= pIdx.nColumn ) )
                 return null;
             }
-            if ( pColl != null && sqlite3StrICmp( pColl.zName, pIdx.azColl[j] ) != 0 )
+            if ( pColl != null && !pColl.zName.Equals( pIdx.azColl[j] ,StringComparison.InvariantCultureIgnoreCase )  )
               continue;
           }
           return pTerm;
@@ -904,7 +904,7 @@ ExprList pList;
 if( pExpr.op!=TK_FUNCTION ){
 return 0;
 }
-if(sqlite3StrICmp(pExpr.u.zToken,"match")!=0 ){
+if( pExpr.u.zToken.Equals("match", StringComparison.InvariantCultureIgnoreCase ) ){
 return 0;
 }
 pList = pExpr.x.pList;
@@ -1685,7 +1685,7 @@ pNewTerm.prereqAll = pTerm.prereqAll;
           iSortOrder = 0;
           zColl = pColl.zName;
         }
-        if ( pExpr.iColumn != iColumn || sqlite3StrICmp( pColl.zName, zColl ) != 0 )
+        if ( pExpr.iColumn != iColumn || !pColl.zName.Equals( zColl ,StringComparison.InvariantCultureIgnoreCase )  )
         {
           /* Term j of the ORDER BY clause does not match column i of the index */
           if ( i < nEqCol )

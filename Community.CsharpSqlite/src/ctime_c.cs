@@ -383,8 +383,10 @@ namespace Community.CsharpSqlite
     */
     static int sqlite3_compileoption_used( string zOptName )
     {
+      if ( zOptName.EndsWith( "=" ) )
+        return 0;
       int i, n = 0;
-      if ( sqlite3StrNICmp( zOptName, "SQLITE_", 7 ) == 0 )
+      if ( zOptName.StartsWith( "SQLITE_", System.StringComparison.InvariantCultureIgnoreCase ) )
         n = 7;
       //n = sqlite3Strlen30(zOptName);
 
@@ -393,9 +395,8 @@ namespace Community.CsharpSqlite
       if ( !String.IsNullOrEmpty( zOptName ) )
         for ( i = 0; i < ArraySize( azCompileOpt ); i++ )
         {
-          if ( ( sqlite3StrNICmp( zOptName, n, azCompileOpt[i], zOptName.Length - n ) == 0 )
-          && ( ( azCompileOpt[i].Length == zOptName.Length - n ) || ( azCompileOpt[i][zOptName.Length - n] == '=' ) )
-          )
+          int n1 = ( zOptName.Length-n < azCompileOpt[i].Length ) ? zOptName.Length-n : azCompileOpt[i].Length;
+          if ( String.Compare( zOptName, n, azCompileOpt[i], 0, n1, StringComparison.InvariantCultureIgnoreCase ) == 0 )
             return 1;
         }
       return 0;

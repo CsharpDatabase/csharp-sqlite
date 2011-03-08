@@ -43,7 +43,7 @@ namespace Community.CsharpSqlite
     ** The header string that appears at the beginning of every
     ** SQLite database.
     */
-    static string zMagicHeader = SQLITE_FILE_HEADER;
+    static byte[] zMagicHeader = Encoding.UTF8.GetBytes( SQLITE_FILE_HEADER );
 
     /*
     ** Set this global variable to 1 to enable tracing using the TRACE
@@ -2841,7 +2841,7 @@ page1_init_failed:
       rc = sqlite3PagerWrite( pP1.pDbPage );
       if ( rc != 0 )
         return rc;
-      Buffer.BlockCopy( Encoding.UTF8.GetBytes( zMagicHeader ), 0, data, 0, 16 );// memcpy(data, zMagicHeader, sizeof(zMagicHeader));
+      Buffer.BlockCopy(zMagicHeader, 0, data, 0, 16 );// memcpy(data, zMagicHeader, sizeof(zMagicHeader));
       Debug.Assert( zMagicHeader.Length == 16 );
       data[16] = (u8)( ( pBt.pageSize >> 8 ) & 0xff );
       data[17] = (u8)( ( pBt.pageSize >> 16 ) & 0xff );

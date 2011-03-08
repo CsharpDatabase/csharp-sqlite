@@ -206,7 +206,7 @@ if( new_size==pH->htsize ) return false;
       }
       while ( count-- > 0 && ALWAYS( elem ) )
       {
-        if ( elem.nKey == nKey && sqlite3StrNICmp( elem.pKey, pKey, nKey ) == 0 )
+        if ( elem.nKey == nKey && elem.pKey.Equals( pKey, StringComparison.InvariantCultureIgnoreCase ) )
         {
           return elem;
         }

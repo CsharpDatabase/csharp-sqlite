@@ -812,7 +812,7 @@ isView = false;
         {
           for ( j = 0; j < pTab.nCol; j++ )
           {
-            if ( sqlite3StrICmp( pColumn.a[i].zName, pTab.aCol[j].zName ) == 0 )
+            if ( pColumn.a[i].zName.Equals( pTab.aCol[j].zName ,StringComparison.InvariantCultureIgnoreCase )  )
             {
               pColumn.a[i].idx = j;
               if ( j == pTab.iPKey )
@@ -1792,7 +1792,7 @@ insert_cleanup:
       {
         return false;
       }
-      return sqlite3StrICmp( z1, z2 ) == 0;
+      return z1.Equals( z2 ,StringComparison.InvariantCultureIgnoreCase ) ;
     }
 
 

@@ -461,7 +461,7 @@ zulu_time:
       {
         return 0;
       }
-      else if ( sqlite3StrICmp( zDate, "now" ) == 0 )
+      else if ( zDate.Equals( "now" ,StringComparison.InvariantCultureIgnoreCase )  )
       {
         setDateTimeToCurrent( context, p );
         return 0;

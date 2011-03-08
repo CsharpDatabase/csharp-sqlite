@@ -3094,7 +3094,7 @@ op_column_out:
                 ** an error is returned to the user.  */
                 for (
                 pSavepoint = db.pSavepoint;
-                pSavepoint != null && sqlite3StrICmp( pSavepoint.zName, zName ) != 0;
+                pSavepoint != null && !pSavepoint.zName.Equals( zName ,StringComparison.InvariantCultureIgnoreCase ) ;
                 pSavepoint = pSavepoint.pNext
                 )
                 {
