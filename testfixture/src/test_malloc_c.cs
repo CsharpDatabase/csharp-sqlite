@@ -1464,9 +1464,9 @@ new _aOp(  "LOOKASIDE_MISS_FULL", SQLITE_DBSTATUS_LOOKASIDE_MISS_FULL )
       if ( getDbPointer( interp, TCL.Tcl_GetString( objv[1] ), ref db ) != 0 )
         return TCL.TCL_ERROR;
       zOpName = TCL.Tcl_GetString( objv[2] );
-      if ( memcmp( zOpName, "SQLITE_", 7 ) == 0 )
+      if ( zOpName.StartsWith( "SQLITE_" ) )
         zOpName = zOpName.Remove( 0, 7 ); //zOpName += 7;
-      if ( memcmp( zOpName, "DBSTATUS_", 9 ) == 0 )
+      if ( zOpName.StartsWith( "DBSTATUS_" ) )
         zOpName = zOpName.Remove( 0, 9 ); //zOpName += 9;
       for ( i = 0; i < ArraySize( aOp ); i++ )
       {

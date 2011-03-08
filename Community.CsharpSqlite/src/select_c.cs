@@ -254,7 +254,7 @@ namespace Community.CsharpSqlite
       int i;
       for ( i = 0; i < pTab.nCol; i++ )
       {
-        if ( pTab.aCol[i].zName.Equals( zCol ,StringComparison.InvariantCultureIgnoreCase )  )
+        if ( pTab.aCol[i].zName.Equals( zCol, StringComparison.InvariantCultureIgnoreCase ) )
           return i;
       }
       return -1;
@@ -1333,18 +1333,18 @@ static void explainSetInteger(ref byte a, int b) {}
         Expr p = pEList.a[i].pExpr;
         string zType;
 #if SQLITE_ENABLE_COLUMN_METADATA
-const string zOrigDb = 0;
-const string zOrigTab = 0;
-const string zOrigCol = 0;
-zType = columnType(&sNC, p, zOrigDb, zOrigTab, zOrigCol);
+        string zOrigDb = null;
+        string zOrigTab = null;
+        string zOrigCol = null;
+        zType = columnType( sNC, p, ref zOrigDb, ref zOrigTab, ref zOrigCol );
 
-/* The vdbe must make its own copy of the column-type and other
-** column specific strings, in case the schema is reset before this
-** virtual machine is deleted.
-*/
-sqlite3VdbeSetColName(v, i, COLNAME_DATABASE, zOrigDb, SQLITE_TRANSIENT);
-sqlite3VdbeSetColName(v, i, COLNAME_TABLE, zOrigTab, SQLITE_TRANSIENT);
-sqlite3VdbeSetColName(v, i, COLNAME_COLUMN, zOrigCol, SQLITE_TRANSIENT);
+        /* The vdbe must make its own copy of the column-type and other
+        ** column specific strings, in case the schema is reset before this
+        ** virtual machine is deleted.
+        */
+        sqlite3VdbeSetColName( v, i, COLNAME_DATABASE, zOrigDb, SQLITE_TRANSIENT );
+        sqlite3VdbeSetColName( v, i, COLNAME_TABLE, zOrigTab, SQLITE_TRANSIENT );
+        sqlite3VdbeSetColName( v, i, COLNAME_COLUMN, zOrigCol, SQLITE_TRANSIENT );
 #else
         string sDummy = null;
         zType = columnType( sNC, p, ref sDummy, ref sDummy, ref sDummy );
@@ -1533,7 +1533,7 @@ sqlite3VdbeSetColName(v, i, COLNAME_COLUMN, zOrigCol, SQLITE_TRANSIENT);
         nName = sqlite3Strlen30( zName );
         for ( j = cnt = 0; j < i; j++ )
         {
-          if ( aCol[j].zName.Equals( zName ,StringComparison.InvariantCultureIgnoreCase )  )
+          if ( aCol[j].zName.Equals( zName, StringComparison.InvariantCultureIgnoreCase ) )
           {
             string zNewName;
             //zName[nName] = 0;
@@ -3608,7 +3608,7 @@ break;
         string zIndex = pFrom.zIndex;
         Index pIdx;
         for ( pIdx = pTab.pIndex;
-        pIdx != null && !pIdx.zName.Equals( zIndex ,StringComparison.InvariantCultureIgnoreCase ) ;
+        pIdx != null && !pIdx.zName.Equals( zIndex, StringComparison.InvariantCultureIgnoreCase );
         pIdx = pIdx.pNext
         )
           ;
@@ -3823,7 +3823,7 @@ break;
                 zTabName = pTab.zName;
               }
               ///if ( db.mallocFailed != 0 ) break;
-              if ( zTName != null && !zTName.Equals( zTabName ,StringComparison.InvariantCultureIgnoreCase )  )
+              if ( zTName != null && !zTName.Equals( zTabName, StringComparison.InvariantCultureIgnoreCase ) )
               {
                 continue;
               }

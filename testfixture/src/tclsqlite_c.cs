@@ -1200,7 +1200,7 @@ else pVal = TCL.Tcl_NewStringObj( zText, -1 );
       {
         int n = pPreStmt.nSql;
         if ( nSql >= n
-        && memcmp( pPreStmt.zSql, zSql, n ) == 0
+        && zSql.StartsWith(pPreStmt.zSql)
         && ( nSql == n /* zSql[n]==0 */|| zSql[n - 1] == ';' )
         )
         {
@@ -1283,7 +1283,7 @@ else pVal = TCL.Tcl_NewStringObj( zText, -1 );
       }
       Debug.Assert( pPreStmt != null );
       Debug.Assert( strlen30( pPreStmt.zSql ) == pPreStmt.nSql );
-      Debug.Assert( 0 == memcmp( pPreStmt.zSql, zSql, pPreStmt.nSql ) );
+      Debug.Assert( zSql.StartsWith( pPreStmt.zSql ) );
 
       /* Bind values to parameters that begin with $ or : */
       for ( i = 1; i <= nVar; i++ )

@@ -1143,10 +1143,11 @@ pStmt, N,  sqlite3_value_text16, COLNAME_NAME);
 ** NULL is returned if the result column is an expression or constant or
 ** anything else which is not an unabiguous reference to a database column.
 */
-static byte[] sqlite3_column_database_name(sqlite3_stmt pStmt, int N){
-return columnName(
-pStmt, N, sqlite3_value_text, COLNAME_DATABASE);
-}
+    public static string sqlite3_column_database_name( sqlite3_stmt pStmt, int N )
+    {
+      return columnName(
+      pStmt, N, sqlite3_value_text, COLNAME_DATABASE );
+    }
 #if !SQLITE_OMIT_UTF16
 const void *sqlite3_column_database_name16(sqlite3_stmt pStmt, int N){
 return columnName(
@@ -1159,10 +1160,11 @@ pStmt, N, (const void*(*)(Mem*))sqlite3_value_text16, COLNAME_DATABASE);
 ** NULL is returned if the result column is an expression or constant or
 ** anything else which is not an unabiguous reference to a database column.
 */
-static byte[] qlite3_column_table_name(sqlite3_stmt pStmt, int N){
-return columnName(
-pStmt, N, sqlite3_value_text, COLNAME_TABLE);
-}
+    public static string sqlite3_column_table_name( sqlite3_stmt pStmt, int N )
+    {
+      return columnName(
+      pStmt, N, sqlite3_value_text, COLNAME_TABLE );
+    }
 #if !SQLITE_OMIT_UTF16
 const void *sqlite3_column_table_name16(sqlite3_stmt pStmt, int N){
 return columnName(
@@ -1175,10 +1177,11 @@ pStmt, N, (const void*(*)(Mem*))sqlite3_value_text16, COLNAME_TABLE);
 ** NULL is returned if the result column is an expression or constant or
 ** anything else which is not an unabiguous reference to a database column.
 */
-static byte[] sqlite3_column_origin_name(sqlite3_stmt pStmt, int N){
-return columnName(
-pStmt, N, sqlite3_value_text, COLNAME_COLUMN);
-}
+    public static string sqlite3_column_origin_name( sqlite3_stmt pStmt, int N )
+    {
+      return columnName(
+      pStmt, N, sqlite3_value_text, COLNAME_COLUMN );
+    }
 #if !SQLITE_OMIT_UTF16
 const void *sqlite3_column_origin_name16(sqlite3_stmt pStmt, int N){
 return columnName(

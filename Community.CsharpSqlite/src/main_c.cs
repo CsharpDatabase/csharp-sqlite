@@ -2565,112 +2565,132 @@ void sqlite3_thread_cleanup()
 */
 #if SQLITE_ENABLE_COLUMN_METADATA
 
-int sqlite3_table_column_metadata(
-sqlite3 db,            /* Connection handle */
-string zDbName,        /* Database name or NULL */
-string zTableName,     /* Table name */
-string zColumnName,    /* Column name */
-ref byte[] pzDataType, /* OUTPUT: Declared data type */
-ref byte[] pzCollSeq,  /* OUTPUT: Collation sequence name */
-ref int pNotNull,      /* OUTPUT: True if NOT NULL constraint exists */
-ref int pPrimaryKey,   /* OUTPUT: True if column part of PK */
-ref int pAutoinc       /* OUTPUT: True if column is auto-increment */
-){
-int rc;
-string zErrMsg = "";
-Table pTab = null;
-Column pCol = null;
-int iCol;
+    static int sqlite3_table_column_metadata(
+    sqlite3 db,            /* Connection handle */
+    string zDbName,        /* Database name or NULL */
+    string zTableName,     /* Table name */
+    string zColumnName,    /* Column name */
+    ref string pzDataType, /* OUTPUT: Declared data type */
+    ref string pzCollSeq,  /* OUTPUT: Collation sequence name */
+    ref int pNotNull,      /* OUTPUT: True if NOT NULL constraint exists */
+    ref int pPrimaryKey,   /* OUTPUT: True if column part of PK */
+    ref int pAutoinc       /* OUTPUT: True if column is auto-increment */
+    )
+    {
+      int rc;
+      string zErrMsg = "";
+      Table pTab = null;
+      Column pCol = null;
+      int iCol;
 
-char const *zDataType = 0;
-char const *zCollSeq = 0;
-int notnull = 0;
-int primarykey = 0;
-int autoinc = 0;
+      string zDataType = null;
+      string zCollSeq = null;
+      int notnull = 0;
+      int primarykey = 0;
+      int autoinc = 0;
 
-/* Ensure the database schema has been loaded */
-sqlite3_mutex_enter(db.mutex);
-sqlite3BtreeEnterAll(db);
-rc = sqlite3Init(db, zErrMsg);
-if( SQLITE_OK!=rc ){
-goto error_out;
-}
+      /* Ensure the database schema has been loaded */
+      sqlite3_mutex_enter( db.mutex );
+      sqlite3BtreeEnterAll( db );
+      rc = sqlite3Init( db, ref zErrMsg );
+      if ( SQLITE_OK != rc )
+      {
+        goto error_out;
+      }
 
-/* Locate the table in question */
-pTab = sqlite3FindTable(db, zTableName, zDbName);
-if( null==pTab || pTab.pSelect ){
-pTab = 0;
-goto error_out;
-}
+      /* Locate the table in question */
+      pTab = sqlite3FindTable( db, zTableName, zDbName );
+      if ( null == pTab || pTab.pSelect != null )
+      {
+        pTab = null;
+        goto error_out;
+      }
 
-/* Find the column for which info is requested */
-if( sqlite3IsRowid(zColumnName) ){
-iCol = pTab.iPKey;
-if( iCol>=0 ){
-pCol = pTab.aCol[iCol];
-}
-}else{
-for(iCol=0; iCol<pTab.nCol; iCol++){
-pCol = pTab.aCol[iCol];
-if( pCol.zName.Equals(zColumnName, StringComparison.InvariantCultureIgnoreCase ) ){
-break;
-}
-}
-if( iCol==pTab.nCol ){
-pTab = 0;
-goto error_out;
-}
-}
+      /* Find the column for which info is requested */
+      if ( sqlite3IsRowid( zColumnName ) )
+      {
+        iCol = pTab.iPKey;
+        if ( iCol >= 0 )
+        {
+          pCol = pTab.aCol[iCol];
+        }
+      }
+      else
+      {
+        for ( iCol = 0; iCol < pTab.nCol; iCol++ )
+        {
+          pCol = pTab.aCol[iCol];
+          if ( pCol.zName.Equals( zColumnName, StringComparison.InvariantCultureIgnoreCase ) )
+          {
+            break;
+          }
+        }
+        if ( iCol == pTab.nCol )
+        {
+          pTab = null;
+          goto error_out;
+        }
+      }
 
-/* The following block stores the meta information that will be returned
-** to the caller in local variables zDataType, zCollSeq, notnull, primarykey
-** and autoinc. At this point there are two possibilities:
-**
-**     1. The specified column name was rowid", "oid" or "_rowid_"
-**        and there is no explicitly declared IPK column.
-**
-**     2. The table is not a view and the column name identified an
-**        explicitly declared column. Copy meta information from pCol.
-*/
-if( pCol ){
-zDataType = pCol.zType;
-zCollSeq = pCol.zColl;
-notnull = pCol->notNull!=0;
-primarykey  = pCol->isPrimKey!=0;
-autoinc = pTab.iPKey==iCol && (pTab.tabFlags & TF_Autoincrement)!=0;
-}else{
-zDataType = "INTEGER";
-primarykey = 1;
-}
-if( !zCollSeq ){
-zCollSeq = "BINARY";
-}
+      /* The following block stores the meta information that will be returned
+      ** to the caller in local variables zDataType, zCollSeq, notnull, primarykey
+      ** and autoinc. At this point there are two possibilities:
+      **
+      **     1. The specified column name was rowid", "oid" or "_rowid_"
+      **        and there is no explicitly declared IPK column.
+      **
+      **     2. The table is not a view and the column name identified an
+      **        explicitly declared column. Copy meta information from pCol.
+      */
+      if ( pCol != null )
+      {
+        zDataType = pCol.zType;
+        zCollSeq = pCol.zColl;
+        notnull = pCol.notNull != 0 ? 1 : 0;
+        primarykey = pCol.isPrimKey != 0 ? 1 : 0;
+        autoinc = ( pTab.iPKey == iCol && ( pTab.tabFlags & TF_Autoincrement ) != 0 ) ? 1 : 0;
+      }
+      else
+      {
+        zDataType = "INTEGER";
+        primarykey = 1;
+      }
+      if ( String.IsNullOrEmpty( zCollSeq ) )
+      {
+        zCollSeq = "BINARY";
+      }
 
 error_out:
-sqlite3BtreeLeaveAll(db);
+      sqlite3BtreeLeaveAll( db );
 
-/* Whether the function call succeeded or failed, set the output parameters
-** to whatever their local counterparts contain. If an error did occur,
-** this has the effect of zeroing all output parameters.
-*/
-if( pzDataType ) pzDataType = zDataType;
-if( pzCollSeq ) pzCollSeq = zCollSeq;
-if( pNotNull ) pNotNull = notnull;
-if( pPrimaryKey ) pPrimaryKey = primarykey;
-if( pAutoinc ) pAutoinc = autoinc;
+      /* Whether the function call succeeded or failed, set the output parameters
+      ** to whatever their local counterparts contain. If an error did occur,
+      ** this has the effect of zeroing all output parameters.
+      */
+      //if ( pzDataType )
+        pzDataType = zDataType;
+      //if ( pzCollSeq )
+        pzCollSeq = zCollSeq;
+      //if ( pNotNull )
+        pNotNull = notnull;
+      //if ( pPrimaryKey )
+        pPrimaryKey = primarykey;
+      //if ( pAutoinc )
+        pAutoinc = autoinc;
 
-if( SQLITE_OK==rc && !pTab ){
-sqlite3DbFree(db, ref zErrMsg);
-zErrMsg = sqlite3MPrintf(db, "no such table column: %s.%s", zTableName,
-zColumnName);
-rc = SQLITE_ERROR;
-}
-sqlite3Error(db, rc, (zErrMsg?"%s":0), zErrMsg);
-sqlite3DbFree(db, ref zErrMsg);
-rc = sqlite3ApiExit(db, rc);
-sqlite3_mutex_leave(db.mutex);
-return rc;
-}
+        if ( SQLITE_OK == rc && null == pTab )
+        {
+        sqlite3DbFree( db, ref zErrMsg );
+        zErrMsg = sqlite3MPrintf( db, "no such table column: %s.%s", zTableName,
+        zColumnName );
+        rc = SQLITE_ERROR;
+      }
+        sqlite3Error( db, rc, ( !String.IsNullOrEmpty( zErrMsg ) ? "%s" : null ), zErrMsg );
+        sqlite3DbFree( db, ref zErrMsg );
+      rc = sqlite3ApiExit( db, rc );
+      sqlite3_mutex_leave( db.mutex );
+      return rc;
+    }
 #endif
 
     /*

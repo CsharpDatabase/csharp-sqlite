@@ -1851,54 +1851,59 @@ return TCL.TCL_OK;
     **
     */
 #if SQLITE_ENABLE_COLUMN_METADATA
-static int test_table_column_metadata(
-object clientdata, /* Pointer to sqlite3_enable_XXX function */
-Tcl_Interp interp, /* The TCL interpreter that invoked this command */
-int objc, /* Number of arguments */
-Tcl_Obj[] objv /* Command arguments */
-){
-sqlite3 db=null;
-const char *zDb;
-const char *zTbl;
-const char *zCol;
-int rc;
-Tcl_Obj pRet;
+    static int test_table_column_metadata(
+    object clientdata, /* Pointer to sqlite3_enable_XXX function */
+    Tcl_Interp interp, /* The TCL interpreter that invoked this command */
+    int objc, /* Number of arguments */
+    Tcl_Obj[] objv /* Command arguments */
+    )
+    {
+      sqlite3 db = null;
+      string zDb = null;
+      string zTbl = null;
+      string zCol = null;
+      int rc;
+      Tcl_Obj pRet;
 
-const char *zDatatype;
-const char *zCollseq;
-int notnull;
-int primarykey;
-int autoincrement;
+      string zDatatype = null;
+      string zCollseq = null;
+      int notnull = 0;
+      int primarykey = 0;
+      int autoincrement = 0;
 
-if( objc!=5 ){
-TCL.Tcl_WrongNumArgs(interp, 1, objv, "DB dbname tblname colname");
-return TCL.TCL_ERROR;
-}
-if( getDbPointer(interp, TCL.Tcl_GetString(objv[1]), ref db) !=0) return TCL.TCL_ERROR;
-zDb = TCL.Tcl_GetString(objv[2]);
-zTbl = TCL.Tcl_GetString(objv[3]);
-zCol = TCL.Tcl_GetString(objv[4]);
+      if ( objc != 5 )
+      {
+        TCL.Tcl_WrongNumArgs( interp, 1, objv, "DB dbname tblname colname" );
+        return TCL.TCL_ERROR;
+      }
+      if ( getDbPointer( interp, TCL.Tcl_GetString( objv[1] ), ref db ) != 0 )
+        return TCL.TCL_ERROR;
+      zDb = TCL.Tcl_GetString( objv[2] );
+      zTbl = TCL.Tcl_GetString( objv[3] );
+      zCol = TCL.Tcl_GetString( objv[4] );
 
-if( strlen(zDb)==0 ) zDb = 0;
+      if ( zDb.Length == 0 )
+        zDb = null;
 
-rc = sqlite3_table_column_metadata(db, zDb, zTbl, zCol,
-&zDatatype, zCollseq, notnull, primarykey, autoincrement);
+      rc = sqlite3_table_column_metadata( db, zDb, zTbl, zCol,
+      ref zDatatype, ref zCollseq, ref notnull, ref primarykey, ref autoincrement );
 
-if( rc!=SQLITE_OK ){
-TCL.Tcl_AppendResult(interp, sqlite3_errmsg(db));
-return TCL.TCL_ERROR;
-}
+      if ( rc != SQLITE_OK )
+      {
+        TCL.Tcl_AppendResult( interp, sqlite3_errmsg( db ) );
+        return TCL.TCL_ERROR;
+      }
 
-pRet = TCL.Tcl_NewObj();
-TCL.Tcl_ListObjAppendElement(0, pRet, TCL.Tcl_NewStringObj(zDatatype, -1));
-TCL.Tcl_ListObjAppendElement(0, pRet, TCL.Tcl_NewStringObj(zCollseq, -1));
-TCL.Tcl_ListObjAppendElement(0, pRet, TCL.Tcl_NewIntObj(notnull));
-TCL.Tcl_ListObjAppendElement(0, pRet, TCL.Tcl_NewIntObj(primarykey));
-TCL.Tcl_ListObjAppendElement(0, pRet, TCL.Tcl_NewIntObj(autoincrement));
-TCL.Tcl_SetObjResult(interp, pRet);
+      pRet = TCL.Tcl_NewObj();
+      TCL.Tcl_ListObjAppendElement( null, pRet, TCL.Tcl_NewStringObj( zDatatype, -1 ) );
+      TCL.Tcl_ListObjAppendElement( null, pRet, TCL.Tcl_NewStringObj( zCollseq, -1 ) );
+      TCL.Tcl_ListObjAppendElement( null, pRet, TCL.Tcl_NewIntObj( notnull ) );
+      TCL.Tcl_ListObjAppendElement( null, pRet, TCL.Tcl_NewIntObj( primarykey ) );
+      TCL.Tcl_ListObjAppendElement( null, pRet, TCL.Tcl_NewIntObj( autoincrement ) );
+      TCL.Tcl_SetObjResult( interp, pRet );
 
-return TCL.TCL_OK;
-}
+      return TCL.TCL_OK;
+    }
 #endif
 
 #if !SQLITE_OMIT_INCRBLOB
@@ -2506,28 +2511,28 @@ new EncTable("0", 0 )
         string zArg0 = sqlite3_value_text( argv[ARGV] );
         if ( zArg0 != null )
         {
-          if ( 0 == sqlite3StrICmp( zArg0, "int" ) )
+          if ( zArg0.Equals( "int", StringComparison.InvariantCultureIgnoreCase ) )
           {
             sqlite3_result_int( context, sqlite3_value_int( argv[ARGV + 1] ) );
           }
-          else if ( sqlite3StrICmp( zArg0, "int64" ) == 0 )
+          else if ( zArg0.Equals( "int64", StringComparison.InvariantCultureIgnoreCase ) )
           {
             sqlite3_result_int64( context, sqlite3_value_int64( argv[ARGV + 1] ) );
           }
-          else if ( sqlite3StrICmp( zArg0, "string" ) == 0 )
+          else if ( zArg0.Equals( "string", StringComparison.InvariantCultureIgnoreCase ) )
           {
             sqlite3_result_text( context, sqlite3_value_text( argv[ARGV + 1] ), -1,
             SQLITE_TRANSIENT );
           }
-          else if ( sqlite3StrICmp( zArg0, "double" ) == 0 )
+          else if ( zArg0.Equals( "double", StringComparison.InvariantCultureIgnoreCase ) )
           {
             sqlite3_result_double( context, sqlite3_value_double( argv[ARGV + 1] ) );
           }
-          else if ( sqlite3StrICmp( zArg0, "null" ) == 0 )
+          else if ( zArg0.Equals( "null", StringComparison.InvariantCultureIgnoreCase ) )
           {
             sqlite3_result_null( context );
           }
-          else if ( sqlite3StrICmp( zArg0, "value" ) == 0 )
+          else if ( zArg0.Equals( "value", StringComparison.InvariantCultureIgnoreCase ) )
           {
             sqlite3_result_value( context, argv[sqlite3_value_int( argv[ARGV + 1] )] );
           }
@@ -3342,7 +3347,7 @@ TCL.Tcl_NewIntObj( pStmt1.nVar == pStmt2.nVar ? sqlite3TransferBindings( pStmt1,
       zCode = TCL.Tcl_GetString( objv[1] );
       for ( i = 0; i < 200; i++ )
       {
-        if ( String.Compare( t1ErrorName( i ), zCode ) == 0 )
+        if ( t1ErrorName( i ).Equals( zCode ) )
           break;
       }
       TCL.Tcl_SetResult( interp, sqlite3ErrStr( i ), 0 );
@@ -6349,9 +6354,9 @@ new _aObjCmd( "tcl_variable_type", tcl_variable_type, 0 ),
 new _aObjCmd( "sqlite3_enable_shared_cache", test_enable_shared, 0 ),
 //{ "sqlite3_shared_cache_report", sqlite3BtreeSharedCacheReport, 0),
 #endif
-// new _aObjCmd( "sqlite3_libversion_number", test_libversion_number, 0 ),
+ new _aObjCmd( "sqlite3_libversion_number", test_libversion_number, 0 ),
 #if SQLITE_ENABLE_COLUMN_METADATA
-// new _aObjCmd( "sqlite3_table_column_metadata", test_table_column_metadata, 0 ),
+ new _aObjCmd( "sqlite3_table_column_metadata", test_table_column_metadata, 0 ),
 #endif
 #if !SQLITE_OMIT_INCRBLOB
 // new _aObjCmd( "sqlite3_blob_read", test_blob_read, 0 ),
