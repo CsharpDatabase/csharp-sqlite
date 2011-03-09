@@ -83,6 +83,7 @@ this.pageHash=0;
 #endif
         this.flags = 0;
         this.nRef = 0;
+        this.CacheAllocated = false;
         this.pCache = null;
         this.pDirtyNext = null;
         this.pDirtyPrev = null;

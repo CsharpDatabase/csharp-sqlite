@@ -169,7 +169,7 @@ namespace Community.CsharpSqlite
       ** fixed at sqlite3_initialize() time and do not require mutex protection.
       ** The nFreeSlot and pFree values do require mutex protection.
       */
-      public int isInit;                    /* True if initialized */
+      public bool isInit;                   /* True if initialized */
       public int szSlot;                    /* Size of each free slot */
       public int nSlot;                     /* The number of pcache slots */
       public int nReserve;                  /* Try to keep nFreeSlot above this */
@@ -252,19 +252,21 @@ namespace Community.CsharpSqlite
     */
     static void sqlite3PCacheBufferSetup( object pBuf, int sz, int n )
     {
-      if ( pcache1.isInit != 0 )
+      if ( pcache1.isInit )
       {
         PgFreeslot p;
         sz = ROUNDDOWN8( sz );
         pcache1.szSlot = sz;
         pcache1.nSlot = pcache1.nFreeSlot = n;
         pcache1.nReserve = n > 90 ? 10 : ( n / 10 + 1 );
-        pcache1.pStart = pBuf;
+        pcache1.pStart = null;
+        pcache1.pEnd = null;
         pcache1.pFree = null;
         pcache1.bUnderPressure = false;
         while ( n-- > 0 )
         {
           p = new PgFreeslot();// (PgFreeslot)pBuf;
+          p._PgHdr = new PgHdr();
           p.pNext = pcache1.pFree;
           pcache1.pFree = p;
           //pBuf = (void)&((char)pBuf)[sz];
@@ -671,7 +673,7 @@ static int pcache1MemSize(object p){
     static int pcache1Init<T>( T NotUsed )
     {
       UNUSED_PARAMETER( NotUsed );
-      Debug.Assert( pcache1.isInit == 0 );
+      Debug.Assert( pcache1.isInit == false );
       pcache1 = new PCacheGlobal();//memset(&pcache1, 0, sizeof(pcache1));
       if ( sqlite3GlobalConfig.bCoreMutex )
       {
@@ -679,7 +681,7 @@ static int pcache1MemSize(object p){
         pcache1.mutex = sqlite3_mutex_alloc( SQLITE_MUTEX_STATIC_PMEM );
       }
       pcache1.grp.mxPinned = 10;
-      pcache1.isInit = 1;
+      pcache1.isInit = true;
       return SQLITE_OK;
     }
 
@@ -691,7 +693,7 @@ static int pcache1MemSize(object p){
     static void pcache1Shutdown<T>( T NotUsed )
     {
       UNUSED_PARAMETER( NotUsed );
-      Debug.Assert( pcache1.isInit != 0 );
+      Debug.Assert( pcache1.isInit );
       pcache1 = new PCacheGlobal();//;memset( &pcache1, 0, sizeof( pcache1 ) );
     }
 
@@ -929,7 +931,7 @@ static int pcache1MemSize(object p){
       if ( null == pPage )
       {
         if ( createFlag == 1 )
-          sqlite3BeginBenignMalloc();
+        sqlite3BeginBenignMalloc();
         pcache1LeaveMutex( pGroup );
         pPage = pcache1AllocPage( pCache );
         pcache1EnterMutex( pGroup );
