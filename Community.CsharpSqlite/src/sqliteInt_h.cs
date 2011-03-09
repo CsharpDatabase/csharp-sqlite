@@ -479,9 +479,9 @@ static public bool SQLITE_DEFAULT_RECURSIVE_TRIGGERS = true;
 ** Provide a default value for SQLITE_TEMP_STORE in case it is not specified
 ** on the command-line
 */
-#if !SQLITE_TEMP_STORE
+//#if !SQLITE_TEMP_STORE
     static int SQLITE_TEMP_STORE = 1;//#define SQLITE_TEMP_STORE 1
-#endif
+//#endif
 
     /*
 ** GCC does not define the offsetof() macro so we'll have to do it

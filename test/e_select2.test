@@ -290,8 +290,13 @@ proc te_dataset_eq {testname got expected} {
   uplevel #0 [list do_test $testname [list set {} $got] $expected]
 }
 proc te_dataset_eq_unordered {testname got expected} {
-  lset got      1 [lsort [lindex $got 1]]
-  lset expected 1 [lsort [lindex $expected 1]]
+#  lset got      1 [lsort [lindex $got 1]]
+if { [llength got] > 1 } {
+  set got [lreplace $got 1 1 [lsort [lindex $got 1]]]
+  } else {
+  set got [lappend $got [lsort [lindex $got 1]]] }
+#  lset expected 1 [lsort [lindex $expected 1]]
+  set expected [lreplace $expected 1 1 [lsort [lindex $expected 1]]]
   te_dataset_eq $testname $got $expected
 }
 

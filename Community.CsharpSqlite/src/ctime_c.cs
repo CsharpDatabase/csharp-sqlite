@@ -355,9 +355,9 @@ namespace Community.CsharpSqlite
 #if SQLITE_TCL
 "TCL",
 #endif
-#if SQLITE_TEMP_STORE
-"TEMP_STORE=" CTIMEOPT_VAL(SQLITE_TEMP_STORE),
-#endif
+//#if SQLITE_TEMP_STORE
+"TEMP_STORE=1",//CTIMEOPT_VAL(SQLITE_TEMP_STORE),
+//#endif
 #if SQLITE_TEST
 "TEST",
 #endif
