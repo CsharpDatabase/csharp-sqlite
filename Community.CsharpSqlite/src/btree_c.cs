@@ -6252,7 +6252,9 @@ freepage_out:
         return;
 
       Debug.Assert( idx >= 0 && idx < pPage.nCell );
+#if SQLITE_DEBUG
       Debug.Assert( sz == cellSize( pPage, idx ) );
+#endif
       Debug.Assert( sqlite3PagerIswriteable( pPage.pDbPage ) );
       Debug.Assert( sqlite3_mutex_held( pPage.pBt.mutex ) );
       data = pPage.aData;
