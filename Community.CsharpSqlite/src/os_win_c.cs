@@ -2563,7 +2563,7 @@ dwFlagsAndAttributes |= FileOptions.RandomAccess; // FILE_FLAG_RANDOM_ACCESS;
           try
           {
             retries--;
-#if WINDOWS_PHONE
+#if WINDOWS_PHONE || SQLITE_SILVERLIGHT  
  fs = new IsolatedStorage.IsolatedStorageFileStream(zConverted, dwCreationDisposition, dwDesiredAccess, dwShareMode, IsolatedStorage.IsolatedStorageFile.GetUserStoreForApplication());
 #elif !SQLITE_SILVERLIGHT
             fs = new FileStream( zConverted, dwCreationDisposition, dwDesiredAccess, dwShareMode, 4096, dwFlagsAndAttributes );
@@ -2955,7 +2955,7 @@ return SQLITE_OK;
         // will happen on exit; was   free(zConverted);
         try
         {
-#if WINDOWS_PHONE
+#if WINDOWS_PHONE || SQLITE_SILVERLIGHT 
           zOut = zRelative;
 #else
           zOut = Path.GetFullPath( zRelative ); // was unicodeToUtf8(zTemp);
@@ -3247,7 +3247,7 @@ n += sizeof( long );
     */
     static int winSleep( sqlite3_vfs pVfs, int microsec )
     {
-      Thread.Sleep( ( microsec + 999 ) / 1000 );
+      Thread.Sleep( (( microsec + 999 ) / 1000 ) * 1000);
       UNUSED_PARAMETER( pVfs );
       return ( ( microsec + 999 ) / 1000 ) * 1000;
     }
