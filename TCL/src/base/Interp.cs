@@ -619,6 +619,7 @@ namespace tcl.lang
       Extension.loadOnDemand( this, "lrange", "tcl.lang.LrangeCmd" );
       Extension.loadOnDemand( this, "lreplace", "tcl.lang.LreplaceCmd" );
       Extension.loadOnDemand( this, "lsearch", "tcl.lang.LsearchCmd" );
+      Extension.loadOnDemand( this, "lset", "tcl.lang.LsetCmd" );
       Extension.loadOnDemand( this, "lsort", "tcl.lang.LsortCmd" );
       Extension.loadOnDemand( this, "namespace", "tcl.lang.NamespaceCmd" );
       Extension.loadOnDemand( this, "open", "tcl.lang.OpenCmd" );
