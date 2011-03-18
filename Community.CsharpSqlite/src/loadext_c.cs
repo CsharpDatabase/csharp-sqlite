@@ -628,7 +628,7 @@ sqlite3AutoExtList *x = &GLOBAL(sqlite3AutoExtList,sqlite3Autoext)
 #if SQLITE_THREADSAFE
         sqlite3_mutex mutex = sqlite3MutexAlloc( SQLITE_MUTEX_STATIC_MASTER );
 #else
-        sqlite3_mutex mutex = sqlite3MutexAlloc( SQLITE_MUTEX_STATIC_MASTER ); // Need this since mutex_enter & leave are not MACROS under C#
+        sqlite3_mutex mutex = sqlite3MutexAlloc( SQLITE_MUTEX_STATIC_MASTER );
 #endif
         wsdAutoextInit();
         sqlite3_mutex_enter( mutex );
@@ -666,7 +666,7 @@ sqlite3AutoExtList *x = &GLOBAL(sqlite3AutoExtList,sqlite3Autoext)
 #if SQLITE_THREADSAFE
         sqlite3_mutex mutex = sqlite3MutexAlloc( SQLITE_MUTEX_STATIC_MASTER );
 #else
-        sqlite3_mutex mutex = sqlite3MutexAlloc( SQLITE_MUTEX_STATIC_MASTER ); // Need this since mutex_enter & leave are not MACROS under C#
+        sqlite3_mutex mutex = sqlite3MutexAlloc( SQLITE_MUTEX_STATIC_MASTER );
 #endif
         wsdAutoextInit();
         sqlite3_mutex_enter( mutex );
@@ -710,7 +710,7 @@ if ( wsdAutoext.nExt == 0 )
 #if SQLITE_THREADSAFE
         sqlite3_mutex mutex = sqlite3MutexAlloc( SQLITE_MUTEX_STATIC_MASTER );
 #else
-        sqlite3_mutex mutex = sqlite3MutexAlloc( SQLITE_MUTEX_STATIC_MASTER ); // Need this since mutex_enter & leave are not MACROS under C#
+        sqlite3_mutex mutex = sqlite3MutexAlloc( SQLITE_MUTEX_STATIC_MASTER );
 #endif
         sqlite3_mutex_enter( mutex );
         if ( i >= wsdAutoext.nExt )

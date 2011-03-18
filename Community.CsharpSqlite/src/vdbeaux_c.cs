@@ -1165,37 +1165,43 @@ if( n>nMaxArgs ) nMaxArgs = n;
 */
     static void sqlite3VdbeComment( Vdbe p, string zFormat, params object[] ap )
     {
-      //      va_list ap;
       if ( null == p )
         return;
-      Debug.Assert( p.nOp > 0 || p.aOp == null );
-      Debug.Assert( p.aOp == null || p.aOp[p.nOp - 1].zComment == null /* || p.db.mallocFailed != 0 */);
-      if ( p.nOp != 0 )
+      //      va_list ap;
+      lock ( lock_va_list )
       {
-        string pz;// = p.aOp[p.nOp-1].zComment;
-        va_start( ap, zFormat );
-        //sqlite3DbFree(db, ref pz);
-        pz = sqlite3VMPrintf( p.db, zFormat, ap );
-        p.aOp[p.nOp - 1].zComment = pz;
-        va_end( ap );
+        Debug.Assert( p.nOp > 0 || p.aOp == null );
+        Debug.Assert( p.aOp == null || p.aOp[p.nOp - 1].zComment == null /* || p.db.mallocFailed != 0 */);
+        if ( p.nOp != 0 )
+        {
+          string pz;// = p.aOp[p.nOp-1].zComment;
+          va_start( ap, zFormat );
+          //sqlite3DbFree(db, ref pz);
+          pz = sqlite3VMPrintf( p.db, zFormat, ap );
+          p.aOp[p.nOp - 1].zComment = pz;
+          va_end( ref ap );
+        }
       }
     }
     static void sqlite3VdbeNoopComment( Vdbe p, string zFormat, params object[] ap )
     {
-      //va_list ap;
       if ( null == p )
         return;
-      sqlite3VdbeAddOp0( p, OP_Noop );
-      Debug.Assert( p.nOp > 0 || p.aOp == null );
-      Debug.Assert( p.aOp == null || p.aOp[p.nOp - 1].zComment == null /* || p.db.mallocFailed != 0 */);
-      if ( p.nOp != 0 )
+      //va_list ap;
+      lock ( lock_va_list )
       {
-        string pz; // = p.aOp[p.nOp - 1].zComment;
-        va_start( ap, zFormat );
-        //sqlite3DbFree(db,ref pz);
-        pz = sqlite3VMPrintf( p.db, zFormat, ap );
-        p.aOp[p.nOp - 1].zComment = pz;
-        va_end( ap );
+        sqlite3VdbeAddOp0( p, OP_Noop );
+        Debug.Assert( p.nOp > 0 || p.aOp == null );
+        Debug.Assert( p.aOp == null || p.aOp[p.nOp - 1].zComment == null /* || p.db.mallocFailed != 0 */);
+        if ( p.nOp != 0 )
+        {
+          string pz; // = p.aOp[p.nOp - 1].zComment;
+          va_start( ap, zFormat );
+          //sqlite3DbFree(db,ref pz);
+          pz = sqlite3VMPrintf( p.db, zFormat, ap );
+          p.aOp[p.nOp - 1].zComment = pz;
+          va_end( ref ap );
+        }
       }
     }
 #else

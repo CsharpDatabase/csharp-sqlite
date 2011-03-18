@@ -733,8 +733,8 @@ static int pcache1MemSize(object p){
         //memset( pCache, 0, sz );
         if ( separateCache != 0 )
         {
-          pGroup = new PGroup();//(PGroup)pCache[1];
-          pGroup.mxPinned = 10;
+          //pGroup = new PGroup();//(PGroup)pCache[1];
+          //pGroup.mxPinned = 10;
         }
         else
         {

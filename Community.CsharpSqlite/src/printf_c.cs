@@ -1214,11 +1214,14 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
     */
     static string sqlite3MPrintf( sqlite3 db, string zFormat, params va_list[] ap )
     {
-      //va_list ap;
       string z;
-      va_start( ap, zFormat );
-      z = sqlite3VMPrintf( db, zFormat, ap );
-      va_end( ap );
+      //va_list ap;
+      lock ( lock_va_list )
+      {
+        va_start( ap, zFormat );
+        z = sqlite3VMPrintf( db, zFormat, ap );
+        va_end( ref ap );
+      }
       return z;
     }
 
@@ -1232,12 +1235,15 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
     */
     static string sqlite3MAppendf( sqlite3 db, string zStr, string zFormat, params  va_list[] ap )
     {
-      //va_list ap;
       string z;
-      va_start( ap, zFormat );
-      z = sqlite3VMPrintf( db, zFormat, ap );
-      va_end( ap );
-      sqlite3DbFree( db, ref zStr );
+      //va_list ap;
+      lock ( lock_va_list )
+      {
+        va_start( ap, zFormat );
+        z = sqlite3VMPrintf( db, zFormat, ap );
+        va_end( ref ap );
+        sqlite3DbFree( db, ref zStr );
+      }
       return z;
     }
 
@@ -1264,15 +1270,18 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
     */
     static public string sqlite3_mprintf( string zFormat, params va_list[] ap )
     { //, ...){
-      //va_list ap;
       string z;
 #if  !SQLITE_OMIT_AUTOINIT
       if ( sqlite3_initialize() != 0 )
         return "";
 #endif
-      va_start( ap, zFormat );
-      z = sqlite3_vmprintf( zFormat, ap );
-      va_end( ap );
+      //va_list ap;
+      lock ( lock_va_list )
+      {
+        va_start( ap, zFormat );
+        z = sqlite3_vmprintf( zFormat, ap );
+        va_end( ref ap );
+      }
       return z;
     }
 
@@ -1308,11 +1317,13 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
     {
       //string z;
       //va_list ap;
-      //StrAccum acc = new StrAccum( SQLITE_PRINT_BUF_SIZE );
-      zBuf.EnsureCapacity( SQLITE_PRINT_BUF_SIZE );
-      va_start( ap, zFormat );
-      sqlite3_vsnprintf( n, zBuf, zFormat, ap );
-      va_end( ap );
+      lock ( lock_va_list )
+      {//StrAccum acc = new StrAccum( SQLITE_PRINT_BUF_SIZE );
+        zBuf.EnsureCapacity( SQLITE_PRINT_BUF_SIZE );
+        va_start( ap, zFormat );
+        sqlite3_vsnprintf( n, zBuf, zFormat, ap );
+        va_end( ref ap );
+      }
       return;
     }
 
@@ -1361,12 +1372,15 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
     */
     static void sqlite3_log( int iErrCode, string zFormat, params va_list[] ap )
     {
-      //va_list ap;                             /* Vararg list */
       if ( sqlite3GlobalConfig.xLog != null )
       {
-        va_start( ap, zFormat );
-        renderLogMsg( iErrCode, zFormat, ap );
-        va_end( ap );
+        //va_list ap;                             /* Vararg list */
+        lock ( lock_va_list )
+        {
+          va_start( ap, zFormat );
+          renderLogMsg( iErrCode, zFormat, ap );
+          va_end( ref  ap );
+        }
       }
     }
 
@@ -1379,12 +1393,15 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
     static void sqlite3DebugPrintf( string zFormat, params va_list[] ap )
     {
       //va_list ap;
-      //StrAccum acc = new StrAccum( SQLITE_PRINT_BUF_SIZE );
-      sqlite3StrAccumInit( acc, null, SQLITE_PRINT_BUF_SIZE, 0 );
-      //acc.useMalloc = 0;
-      va_start( ap, zFormat );
-      sqlite3VXPrintf( acc, 0, zFormat, ap );
-      va_end( ap );
+      lock ( lock_va_list )
+      {
+        //StrAccum acc = new StrAccum( SQLITE_PRINT_BUF_SIZE );
+        sqlite3StrAccumInit( acc, null, SQLITE_PRINT_BUF_SIZE, 0 );
+        //acc.useMalloc = 0;
+        va_start( ap, zFormat );
+        sqlite3VXPrintf( acc, 0, zFormat, ap );
+        va_end( ref ap );
+      }
       Console.Write( sqlite3StrAccumFinish( acc ) );
       //fflush(stdout);
     }
@@ -1396,9 +1413,12 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
     static void sqlite3XPrintf( StrAccum p, string zFormat, params object[] ap )
     {
       //va_list ap;
-      va_start( ap, zFormat );
-      sqlite3VXPrintf( p, 1, zFormat, ap );
-      va_end( ap );
+      lock ( lock_va_list )
+      {
+        va_start( ap, zFormat );
+        sqlite3VXPrintf( p, 1, zFormat, ap );
+        va_end( ref ap );
+      }
     }
 #endif
 

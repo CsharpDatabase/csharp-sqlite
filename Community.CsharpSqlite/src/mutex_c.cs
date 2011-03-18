@@ -63,13 +63,12 @@ static int sqlite3MutexInit(){
     //memcpy(pTo, pFrom, offsetof(sqlite3_mutex_methods, xMutexAlloc));
     //memcpy(pTo.xMutexFree, pFrom.xMutexFree,
     //       sizeof(*pTo) - offsetof(sqlite3_mutex_methods, xMutexFree));
-    pTo.xMutexFree = pFrom.xMutexFree;
-    pTo.xMutexAlloc = pFrom.xMutexAlloc;
+    pTo.Copy(pFrom);
   }
   rc = sqlite3GlobalConfig.mutex.xMutexInit();
 
 #if SQLITE_DEBUG
-  int mutexIsInit = 1; //GLOBAL(int, mutexIsInit) = 1;
+  mutexIsInit = 1; //GLOBAL(int, mutexIsInit) = 1;
 #endif
 
   return rc;
@@ -81,12 +80,12 @@ static int sqlite3MutexInit(){
 */
 static int sqlite3MutexEnd(){
   int rc = SQLITE_OK;
-  if( sqlite3GlobalConfig.mutex.xMutexEnd ){
+  if( sqlite3GlobalConfig.mutex.xMutexEnd !=null){
     rc = sqlite3GlobalConfig.mutex.xMutexEnd();
   }
 
 #if  SQLITE_DEBUG
-  int mutexIsInit = 0;//GLOBAL(int, mutexIsInit) = 0;
+  mutexIsInit = 0;//GLOBAL(int, mutexIsInit) = 0;
 #endif
 
   return rc;
@@ -113,9 +112,9 @@ static sqlite3_mutex sqlite3MutexAlloc(int id){
 /*
 ** Free a dynamic mutex.
 */
-static void sqlite3_mutex_free(ref sqlite3_mutex p){
+static void sqlite3_mutex_free( sqlite3_mutex p){
   if( p!=null ){
-    sqlite3GlobalConfig.mutex.xMutexFree(ref p);
+    sqlite3GlobalConfig.mutex.xMutexFree( p);
   }
 }
 
@@ -135,7 +134,7 @@ static void sqlite3_mutex_enter(sqlite3_mutex p){
 */
 static int sqlite3_mutex_try(sqlite3_mutex p){
   int rc = SQLITE_OK;
-  if( p ){
+  if( p!=null ){
     return sqlite3GlobalConfig.mutex.xMutexTry(p);
   }
   return rc;
@@ -159,6 +158,8 @@ static void sqlite3_mutex_leave(sqlite3_mutex p){
 ** intended for use inside assert() statements.
 */
 static bool sqlite3_mutex_held(sqlite3_mutex p){
+  if ( p != null && p.trace != 0 )
+    printf( "sqlite3_mutex_held {0} ({1}) with nRef={2}\n", p.GetHashCode(), p.owner, p.nRef );
   return p==null || sqlite3GlobalConfig.mutex.xMutexHeld(p);
 }
 static bool sqlite3_mutex_notheld(sqlite3_mutex p){

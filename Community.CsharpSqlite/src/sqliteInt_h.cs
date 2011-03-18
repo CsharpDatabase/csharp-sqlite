@@ -164,14 +164,10 @@ namespace Community.CsharpSqlite
     */
 
 #if !SQLITE_THREADSAFE
-#if THREADSAFE
-//# define SQLITE_THREADSAFE THREADSAFE
+    //# define SQLITE_THREADSAFE 2
+    const int SQLITE_THREADSAFE = 2;
 #else
-    //# define SQLITE_THREADSAFE 1
-    const int SQLITE_THREADSAFE = 1;
-#endif
-#else
-    const int SQLITE_THREADSAFE = 1; /* IMP: R-07272-22309 */
+    const int SQLITE_THREADSAFE = 2; /* IMP: R-07272-22309 */
 #endif
 
     /*
@@ -2947,6 +2943,7 @@ static void ExprSetIrreducible( Expr X ) { }
       public int iReg;             /* Reg with value of this column. 0 means none. */
       public int lru;              /* Least recently used entry has the smallest value */
     }
+
     public class Parse
     {
       public sqlite3 db;          /* The main database structure */

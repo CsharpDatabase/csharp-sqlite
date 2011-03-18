@@ -68,6 +68,25 @@ namespace Community.CsharpSqlite
     //#  endif
     //#endif
 
+#if SQLITE_THREADSAFE && SQLITE_MUTEX_NOOP
+#error  Cannot compile with both SQLITE_THREADSAFE and SQLITE_MUTEX_NOOP
+#endif
+
+#if SQLITE_THREADSAFE && SQLITE_MUTEX_OMIT
+#error  Cannot compile with both SQLITE_THREADSAFE and SQLITE_MUTEX_OMIT
+#endif
+
+#if SQLITE_MUTEX_OMIT && SQLITE_MUTEX_NOOP
+#error  Cannot compile with both SQLITE_MUTEX_OMIT and SQLITE_MUTEX_NOOP
+#endif
+
+#if SQLITE_MUTEX_OMIT && SQLITE_MUTEX_W32
+#error  Cannot compile with both SQLITE_MUTEX_OMIT and SQLITE_MUTEX_W32
+#endif
+
+#if SQLITE_MUTEX_NOOP && SQLITE_MUTEX_W32
+#error  Cannot compile with both SQLITE_MUTEX_NOOP and SQLITE_MUTEX_W32
+#endif
 
 #if SQLITE_MUTEX_OMIT
     /*
@@ -85,7 +104,7 @@ namespace Community.CsharpSqlite
     {
       return new sqlite3_mutex();
     }//#define sqlite3_mutex_alloc(X)    ((sqlite3_mutex*)8)
-    static void sqlite3_mutex_free( ref sqlite3_mutex m )
+    static void sqlite3_mutex_free( sqlite3_mutex m )
     {
     }          //#define sqlite3_mutex_free(X)
     static void sqlite3_mutex_enter( sqlite3_mutex m )

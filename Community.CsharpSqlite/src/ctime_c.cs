@@ -362,7 +362,7 @@ namespace Community.CsharpSqlite
 "TEST",
 #endif
 #if SQLITE_THREADSAFE
-"THREADSAFE=1", // For C#, hardcode to = 1 CTIMEOPT_VAL(SQLITE_THREADSAFE),
+"THREADSAFE=2", // For C#, hardcode to = 2 CTIMEOPT_VAL(SQLITE_THREADSAFE),
 #else
 "THREADSAFE=0", // For C#, hardcode to = 0
 #endif

@@ -181,7 +181,7 @@ namespace Community.CsharpSqlite
     public delegate int dxMutexInit();
     public delegate int dxMutexEnd();
     public delegate sqlite3_mutex dxMutexAlloc( int iNumber );
-    public delegate void dxMutexFree( ref sqlite3_mutex sm );
+    public delegate void dxMutexFree( sqlite3_mutex sm );
     public delegate void dxMutexEnter( sqlite3_mutex sm );
     public delegate int dxMutexTry( sqlite3_mutex sm );
     public delegate void dxMutexLeave( sqlite3_mutex sm );

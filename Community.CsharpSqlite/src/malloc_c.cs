@@ -755,13 +755,13 @@ db.lookaside.pFree = pBuf;
 db.lookaside.nOut--;
 }else
 #endif
-        {
-          Debug.Assert( sqlite3MemdebugHasType( p, MEMTYPE_DB ) );
-          Debug.Assert( sqlite3MemdebugHasType( p, MEMTYPE_LOOKASIDE | MEMTYPE_HEAP ) );
-          Debug.Assert( db != null || sqlite3MemdebugNoType( p, MEMTYPE_LOOKASIDE ) );
-          sqlite3MemdebugSetType( p, MEMTYPE_HEAP );
-          sqlite3_free( ref p );
-        }
+        //{
+        //  Debug.Assert( sqlite3MemdebugHasType( p, MEMTYPE_DB ) );
+        //  Debug.Assert( sqlite3MemdebugHasType( p, MEMTYPE_LOOKASIDE | MEMTYPE_HEAP ) );
+        //  Debug.Assert( db != null || sqlite3MemdebugNoType( p, MEMTYPE_LOOKASIDE ) );
+        //  sqlite3MemdebugSetType( p, MEMTYPE_HEAP );
+        //  sqlite3_free( ref p );
+        //}
       }
     }
 
@@ -1037,13 +1037,16 @@ sqlite3MemdebugSetType(pNew, MEMTYPE_DB |
     static void sqlite3SetString( ref string pz, sqlite3 db, string zFormat, params string[] ap )
     {
       //va_list ap;
-      string z;
+      lock ( lock_va_list )
+      {
+        string z;
 
-      va_start( ap, zFormat );
-      z = sqlite3VMPrintf( db, zFormat, ap );
-      va_end( ap );
-      sqlite3DbFree( db, ref pz );
-      pz = z;
+        va_start( ap, zFormat );
+        z = sqlite3VMPrintf( db, zFormat, ap );
+        va_end( ref ap );
+        sqlite3DbFree( db, ref pz );
+        pz = z;
+      }
     }
 
     /*

@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using DWORD = System.Int32;
 using System.Threading;
+using System;
 
 namespace Community.CsharpSqlite
 {
@@ -38,17 +39,39 @@ namespace Community.CsharpSqlite
     /*
 ** Each recursive mutex is an instance of the following structure.
 */
-    public class sqlite3_mutex
+    public partial class sqlite3_mutex
     {
-      public Mutex mutex;    /* Mutex controlling the lock */
-      public int id;                    /* Mutex type */
-      public int nRef;                  /* Number of enterances */
-      public DWORD owner;               /* Thread holding this mutex */
+      public Object mutex;    /* Mutex controlling the lock */
+      public int id;         /* Mutex type */
+      public int nRef;       /* Number of enterances */
+      public DWORD owner;    /* Thread holding this mutex */
 #if SQLITE_DEBUG
-      public int trace;                 /* True to trace changes */
+      public int trace;      /* True to trace changes */
 #endif
+
+      public sqlite3_mutex()
+      {
+        mutex = new Object();
+      }
+
+      public sqlite3_mutex( Mutex mutex, int id, int nRef, DWORD owner
+#if SQLITE_DEBUG
+, int trace
+#endif
+ )
+      {
+        this.mutex = mutex;
+        this.id = id;
+        this.nRef = nRef;
+        this.owner = owner;
+#if SQLITE_DEBUG
+        this.trace = 0;
+#endif
+      }
     };
+
     //#define SQLITE_W32_MUTEX_INITIALIZER { 0 }
+    static Mutex SQLITE_W32_MUTEX_INITIALIZER = null;
 #if SQLITE_DEBUG
     //#define SQLITE3_MUTEX_INITIALIZER { SQLITE_W32_MUTEX_INITIALIZER, 0, 0L, (DWORD)0, 0 }
 #else
@@ -113,13 +136,38 @@ return osType==2;
     /*
 ** Initialize and deinitialize the mutex subsystem.
 */
-    static sqlite3_mutex[] winMutex_staticMutexes = new sqlite3_mutex{
-  SQLITE3_MUTEX_INITIALIZER,
-  SQLITE3_MUTEX_INITIALIZER,
-  SQLITE3_MUTEX_INITIALIZER,
-  SQLITE3_MUTEX_INITIALIZER,
-  SQLITE3_MUTEX_INITIALIZER,
-  SQLITE3_MUTEX_INITIALIZER
+    //No MACROS under C#; Cannot use SQLITE3_MUTEX_INITIALIZER,
+    static sqlite3_mutex[] winMutex_staticMutexes = new sqlite3_mutex[]{
+new sqlite3_mutex( SQLITE_W32_MUTEX_INITIALIZER, 0, 0, (DWORD)0
+#if SQLITE_DEBUG
+  , 0 
+#endif
+  ),//  SQLITE3_MUTEX_INITIALIZER,
+new sqlite3_mutex( SQLITE_W32_MUTEX_INITIALIZER, 0, 0, (DWORD)0
+#if SQLITE_DEBUG
+  , 0 
+#endif
+  ),//  SQLITE3_MUTEX_INITIALIZER,
+new sqlite3_mutex( SQLITE_W32_MUTEX_INITIALIZER, 0, 0, (DWORD)0
+#if SQLITE_DEBUG
+  , 0 
+#endif
+  ),//  SQLITE3_MUTEX_INITIALIZER,
+new sqlite3_mutex( SQLITE_W32_MUTEX_INITIALIZER, 0, 0, (DWORD)0
+#if SQLITE_DEBUG
+  , 0 
+#endif
+  ),//  SQLITE3_MUTEX_INITIALIZER,
+new sqlite3_mutex( SQLITE_W32_MUTEX_INITIALIZER, 0, 0, (DWORD)0
+#if SQLITE_DEBUG
+  , 0 
+#endif
+  ),//  SQLITE3_MUTEX_INITIALIZER,
+new sqlite3_mutex( SQLITE_W32_MUTEX_INITIALIZER, 0, 0, (DWORD)0
+#if SQLITE_DEBUG
+  , 0 
+#endif
+  ),//  SQLITE3_MUTEX_INITIALIZER,
 };
     static int winMutex_isInit = 0;
     /* As winMutexInit() and winMutexEnd() are called as part
@@ -129,26 +177,30 @@ return osType==2;
     */
     static long winMutex_lock = 0;
 
+    private static System.Object lockThis = new System.Object();
     static int winMutexInit()
     {
       /* The first to increment to 1 does actual initialization */
-      if ( InterlockedCompareExchange( winMutex_lock, 1, 0 ) == 0 )
+
+      lock ( lockThis )
+      //if ( Interlocked.CompareExchange(ref winMutex_lock, 1, 0 ) == 0 )
       {
         int i;
         for ( i = 0; i < ArraySize( winMutex_staticMutexes ); i++ )
         {
-          InitializeCriticalSection( winMutex_staticMutexes[i].mutex );
+          if (winMutex_staticMutexes[i].mutex== null) winMutex_staticMutexes[i].mutex = new Mutex();
+          //InitializeCriticalSection( winMutex_staticMutexes[i].mutex );
         }
         winMutex_isInit = 1;
       }
-      else
-      {
-        /* Someone else is in the process of initing the static mutexes */
-        while ( 0==winMutex_isInit )
-        {
-          Sleep( 1 );
-        }
-      }
+      //else
+      //{
+      //  /* Someone else is in the process of initing the static mutexes */
+      //  while ( 0 == winMutex_isInit )
+      //  {
+      //    Thread.Sleep( 1 );
+      //  }
+      //}
       return SQLITE_OK;
     }
 
@@ -156,7 +208,7 @@ return osType==2;
     {
       /* The first to decrement to 0 does actual shutdown
       ** (which should be the last to shutdown.) */
-      if ( InterlockedCompareExchange( winMutex_lock, 0, 1 ) == 1 )
+      if ( Interlocked.CompareExchange( ref winMutex_lock, 0, 1 ) == 1 )
       {
         if ( winMutex_isInit == 1 )
         {
@@ -228,6 +280,7 @@ return osType==2;
               p.id = iType;
               InitializeCriticalSection( p.mutex );
             }
+            //p.trace = 1;
             break;
           }
         default:
@@ -251,11 +304,12 @@ return osType==2;
     */
     static void winMutexFree( sqlite3_mutex p )
     {
-      Debug.Assert( p );
+      Debug.Assert( p != null );
       Debug.Assert( p.nRef == 0 );
       Debug.Assert( p.id == SQLITE_MUTEX_FAST || p.id == SQLITE_MUTEX_RECURSIVE );
       DeleteCriticalSection( p.mutex );
-      sqlite3DbFree( ref db, p );
+      p.owner = 0;
+      //sqlite3_free( p );
     }
 
     /*
@@ -277,19 +331,20 @@ return osType==2;
       p.owner = tid;
       p.nRef++;
 #if SQLITE_DEBUG
-      if ( p.trace )
+      if ( p.trace != 0 )
       {
-        printf( "enter mutex %p (%d) with nRef=%d\n", p, p.trace, p.nRef );
+        printf( "enter mutex {0} ({1}) with nRef={2}\n", p.GetHashCode(), p.owner, p.nRef );
       }
 #endif
     }
+
     static int winMutexTry( sqlite3_mutex p )
     {
 #if !NDEBUG
       DWORD tid = GetCurrentThreadId();
 #endif
       int rc = SQLITE_BUSY;
-      assert( p.id == SQLITE_MUTEX_RECURSIVE || winMutexNotheld2( p, tid ) );
+      Debug.Assert( p.id == SQLITE_MUTEX_RECURSIVE || winMutexNotheld2( p, tid ) );
       /*
       ** The sqlite3_mutex_try() routine is very rarely used, and when it
       ** is used it is merely an optimization.  So it is OK for it to always
@@ -311,9 +366,9 @@ rc = SQLITE_OK;
       UNUSED_PARAMETER( p );
 #endif
 #if SQLITE_DEBUG
-      if ( rc == SQLITE_OK && p.trace )
+      if ( rc == SQLITE_OK && p.trace != 0 )
       {
-        printf( "enter mutex %p (%d) with nRef=%d\n", p, p.trace, p.nRef );
+        printf( "try mutex {0} ({1}) with nRef={2}\n", p.GetHashCode(), p.owner, p.nRef );
       }
 #endif
       return rc;
@@ -334,33 +389,33 @@ rc = SQLITE_OK;
       Debug.Assert( p.owner == tid );
       p.nRef--;
       Debug.Assert( p.nRef == 0 || p.id == SQLITE_MUTEX_RECURSIVE );
-      LeaveCriticalSection( p.mutex );
+      if (p.nRef == 0) LeaveCriticalSection( p.mutex );
 #if SQLITE_DEBUG
-      if ( p.trace )
+      if ( p.trace != 0 )
       {
-        printf( "leave mutex %p (%d) with nRef=%d\n", p, p.trace, p.nRef );
+        printf( "leave mutex {0} ({1}) with nRef={2}\n", p.GetHashCode(), p.owner, p.nRef );
       }
 #endif
     }
 
     static sqlite3_mutex_methods sqlite3DefaultMutex()
     {
-      sqlite3_mutex_methods sMutex = {
-winMutexInit,
-winMutexEnd,
-winMutexAlloc,
-winMutexFree,
-winMutexEnter,
-winMutexTry,
-winMutexLeave,
+      sqlite3_mutex_methods sMutex = new sqlite3_mutex_methods (
+(dxMutexInit)winMutexInit,
+(dxMutexEnd)winMutexEnd,
+(dxMutexAlloc)winMutexAlloc,
+(dxMutexFree)winMutexFree,
+(dxMutexEnter)winMutexEnter,
+(dxMutexTry)winMutexTry,
+(dxMutexLeave)winMutexLeave,
 #if SQLITE_DEBUG
-winMutexHeld,
-winMutexNotheld
+(dxMutexHeld)winMutexHeld,
+(dxMutexNotheld)winMutexNotheld
 #else
 null,
 null
 #endif
-};
+);
 
       return sMutex;
     }

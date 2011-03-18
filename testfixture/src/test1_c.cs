@@ -1152,14 +1152,14 @@ Debugger.Break (); //TODO --
     {
       sqlite3_result_int( context, 0 );
       return;
-      Debugger.Break(); //TODO --
-      string p1 = "", p2 = "";
-      string zCmd;
-      if ( argc != 4 )
-        return;
-      zCmd = sqlite3_value_text( argv[1] );
-      if ( zCmd == null )
-        return;
+      //Debugger.Break(); //TODO --
+      //string p1 = "", p2 = "";
+      //string zCmd;
+      //if ( argc != 4 )
+      //  return;
+      //zCmd = sqlite3_value_text( argv[1] );
+      //if ( zCmd == null )
+      //  return;
       // if( strcmp(zCmd,"text")==0 ){
       // p1 = (const void*)sqlite3_value_text(argv[0]);
       //#if !SQLITE_OMIT_UTF16
@@ -1197,7 +1197,7 @@ Debugger.Break (); //TODO --
       // }else{
       // return;
       // }
-      sqlite3_result_int( context, p1 != p2 ? 1 : 0 );
+      //sqlite3_result_int( context, p1 != p2 ? 1 : 0 );
     }
 
 

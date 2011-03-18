@@ -1,4 +1,5 @@
 using u8 = System.Byte;
+using System.Diagnostics;
 
 namespace Community.CsharpSqlite
 {
@@ -552,24 +553,24 @@ namespace Community.CsharpSqlite
     //#define SQLITE_OPEN_WAL              0x00080000  /* VFS only */
 
     /* Reserved:                           0x00F00000 */
-    const int SQLITE_OPEN_READONLY = 0x00000001;
-    const int SQLITE_OPEN_READWRITE = 0x00000002;
-    const int SQLITE_OPEN_CREATE = 0x00000004;
-    const int SQLITE_OPEN_DELETEONCLOSE = 0x00000008;
-    const int SQLITE_OPEN_EXCLUSIVE = 0x00000010;
-    const int SQLITE_OPEN_AUTOPROXY = 0x00000020;
-    const int SQLITE_OPEN_MAIN_DB = 0x00000100;
-    const int SQLITE_OPEN_TEMP_DB = 0x00000200;
-    const int SQLITE_OPEN_TRANSIENT_DB = 0x00000400;
-    const int SQLITE_OPEN_MAIN_JOURNAL = 0x00000800;
-    const int SQLITE_OPEN_TEMP_JOURNAL = 0x00001000;
-    const int SQLITE_OPEN_SUBJOURNAL = 0x00002000;
-    const int SQLITE_OPEN_MASTER_JOURNAL = 0x00004000;
-    const int SQLITE_OPEN_NOMUTEX = 0x00008000;
-    const int SQLITE_OPEN_FULLMUTEX = 0x00010000;
-    const int SQLITE_OPEN_SHAREDCACHE = 0x00020000;
-    const int SQLITE_OPEN_PRIVATECACHE = 0x00040000;
-    const int SQLITE_OPEN_WAL = 0x00080000;
+    public const int SQLITE_OPEN_READONLY = 0x00000001;
+    public const int SQLITE_OPEN_READWRITE = 0x00000002;
+    public const int SQLITE_OPEN_CREATE = 0x00000004;
+    public const int SQLITE_OPEN_DELETEONCLOSE = 0x00000008;
+    public const int SQLITE_OPEN_EXCLUSIVE = 0x00000010;
+    public const int SQLITE_OPEN_AUTOPROXY = 0x00000020;
+    public const int SQLITE_OPEN_MAIN_DB = 0x00000100;
+    public const int SQLITE_OPEN_TEMP_DB = 0x00000200;
+    public const int SQLITE_OPEN_TRANSIENT_DB = 0x00000400;
+    public const int SQLITE_OPEN_MAIN_JOURNAL = 0x00000800;
+    public const int SQLITE_OPEN_TEMP_JOURNAL = 0x00001000;
+    public const int SQLITE_OPEN_SUBJOURNAL = 0x00002000;
+    public const int SQLITE_OPEN_MASTER_JOURNAL = 0x00004000;
+    public const int SQLITE_OPEN_NOMUTEX = 0x00008000;
+    public const int SQLITE_OPEN_FULLMUTEX = 0x00010000;
+    public const int SQLITE_OPEN_SHAREDCACHE = 0x00020000;
+    public const int SQLITE_OPEN_PRIVATECACHE = 0x00040000;
+    public const int SQLITE_OPEN_WAL = 0x00080000;
 
     /*
     ** CAPI3REF: Device Characteristics
@@ -5701,17 +5702,22 @@ namespace Community.CsharpSqlite
       public dxMutexLeave xMutexLeave;
       public dxMutexHeld xMutexHeld;
       public dxMutexNotheld xMutexNotheld;
+
+      public sqlite3_mutex_methods()
+      {
+      }
+
       public sqlite3_mutex_methods(
-      dxMutexInit xMutexInit,
-      dxMutexEnd xMutexEnd,
-      dxMutexAlloc xMutexAlloc,
-      dxMutexFree xMutexFree,
-      dxMutexEnter xMutexEnter,
-      dxMutexTry xMutexTry,
-      dxMutexLeave xMutexLeave,
-      dxMutexHeld xMutexHeld,
-      dxMutexNotheld xMutexNotheld
-      )
+        dxMutexInit xMutexInit,
+        dxMutexEnd xMutexEnd,
+        dxMutexAlloc xMutexAlloc,
+        dxMutexFree xMutexFree,
+        dxMutexEnter xMutexEnter,
+        dxMutexTry xMutexTry,
+        dxMutexLeave xMutexLeave,
+        dxMutexHeld xMutexHeld,
+        dxMutexNotheld xMutexNotheld
+        )
       {
         this.xMutexInit = xMutexInit;
         this.xMutexEnd = xMutexEnd;
@@ -5723,8 +5729,22 @@ namespace Community.CsharpSqlite
         this.xMutexHeld = xMutexHeld;
         this.xMutexNotheld = xMutexNotheld;
       }
-    };
 
+//Copy sqlite3_mutex_methods from existing 
+      public void Copy( sqlite3_mutex_methods cp )
+      {
+        Debug.Assert( cp != null );
+        this.xMutexInit = cp.xMutexInit;
+        this.xMutexEnd = cp.xMutexEnd;
+        this.xMutexAlloc = cp.xMutexAlloc;
+        this.xMutexFree = cp.xMutexFree;
+        this.xMutexEnter = cp.xMutexEnter;
+        this.xMutexTry = cp.xMutexTry;
+        this.xMutexLeave = cp.xMutexLeave;
+        this.xMutexHeld = cp.xMutexHeld;
+        this.xMutexNotheld = cp.xMutexNotheld;
+      }
+    }
     /*
     ** CAPI3REF: Mutex Verification Routines
     **
@@ -5788,7 +5808,7 @@ namespace Community.CsharpSqlite
     const int SQLITE_MUTEX_STATIC_PRNG = 5;
     const int SQLITE_MUTEX_STATIC_LRU = 6;
     const int SQLITE_MUTEX_STATIC_LRU2 = 7;
-    const int SQLITE_MUTEX_STATIC_PMEM = 8;
+    const int SQLITE_MUTEX_STATIC_PMEM = 7;
 
     /*
     ** CAPI3REF: Retrieve the mutex for a database connection

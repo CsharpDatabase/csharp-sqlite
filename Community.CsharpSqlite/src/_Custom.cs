@@ -44,11 +44,11 @@ namespace Community.CsharpSqlite
 
     static void fprintf( TextWriter tw, string zFormat, params object[] ap )
     {
-      tw.Write( sqlite3_mprintf( zFormat, ap ) );
+      tw.Write( String.Format( zFormat, ap ) );
     }
     static void printf( string zFormat, params object[] ap )
     {
-      Console.Out.Write( sqlite3_mprintf( zFormat, ap ) );
+      Console.Out.Write( String.Format( zFormat, ap ) );
     }
 
 
@@ -143,6 +143,8 @@ namespace Community.CsharpSqlite
     // ----------------------------
     // ** Convertion routines
     // ----------------------------
+    static Object lock_va_list= new Object();
+
     static string vaFORMAT;
     static int vaNEXT;
 
@@ -195,7 +197,7 @@ namespace Community.CsharpSqlite
           }
         case "char*":
         case "string":
-          if ( ap[vaNEXT - 1] == null )
+          if ( ap.Length<vaNEXT ||  ap[vaNEXT - 1] == null )
           {
             return "NULL";
           }
@@ -274,7 +276,12 @@ namespace Community.CsharpSqlite
           return ap[vaNEXT - 1];
       }
     }
-    static void va_end( object[] ap )
+    static void va_end( ref string[] ap )
+    {
+      ap = null;
+      vaFORMAT = "";
+    }
+    static void va_end( ref object[] ap )
     {
       ap = null;
       vaFORMAT = "";
@@ -456,22 +463,28 @@ static long InterlockedIncrement(long location)
 Interlocked.Increment(ref  location);
 return location;
 }
-
-static void EnterCriticalSection(Mutex mtx)
+static void EnterCriticalSection( Object mtx )
 {
-Monitor.Enter(mtx);
+  //long mid = mtx.GetHashCode();
+  //int tid = Thread.CurrentThread.ManagedThreadId;
+  //long ticks = cnt++;
+  //Debug.WriteLine(String.Format( "{2}: +EnterCriticalSection; Mutex {0} Thread {1}", mtx.GetHashCode(), Thread.CurrentThread.ManagedThreadId, ticks) );
+  Monitor.Enter( mtx );
 }
-static void InitializeCriticalSection(Mutex mtx)
+static void InitializeCriticalSection( Object mtx )
 {
-Monitor.Enter(mtx);
+  //Debug.WriteLine(String.Format( "{2}: +InitializeCriticalSection; Mutex {0} Thread {1}", mtx.GetHashCode(), Thread.CurrentThread.ManagedThreadId, System.DateTime.Now.Ticks ));
+  Monitor.Enter( mtx );
 }
-static void DeleteCriticalSection(Mutex mtx)
+static void DeleteCriticalSection( Object mtx )
 {
-Monitor.Exit(mtx);
+  //Debug.WriteLine(String.Format( "{2}: +DeleteCriticalSection; Mutex {0} Thread {1}", mtx.GetHashCode(), Thread.CurrentThread.ManagedThreadId, System.DateTime.Now.Ticks) );
+  Monitor.Exit( mtx );
 }
-static void LeaveCriticalSection(Mutex mtx)
+static void LeaveCriticalSection( Object mtx )
 {
-Monitor.Exit(mtx);
+  //Debug.WriteLine(String.Format("{2}: +LeaveCriticalSection; Mutex {0} Thread {1}", mtx.GetHashCode(), Thread.CurrentThread.ManagedThreadId, System.DateTime.Now.Ticks ));
+  Monitor.Exit( mtx );
 }
 #endif
 

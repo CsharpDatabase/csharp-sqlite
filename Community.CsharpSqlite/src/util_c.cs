@@ -173,11 +173,14 @@ rc = isnan(x);
         db.errCode = err_code;
         if ( zFormat != null )
         {
-          string z;
-          va_start( ap, zFormat );
-          z = sqlite3VMPrintf( db, zFormat, ap );
-          va_end( ap );
-          sqlite3ValueSetStr( db.pErr, -1, z, SQLITE_UTF8, (dxDel)SQLITE_DYNAMIC );
+          lock ( lock_va_list )
+          {
+            string z;
+            va_start( ap, zFormat );
+            z = sqlite3VMPrintf( db, zFormat, ap );
+            va_end( ref ap );
+            sqlite3ValueSetStr( db.pErr, -1, z, SQLITE_UTF8, (dxDel)SQLITE_DYNAMIC );
+          }
         }
         else
         {
@@ -206,11 +209,14 @@ rc = isnan(x);
     static void sqlite3ErrorMsg( Parse pParse, string zFormat, params object[] ap )
     {
       string zMsg;
-      //va_list ap;
       sqlite3 db = pParse.db;
-      va_start( ap, zFormat );
-      zMsg = sqlite3VMPrintf( db, zFormat, ap );
-      va_end( ap );
+      //va_list ap;
+      lock ( lock_va_list )
+      {
+        va_start( ap, zFormat );
+        zMsg = sqlite3VMPrintf( db, zFormat, ap );
+        va_end( ref ap );
+      }
       if ( db.suppressErr != 0 )
       {
         sqlite3DbFree( db, ref zMsg );

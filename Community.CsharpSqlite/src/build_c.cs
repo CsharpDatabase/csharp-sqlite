@@ -275,31 +275,39 @@ pParse.nVtabLock = 0;
     */
     static void sqlite3NestedParse( Parse pParse, string zFormat, params object[] ap )
     {
-      //  va_list ap;
       string zSql;        //  char *zSql;
       string zErrMsg = "";//  char* zErrMsg = 0;
       sqlite3 db = pParse.db;
+
       //# define SAVE_SZ  (Parse.Length - offsetof(Parse,nVar))
       //  char saveBuf[SAVE_SZ];
 
       if ( pParse.nErr != 0 )
         return;
       Debug.Assert( pParse.nested < 10 );  /* Nesting should only be of limited depth */
-      va_start( ap, zFormat );
-      zSql = sqlite3VMPrintf( db, zFormat, ap );
-      va_end( ap );
+      //  va_list ap;
+      lock ( lock_va_list )
+      {
+        va_start( ap, zFormat );
+        zSql = sqlite3VMPrintf( db, zFormat, ap );
+        va_end( ref ap );
+      }
       //if( zSql=="" ){
       //  return;   /* A malloc must have failed */
       //}
-      pParse.nested++;
-      pParse.SaveMembers();     //  memcpy(saveBuf, pParse.nVar, SAVE_SZ);
-      pParse.ResetMembers();    //  memset(pParse.nVar, 0, SAVE_SZ);
-      sqlite3RunParser( pParse, zSql, ref zErrMsg );
-      sqlite3DbFree( db, ref zErrMsg );
-      sqlite3DbFree( db, ref zSql );
-      pParse.RestoreMembers();  //  memcpy(pParse.nVar, saveBuf, SAVE_SZ);
-      pParse.nested--;
+      lock ( nestingLock )
+      {
+        pParse.nested++;
+        pParse.SaveMembers();     //  memcpy(saveBuf, pParse.nVar, SAVE_SZ);
+        pParse.ResetMembers();    //  memset(pParse.nVar, 0, SAVE_SZ);
+        sqlite3RunParser( pParse, zSql, ref zErrMsg );
+        sqlite3DbFree( db, ref zErrMsg );
+        sqlite3DbFree( db, ref zSql );
+        pParse.RestoreMembers();  //  memcpy(pParse.nVar, saveBuf, SAVE_SZ);
+        pParse.nested--;
+      }
     }
+    static Object nestingLock = new Object();
 
     /*
     ** Locate the in-memory structure that describes a particular database
@@ -323,7 +331,7 @@ pParse.nVtabLock = 0;
       for ( i = OMIT_TEMPDB; i < db.nDb; i++ )
       {
         int j = ( i < 2 ) ? i ^ 1 : i;   /* Search TEMP before MAIN */
-        if ( zDatabase != null && !zDatabase.Equals( db.aDb[j].zName ,StringComparison.InvariantCultureIgnoreCase )  )
+        if ( zDatabase != null && !zDatabase.Equals( db.aDb[j].zName, StringComparison.InvariantCultureIgnoreCase ) )
           continue;
         p = sqlite3HashFind( db.aDb[j].pSchema.tblHash, zName, nName, (Table)null );
         if ( p != null )
@@ -397,7 +405,7 @@ pParse.nVtabLock = 0;
         int j = ( i < 2 ) ? i ^ 1 : i;  /* Search TEMP before MAIN */
         Schema pSchema = db.aDb[j].pSchema;
         Debug.Assert( pSchema != null );
-        if ( zDb != null && !zDb.Equals( db.aDb[j].zName ,StringComparison.InvariantCultureIgnoreCase )  )
+        if ( zDb != null && !zDb.Equals( db.aDb[j].zName, StringComparison.InvariantCultureIgnoreCase ) )
           continue;
         p = sqlite3HashFind( pSchema.idxHash, zName, nName, (Index)null );
         if ( p != null )
@@ -706,7 +714,7 @@ pParse.nVtabLock = 0;
         {
           pDb = db.aDb[i];
           if ( ( OMIT_TEMPDB == 0 || i != 1 ) && n == sqlite3Strlen30( pDb.zName ) &&
-          pDb.zName.Equals( zName ,StringComparison.InvariantCultureIgnoreCase ) )
+          pDb.zName.Equals( zName, StringComparison.InvariantCultureIgnoreCase ) )
           {
             break;
           }
@@ -1073,7 +1081,7 @@ begin_table_error:
         return;
       for ( i = 0; i < p.nCol; i++ )
       {
-        if ( z.Equals( p.aCol[i].zName ,StringComparison.InvariantCultureIgnoreCase ) )
+        if ( z.Equals( p.aCol[i].zName, StringComparison.InvariantCultureIgnoreCase ) )
         {//STRICMP(z, p.aCol[i].zName) ){
           sqlite3ErrorMsg( pParse, "duplicate column name: %s", z );
           sqlite3DbFree( db, ref z );
@@ -1309,7 +1317,7 @@ begin_table_error:
         {
           for ( iCol = 0; iCol < pTab.nCol; iCol++ )
           {
-            if ( pList.a[i].zName.Equals( pTab.aCol[iCol].zName ,StringComparison.InvariantCultureIgnoreCase )  )
+            if ( pList.a[i].zName.Equals( pTab.aCol[iCol].zName, StringComparison.InvariantCultureIgnoreCase ) )
             {
               break;
             }
@@ -1326,7 +1334,7 @@ begin_table_error:
       {
         zType = pTab.aCol[iCol].zType;
       }
-      if ( zType != null && zType.Equals( "INTEGER" ,StringComparison.InvariantCultureIgnoreCase ) 
+      if ( zType != null && zType.Equals( "INTEGER", StringComparison.InvariantCultureIgnoreCase )
       && sortOrder == SQLITE_SO_ASC )
       {
         pTab.iPKey = iCol;
@@ -2562,7 +2570,7 @@ exit_drop_table:
           int j;
           for ( j = 0; j < p.nCol; j++ )
           {
-            if ( p.aCol[j].zName.Equals( pFromCol.a[i].zName ,StringComparison.InvariantCultureIgnoreCase )  )
+            if ( p.aCol[j].zName.Equals( pFromCol.a[i].zName, StringComparison.InvariantCultureIgnoreCase ) )
             {
               pFKey.aCol[i].iFrom = j;
               break;
@@ -3037,7 +3045,7 @@ goto exit_create_index;
         for ( j = 0; j < pTab.nCol; j++ )
         {//, pTabCol++){
           pTabCol = pTab.aCol[j];
-          if ( zColName.Equals( pTabCol.zName ,StringComparison.InvariantCultureIgnoreCase )  )
+          if ( zColName.Equals( pTabCol.zName, StringComparison.InvariantCultureIgnoreCase ) )
             break;
         }
         if ( j >= pTab.nCol )
@@ -3123,7 +3131,7 @@ goto exit_create_index;
               break;
             z1 = pIdx.azColl[k];
             z2 = pIndex.azColl[k];
-            if ( z1 != z2 && !z1.Equals( z2 ,StringComparison.InvariantCultureIgnoreCase )  )
+            if ( z1 != z2 && !z1.Equals( z2, StringComparison.InvariantCultureIgnoreCase ) )
               break;
           }
           if ( k == pIdx.nColumn )
@@ -3525,7 +3533,7 @@ exit_drop_index:
         return -1;
       for ( i = 0; i < pList.nId; i++ )
       {
-        if ( pList.a[i].zName.Equals( zName ,StringComparison.InvariantCultureIgnoreCase )  )
+        if ( pList.a[i].zName.Equals( zName, StringComparison.InvariantCultureIgnoreCase ) )
           return i;
       }
       return -1;
@@ -4137,7 +4145,7 @@ Debug.Assert( !SAVEPOINT_BEGIN && SAVEPOINT_RELEASE==1 && SAVEPOINT_ROLLBACK==2 
       {
         string z = pIndex.azColl[i];
         Debug.Assert( z != null );
-        if ( z.Equals( zColl ,StringComparison.InvariantCultureIgnoreCase ) )
+        if ( z.Equals( zColl, StringComparison.InvariantCultureIgnoreCase ) )
         {
           return true;
         }

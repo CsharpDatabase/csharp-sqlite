@@ -482,7 +482,7 @@ rc = db->xWalCallback(db->pWalArg, db, db->aDb[i].zName, nEntry);
     ** schema change has occurred.  That detail is handled by the
     ** outer sqlite3_step() wrapper procedure.
     */
-    public static int sqlite3Step( Vdbe p )
+    static int sqlite3Step( Vdbe p )
     {
       sqlite3 db;
       int rc;

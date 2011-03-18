@@ -35,7 +35,6 @@ namespace tcl.lang
         {
           StringBuilder sbuf = new StringBuilder( argv[1].ToString().Length );
           StringBuilder sArgv = new StringBuilder( argv[1].ToString() );
-          int bBrace = 0;
           for ( int i = 3; i < sArgv.Length; i++ )
           {
             //if (sArgv[i] == '{' && ++bBrace == 1) continue;

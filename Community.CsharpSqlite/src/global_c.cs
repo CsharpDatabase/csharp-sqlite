@@ -160,7 +160,7 @@ namespace Community.CsharpSqlite
     static Sqlite3Config sqlite3Config = new Sqlite3Config(
     SQLITE_DEFAULT_MEMSTATUS, /* bMemstat */
     1,                        /* bCoreMutex */
-    SQLITE_THREADSAFE == 1,   /* bFullMutex */
+    SQLITE_THREADSAFE != 0,   /* bFullMutex */
     0x7ffffffe,               /* mxStrlen */
     100,                      /* szLookaside */
     500,                      /* nLookaside */

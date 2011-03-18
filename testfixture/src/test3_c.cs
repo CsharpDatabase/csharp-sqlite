@@ -188,7 +188,7 @@ namespace Community.CsharpSqlite
       if ( nRefSqlite3 == 0 )
       {
         sqlite3_mutex_leave( sDb.mutex );
-        sqlite3_mutex_free( ref sDb.mutex );
+        sqlite3_mutex_free( sDb.mutex );
         sDb.mutex = null;
         sDb.pVfs = null;
       }

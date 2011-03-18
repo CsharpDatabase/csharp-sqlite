@@ -153,6 +153,9 @@ struct sqlite3PrngType *p = &GLOBAL(struct sqlite3PrngType, sqlite3Prng);
     static void sqlite3_randomness( byte[] pBuf, int Offset, int N )
     {
       i64 iBuf = System.DateTime.Now.Ticks;
+#if SQLITE_THREADSAFE
+  sqlite3_mutex mutex = sqlite3MutexAlloc(SQLITE_MUTEX_STATIC_PRNG);
+#endif
       sqlite3_mutex_enter( mutex );
       while ( N-- > 0 )
       {

@@ -1322,12 +1322,13 @@ static int cellSize(MemPage pPage, int iCell) { return -1; }
         testcase( pc == iCellFirst );
         testcase( pc == iCellLast );
 #if !(SQLITE_ENABLE_OVERSIZE_CELL_CHECK)
-/* These conditions have already been verified in btreeInitPage()
+        /* These conditions have already been verified in btreeInitPage()
 ** if SQLITE_ENABLE_OVERSIZE_CELL_CHECK is defined
 */
-if( pc<iCellFirst || pc>iCellLast ){
-return SQLITE_CORRUPT_BKPT();
-}
+        if ( pc < iCellFirst || pc > iCellLast )
+        {
+          return SQLITE_CORRUPT_BKPT();
+        }
 #endif
         Debug.Assert( pc >= iCellFirst && pc <= iCellLast );
         size = cellSizePtr( pPage, temp, pc );
@@ -1338,9 +1339,10 @@ return SQLITE_CORRUPT_BKPT();
           return SQLITE_CORRUPT_BKPT();
         }
 #else
-if( cbrk<iCellFirst || pc+size>usableSize ){
-return SQLITE_CORRUPT_BKPT();
-}
+        if ( cbrk < iCellFirst || pc + size > usableSize )
+        {
+          return SQLITE_CORRUPT_BKPT();
+        }
 #endif
         Debug.Assert( cbrk + size <= usableSize && cbrk >= iCellFirst );
         testcase( cbrk + size == usableSize );
@@ -2841,7 +2843,7 @@ page1_init_failed:
       rc = sqlite3PagerWrite( pP1.pDbPage );
       if ( rc != 0 )
         return rc;
-      Buffer.BlockCopy(zMagicHeader, 0, data, 0, 16 );// memcpy(data, zMagicHeader, sizeof(zMagicHeader));
+      Buffer.BlockCopy( zMagicHeader, 0, data, 0, 16 );// memcpy(data, zMagicHeader, sizeof(zMagicHeader));
       Debug.Assert( zMagicHeader.Length == 16 );
       data[16] = (u8)( ( pBt.pageSize >> 8 ) & 0xff );
       data[17] = (u8)( ( pBt.pageSize >> 16 ) & 0xff );
@@ -8644,22 +8646,25 @@ if( idx==BTREE_LARGEST_ROOT_PAGE && pMeta>0 ) pBt.readOnly = 1;
     params object[] ap
     )
     {
-      //va_list ap;
       if ( 0 == pCheck.mxErr )
         return;
-      pCheck.mxErr--;
-      pCheck.nErr++;
-      va_start( ap, zFormat );
-      if ( pCheck.errMsg.zText.Length != 0 )
+      //va_list ap;
+      lock ( lock_va_list )
       {
-        sqlite3StrAccumAppend( pCheck.errMsg, "\n", 1 );
+        pCheck.mxErr--;
+        pCheck.nErr++;
+        va_start( ap, zFormat );
+        if ( pCheck.errMsg.zText.Length != 0 )
+        {
+          sqlite3StrAccumAppend( pCheck.errMsg, "\n", 1 );
+        }
+        if ( zMsg1.Length > 0 )
+        {
+          sqlite3StrAccumAppend( pCheck.errMsg, zMsg1.ToString(), -1 );
+        }
+        sqlite3VXPrintf( pCheck.errMsg, 1, zFormat, ap );
+        va_end( ref ap );
       }
-      if ( zMsg1.Length > 0 )
-      {
-        sqlite3StrAccumAppend( pCheck.errMsg, zMsg1.ToString(), -1 );
-      }
-      sqlite3VXPrintf( pCheck.errMsg, 1, zFormat, ap );
-      va_end( ap );
     }
 
     static void checkAppendMsg(
@@ -8669,22 +8674,25 @@ if( idx==BTREE_LARGEST_ROOT_PAGE && pMeta>0 ) pBt.readOnly = 1;
     params object[] ap
     )
     {
-      //va_list ap;
       if ( 0 == pCheck.mxErr )
         return;
-      pCheck.mxErr--;
-      pCheck.nErr++;
-      va_start( ap, zFormat );
-      if ( pCheck.errMsg.zText.Length != 0 )
+      //va_list ap;
+      lock ( lock_va_list )
       {
-        sqlite3StrAccumAppend( pCheck.errMsg, "\n", 1 );
-      }
-      if ( zMsg1.Length > 0 )
-      {
-        sqlite3StrAccumAppend( pCheck.errMsg, zMsg1.ToString(), -1 );
-      }
-      sqlite3VXPrintf( pCheck.errMsg, 1, zFormat, ap );
-      va_end( ap );
+        pCheck.mxErr--;
+        pCheck.nErr++;
+        va_start( ap, zFormat );
+        if ( pCheck.errMsg.zText.Length != 0 )
+        {
+          sqlite3StrAccumAppend( pCheck.errMsg, "\n", 1 );
+        }
+        if ( zMsg1.Length > 0 )
+        {
+          sqlite3StrAccumAppend( pCheck.errMsg, zMsg1.ToString(), -1 );
+        }
+        sqlite3VXPrintf( pCheck.errMsg, 1, zFormat, ap );
+        va_end( ref ap );
+      }      
       //if( pCheck.errMsg.mallocFailed ){
       //  pCheck.mallocFailed = 1;
       //}
