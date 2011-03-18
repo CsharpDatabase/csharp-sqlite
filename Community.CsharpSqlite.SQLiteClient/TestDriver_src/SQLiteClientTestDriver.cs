@@ -227,6 +227,11 @@ namespace SQLiteClientTests
     string connstring_T4;
     public void Test4()
     {
+      string dbFilename = "threading_t4.db";
+      if ( File.Exists( dbFilename ) )
+        File.Delete( dbFilename );
+      connstring_T4 = @"Version=3,busy_timeout=100,uri=file:" + dbFilename;
+
       Setup_T4();
       InsertSameTable_T4(); //concurrent inserts
       SelectorWrite_T4(); //concurrent selects and inserts
@@ -241,7 +246,10 @@ namespace SQLiteClientTests
         Console.WriteLine( "SELECT/INSERT ON Thread {0}", i );
         Thread worker = new Thread( () =>
         {
-          int op = i % 2;
+          // Cannot use value of i, since it exceeds the scope of this thread and will be 
+          // reused by multiple threads
+          int aValue = 100+Thread.CurrentThread.ManagedThreadId;
+          int op = aValue % 2;
 
           SqliteConnection con = new SqliteConnection();
           con.ConnectionString = connstring_T4;
@@ -255,7 +263,8 @@ namespace SQLiteClientTests
           }
           else
           {
-            cmd.CommandText = String.Format( "INSERT INTO ATABLE ( A, B, C ) VALUES ({0},'threader', '1' )", ( 10 + i ) );
+            cmd.CommandText = String.Format( "INSERT INTO ATABLE ( A, B, C ) VALUES ({0},'threader', '1' )", aValue );
+            Console.WriteLine( cmd.CommandText );
             cmd.ExecuteNonQuery();
           }
         } );
@@ -265,17 +274,23 @@ namespace SQLiteClientTests
     //we need concurrency support on a table level inside of the database file.
     private void InsertSameTable_T4()
     {
-      for ( int i = 0; i < 0; i++ )
+      for ( int i = 0; i < 10; i++ )
       {
         Console.WriteLine( "INSERTING ON Thread {0}", i );
         Thread worker = new Thread( () =>
         {
+          // Cannot use value of i, since it exceeds the scope of this thread and will be 
+          // reused by multiple threads
+          
+          int aValue = Thread.CurrentThread.ManagedThreadId;
+
           SqliteConnection con = new SqliteConnection();
           con.ConnectionString = connstring_T4;
           con.Open();
           SqliteCommand cmd = con.CreateCommand();
           cmd = con.CreateCommand();
-          cmd.CommandText = String.Format( "INSERT INTO ATABLE ( A, B, C ) VALUES ({0},'threader', '1' )", i );
+          cmd.CommandText = String.Format( "INSERT INTO ATABLE ( A, B, C ) VALUES ({0},'threader', '1' )", aValue );
+          Console.WriteLine( cmd.CommandText );
           cmd.ExecuteNonQuery();
         }
           );
@@ -286,11 +301,6 @@ namespace SQLiteClientTests
     private void Setup_T4()
     {
       SqliteConnection con = new SqliteConnection();
-      string dbFilename = "threading_t4.db";
-      if ( File.Exists( dbFilename ) )
-        File.Delete( dbFilename );
-
-      connstring_T4 = @"Version=3,uri=file:" + dbFilename;
       con.ConnectionString = connstring_T4;
       con.Open();
       SqliteCommand cmd = con.CreateCommand();
@@ -301,8 +311,6 @@ namespace SQLiteClientTests
       cmd.ExecuteNonQuery();
       cmd.CommandText = String.Format( "INSERT INTO BTABLE ( A, B, C ) VALUES (6,'threader', '1' )" );
       cmd.ExecuteNonQuery();
-      Console.WriteLine( "Setup for Threading done: Waiting 1 second" );
-      Thread.Sleep( 1000 );
     }
 
     public void Issue_65()
@@ -431,7 +439,7 @@ namespace SQLiteClientTests
           {
             Console.WriteLine( eventArgs.ExceptionObject );
           };
-      int flags = Sqlite3.SQLITE_OPEN_FULLMUTEX | Sqlite3.SQLITE_OPEN_READWRITE | Sqlite3.SQLITE_OPEN_CREATE;
+      int flags = Sqlite3.SQLITE_OPEN_NOMUTEX | Sqlite3.SQLITE_OPEN_READWRITE | Sqlite3.SQLITE_OPEN_CREATE;
       for ( int i = 0; i < 10; i++ )
       {
         Console.WriteLine( "Running Thread {0}", i );
@@ -492,7 +500,7 @@ namespace SQLiteClientTests
     {
       SQLiteClientTestDriver tests = new SQLiteClientTestDriver();
 
-      int Test = 86;
+      int Test = 4;
       switch ( Test )
       {
         case 1:

@@ -3247,7 +3247,7 @@ n += sizeof( long );
     */
     static int winSleep( sqlite3_vfs pVfs, int microsec )
     {
-      Thread.Sleep( (( microsec + 999 ) / 1000 ) * 1000);
+      Thread.Sleep( (( microsec + 999 ) / 1000 ));
       UNUSED_PARAMETER( pVfs );
       return ( ( microsec + 999 ) / 1000 ) * 1000;
     }
