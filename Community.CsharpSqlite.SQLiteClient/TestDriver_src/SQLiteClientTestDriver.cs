@@ -313,6 +313,184 @@ namespace SQLiteClientTests
       cmd.ExecuteNonQuery();
     }
 
+    //nSoftware code for Threading
+    string connstring_T5;
+    public void Test5()
+    {
+      string dbFilename = "threading_t5.db";
+      if ( File.Exists( dbFilename ) )
+        File.Delete( dbFilename );
+      connstring_T5 = @"Version=3,busy_timeout=1000,uri=file:" + dbFilename;
+
+      Setup_T5();
+      MultiInsertsSameThread_T5(); //concurrent inserts
+      Console.WriteLine( "Threads are running..." );
+      Console.In.Read();
+    }
+
+    private void MultiInsertsSameThread_T5()
+    {
+      for ( int i = 0; i < 5; i++ )
+      {
+        //Console.WriteLine( "SELECT/INSERT ON Thread {0}", i );
+        Thread worker = new Thread( () =>
+        {
+          string commandt = String.Empty;
+          try
+          {
+            // Cannot use value of i, since it exceeds the scope of this thread and will be 
+            // reused by multiple threads
+            int aValue = 100 + Thread.CurrentThread.ManagedThreadId;
+            int op = aValue % 2;
+
+            SqliteConnection con = new SqliteConnection();
+            con.ConnectionString = connstring_T5;
+            con.Open();
+            SqliteCommand cmd = con.CreateCommand();
+            cmd = con.CreateCommand();
+            if ( op == 0 )
+            {
+              for ( int j = 0; j < 1000; j++ )
+              {
+                int rows;
+                int retry = 0;
+                cmd.CommandText = String.Format( "INSERT INTO BTABLE ( A, B, C ) VALUES ({0},'threader', '1' )", ( aValue * 10000 ) + j );
+                commandt = cmd.CommandText;
+                do
+                {
+                  rows = cmd.ExecuteNonQuery();
+                  if ( rows == 0 )
+                  {
+                    retry += 1; // Insert Failed
+                    Console.WriteLine( cmd.CommandText );
+                    Console.WriteLine( "retry {0}", retry );
+                    Console.WriteLine( cmd.GetLastError() );
+                  }
+                } while ( rows == 0 && retry < 5 );
+              }
+            }
+            else
+            {
+              cmd.CommandText = String.Format( "Select * FROM ATABLE" );
+              commandt = cmd.CommandText;
+              cmd.ExecuteReader();
+            }
+          }
+          catch ( Exception ex )
+          {
+            Console.WriteLine( String.Format( "Command {0} threw exception {1}", commandt, ex.Message ) );
+          }
+        } );
+
+        worker.Start();
+      }
+    }
+
+    private void Setup_T5()
+    {
+      SqliteConnection con = new SqliteConnection();
+      con.ConnectionString = connstring_T5;
+      con.Open();
+      SqliteCommand cmd = con.CreateCommand();
+      cmd = con.CreateCommand();
+      cmd.CommandText = "CREATE TABLE IF NOT EXISTS ATABLE(A integer primary key , B varchar (50), C integer)";
+      cmd.ExecuteNonQuery();
+      cmd.CommandText = "CREATE TABLE IF NOT EXISTS BTABLE(A integer primary key , B varchar (50), C integer)";
+      cmd.ExecuteNonQuery();
+      cmd.CommandText = String.Format( "INSERT INTO BTABLE ( A, B, C ) VALUES (6,'threader', '1' )" );
+      cmd.ExecuteNonQuery();
+    }
+
+    //nSoftware code for Threading & Transactions
+    string connstring_T6;
+    public void Test6()
+    {
+      string dbFilename = "threading_t6.db";
+      if ( File.Exists( dbFilename ) )
+        File.Delete( dbFilename );
+      connstring_T6 = @"Version=3,busy_timeout=1000,uri=file:" + dbFilename;
+
+      Setup_T6();
+      MultiInsertsTransactionsSameThread_T6(); //concurrent inserts
+      Console.WriteLine( "Threads are running..." );
+      Console.In.Read();
+    }
+
+    private void MultiInsertsTransactionsSameThread_T6()
+    {
+      for ( int i = 0; i < 5; i++ )
+      {
+        //Console.WriteLine( "SELECT/INSERT ON Thread {0}", i );
+        Thread worker = new Thread( () =>
+        {
+          string commandt = String.Empty;
+          try
+          {
+            // Cannot use value of i, since it exceeds the scope of this thread and will be 
+            // reused by multiple threads
+            int aValue = 100 + Thread.CurrentThread.ManagedThreadId;
+            int op = aValue % 2;
+
+            SqliteConnection con = new SqliteConnection();
+            con.ConnectionString = connstring_T6;
+            con.Open();
+            SqliteCommand cmd = con.CreateCommand();
+            cmd = con.CreateCommand();
+            if ( op == 0 )
+            {
+              SqliteTransaction trans = (SqliteTransaction)con.BeginTransaction();
+              for ( int j = 0; j < 1000; j++ )
+              {
+                int rows;
+                int retry = 0;
+                cmd.CommandText = String.Format( "INSERT INTO BTABLE ( A, B, C ) VALUES ({0},'threader', '1' )", ( aValue * 10000 ) + j );
+                commandt = cmd.CommandText;
+                do
+                {
+                  rows = cmd.ExecuteNonQuery();
+                  if ( rows == 0 )
+                  {
+                    retry += 1; // Insert Failed
+                    Console.WriteLine( cmd.CommandText );
+                    Console.WriteLine( "retry {0}", retry );
+                    Console.WriteLine( cmd.GetLastError() );
+                  }
+                } while ( rows == 0 && retry < 5 );
+              }
+              trans.Commit();
+            }
+            else
+            {
+              cmd.CommandText = String.Format( "Select * FROM ATABLE" );
+              commandt = cmd.CommandText;
+              cmd.ExecuteReader();
+            }
+          }
+          catch ( Exception ex )
+          {
+            Console.WriteLine( String.Format( "Command {0} threw exception {1}", commandt, ex.Message ) );
+          }
+        } );
+
+        worker.Start();
+      }
+    }
+
+    private void Setup_T6()
+    {
+      SqliteConnection con = new SqliteConnection();
+      con.ConnectionString = connstring_T6;
+      con.Open();
+      SqliteCommand cmd = con.CreateCommand();
+      cmd = con.CreateCommand();
+      cmd.CommandText = "CREATE TABLE IF NOT EXISTS ATABLE(A integer primary key , B varchar (50), C integer)";
+      cmd.ExecuteNonQuery();
+      cmd.CommandText = "CREATE TABLE IF NOT EXISTS BTABLE(A integer primary key , B varchar (50), C integer)";
+      cmd.ExecuteNonQuery();
+      cmd.CommandText = String.Format( "INSERT INTO BTABLE ( A, B, C ) VALUES (6,'threader', '1' )" );
+      cmd.ExecuteNonQuery();
+    }
+
     public void Issue_65()
     {
       string datasource = "file://" + TempDirectory.ToString() + "myBigDb.s3db";
@@ -500,7 +678,7 @@ namespace SQLiteClientTests
     {
       SQLiteClientTestDriver tests = new SQLiteClientTestDriver();
 
-      int Test = 4;
+      int Test = 6;
       switch ( Test )
       {
         case 1:
@@ -514,6 +692,12 @@ namespace SQLiteClientTests
           break;
         case 4:
           tests.Test4();
+          break;
+        case 5:
+          tests.Test5();
+          break;
+        case 6:
+          tests.Test6();
           break;
         case 65:
           tests.Issue_65();
