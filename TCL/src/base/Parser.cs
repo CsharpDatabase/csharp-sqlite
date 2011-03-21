@@ -171,6 +171,8 @@ namespace tcl.lang
         while ( true )
         {
 
+          bool expandWord = false;
+
           // Create the token for  the word.
           wordIndex = parse.numTokens;
 
@@ -227,10 +229,11 @@ namespace tcl.lang
           parse.numWords++;
 
 
-          // At this point the word can have one of three forms: something
-          // enclosed in quotes, something enclosed in braces, or an
-          // unquoted word (anything else).
+        // At this point the word can have one of four forms: something
+// enclosed in quotes, something enclosed in braces, and
+// expanding word, or an unquoted word (anything else).
 
+parseWord:
           cur = script_array[script_index];
 
           if ( cur == '"' )
@@ -251,6 +254,22 @@ namespace tcl.lang
           }
           else if ( cur == '{' )
           {
+            /*
+             * Hack for {*} 
+             * Check whether the braces contained the word expansion prefix.
+             */
+            if ( script_index < script_array.Length - 3 // only if there is room
+              && script_array[script_index + 1] == '*' && script_array[script_index + 2] == '}' // and it is {*}
+              && typeTable[script_array[script_index + 1]] != TYPE_SPACE /* Non-whitespace follows */
+              && !expandWord // only one per token
+              )
+            {
+              script_index += 3; // Skip
+              expandWord = true;
+              //parse.numTokens--;
+              goto parseWord;
+            }
+
             // Find the matching right brace that terminates the word,
             // then generate a single token for everything between the
             // braces.
@@ -362,10 +381,206 @@ namespace tcl.lang
           token = parse.getToken( wordIndex );
           token.size = script_index - token.script_index;
           token.numComponents = parse.numTokens - ( wordIndex + 1 );
-          if ( ( token.numComponents == 1 ) && ( parse.getToken( wordIndex + 1 ).type == TCL_TOKEN_TEXT ) )
+
+          if ( expandWord )
+          {
+            int i = 1;
+            bool isLiteral = true;
+
+            /*
+             * When a command includes a word that is an expanded literal; for
+             * example, {*}{1 2 3}, the parser performs that expansion
+             * immediately, generating several TCL_TOKEN_SIMPLE_WORDs instead
+             * of a single TCL_TOKEN_EXPAND_WORD that the Tcl_ParseCommand()
+             * caller might have to expand. This notably makes it simpler for
+             * those callers that wish to track line endings, such as those
+             * that implement key parts of TIP 280.
+             *
+             * First check whether the thing to be expanded is a literal,
+             * in the sense of being composed entirely of TCL_TOKEN_TEXT
+             * tokens.
+             */
+
+            for ( i = 1; i <= token.numComponents; i++ )
+            {
+              if ( parse.getToken( wordIndex + i ).type != TCL_TOKEN_TEXT )//if (tokenPtr[i].type != TCL_TOKEN_TEXT) 
+              {
+                isLiteral = false;
+                break;
+              }
+            }
+
+            if ( isLiteral )
+            {
+              int elemCount = 0;
+              FindElemResult code = null;
+              bool nakedbs = false;
+              int nextElem, listEnd;
+              int elemStart = 0;
+
+              /*
+               * The word to be expanded is a literal, so determine the
+               * boundaries of the literal string to be treated as a list
+               * and expanded. That literal string starts at
+               * tokenPtr[1].start, and includes all bytes up to, but not
+               * including (tokenPtr[token.numComponents].start +
+               * tokenPtr[token.numComponents].size)
+               */
+
+              //listEnd = ( tokenPtr[tokenPtr->numComponents].start +
+              //  tokenPtr[tokenPtr->numComponents].size );
+              listEnd = ( parse.getToken( wordIndex + token.numComponents ).script_index +
+                parse.getToken( wordIndex + token.numComponents ).size ) - 1;
+              nextElem = parse.getToken( wordIndex + token.numComponents ).script_index;//nextElem = tokenPtr[1].start;
+
+
+              /*
+               * Step through the literal string, parsing and counting list
+               * elements.
+               */
+
+              string string_array = new string( token.script_array );
+              while ( nextElem < listEnd )
+              {
+                int size;
+
+                code = Util.findElement( null, string_array, nextElem, listEnd );
+                //code = TclFindElement(NULL, nextElem, listEnd - nextElem,
+                //  &elemStart, &nextElem, &size, &brace);
+                if ( code == null )
+                {
+                  break;
+                }
+                if ( !code.brace )
+                {
+                  size = code.size;
+                  elemStart = nextElem;
+                  int s;
+
+                  for ( s = elemStart; size > 0; s++, size-- )
+                  {
+                    if ( token.script_array[s] == '\\' )
+                    {
+                      nakedbs = true;
+                      break;
+                    }
+                  }
+                }
+                elemCount++;
+                nextElem = code.elemEnd;
+              }
+
+              if ( ( code == null ) || nakedbs )
+              {
+                /*
+                 * Some  list element  could not  be parsed,  or contained
+                 * naked  backslashes. This means  the literal  string was
+                 * not  in fact  a  valid nor  canonical  list. Defer  the
+                 * handling of  this to  compile/eval time, where  code is
+                 * already  in place to  report the  "attempt to  expand a
+                 * non-list" error or expand lists that require
+                 * substitution.
+                 */
+
+                token.type = TCL_TOKEN_EXPAND_WORD;
+              }
+              else if ( elemCount == 0 )
+              {
+                /*
+                 * We are expanding a literal empty list. This means that
+                 * the expanding word completely disappears, leaving no
+                 * word generated this pass through the loop. Adjust
+                 * accounting appropriately.
+                 */
+
+                parse.numWords--;
+                parse.numTokens = wordIndex;
+              }
+              else
+              {
+                /*
+                 * Recalculate the number of Tcl_Tokens needed to store
+                 * tokens representing the expanded list.
+                 */
+
+                int growthNeeded = wordIndex + 2 * elemCount
+                  - parse.numTokens;
+                parse.numWords += elemCount - 1;
+                if ( growthNeeded > 0 )
+                {
+                  parse.expandTokenArray( growthNeeded );// TclGrowParseTokenArray( parse, growthNeeded );
+                  token = parse.getToken( wordIndex );//&parsePtr->tokenPtr[wordIndex];
+                }
+                parse.numTokens = wordIndex + 2 * elemCount;
+
+
+                /*
+                 * Generate a TCL_TOKEN_SIMPLE_WORD token sequence for
+                 * each element of the literal list we are expanding in
+                 * place. Take care with the start and size fields of each
+                 * token so they point to the right literal characters in
+                 * the original script to represent the right expanded
+                 * word value.
+                 */
+
+                nextElem = parse.getToken( wordIndex ).script_index;//tokenPtr[1].start;
+                while ( token.script_array[nextElem] == ' ' )//isspace( UCHAR( *nextElem ) ) )
+                {
+                  nextElem++;
+                }
+                while ( nextElem < listEnd )
+                {
+                  token.type = TCL_TOKEN_SIMPLE_WORD;
+                  token.numComponents = 1;
+                  token.script_index = nextElem;
+
+                  token = parse.getToken( ++wordIndex );// tokenPtr++;
+                  token.type = TCL_TOKEN_TEXT;
+                  token.numComponents = 0;
+                  code = Util.findElement( null, string_array, nextElem, listEnd );
+                  //TclFindElement(NULL, nextElem, listEnd - nextElem,
+                  //  &(tokenPtr->start), &nextElem,
+                  //  &(tokenPtr->size), NULL);
+                  token.script_index = nextElem + ( code.brace ? 1 : 0 );
+                  token.size = code.size;
+                  nextElem = code.elemEnd;
+                  if ( token.script_index + token.size == listEnd )
+                  {
+                    parse.getToken( wordIndex - 1 ).size = listEnd - parse.getToken( wordIndex - 1 ).script_index;//tokenPtr[-1].size = listEnd - tokenPtr[-1].start;
+                  }
+                  else
+                  {
+                    //tokenPtr[-1].size = tokenPtr->start
+                    //  + tokenPtr->size - tokenPtr[-1].start;
+                    parse.getToken( wordIndex - 1 ).size = token.script_index
+                      + token.size - parse.getToken( wordIndex - 1 ).script_index;
+                    if ( script_index + token.size < token.script_array.Length &&
+                      ( token.script_array[script_index + token.size] == ' ' ) )
+                      parse.getToken( wordIndex - 1 ).size += 1;
+                    //  tokenPtr[-1].size += ( isspace( UCHAR(
+                    //tokenPtr->start[tokenPtr->size] ) ) == 0 );
+                  }
+
+                  token = parse.getToken( ++wordIndex );// tokenPtr++;
+                }
+              }
+            }
+            else
+            {
+              /*
+               * The word to be expanded is not a literal, so defer
+               * expansion to compile/eval time by marking with a
+               * TCL_TOKEN_EXPAND_WORD token.
+               */
+
+              token.type = TCL_TOKEN_EXPAND_WORD;
+            }
+          }
+          else if ( ( token.numComponents == 1 ) && ( parse.getToken( wordIndex + 1 ).type == TCL_TOKEN_TEXT ) )
           {
             token.type = TCL_TOKEN_SIMPLE_WORD;
           }
+
 
           // Do two additional checks: (a) make sure we're really at the
           // end of a word (there might have been garbage left after a
@@ -477,7 +692,7 @@ namespace tcl.lang
 
       // Each iteration through the following loop adds one token of
       // type TCL_TOKEN_TEXT, TCL_TOKEN_BS, TCL_TOKEN_COMMAND, or
-      // TCL_TOKEN_VARIABLE to parsePtr.  For TCL_TOKEN_VARIABLE additional,
+      // TCL_TOKEN_VARIABLE to parse.  For TCL_TOKEN_VARIABLE additional,
       // tokens tokens are added for the parsed variable name.
 
       originalTokens = parse.numTokens;
@@ -1130,6 +1345,33 @@ namespace tcl.lang
                 else
                 {
                   objv[objUsed] = obj;
+                  if ( token.type == TCL_TOKEN_EXPAND_WORD )
+                  {
+                    int numElements;
+                    int code;
+                    TclList.setListFromAny( null, objv[objUsed] );
+                    TclObject[] elements = TclList.getElements( null, objv[objUsed] );
+                    if ( elements.Length == 0 )
+                    {
+                      elements = new TclObject[1];
+                      elements[0] = TclString.newInstance("{}") ;
+                      TclList.setListFromAny( null, elements[0] );
+                    }
+                    numElements = elements.Length;
+                    /*
+                     * Some word expansion was requested. Check for objv resize.
+                     */
+
+                    int objIdx = objUsed + numElements - 1;
+                    Array.Resize( ref objv, objIdx+1 );
+                    while ( numElements-- != 0 )
+                    {
+                      objv[objIdx] = elements[numElements];
+                      objv[objIdx].preserve();
+                      objIdx--;
+                    }
+                    objUsed = objv.Length-1;
+                  }
                 }
                 tokenIndex += ( token.numComponents + 1 );
                 token = parse.getToken( tokenIndex );
@@ -1233,8 +1475,8 @@ namespace tcl.lang
     }
     public static TclParse parseVarName( Interp interp, char[] script_array, int script_index, int numBytes, TclParse parse, bool append )
     // Non-zero means append tokens to existing
-    // information in parsePtr; zero means ignore
-    // existing tokens in parsePtr and reinitialize
+    // information in parse; zero means ignore
+    // existing tokens in parse and reinitialize
     // it. 
     {
       char cur;
@@ -1772,6 +2014,9 @@ getoctal_brk:
     internal const int TCL_TOKEN_BS = 8;
     internal const int TCL_TOKEN_COMMAND = 16;
     internal const int TCL_TOKEN_VARIABLE = 32;
+    //#define TCL_TOKEN_SUB_EXPR	64
+    //#define TCL_TOKEN_OPERATOR	128
+    internal const int TCL_TOKEN_EXPAND_WORD = 256;
 
 
     // Note: Most of the variables below will not be used until the

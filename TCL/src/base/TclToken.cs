@@ -97,6 +97,12 @@ namespace tcl.lang
             break;
           }
 
+        case Parser.TCL_TOKEN_EXPAND_WORD:
+          {
+            sbuf.Append( "\n  Token Type: TCL_TOKEN_EXPAND_WORD" );
+            break;
+          }
+        
         case Parser.TCL_TOKEN_TEXT:
           {
             sbuf.Append( "\n  Token Type: TCL_TOKEN_TEXT" );

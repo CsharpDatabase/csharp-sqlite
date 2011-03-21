@@ -28,7 +28,7 @@ namespace tcl.lang
 
     public TCL.CompletionCode cmdProc( Interp interp, TclObject[] argv )
     {
-      if ( argv.Length != 3 )
+      if ( argv.Length < 3 )
       {
         throw new TclNumArgsException( interp, 1, argv, "list index" );
       }

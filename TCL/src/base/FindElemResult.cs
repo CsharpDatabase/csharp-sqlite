@@ -38,11 +38,15 @@ namespace tcl.lang
     */
 
     internal string elem;
+    internal bool brace;
+    internal int size;
 
-    internal FindElemResult( int i, string s )
+    internal FindElemResult( int i, string s, int b )
     {
       elemEnd = i;
       elem = s;
+      brace = b!=0;
+      size = s.Length;
     }
   } // end FindElemResult
 }

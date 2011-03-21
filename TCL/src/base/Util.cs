@@ -880,7 +880,7 @@ namespace tcl.lang
           {
             throw new TclException( interp, "unmatched open quote in list" );
           }
-          return new FindElemResult( i, sbuf.ToString() );
+          return new FindElemResult( i, sbuf.ToString(), openBraces );
         }
 
         c = s[i];
@@ -907,7 +907,7 @@ namespace tcl.lang
             {
               if ( i == len - 1 || System.Char.IsWhiteSpace( s[i + 1] ) )
               {
-                return new FindElemResult( i + 1, sbuf.ToString() );
+                return new FindElemResult( i + 1, sbuf.ToString(), openBraces );
               }
               else
               {
@@ -961,7 +961,7 @@ namespace tcl.lang
           case '\t':
             if ( ( openBraces == 0 ) && !inQuotes )
             {
-              return new FindElemResult( i + 1, sbuf.ToString() );
+              return new FindElemResult( i + 1, sbuf.ToString(), openBraces );
             }
             else
             {
@@ -978,7 +978,7 @@ namespace tcl.lang
             {
               if ( i == len - 1 || System.Char.IsWhiteSpace( s[i + 1] ) )
               {
-                return new FindElemResult( i + 1, sbuf.ToString() );
+                return new FindElemResult( i + 1, sbuf.ToString(), openBraces );
               }
               else
               {

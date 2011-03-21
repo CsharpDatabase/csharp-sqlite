@@ -146,6 +146,7 @@ proc te_join {data1 data2 args} {
   set isleft 0
   for {set i 0} {$i < [llength $args]} {incr i} {
     set a [lindex $args $i]
+    if { $a != "{}" } {
     switch -- $a {
       -on     { set testproc [lindex $args [incr i]] }
       -using  { set usinglist [lindex $args [incr i]] }
@@ -155,6 +156,7 @@ proc te_join {data1 data2 args} {
       }
     }
   }
+}
 
   set c1 [lindex $data1 0]
   set c2 [lindex $data2 0]
@@ -199,8 +201,7 @@ proc te_join {data1 data2 args} {
 }
 
 proc te_tbljoin {db t1 t2 args} {
-#  te_join [te_read_tbl $db $t1] [te_read_tbl $db $t2] {*}$args
-  te_join [te_read_tbl $db $t1] [te_read_tbl $db $t2] [eval [linsert $args 0 list]]
+  te_join [te_read_tbl $db $t1] [te_read_tbl $db $t2] {*}$args
 }
 
 proc te_apply_affinity {affinity typevar valvar} {
@@ -306,14 +307,8 @@ proc te_dataset_ne_unordered {testname got unexpected} {
 #
 proc test_join {tn sqljoin tbljoinargs} {
   set sql [te_read_sql db "SELECT * FROM $sqljoin"]
-# set te  [te_tbljoin db {*}$tbljoinargs]
-  set testname  [lrange $tbljoinargs 0 0]
-  set got       [lrange $tbljoinargs 1 1]
-  set expected  list[[lrange $tbljoinargs 2 end]]
-  set te  [te_tbljoin db $testname $got $expected]
+  set te  [te_tbljoin db {*}$tbljoinargs]
   te_dataset_eq_unordered $tn $sql $te
-  
-  
 }
 
 drop_all_tables

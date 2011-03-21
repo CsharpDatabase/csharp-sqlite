@@ -141,6 +141,7 @@ namespace tcl.lang
       if ( tokenList[index] == null )
       {
         tokenList[index] = grabToken();
+        tokenList[index].script_array = tokenList[0].script_array;
       }
       return tokenList[index];
     }
@@ -280,6 +281,10 @@ namespace tcl.lang
 
             case Parser.TCL_TOKEN_SIMPLE_WORD:
               typeString = "simple";
+              break;
+
+            case Parser.TCL_TOKEN_EXPAND_WORD:
+              typeString = "expand";
               break;
 
             case Parser.TCL_TOKEN_TEXT:

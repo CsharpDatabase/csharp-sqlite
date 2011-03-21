@@ -1616,8 +1616,7 @@ foreach {tn select res} {
   7  "(2,3) EXCEPT    (2)   EXCEPT    (3)"   {}
 } {
   set select [string map {( {SELECT x FROM t1 WHERE x IN (}} $select]
-#  do_execsql_test e_select-7.12.$tn $select [list {*}$res]
-  do_execsql_test e_select-7.12.$tn $select [eval list $res]
+  do_execsql_test e_select-7.12.$tn $select [list {*}$res]
 }
 
 

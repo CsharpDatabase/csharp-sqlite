@@ -373,17 +373,14 @@ proc fix_testname {varname} {
     
 proc do_execsql_test {testname sql {result {}}} {
   fix_testname testname
-#  uplevel do_test $testname [list "execsql {$sql}"] [list [list {*}$result]]
-  uplevel do_test $testname [list "execsql {$sql}"] [list [concat $result]]
+  uplevel do_test $testname [list "execsql {$sql}"] [list [list {*}$result]]
 }
 proc do_catchsql_test {testname sql result} {
   fix_testname testname
-#  uplevel do_test $testname [list "catchsql {$sql}"] [list {*}$result]
-  uplevel do_test $testname [list "catchsql {$sql}"] [list $result]
+  uplevel do_test $testname [list "catchsql {$sql}"] [list [list {*}$result]]
 }
 proc do_eqp_test {name sql res} {
-#  uplevel do_execsql_test $name [list "EXPLAIN QUERY PLAN $sql"] [list {*}$res]
-  uplevel do_execsql_test $name [list "EXPLAIN QUERY PLAN $sql"] [list $res]
+  uplevel do_execsql_test $name [list "EXPLAIN QUERY PLAN $sql"] [list [list {*}$res]]
 }
 
 #-------------------------------------------------------------------------
@@ -437,18 +434,15 @@ proc do_select_tests {prefix args} {
   foreach {tn sql res} $testlist {
     if {$tclquery != ""} {
       execsql $sql
-#      uplevel do_test ${prefix}.$tn [list $tclquery] [list [list {*}$res]]
-      uplevel do_test ${prefix}.$tn [list $tclquery] [list [concat $res]]
+      uplevel do_test ${prefix}.$tn [list $tclquery] [list [list {*}$res]]
     } elseif {$countonly} {
       set nRow 0
       db eval $sql {incr nRow}
       uplevel do_test ${prefix}.$tn [list [list set {} $nRow]] [list $res]
     } elseif {$errfmt==""} {
-#      uplevel do_execsql_test ${prefix}.${tn} [list $sql] [list [list {*}$res]]
-      uplevel do_execsql_test ${prefix}.${tn} [list $sql] [list [concat $res]]
+      uplevel do_execsql_test ${prefix}.${tn} [list $sql] [list [list {*}$res]]
     } else {
-#     set res [list 1 [string trim [format $errfmt {*}$res]]]
-     set res [list 1 [string trim [eval format [list $errfmt] $res]]] 
+      set res [list 1 [string trim [format $errfmt {*}$res]]]
       uplevel do_catchsql_test ${prefix}.${tn} [list $sql] [list $res]
     }
     eval $repair

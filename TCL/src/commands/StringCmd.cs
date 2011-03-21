@@ -47,7 +47,7 @@ namespace tcl.lang
     private const int STR_WORDEND = 19;
     private const int STR_WORDSTART = 20;
 
-    private static readonly string[] isOptions = new string[] { "alnum", "alpha", "ascii", "control", "boolean", "digit", "double", "false", "graph", "integer", "lower", "print", "punct", "space", "true", "upper", "wordchar", "xdigit" };
+    private static readonly string[] isOptions = new string[] { "alnum", "alpha", "ascii", "control", "boolean", "digit", "double", "false", "graph", "integer", "lower", "print", "punct", "space", "true", "upper", "wideinteger", "wordchar", "xdigit" };
     private const int STR_IS_ALNUM = 0;
     private const int STR_IS_ALPHA = 1;
     private const int STR_IS_ASCII = 2;
@@ -64,8 +64,9 @@ namespace tcl.lang
     private const int STR_IS_SPACE = 13;
     private const int STR_IS_TRUE = 14;
     private const int STR_IS_UPPER = 15;
-    private const int STR_IS_WORD = 16;
-    private const int STR_IS_XDIGIT = 17;
+    private const int STR_IS_WIDE = 16;
+    private const int STR_IS_WORD = 17;
+    private const int STR_IS_XDIGIT = 18;
 
     /// <summary> Java's Character class has a many boolean test functions to check
     /// the kind of a character (like isLowerCase() or isISOControl()).
@@ -444,6 +445,64 @@ namespace tcl.lang
                   try
                   {
                     TclInteger.get( null, obj );
+                  }
+                  catch ( TclException e )
+                  {
+                    isInteger = false;
+                  }
+                  if ( isInteger )
+                  {
+                    break;
+                  }
+
+                  char c = string1[0];
+                  int signIx = ( c == '-' || c == '+' ) ? 1 : 0;
+                  StrtoulResult res = Util.strtoul( string1, signIx, 0 );
+                  if ( res.errno == TCL.INTEGER_RANGE )
+                  {
+                    // if (errno == ERANGE), then it was an over/underflow
+                    // problem, but in this method, we only want to know
+                    // yes or no, so bad flow returns false and sets
+                    // the failVarObj to the string length.
+
+                    result = false;
+                    failat = -1;
+                  }
+                  else if ( res.index == 0 )
+                  {
+                    // In this case, nothing like a number was found
+
+                    result = false;
+                    failat = 0;
+                  }
+                  else
+                  {
+                    // Go onto SPACE, since we are
+                    // allowed trailing whitespace
+
+                    failat = res.index;
+                    for ( int i = res.index; i < length1; i++ )
+                    {
+                      if ( !System.Char.IsWhiteSpace( string1[i] ) )
+                      {
+                        result = false;
+                        break;
+                      }
+                    }
+                  }
+                  break;
+                }
+
+              case STR_IS_WIDE:
+                {
+                  if ( obj.InternalRep is TclLong )
+                  {
+                    break;
+                  }
+                  bool isInteger = true;
+                  try
+                  {
+                    TclLong.get( null, obj );
                   }
                   catch ( TclException e )
                   {

@@ -125,12 +125,7 @@ namespace tcl.lang
         // Insert the new elements at the end of the list.
 
         for ( i = 2; i < objv.Length; i++ )
-        {
-          if ( objv[i].ToString().StartsWith( "{*}" ) )
-            TclList.append( interp, varValue, TclString.newInstance( "{" + objv[i].ToString().Substring( 3 ) + "}" ) );
-          else
             TclList.append( interp, varValue, objv[i] );
-        }
 
         // No need to call varValue.invalidateStringRep() since it
         // is called during the TclList.append operation.

@@ -103,19 +103,6 @@ namespace tcl.lang
 
       format = argv[1].ToString().ToCharArray();
       sbuf = new StringBuilder();
-      if ( argv.Length > 2 && argv[2].ToString().StartsWith( "{*}" ) )
-      {
-        // Kludge to workaround incomplete TCL implementation -- 2011-02 NBH
-        {
-          string temp = argv[2].stringRep.Length == 3 ? "" : argv[2].stringRep.Substring( 3 );
-          for ( int i = 3; i < argv.Length; i++ )
-            temp += argv[i].ToString().Replace( "{", "" ).Replace( "}", "" ).Replace( "  ", " " ) + " ";
-          string[] tempSplit = temp.Split( ' ' );
-          Array.Resize( ref argv, 2 + tempSplit.Length );
-          for ( int i = 0; i < tempSplit.Length; i++ )
-            argv[2 + i] = TclString.newInstance( tempSplit[i] );
-        }
-      }
 
       // So, what happens here is to scan the format string one % group
       // at a time, making many individual appends to the StringBuffer.

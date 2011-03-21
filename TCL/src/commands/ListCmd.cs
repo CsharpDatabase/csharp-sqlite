@@ -31,19 +31,6 @@ namespace tcl.lang
       list.preserve();
       try
       {
-        if ( argv.Length > 1 && argv[1].ToString().StartsWith( "{*}" ) )
-        {
-          StringBuilder sbuf = new StringBuilder( argv[1].ToString().Length );
-          StringBuilder sArgv = new StringBuilder( argv[1].ToString() );
-          for ( int i = 3; i < sArgv.Length; i++ )
-          {
-            //if (sArgv[i] == '{' && ++bBrace == 1) continue;
-            //if (sArgv[i] == '}' && --bBrace == 0) continue;
-            sbuf.Append( sArgv[i] );
-          }
-          TclList.append( interp, list, TclString.newInstance( sbuf.ToString().Trim() ) );
-        }
-        else
           for ( int i = 1; i < argv.Length; i++ )
             TclList.append( interp, list, argv[i] );
         interp.setResult( list );
