@@ -222,7 +222,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 					string tvalue_lc = arg_pieces[1].ToLower (System.Globalization.CultureInfo.InvariantCulture).Trim ();
 					switch (token) {
 #if NET_2_0
-						case "DataSource":
+						case "data source":
 #endif
 						case "uri": 
 							if (tvalue_lc.StartsWith ("file://")) {
