@@ -34,19 +34,12 @@
 
 using System;
 using System.Data;
-#if NET_2_0
 using System.Data.Common;
-#endif
 using System.Collections;
 
 namespace Community.CsharpSqlite.SQLiteClient
 {
-	public class SqliteParameterCollection :
-#if NET_2_0
-		DbParameterCollection
-#else
-		IDataParameterCollection, IList
-#endif
+	public class SqliteParameterCollection : DbParameterCollection
 	{
 	
 		#region Fields
@@ -96,42 +89,12 @@ namespace Community.CsharpSqlite.SQLiteClient
 
 		#region Properties
 		
-#if !NET_2_0
-		object IList.this[int index] {
-			get 
-			{
-				return this[index];
-			}
-			set 
-			{
-				CheckSqliteParam (value);
-				this[index] = (SqliteParameter) value;
-			}
-		}
-
-		object IDataParameterCollection.this[string parameterName] {
-			get 
-			{
-				return this[parameterName];
-			}
-			set 
-			{
-				CheckSqliteParam (value);
-				this[parameterName] = (SqliteParameter) value;
-			}
-		}
-#endif
-		
 		private bool isPrefixed (string parameterName)
 		{
 			return parameterName.Length > 1 && (parameterName[0] == ':' || parameterName[0] == '$');
 		}
 
-#if NET_2_0
 		protected override DbParameter GetParameter (int parameterIndex)
-#else
-		SqliteParameter GetParameter (int parameterIndex)
-#endif
 		{
 			if (this.Count >= parameterIndex+1)
 				return (SqliteParameter) numeric_param_list[parameterIndex];
@@ -139,11 +102,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 				throw new IndexOutOfRangeException("The specified parameter index does not exist: " + parameterIndex.ToString());
 		}
 
-#if NET_2_0
 		protected override DbParameter GetParameter (string parameterName)
-#else
-		SqliteParameter GetParameter (string parameterName)
-#endif
 		{
 			if (this.Contains(parameterName))
 				return this[(int) named_param_hash[parameterName]];
@@ -153,11 +112,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 				throw new IndexOutOfRangeException("The specified name does not exist: " + parameterName);
 		}
 
-#if NET_2_0
 		protected override void SetParameter (int parameterIndex, DbParameter parameter)
-#else
-		void SetParameter (int parameterIndex, SqliteParameter parameter)
-#endif
 		{
 			if (this.Count >= parameterIndex+1)
 				numeric_param_list[parameterIndex] = parameter;
@@ -165,11 +120,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 				throw new IndexOutOfRangeException("The specified parameter index does not exist: " + parameterIndex.ToString());
 		}
 
-#if NET_2_0
 		protected override void SetParameter (string parameterName, DbParameter parameter)
-#else
-		void SetParameter (string parameterName, SqliteParameter parameter)
-#endif
 		{
 			if (this.Contains(parameterName))
 				numeric_param_list[(int) named_param_hash[parameterName]] = parameter;
@@ -179,24 +130,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 				throw new IndexOutOfRangeException("The specified name does not exist: " + parameterName);
 		}
 
-#if !NET_2_0
-		public SqliteParameter this[string parameterName] 
-		{
-			get { return GetParameter (parameterName); }
-			set { SetParameter (parameterName, value); }
-		}
-
-		public SqliteParameter this[int parameterIndex]
-		{
-			get { return GetParameter (parameterIndex); }
-			set { SetParameter (parameterIndex, value); }
-		}
-#endif
-
-#if NET_2_0
-		override
-#endif
-		public int Count 
+		public override int Count 
 		{
 			get
 			{
@@ -204,11 +138,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 			}
 		}
 
-#if NET_2_0
 		public override bool IsFixedSize
-#else
-		bool IList.IsFixedSize
-#endif
 		{
 			get
 			{
@@ -216,11 +146,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 			}
 		}
 
-#if NET_2_0
 		public override bool IsReadOnly
-#else
-		bool IList.IsReadOnly
-#endif
 		{
 			get
 			{
@@ -228,25 +154,15 @@ namespace Community.CsharpSqlite.SQLiteClient
 			}
 		}
 
-
-#if NET_2_0
 		public override bool IsSynchronized
-#else
-		bool ICollection.IsSynchronized 
-#endif
 		{
 			get
 			{
 				return this.numeric_param_list.IsSynchronized;
 			}
 		}
-		
 
-#if NET_2_0
 		public override object SyncRoot
-#else
-		object ICollection.SyncRoot 
-#endif
 		{
 			get
 			{
@@ -258,7 +174,6 @@ namespace Community.CsharpSqlite.SQLiteClient
 
 		#region Public Methods
 
-#if NET_2_0
 		public override void AddRange (Array values)
 		{
 			if (values == null || values.Length == 0)
@@ -267,12 +182,8 @@ namespace Community.CsharpSqlite.SQLiteClient
 			foreach (object value in values)
 				Add (value);
 		}
-#endif
-		
-#if NET_2_0
-		override
-#endif
-		public int Add (object value)
+
+		public override int Add (object value)
 		{
 			CheckSqliteParam (value);
 			SqliteParameter sqlp = value as SqliteParameter;
@@ -297,37 +208,24 @@ namespace Community.CsharpSqlite.SQLiteClient
 		{
 			return Add (new SqliteParameter (name, type));
 		}
-		
-#if NET_2_0
-		override
-#endif
-		public void Clear ()
+
+		public override void Clear ()
 		{
 			numeric_param_list.Clear ();
 			named_param_hash.Clear ();
 		}
-	
-#if NET_2_0
-		override
-#endif
-		public void CopyTo (Array array, int index)
+
+		public override void CopyTo (Array array, int index)
 		{
 			this.numeric_param_list.CopyTo(array, index);
 		}
-		
-#if NET_2_0
+
 		public override bool Contains (object value)
-#else
-		bool IList.Contains (object value)
-#endif
 		{
 			return Contains ((SqliteParameter) value);
 		}
-		
-#if NET_2_0
-		override
-#endif
-		public bool Contains (string parameterName)
+
+		public override bool Contains (string parameterName)
 		{
 			return named_param_hash.Contains (parameterName);
 		}
@@ -336,28 +234,18 @@ namespace Community.CsharpSqlite.SQLiteClient
 		{
 			return Contains (param.ParameterName);
 		}
-		
-#if NET_2_0
-		override
-#endif
-		public IEnumerator GetEnumerator ()
+
+		public override IEnumerator GetEnumerator ()
 		{
 			return this.numeric_param_list.GetEnumerator();
 		}
-		
-#if NET_2_0
+
 		public override int IndexOf (object param)
-#else
-		int IList.IndexOf (object param)
-#endif
 		{
 			return IndexOf ((SqliteParameter) param);
 		}
-		
-#if NET_2_0
-		override
-#endif
-		public int IndexOf (string parameterName)
+
+		public override int IndexOf (string parameterName)
 		{
 			if (isPrefixed (parameterName)){
 				string sub = parameterName.Substring (1);
@@ -369,16 +257,13 @@ namespace Community.CsharpSqlite.SQLiteClient
 			else 
 				return -1;
 		}
-		
+
 		public int IndexOf (SqliteParameter param)
 		{
 			return IndexOf (param.ParameterName);
 		}
-		
-#if NET_2_0
-		override
-#endif
-		public void Insert (int index, object value)
+
+		public override void Insert (int index, object value)
 		{
 			CheckSqliteParam (value);
 			if (numeric_param_list.Count == index) 
@@ -390,28 +275,19 @@ namespace Community.CsharpSqlite.SQLiteClient
 			numeric_param_list.Insert (index, value);
 			RecreateNamedHash ();
 		}
-		
-#if NET_2_0
-		override
-#endif
-		public void Remove (object value)
+
+		public override void Remove (object value)
 		{
 			CheckSqliteParam (value);
 			RemoveAt ((SqliteParameter) value);
 		}
-		
-#if NET_2_0
-		override
-#endif
-		public void RemoveAt (int index)
+
+		public override void RemoveAt (int index)
 		{
 			RemoveAt (((SqliteParameter) numeric_param_list[index]).ParameterName);
 		}
-		
-#if NET_2_0
-		override
-#endif
-		public void RemoveAt (string parameterName)
+
+		public override void RemoveAt (string parameterName)
 		{
 			if (!named_param_hash.Contains (parameterName))
 				throw new ApplicationException ("Parameter " + parameterName + " not found");

@@ -37,25 +37,18 @@
 using System;
 using System.Text;
 using System.Data;
-#if NET_2_0
 using System.Data.Common;
-#endif
 using Community.CsharpSqlite;
 using System.Globalization;
 
 namespace Community.CsharpSqlite.SQLiteClient
 {
-#if NET_2_0
 	public class SqliteCommand : DbCommand, ICloneable
-#else
-	public class SqliteCommand : IDbCommand, ICloneable
-#endif
 	{
 		#region Fields
 
 		private SqliteConnection parent_conn;
-		//private SqliteTransaction transaction;
-		private IDbTransaction transaction;
+		private SqliteTransaction transaction;
 		private string sql;
 		private int timeout;
 		private CommandType type;
@@ -84,27 +77,18 @@ namespace Community.CsharpSqlite.SQLiteClient
 			parent_conn = dbConn;
 		}
 
-		public SqliteCommand( string sqlText, SqliteConnection dbConn, IDbTransaction trans )
+		public SqliteCommand( string sqlText, SqliteConnection dbConn, SqliteTransaction trans )
 		{
 			sql = sqlText;
 			parent_conn = dbConn;
 			transaction = trans;
 		}
 
-#if !NET_2_0
-		public void Dispose()
-		{
-		}
-#endif
-
 		#endregion
 
 		#region Properties
 
-#if NET_2_0
-		override
-#endif
-		public string CommandText
+		public override string CommandText
 		{
 			get
 			{
@@ -117,10 +101,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 			}
 		}
 
-#if NET_2_0
-		override
-#endif
-		public int CommandTimeout
+		public override int CommandTimeout
 		{
 			get
 			{
@@ -132,10 +113,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 			}
 		}
 
-#if NET_2_0
-		override
-#endif
-		public CommandType CommandType
+		public override CommandType CommandType
 		{
 			get
 			{
@@ -147,13 +125,12 @@ namespace Community.CsharpSqlite.SQLiteClient
 			}
 		}
 
-#if NET_2_0
 		protected override DbConnection DbConnection
 		{
 			get { return parent_conn; }
 			set { parent_conn = (SqliteConnection)value; }
 		}
-#endif
+
 		public SqliteConnection Connection
 		{
 			get
@@ -166,29 +143,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 			}
 		}
 
-#if !NET_2_0
-		IDbConnection IDbCommand.Connection
-		{
-			get
-			{
-				return parent_conn;
-			}
-			set
-			{
-				if ( !( value is SqliteConnection ) )
-				{
-					throw new InvalidOperationException( "Can't set Connection to something other than a SqliteConnection" );
-				}
-				parent_conn = (SqliteConnection)value;
-			}
-		}
-#endif
-
-		public
-#if NET_2_0
-		new
-#endif
-		SqliteParameterCollection Parameters
+		public new SqliteParameterCollection Parameters
 		{
 			get
 			{
@@ -198,56 +153,30 @@ namespace Community.CsharpSqlite.SQLiteClient
 			}
 		}
 
-#if NET_2_0
 		protected override DbParameterCollection DbParameterCollection
 		{
-			get { return (DbParameterCollection) Parameters; }
-		}
-#endif
-
-#if !NET_2_0
-		IDataParameterCollection IDbCommand.Parameters
-		{
-			get
-			{
-				return Parameters;
-			}
+			get { return Parameters; }
 		}
 
-#endif
-
-#if NET_2_0
 		protected override DbTransaction DbTransaction
-#else
-		public IDbTransaction Transaction
-#endif
 		{
 			get
 			{
-#if NET_2_0
-				return (DbTransaction)transaction;
-#else
 				return transaction;
-#endif
 			}
 			set
 			{
-				transaction = value;
+				transaction = (SqliteTransaction)value;
 			}
 		}
 
-#if NET_2_0
 		public override bool DesignTimeVisible
 		{
 			get { return _designTimeVisible; }
 			set { _designTimeVisible = value; }
 		}
-#endif
 
-#if NET_2_0
-		override
-#endif
-		public UpdateRowSource UpdatedRowSource
+		public override UpdateRowSource UpdatedRowSource
 		{
 			get
 			{
@@ -430,17 +359,12 @@ namespace Community.CsharpSqlite.SQLiteClient
 		{
 			return new SqliteCommand( sql, parent_conn, transaction );
 		}
-#if NET_2_0
-		override
-#endif
-		public void Cancel()
+
+		public override void Cancel()
 		{
 		}
 
-#if NET_2_0
-		override
-#endif
-		public void Prepare()
+		public override void Prepare()
 		{
 			// There isn't much we can do here.	If a table schema
 			// changes after preparing a statement, Sqlite bails,
@@ -452,36 +376,19 @@ namespace Community.CsharpSqlite.SQLiteClient
 			prepared = true;
 		}
 
-#if !NET_2_0
-		IDbDataParameter IDbCommand.CreateParameter()
-		{
-			return CreateParameter();
-		}
-#endif
-
-#if NET_2_0
 		protected override DbParameter CreateDbParameter ()
-#else
-		public SqliteParameter CreateParameter()
-#endif
 		{
 			return new SqliteParameter();
 		}
 
-#if NET_2_0
-		override
-#endif
-		public int ExecuteNonQuery()
+		public override int ExecuteNonQuery()
 		{
 			int rows_affected;
 			ExecuteReader( CommandBehavior.Default, false, out rows_affected );
 			return rows_affected;
 		}
 
-#if NET_2_0
-		override
-#endif
-		public object ExecuteScalar()
+		public override object ExecuteScalar()
 		{
 			SqliteDataReader r = (SqliteDataReader)ExecuteReader();
 			if ( r == null || !r.Read() )
@@ -493,30 +400,12 @@ namespace Community.CsharpSqlite.SQLiteClient
 			return o;
 		}
 
-#if !NET_2_0
-		IDataReader IDbCommand.ExecuteReader()
-		{
-			return ExecuteReader();
-		}
-
-		IDataReader IDbCommand.ExecuteReader( CommandBehavior behavior )
-		{
-			return ExecuteReader( behavior );
-		}
-
-		public SqliteDataReader ExecuteReader()
-		{
-			return ExecuteReader( CommandBehavior.Default );
-		}
-#endif
-
 		public SqliteDataReader ExecuteReader( CommandBehavior behavior )
 		{
 			int r;
 			return ExecuteReader( behavior, true, out r );
 		}
 
-#if NET_2_0
 		public new SqliteDataReader ExecuteReader ()
 		{
 			return ExecuteReader (CommandBehavior.Default);
@@ -524,9 +413,8 @@ namespace Community.CsharpSqlite.SQLiteClient
 
 		protected override DbDataReader ExecuteDbDataReader (CommandBehavior behavior)
 		{
-			return (DbDataReader) ExecuteReader (behavior);
+			return ExecuteReader (behavior);
 		}
-#endif
 
 		public SqliteDataReader ExecuteReader( CommandBehavior behavior, bool want_results, out int rows_affected )
 		{

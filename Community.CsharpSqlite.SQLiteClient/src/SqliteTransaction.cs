@@ -27,18 +27,11 @@
 
 using System;
 using System.Data;
-#if NET_2_0
 using System.Data.Common;
-#endif
 
 namespace Community.CsharpSqlite.SQLiteClient
 {
-	public sealed class SqliteTransaction :
-#if NET_2_0
-		DbTransaction
-#else
-		IDbTransaction
-#endif
+	public sealed class SqliteTransaction : DbTransaction
 	{
 	
 		#region Fields
@@ -56,40 +49,20 @@ namespace Community.CsharpSqlite.SQLiteClient
 			_open = true;
 		}
 
-#if !NET_2_0
-		void System.IDisposable.Dispose()
-		{
-		}
-#endif
-
 		#endregion
 
 		#region Public Properties
 
-#if NET_2_0
 		protected override DbConnection DbConnection
-#else
-		public IDbConnection Connection
-#endif
 		{
 			get { return _connection; } 
-#if !NET_2_0
-			set { _connection = (SqliteConnection)value; }
-#endif
 		}
 
-#if NET_2_0
-		override
-#endif
-		public IsolationLevel IsolationLevel
+		public override IsolationLevel IsolationLevel
 		{
 			get { return _isolationLevel; }
-#if !NET_2_0
-			set { _isolationLevel = value; }
-#endif
 		}
 
-#if NET_2_0
 		internal void SetConnection (DbConnection conn)
 		{
 			_connection = (SqliteConnection)conn;
@@ -99,16 +72,12 @@ namespace Community.CsharpSqlite.SQLiteClient
 		{
 			_isolationLevel = level;
 		}
-#endif
 
 		#endregion
 		
 		#region Public Methods
 
-#if NET_2_0
-		override
-#endif
-		public void Commit()
+		public override void Commit()
 		{
 			if (_connection == null || _connection.State != ConnectionState.Open)
 				throw new InvalidOperationException("Connection must be valid and open to commit transaction");
@@ -127,10 +96,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 			}
 		}
 
-#if NET_2_0
-		override
-#endif
-		public void Rollback()
+		public override void Rollback()
 		{
 			if (_connection == null || _connection.State != ConnectionState.Open)
 				throw new InvalidOperationException("Connection must be valid and open to commit transaction");

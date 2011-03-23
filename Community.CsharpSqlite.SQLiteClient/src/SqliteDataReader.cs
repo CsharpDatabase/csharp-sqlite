@@ -38,12 +38,7 @@ using Community.CsharpSqlite;
 
 namespace Community.CsharpSqlite.SQLiteClient
 {
-	public class SqliteDataReader :
-#if NET_2_0
-		DbDataReader, IDataReader, IDisposable, IDataRecord
-#else
-		MarshalByRefObject, IEnumerable, IDataReader, IDisposable, IDataRecord
-#endif
+	public class SqliteDataReader : DbDataReader, IDataReader, IDisposable, IDataRecord
 	{
 
 		#region Fields
@@ -67,12 +62,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 			command = cmd;
 			rows = new ArrayList ();
 			column_names_sens = new Hashtable ();
-#if NET_2_0
 			column_names_insens = new Hashtable (StringComparer.InvariantCultureIgnoreCase);
-#else
-			column_names_insens = new Hashtable (CaseInsensitiveHashCodeProvider.DefaultInvariant,
-							     CaseInsensitiveComparer.DefaultInvariant);
-#endif
 			closed = false;
 			current_row = -1;
 			reading = true;
@@ -84,47 +74,29 @@ namespace Community.CsharpSqlite.SQLiteClient
 
 		#region Properties
 		
-#if NET_2_0
-		override
-#endif
-		public int Depth {
+		public override int Depth {
 			get { return 0; }
 		}
-		
-#if NET_2_0
-		override
-#endif
-		public int FieldCount {
+
+		public override int FieldCount {
 			get { return columns.Length; }
 		}
-		
-#if NET_2_0
-		override
-#endif
-		public object this[string name] {
+
+		public override object this[string name] {
 			get {
 				return GetValue (GetOrdinal (name));
 			}
 		}
-		
-#if NET_2_0
-		override
-#endif
-		public object this[int i] {
+
+		public override object this[int i] {
 			get { return GetValue (i); }
 		}
-		
-#if NET_2_0
-		override
-#endif
-		public bool IsClosed {
+
+		public override bool IsClosed {
 			get { return closed; }
 		}
-		
-#if NET_2_0
-		override
-#endif
-		public int RecordsAffected {
+
+		public override int RecordsAffected {
 			get { return records_affected; }
 		}
 		
@@ -246,41 +218,24 @@ namespace Community.CsharpSqlite.SQLiteClient
 		#endregion
 
 		#region  Public Methods
-		
-#if NET_2_0
-		override
-#endif
-		public void Close ()
+
+		public override void Close ()
 		{
 			closed = true;
 		}
 		
-#if NET_2_0
 		protected override void Dispose (bool disposing)
 		{
 			if (disposing)
 				Close ();
 		}
-#else
-		public void Dispose ()
-		{
-			Close ();
-		}
-#endif
-		
-#if NET_2_0
+
 		public override IEnumerator GetEnumerator ()
-#else
-		IEnumerator IEnumerable.GetEnumerator () 
-#endif
 		{
 			return new DbEnumerator (this);
 		}
 		
-#if NET_2_0
-		override
-#endif
-		public DataTable GetSchemaTable () 
+		public override DataTable GetSchemaTable () 
 		{
 			DataTable dataTableSchema = new DataTable ();
 			
@@ -342,21 +297,15 @@ namespace Community.CsharpSqlite.SQLiteClient
 			
 			return dataTableSchema;
 		}
-		
-#if NET_2_0
-		override
-#endif
-		public bool NextResult ()
+
+		public override bool NextResult ()
 		{
 			current_row++;
 			
 			return (current_row < rows.Count);
 		}
-		
-#if NET_2_0
-		override
-#endif
-		public bool Read ()
+
+		public override bool Read ()
 		{
 			return NextResult ();
 		}
@@ -364,98 +313,61 @@ namespace Community.CsharpSqlite.SQLiteClient
 		#endregion
 		
 		#region IDataRecord getters
-		
-#if NET_2_0
-		override
-#endif
-		public bool GetBoolean (int i)
+
+		public override bool GetBoolean (int i)
 		{
 			return Convert.ToBoolean (((object[]) rows[current_row])[i]);
 		}
-		
-#if NET_2_0
-		override
-#endif
-		public byte GetByte (int i)
+
+		public override byte GetByte (int i)
 		{
 			return Convert.ToByte (((object[]) rows[current_row])[i]);
 		}
-		
-#if NET_2_0
-		override
-#endif
-		public long GetBytes (int i, long fieldOffset, byte[] buffer, int bufferOffset, int length)
+
+		public override long GetBytes (int i, long fieldOffset, byte[] buffer, int bufferOffset, int length)
 		{
 			byte[] data = (byte[])(((object[]) rows[current_row])[i]);
 			if (buffer != null)
 				Array.Copy (data, fieldOffset, buffer, bufferOffset, length);
 			return data.LongLength - fieldOffset;
 		}
-		
-#if NET_2_0
-		override
-#endif
-		public char GetChar (int i)
+
+		public override char GetChar (int i)
 		{
 			return Convert.ToChar (((object[]) rows[current_row])[i]);
 		}
-		
-#if NET_2_0
-		override
-#endif
-		public long GetChars (int i, long fieldOffset, char[] buffer, int bufferOffset, int length)
+
+		public override long GetChars (int i, long fieldOffset, char[] buffer, int bufferOffset, int length)
 		{
 			char[] data = (char[])(((object[]) rows[current_row])[i]);
 			if (buffer != null)
 				Array.Copy (data, fieldOffset, buffer, bufferOffset, length);
 			return data.LongLength - fieldOffset;
 		}
-		
-#if !NET_2_0
-		public IDataReader GetData (int i)
-		{
-			return ((IDataReader) this [i]);
-		}
-#endif
-		
-#if NET_2_0
-		override
-#endif
-		public string GetDataTypeName (int i)
+
+		public override string GetDataTypeName (int i)
 		{
 			if (decltypes != null && decltypes[i] != null)
 				return decltypes[i];
 			return "text"; // SQL Lite data type
 		}
-		
-#if NET_2_0
-		override
-#endif
-		public DateTime GetDateTime (int i)
+
+		public override DateTime GetDateTime (int i)
 		{
 			return Convert.ToDateTime (((object[]) rows[current_row])[i]);
 		}
-		
-#if NET_2_0
-		override
-#endif
-		public decimal GetDecimal (int i)
+
+		public override decimal GetDecimal (int i)
 		{
 			return Convert.ToDecimal (((object[]) rows[current_row])[i]);
 		}
-		
-#if NET_2_0
-		override
-#endif
-		public double GetDouble (int i)
+
+		public override double GetDouble (int i)
 		{
 			return Convert.ToDouble (((object[]) rows[current_row])[i]);
 		}
-		
-#if NET_2_0
-		override
-#endif
-		public Type GetFieldType (int i)
+
+		public override Type GetFieldType (int i)
 		{
 			int row = current_row;
 			if (row == -1 && rows.Count == 0) return typeof(string);
@@ -470,19 +382,13 @@ namespace Community.CsharpSqlite.SQLiteClient
 			// be the same as the rows are read if different
 			// types of information are stored in the column.
 		}
-		
-#if NET_2_0
-		override
-#endif
-		public float GetFloat (int i)
+
+		public override float GetFloat (int i)
 		{
 			return Convert.ToSingle (((object[]) rows[current_row])[i]);
 		}
-		
-#if NET_2_0
-		override
-#endif
-		public Guid GetGuid (int i)
+
+		public override Guid GetGuid (int i)
 		{
 			object value = GetValue (i);
 			if (!(value is Guid)) {
@@ -492,43 +398,28 @@ namespace Community.CsharpSqlite.SQLiteClient
 			}
 			return ((Guid) value);
 		}
-		
-#if NET_2_0
-		override
-#endif
-		public short GetInt16 (int i)
+
+		public override short GetInt16 (int i)
 		{
 			return Convert.ToInt16 (((object[]) rows[current_row])[i]);
 		}
-		
-#if NET_2_0
-		override
-#endif
-		public int GetInt32 (int i)
+
+		public override int GetInt32 (int i)
 		{
 			return Convert.ToInt32 (((object[]) rows[current_row])[i]);
 		}
-		
-#if NET_2_0
-		override
-#endif
-		public long GetInt64 (int i)
+
+		public override long GetInt64 (int i)
 		{
 			return Convert.ToInt64 (((object[]) rows[current_row])[i]);
 		}
-		
-#if NET_2_0
-		override
-#endif
-		public string GetName (int i)
+
+		public override string GetName (int i)
 		{
 			return columns[i];
 		}
-		
-#if NET_2_0
-		override
-#endif
-		public int GetOrdinal (string name)
+
+		public override int GetOrdinal (string name)
 		{
 			object v = column_names_sens[name];
 			if (v == null)
@@ -537,29 +428,20 @@ namespace Community.CsharpSqlite.SQLiteClient
 				throw new ArgumentException("Column does not exist.");
 			return (int) v;
 		}
-		
-#if NET_2_0
-		override
-#endif
-		public string GetString (int i)
+
+		public override string GetString (int i)
 		{
 			if (((object[]) rows[current_row])[i] != null) 
 				return (((object[]) rows[current_row])[i]).ToString();
 			else return null;
 		}
-		
-#if NET_2_0
-		override
-#endif
-		public object GetValue (int i)
+
+		public override object GetValue (int i)
 		{
 			return ((object[]) rows[current_row])[i];
 		}
-		
-#if NET_2_0
-		override
-#endif
-		public int GetValues (object[] values)
+
+		public override int GetValues (object[] values)
 		{
 			int num_to_fill = System.Math.Min (values.Length, columns.Length);
 			for (int i = 0; i < num_to_fill; i++) {
@@ -571,25 +453,20 @@ namespace Community.CsharpSqlite.SQLiteClient
 			}
 			return num_to_fill;
 		}
-		
-#if NET_2_0
-		override
-#endif
-		public bool IsDBNull (int i)
+
+		public override bool IsDBNull (int i)
 		{
 			return (((object[]) rows[current_row])[i] == null);
 		}
 
-#if NET_2_0
 		public override bool HasRows {
 			get { return rows.Count > 0; }
 		}
 
-		// [MonoTODO]
 		public override int VisibleFieldCount {
 			get { return FieldCount; }
 		}
-#endif
+
 		#endregion
 	}
 }

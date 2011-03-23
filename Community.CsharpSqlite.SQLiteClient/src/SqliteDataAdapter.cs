@@ -41,21 +41,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 	/// to fill the <see cref="DataSet">DataSet</see> and update the data source.
 	/// </summary>
 	public class SqliteDataAdapter : DbDataAdapter
-#if !NET_2_0
-	, IDbDataAdapter
-#endif
 	{
-		#region Fields
-		
-#if !NET_2_0
-		private IDbCommand _deleteCommand;
-		private IDbCommand _insertCommand;
-		private IDbCommand _selectCommand;
-		private IDbCommand _updateCommand;
-#endif
-		
-		#endregion
-
 		#region Public Events
 		
 		/// <summary>
@@ -88,11 +74,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 		/// with the specified SqliteCommand as the SelectCommand property.
 		/// </summary>
 		/// <param name="selectCommand"></param>
-#if NET_2_0
 		public SqliteDataAdapter(DbCommand selectCommand)
-#else
-		public SqliteDataAdapter(IDbCommand selectCommand) 
-#endif
 		{
 			SelectCommand = selectCommand;
 		}
@@ -105,13 +87,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 		/// <param name="connection"></param>
 		public SqliteDataAdapter(string selectCommandText, SqliteConnection connection)
 		{
-#if NET_2_0
-			DbCommand cmd;
-#else
-			IDbCommand cmd;
-#endif
-
-			cmd = connection.CreateCommand();
+			DbCommand cmd = connection.CreateCommand();
 			cmd.CommandText = selectCommandText;
 			SelectCommand = cmd;
 		}
@@ -126,48 +102,6 @@ namespace Community.CsharpSqlite.SQLiteClient
 		{
 		}
 		
-		#endregion
-
-		#region Public Properties
-		
-#if !NET_2_0
-		/// <summary>
-		/// Gets or sets a Transact-SQL statement or stored procedure to delete 
-		/// records from the data set.
-		/// </summary>
-    public new IDbCommand DeleteCommand
-    {
-			get { return _deleteCommand; }
-			set { _deleteCommand = value; }
-		}
-		
-		/// <summary>
-		/// Gets or sets a Transact-SQL statement or stored procedure to insert 
-		/// new records into the data source.
-		/// </summary>
-		public new IDbCommand InsertCommand {
-			get { return _insertCommand; }
-			set { _insertCommand = value; }
-		}
-		
-		/// <summary>
-		/// Gets or sets a Transact-SQL statement or stored procedure used to 
-		/// select records in the data source.
-		/// </summary>
-		public new IDbCommand SelectCommand {
-			get { return _selectCommand; }
-			set { _selectCommand = value; }
-		}
-		
-		/// <summary>
-		/// Gets or sets a Transact-SQL statement or stored procedure used to 
-		/// update records in the data source.
-		/// </summary>
-		public new IDbCommand UpdateCommand {
-			get { return _updateCommand; }
-			set { _updateCommand = value; }
-		}
-#endif		
 		#endregion
 
 		#region Protected Methods

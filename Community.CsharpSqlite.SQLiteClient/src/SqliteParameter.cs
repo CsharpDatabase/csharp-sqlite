@@ -31,18 +31,11 @@
 
 using System;
 using System.Data;
-#if NET_2_0
 using System.Data.Common;
-#endif
 
 namespace Community.CsharpSqlite.SQLiteClient
 {
-	public class SqliteParameter :
-#if NET_2_0
-		DbParameter
-#else
-		IDbDataParameter
-#endif
+	public class SqliteParameter : DbParameter
 	{
 
 		#region Fields
@@ -101,11 +94,8 @@ namespace Community.CsharpSqlite.SQLiteClient
 		#endregion
 
 		#region Properties
-		
-#if NET_2_0
-		override
-#endif
-		public DbType DbType {
+
+		public override DbType DbType {
 			get { return type; }
 			set {
 				if (!typeSet) {
@@ -117,29 +107,18 @@ namespace Community.CsharpSqlite.SQLiteClient
 					originalType = type;
 			}
 		}
-	
-#if NET_2_0
-		override
-#endif
-		public ParameterDirection Direction {
+
+		public override ParameterDirection Direction {
 			get { return direction; }
 			set { direction = value; }
 		}
 	
-#if NET_2_0
-		override
-#endif
-		public bool IsNullable {
+		public override bool IsNullable {
 			get { return isNullable; }
-#if NET_2_0
 			set { isNullable = value; }
-#endif
 		}
 
-#if NET_2_0
-		override
-#endif
-		public string ParameterName {
+		public override string ParameterName {
 			get { return name; }
 			set { name = value; }
 		}
@@ -154,41 +133,27 @@ namespace Community.CsharpSqlite.SQLiteClient
 			set { scale = value; }
 		}
 
-#if NET_2_0
-		override
-#endif
-		public int Size {
+		public override int Size {
 			get { return size; }
 			set { size = value; }
 		}
-		
-#if NET_2_0
-		override
-#endif
-		public string SourceColumn {
+
+		public override string SourceColumn {
 			get { return source_column; }
 			set { source_column = value; }
 		}
 
-#if NET_2_0
 		public override bool SourceColumnNullMapping {
 			get { return sourceColumnNullMapping; }
 			set { sourceColumnNullMapping = value; }
 		}
-#endif
 
-#if NET_2_0
-		override
-#endif
-		public DataRowVersion SourceVersion {
+		public override DataRowVersion SourceVersion {
 			get { return row_version; }
 			set { row_version = value; }
 		}
-		
-#if NET_2_0
-		override
-#endif
-		public object Value {
+
+		public override object Value {
 			get { return param_value; }
 			set { param_value = value; }
 		}
@@ -196,13 +161,15 @@ namespace Community.CsharpSqlite.SQLiteClient
 		#endregion
 
 		#region methods
-#if NET_2_0
+
 		public override void ResetDbType ()
 		{
 			type = originalType;
 		}
-#endif
+
 		#endregion
 	}
-  public class SQLiteParameter : SqliteParameter { }
+
+	// this causes problems in VB.NET, see issue 104
+	public class SQLiteParameter : SqliteParameter { }
 }

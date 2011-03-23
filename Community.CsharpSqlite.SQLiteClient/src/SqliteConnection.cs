@@ -32,24 +32,18 @@
 
 using System;
 using System.Data;
-#if NET_2_0
 using System.IO;
 using System.Data.Common;
-#endif
 using System.Text;
 using Community.CsharpSqlite;
 
 namespace Community.CsharpSqlite.SQLiteClient
 {
-#if NET_2_0
 	public class SqliteConnection : DbConnection, ICloneable
-#else
-		public class SqliteConnection : IDbConnection, ICloneable
-#endif
 	{
 
 #region Fields
-		
+
 		private string conn_str;
 		private string db_file;
 		private int db_mode;
@@ -60,9 +54,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 		private ConnectionState state;
 		private Encoding encoding;
 		private int busy_timeout;
-#if NET_2_0
 		bool disposed;
-#endif
 
 #endregion
 
@@ -84,13 +76,6 @@ namespace Community.CsharpSqlite.SQLiteClient
 			ConnectionString = connstring;
 		}
 
-
-#if !NET_2_0
-		public void Dispose ()
-		{
-			Close ();
-		}
-#else
 		protected override void Dispose (bool disposing)
 		{
 			try {
@@ -103,41 +88,28 @@ namespace Community.CsharpSqlite.SQLiteClient
 				base.Dispose (disposing);
 			}
 		}
-#endif
-						
+
 #endregion
 
 #region Properties
-		
-#if NET_2_0
-		override
-#endif
-			public string ConnectionString {
+
+		public override string ConnectionString {
 			get { return conn_str; }
 			set { SetConnectionString(value); }
 		}
-		
-#if NET_2_0
-		override
-#endif
-			public int ConnectionTimeout {
+
+		public override int ConnectionTimeout {
 			get { return 0; }
 		}
-	
-#if NET_2_0
-		override
-#endif
-			public string Database {
+
+		public override string Database {
 			get { return db_file; }
 		}
-		
-#if NET_2_0
-		override
-#endif
-			public ConnectionState State {
+
+		public override ConnectionState State {
 			get { return state; }
 		}
-		
+
 		public Encoding Encoding {
 			get { return encoding; }
 		}
@@ -146,30 +118,25 @@ namespace Community.CsharpSqlite.SQLiteClient
 			get { return db_version; }
 		}
 
-#if NET_2_0
-		override
-#endif
-		public string ServerVersion
+		public override string ServerVersion
 		{
-		get { return Sqlite3.sqlite3_libversion(); }
+			get { return Sqlite3.sqlite3_libversion(); }
 		}
 
 		internal Sqlite3.sqlite3 Handle2
-			{
-				get { return sqlite_handle2; }
-			}
+		{
+			get { return sqlite_handle2; }
+		}
+        
 		internal IntPtr Handle {
 			get { return sqlite_handle; }
 		}
 		
-#if NET_2_0
 		public override string DataSource {
 			get { return db_file; }
 		}
 
-#endif
-
-	public int LastInsertRowId {
+		public int LastInsertRowId {
 			get {
 				//if (Version == 3)
 					return (int) Sqlite3.sqlite3_last_insert_rowid(Handle2);
@@ -184,7 +151,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 				return busy_timeout;  
 			}
 			set {
-					busy_timeout = value < 0 ? 0 : value;
+				busy_timeout = value < 0 ? 0 : value;
 			}
 		}
 		
@@ -221,9 +188,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 					string tvalue = arg_pieces[1].Trim ();
 					string tvalue_lc = arg_pieces[1].ToLower (System.Globalization.CultureInfo.InvariantCulture).Trim ();
 					switch (token) {
-#if NET_2_0
 						case "data source":
-#endif
 						case "uri": 
 							if (tvalue_lc.StartsWith ("file://")) {
 								db_file = tvalue.Substring (7);
@@ -231,7 +196,6 @@ namespace Community.CsharpSqlite.SQLiteClient
 								db_file = tvalue.Substring (5);
 							} else if (tvalue_lc.StartsWith ("/")) {
 								db_file = tvalue;
-#if NET_2_0
 							} else if (tvalue_lc.StartsWith ("|DataDirectory|",
 											 StringComparison.InvariantCultureIgnoreCase)) {
 								AppDomainSetup ads = AppDomain.CurrentDomain.SetupInformation;
@@ -240,7 +204,6 @@ namespace Community.CsharpSqlite.SQLiteClient
 												 tvalue_lc.Substring (15));
 								
 								db_file = Path.Combine (ads.ApplicationBase, filePath);
-#endif
 							} else {
 								throw new InvalidOperationException ("Invalid connection string: invalid URI");
 							}
@@ -299,50 +262,31 @@ namespace Community.CsharpSqlite.SQLiteClient
 		{
 			return new SqliteConnection (ConnectionString);
 		}
-		
-#if NET_2_0
-		// [MonoTODO ("handle IsolationLevel")]
+
 		protected override DbTransaction BeginDbTransaction (IsolationLevel il)
-#else
-			public IDbTransaction BeginTransaction ()
-#endif
 		{
 			if (state != ConnectionState.Open)
 				throw new InvalidOperationException("Invalid operation: The connection is closed");
 			
 			SqliteTransaction t = new SqliteTransaction();
-#if NET_2_0
 			t.SetConnection (this);
-#else
-			t.Connection = this;
-#endif
 			SqliteCommand cmd = (SqliteCommand)this.CreateCommand();
 			cmd.CommandText = "BEGIN";
 			cmd.ExecuteNonQuery();
 			return t;
 		}
 
-#if NET_2_0
 		public new DbTransaction BeginTransaction ()
-			{
-				return BeginDbTransaction (IsolationLevel.Unspecified);
+		{
+			return BeginDbTransaction (IsolationLevel.Unspecified);
 		}
 
-			public new DbTransaction BeginTransaction (IsolationLevel il)
-				{
-					return BeginDbTransaction (il);
-			}
-#else
-			public IDbTransaction BeginTransaction (IsolationLevel il)
+		public new DbTransaction BeginTransaction (IsolationLevel il)
 		{
-			throw new InvalidOperationException();
+			return BeginDbTransaction (il);
 		}
-#endif
-		
-#if NET_2_0
-		override
-#endif
-		public void Close ()
+
+		public override void Close ()
 		{
 			if (state != ConnectionState.Open) {
 				return;
@@ -357,37 +301,20 @@ namespace Community.CsharpSqlite.SQLiteClient
 				//Sqlite.sqlite_close (sqlite_handle);
 			sqlite_handle = IntPtr.Zero;
 		}
-		
-#if NET_2_0
-		override
-#endif
-		public void ChangeDatabase (string databaseName)
+
+		public override void ChangeDatabase (string databaseName)
 		{
 			Close ();
 			db_file = databaseName;
 			Open ();
 		}
-		
-#if !NET_2_0
-		IDbCommand IDbConnection.CreateCommand ()
-		{
-			return CreateCommand ();
-		}
-#endif
-		
-#if NET_2_0
+
 		protected override DbCommand CreateDbCommand ()
-#else
-			public SqliteCommand CreateCommand ()
-#endif
 		{
 			return new SqliteCommand (null, this);
 		}
-		
-#if NET_2_0
-		override
-#endif
-		public void Open ()
+
+		public override void Open ()
 		{
 			if (conn_str == null) {
 				throw new InvalidOperationException ("No database specified");
@@ -419,8 +346,8 @@ namespace Community.CsharpSqlite.SQLiteClient
 			 */
 			if (Version == 3) {
 				sqlite_handle = (IntPtr)1;
-			int flags = Sqlite3.SQLITE_OPEN_NOMUTEX | Sqlite3.SQLITE_OPEN_READWRITE | Sqlite3.SQLITE_OPEN_CREATE;
-			int err = Sqlite3.sqlite3_open_v2( db_file, ref sqlite_handle2, flags, null );
+				int flags = Sqlite3.SQLITE_OPEN_NOMUTEX | Sqlite3.SQLITE_OPEN_READWRITE | Sqlite3.SQLITE_OPEN_CREATE;
+				int err = Sqlite3.sqlite3_open_v2( db_file, ref sqlite_handle2, flags, null );
 				//int err = Sqlite.sqlite3_open16(db_file, out sqlite_handle);
 				if (err == (int)SqliteError.ERROR)
 					throw new ApplicationException (Sqlite3.sqlite3_errmsg(sqlite_handle2));
@@ -434,10 +361,6 @@ namespace Community.CsharpSqlite.SQLiteClient
 					cmd.CommandText = "pragma hexkey='" + db_password + "'";
 					cmd.ExecuteNonQuery();
 				}
-		}
-		else
-		
-		{
 			}
 			state = ConnectionState.Open;
 		}
