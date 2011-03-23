@@ -226,7 +226,7 @@ namespace Community.CsharpSqlite
     public static Action<sqlite3_context, String, Int32, Int32, dxDel> ResultText_Offset = sqlite3_result_text;
     public static Action<sqlite3_context, sqlite3_value> ResultValue = sqlite3_result_value;
     public static Action<sqlite3_context, Int32> ResultZeroblob = sqlite3_result_zeroblob;
-    public static Action<sqlite3_context, Int32, String, dxDel> SetAuxdata = sqlite3_set_auxdata;
+    public static Action<sqlite3_context, Int32, String> SetAuxdata = sqlite3_set_auxdata;
 
     //API Simplifications -- Functions
     public delegate Int32 FinalizeDelegate( sqlite3_stmt pStmt );
@@ -277,7 +277,7 @@ namespace Community.CsharpSqlite
     public static PrepareDelegateNoTail PrepareV2NoTail = sqlite3_prepare_v2;
 
     public static Func<sqlite3_context, Int32, Mem> AggregateContext = sqlite3_aggregate_context;
-    public static Func<sqlite3_context, Int32, String> GetAuxdata = sqlite3_get_auxdata;
+    public static Func<sqlite3_context, Int32, Object> GetAuxdata = sqlite3_get_auxdata;
     public static Func<sqlite3_context, sqlite3> ContextDbHandle = sqlite3_context_db_handle;
     public static Func<sqlite3_context, Object> UserData = sqlite3_user_data;
 

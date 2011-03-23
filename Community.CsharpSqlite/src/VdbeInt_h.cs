@@ -364,9 +364,10 @@ static bool memIsValid( Mem M ) { return true; }
 */
     public class AuxData
     {
-      public string pAux;                     /* Aux data for the i-th argument */
-      public dxDel xDelete; //(void *);      /* Destructor for the aux data */
+      public object pAux;                     /* Aux data for the i-th argument */
+      //(void *);      /* Destructor for the aux data */
     };
+
     public class VdbeFunc : FuncDef
     {
       public FuncDef pFunc;                   /* The definition of the function */

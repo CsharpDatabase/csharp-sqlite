@@ -244,7 +244,7 @@ sqlite3_result_text16(pCtx, zVal, -1, destructor);
         if ( z != null )
         {
           int n;
-          string zAux = sqlite3_get_auxdata( pCtx, i );
+          string zAux = (string)sqlite3_get_auxdata( pCtx, i );
           if ( zAux != null )
           {
             zRet.Append( '1' );//[i * 2] = '1';
@@ -259,7 +259,7 @@ sqlite3_result_text16(pCtx, zVal, -1, destructor);
           if ( zAux != null )
           {
             zAux = z.Substring( 0, n );// memcpy( zAux, z, n );
-            sqlite3_set_auxdata( pCtx, i, zAux, free_test_auxdata );
+            sqlite3_set_auxdata( pCtx, i, zAux );
           }
           zRet.Append( ' ' );// zRet[i * 2 + 1] = ' ';
         }

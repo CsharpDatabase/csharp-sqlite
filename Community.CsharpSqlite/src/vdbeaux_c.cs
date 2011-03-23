@@ -3060,9 +3060,9 @@ fclose(out);
         AuxData pAux = pVdbeFunc.apAux[i];
         if ( ( i > 31 || ( mask & ( ( (u32)1 ) << i ) ) == 0 && pAux.pAux != null ) )
         {
-          if ( pAux.xDelete != null )
+          if ( pAux.pAux != null && pAux.pAux is IDisposable )
           {
-            pAux.xDelete( ref pAux.pAux );
+            (pAux.pAux as IDisposable).Dispose();
           }
           pAux.pAux = null;
         }

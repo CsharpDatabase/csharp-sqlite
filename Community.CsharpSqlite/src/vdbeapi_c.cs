@@ -762,7 +762,7 @@ end_of_step:
     ** Return the auxillary data pointer, if any, for the iArg'th argument to
     ** the user-function defined by pCtx.
     */
-    public static string sqlite3_get_auxdata( sqlite3_context pCtx, int iArg )
+    public static object sqlite3_get_auxdata( sqlite3_context pCtx, int iArg )
     {
       VdbeFunc pVdbeFunc;
 
@@ -783,8 +783,8 @@ end_of_step:
     public static void sqlite3_set_auxdata(
     sqlite3_context pCtx,
     int iArg,
-    string pAux,
-    dxDel xDelete//void (*xDelete)(void*)
+    object pAux
+    //void (*xDelete)(void*)
     )
     {
       AuxData pAuxData;
@@ -815,18 +815,17 @@ end_of_step:
       }
 
       pAuxData = pVdbeFunc.apAux[iArg];
-      if ( pAuxData.pAux != null && pAuxData.xDelete != null )
+      if ( pAuxData.pAux != null && pAuxData.pAux is IDisposable )
       {
-        pAuxData.xDelete( ref pAuxData.pAux );
+        (pAuxData.pAux as IDisposable).Dispose();
       }
       pAuxData.pAux = pAux;
-      pAuxData.xDelete = xDelete;
       return;
 
 failed:
-      if ( xDelete != null )
+      if ( pAux != null  && pAux is IDisposable)
       {
-        xDelete( ref pAux );
+        (pAux as IDisposable).Dispose();
       }
     }
 
