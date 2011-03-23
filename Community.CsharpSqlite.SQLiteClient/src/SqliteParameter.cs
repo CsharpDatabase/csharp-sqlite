@@ -169,7 +169,4 @@ namespace Community.CsharpSqlite.SQLiteClient
 
 		#endregion
 	}
-
-	// this causes problems in VB.NET, see issue 104
-	public class SQLiteParameter : SqliteParameter { }
 }
