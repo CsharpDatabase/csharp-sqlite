@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Data;
+using System.Data.Common;
 using System.IO;
-using Community.CsharpSqlite;
-using Community.CsharpSqlite.SQLiteClient;
 using System.Text;
 using System.Threading;
+using System.Collections.Generic;
+using Community.CsharpSqlite;
+using Community.CsharpSqlite.SQLiteClient;
 
 namespace SQLiteClientTests
 {
@@ -119,7 +121,7 @@ namespace SQLiteClientTests
       cmd.ExecuteNonQuery();
 
       Console.WriteLine( "insert row 2..." );
-      cmd.CommandText = "INSERT INTO TBL ( ID, NAME ) VALUES (2, '中文' )";
+      cmd.CommandText = "INSERT INTO TBL ( ID, NAME ) VALUES (2, 'ä¸­æ–‡' )";
       cmd.ExecuteNonQuery();
 
       //Console.WriteLine("commit...");
@@ -127,7 +129,7 @@ namespace SQLiteClientTests
       //cmd.ExecuteNonQuery();
 
       Console.WriteLine( "SELECT data from TBL..." );
-      cmd.CommandText = "SELECT id,NAME FROM tbl WHERE name = '中文'";
+      cmd.CommandText = "SELECT id,NAME FROM tbl WHERE name = 'ä¸­æ–‡'";
       IDataReader reader = cmd.ExecuteReader();
       int r = 0;
       Console.WriteLine( "Read the data..." );
@@ -138,7 +140,7 @@ namespace SQLiteClientTests
         Console.WriteLine( "    ID: {0}", i );
 
         string s = reader.GetString( reader.GetOrdinal( "NAME" ) );
-        Console.WriteLine( "    NAME: {0} = {1}", s, s == "中文" );
+        Console.WriteLine( "    NAME: {0} = {1}", s, s == "ä¸­æ–‡" );
         r++;
       }
       Console.WriteLine( "Rows retrieved: {0}", r );
@@ -246,9 +248,9 @@ namespace SQLiteClientTests
         Console.WriteLine( "SELECT/INSERT ON Thread {0}", i );
         Thread worker = new Thread( () =>
         {
-          // Cannot use value of i, since it exceeds the scope of this thread and will be
+          // Cannot use value of i, since it exceeds the scope of this thread and will be 
           // reused by multiple threads
-          int aValue = 100+Thread.CurrentThread.ManagedThreadId;
+          int aValue = 100 + Thread.CurrentThread.ManagedThreadId;
           int op = aValue % 2;
 
           SqliteConnection con = new SqliteConnection();
@@ -279,7 +281,7 @@ namespace SQLiteClientTests
         Console.WriteLine( "INSERTING ON Thread {0}", i );
         Thread worker = new Thread( () =>
         {
-          // Cannot use value of i, since it exceeds the scope of this thread and will be
+          // Cannot use value of i, since it exceeds the scope of this thread and will be 
           // reused by multiple threads
 
           int aValue = Thread.CurrentThread.ManagedThreadId;
@@ -320,7 +322,7 @@ namespace SQLiteClientTests
       string dbFilename = "threading_t5.db";
       if ( File.Exists( dbFilename ) )
         File.Delete( dbFilename );
-      connstring_T5 = @"Version=3,busy_timeout=1000,uri=file:" + dbFilename;
+      connstring_T5 = @"Version=3,busy_timeout=2500,uri=file:" + dbFilename;
 
       Setup_T5();
       MultiInsertsSameThread_T5(); //concurrent inserts
@@ -330,7 +332,7 @@ namespace SQLiteClientTests
 
     private void MultiInsertsSameThread_T5()
     {
-      for ( int i = 0; i < 5; i++ )
+      for ( int i = 0; i < 10; i++ )
       {
         //Console.WriteLine( "SELECT/INSERT ON Thread {0}", i );
         Thread worker = new Thread( () =>
@@ -338,7 +340,7 @@ namespace SQLiteClientTests
           string commandt = String.Empty;
           try
           {
-            // Cannot use value of i, since it exceeds the scope of this thread and will be
+            // Cannot use value of i, since it exceeds the scope of this thread and will be 
             // reused by multiple threads
             int aValue = 100 + Thread.CurrentThread.ManagedThreadId;
             int op = aValue % 2;
@@ -364,7 +366,7 @@ namespace SQLiteClientTests
                     retry += 1; // Insert Failed
                     Console.WriteLine( cmd.CommandText );
                     Console.WriteLine( "retry {0}", retry );
-                    Console.WriteLine(((SqliteCommand)cmd).GetLastError());
+                    Console.WriteLine( ( (SqliteCommand)cmd ).GetLastError() );
                   }
                 } while ( rows == 0 && retry < 5 );
               }
@@ -402,13 +404,13 @@ namespace SQLiteClientTests
     }
 
     //nSoftware code for Threading & Transactions
-    string connstring_T6;
+    static string connstring_T6;
     public void Test6()
     {
       string dbFilename = "threading_t6.db";
       if ( File.Exists( dbFilename ) )
         File.Delete( dbFilename );
-      connstring_T6 = @"Version=3,busy_timeout=1000,uri=file:" + dbFilename;
+      connstring_T6 = @"Version=3,busy_timeout=2000,uri=file:" + dbFilename;
 
       Setup_T6();
       MultiInsertsTransactionsSameThread_T6(); //concurrent inserts
@@ -416,66 +418,65 @@ namespace SQLiteClientTests
       Console.In.Read();
     }
 
+    static Random rnd = new Random();
     private void MultiInsertsTransactionsSameThread_T6()
     {
-      for ( int i = 0; i < 5; i++ )
+      for ( int i = 0; i < 20; i++ )
       {
-        //Console.WriteLine( "SELECT/INSERT ON Thread {0}", i );
-        Thread worker = new Thread( () =>
-        {
-          string commandt = String.Empty;
-          try
-          {
-            // Cannot use value of i, since it exceeds the scope of this thread and will be
-            // reused by multiple threads
-            int aValue = 100 + Thread.CurrentThread.ManagedThreadId;
-            int op = aValue % 2;
-
-            SqliteConnection con = new SqliteConnection();
-            con.ConnectionString = connstring_T6;
-            con.Open();
-            IDbCommand cmd = con.CreateCommand();
-            cmd = con.CreateCommand();
-            if ( op == 0 )
-            {
-              SqliteTransaction trans = (SqliteTransaction)con.BeginTransaction();
-              for ( int j = 0; j < 1000; j++ )
-              {
-                int rows;
-                int retry = 0;
-                cmd.CommandText = String.Format( "INSERT INTO BTABLE ( A, B, C ) VALUES ({0},'threader', '1' )", ( aValue * 10000 ) + j );
-                commandt = cmd.CommandText;
-                do
-                {
-                  rows = cmd.ExecuteNonQuery();
-                  if ( rows == 0 )
-                  {
-                    retry += 1; // Insert Failed
-                    Console.WriteLine( cmd.CommandText );
-                    Console.WriteLine( "retry {0}", retry );
-                    Console.WriteLine(((SqliteCommand)cmd).GetLastError());
-                  }
-                } while ( rows == 0 && retry < 5 );
-              }
-              trans.Commit();
-            }
-            else
-            {
-              cmd.CommandText = String.Format( "Select * FROM ATABLE" );
-              commandt = cmd.CommandText;
-              cmd.ExecuteReader();
-            }
-          }
-          catch ( Exception ex )
-          {
-            Console.WriteLine( String.Format( "Command {0} threw exception {1}", commandt, ex.Message ) );
-          }
-        } );
-
-        worker.Start();
+        Thread.Sleep( rnd.Next( 100, 1000 ) );
+        Console.WriteLine( "Launching Thread {0}", i );
+        Thread worker = new Thread( SQLiteClientTestDriver.T6_ThreadStart );
+        worker.Start( i );
       }
     }
+    private static void T6_ThreadStart( object data )
+    {
+      string commandt = String.Empty;
+      int i = (int)data;
+      try
+      {
+        int aValue = 100 + i;
+        int op = aValue % 2;
 
+        SqliteConnection con = new SqliteConnection();
+        con.ConnectionString = connstring_T6;
+        con.Open();
+        IDbCommand cmd = con.CreateCommand();
+        cmd = con.CreateCommand();
+        if ( op == 0 )
+        {
+          SqliteTransaction trans = (SqliteTransaction)con.BeginTransaction();
+          for ( int j = 0; j < 5000; j++ )
+          {
+            int rows;
+            int retry = 0;
+            cmd.CommandText = String.Format( "INSERT INTO BTABLE ( A, B, C ) VALUES ({0},'threader', '1' )", ( aValue * 10000 ) + j );
+            commandt = cmd.CommandText;
+            do
+            {
+              rows = cmd.ExecuteNonQuery();
+              if ( rows == 0 )
+              {
+                retry += 1; // Insert Failed
+                Console.WriteLine( "retry {0}:{1}:{2}", retry, ( (SqliteCommand)cmd ).GetLastError(), cmd.CommandText );
+                Thread.Sleep( rnd.Next( 50, 1000 ) );
+              }
+            } while ( rows == 0 && retry < 10 );
+          }
+          trans.Commit();
+        }
+        else
+        {
+          cmd.CommandText = String.Format( "Select * FROM ATABLE" );
+          commandt = cmd.CommandText;
+          cmd.ExecuteReader();
+        }
+      }
+      catch ( Exception ex )
+      {
+        Console.WriteLine( String.Format( "Command {0} threw exception {1}", commandt, ex.Message ) );
+      }
+    }
     private void Setup_T6()
     {
       SqliteConnection con = new SqliteConnection();
@@ -490,6 +491,85 @@ namespace SQLiteClientTests
       cmd.CommandText = String.Format( "INSERT INTO BTABLE ( A, B, C ) VALUES (6,'threader', '1' )" );
       cmd.ExecuteNonQuery();
     }
+    //nSoftware code for Threading
+    string connstring_T7;
+    public void Test7()
+    {
+      string dbFilename = "threading_t7.db";
+      if ( File.Exists( dbFilename ) )
+        File.Delete( dbFilename );
+      connstring_T7 = @"Version=3,busy_timeout=1000,uri=file:" + dbFilename;
+
+      MultiInsertsSameThread_T7(); //concurrent table creation
+      Console.WriteLine( "Threads are running..." );
+      Console.In.Read();
+    }
+
+    private void MultiInsertsSameThread_T7()
+    {
+      List<Thread> lthread = new List<Thread>();
+      for ( int i = 0; i < 70; i++ )
+      {
+        Thread.Sleep( rnd.Next( 100, 1000 ) );
+        Console.WriteLine( "Launching Thread {0}", i );
+        Thread worker = new Thread( this.T7_ThreadStart );
+        lthread.Add( worker );
+        worker.Start( i );
+      }
+      bool alldone = false;
+
+      while ( !alldone )
+      {
+        alldone = true;
+        for ( int i = 0; i < lthread.Count; i++ )
+        {
+          if ( lthread[i].ThreadState == ThreadState.Running )
+            alldone = false;
+          Thread.Sleep( 100 );
+        }
+      }
+      Console.WriteLine( "finished" );
+    }
+
+    private void T7_ThreadStart( object iSequence )
+    {
+      int aValue = (int)iSequence * 1000;
+      int op = aValue % 2;
+      int rows = 0;
+
+      SqliteConnection con = new SqliteConnection();
+      con.ConnectionString = connstring_T7;
+      con.Open();
+      IDbCommand cmd = con.CreateCommand();
+      cmd = con.CreateCommand();
+      string commandt = String.Format( "CREATE TABLE IF NOT EXISTS ATABLE{0}(A integer primary key , B varchar (50), C integer, D varchar (500))", aValue );
+      cmd.CommandText = commandt;
+      try
+      {
+        rows = cmd.ExecuteNonQuery();
+        Console.WriteLine( "Created table: ATABLE" + aValue );
+      }
+      catch ( Exception ex )
+      {
+        Console.WriteLine( String.Format( "Command {0} threw exception {1}", commandt, ex.Message ) );
+      }
+    }
+
+    private void Setup_T7()
+    {
+      SqliteConnection con = new SqliteConnection();
+      con.ConnectionString = connstring_T7;
+      con.Open();
+      IDbCommand cmd = con.CreateCommand();
+      cmd = con.CreateCommand();
+      cmd.CommandText = "CREATE TABLE IF NOT EXISTS ATABLE(A integer primary key , B varchar (50), C integer)";
+      cmd.ExecuteNonQuery();
+      cmd.CommandText = "CREATE TABLE IF NOT EXISTS BTABLE(A integer primary key , B varchar (50), C integer)";
+      cmd.ExecuteNonQuery();
+      cmd.CommandText = String.Format( "INSERT INTO BTABLE ( A, B, C ) VALUES (6,'threader', '1' )" );
+      cmd.ExecuteNonQuery();
+    }
+
 
     public void Issue_65()
     {
@@ -544,7 +624,7 @@ namespace SQLiteClientTests
 
     }
 
-    //Issue 76 Encryption is not implemented in C#SQLite client connection and command objects
+    //Issue 76 Encryption is not implemented in C#SQLite client connection and command objects 
     public void Issue_76()
     {
       Console.WriteLine( "Test for Issue_76 Start." );
@@ -629,7 +709,7 @@ namespace SQLiteClientTests
               File.Delete( dbFilename );
             Console.WriteLine( "Using Database {0}", dbFilename );
             Sqlite3.sqlite3 db = null;
-            Sqlite3.sqlite3_open_v2( dbFilename, ref db,flags,null );
+            Sqlite3.sqlite3_open_v2( dbFilename, ref db, flags, null );
             var command = string.Format( "create table [t{0}] (id, name, amount)", Thread.CurrentThread.ManagedThreadId );
             ExecuteCommand( db, command );
             Sqlite3.sqlite3_close( db );
@@ -678,7 +758,7 @@ namespace SQLiteClientTests
     {
       SQLiteClientTestDriver tests = new SQLiteClientTestDriver();
 
-      int Test = 6;
+      int Test = 7;
       switch ( Test )
       {
         case 1:
@@ -698,6 +778,9 @@ namespace SQLiteClientTests
           break;
         case 6:
           tests.Test6();
+          break;
+        case 7:
+          tests.Test7();
           break;
         case 65:
           tests.Issue_65();
