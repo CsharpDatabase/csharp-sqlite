@@ -365,12 +365,12 @@ namespace Community.CsharpSqlite.SQLiteClient
 			state = ConnectionState.Open;
 		}
 
-	public DataTable GetSchema( String collectionName )
+	public override DataTable GetSchema( String collectionName )
 	{
 		return GetSchema( collectionName, null );
 	}
 
-	public DataTable GetSchema( String collectionName, string[] restrictionValues )
+	public override DataTable GetSchema( String collectionName, string[] restrictionValues )
 	{
 		if ( State != ConnectionState.Open )
 		throw new InvalidOperationException( "Invalid operation.  The connection is closed." );

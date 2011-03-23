@@ -33,7 +33,7 @@ namespace SQLiteClientTests
       con.Open();
 
       Console.WriteLine( "create command..." );
-      SqliteCommand cmd = con.CreateCommand();
+      IDbCommand cmd = con.CreateCommand();
 
       Console.WriteLine( "create table TEST_TABLE..." );
       cmd.CommandText = "CREATE TABLE TEST_TABLE ( COLA INTEGER, COLB TEXT, COLC DATETIME )";
@@ -53,7 +53,7 @@ namespace SQLiteClientTests
 
       Console.WriteLine( "SELECT data from TEST_TABLE..." );
       cmd.CommandText = "SELECT COLA, COLB, COLC FROM TEST_TABLE";
-      SqliteDataReader reader = cmd.ExecuteReader();
+      IDataReader reader = cmd.ExecuteReader();
       int r = 0;
       Console.WriteLine( "Read the data..." );
       while ( reader.Read() )
@@ -108,7 +108,7 @@ namespace SQLiteClientTests
       con.Open();
 
       Console.WriteLine( "create command..." );
-      SqliteCommand cmd = con.CreateCommand();
+      IDbCommand cmd = con.CreateCommand();
 
       Console.WriteLine( "create table TEST_TABLE..." );
       cmd.CommandText = "CREATE TABLE TBL ( ID NUMBER, NAME TEXT)";
@@ -128,7 +128,7 @@ namespace SQLiteClientTests
 
       Console.WriteLine( "SELECT data from TBL..." );
       cmd.CommandText = "SELECT id,NAME FROM tbl WHERE name = '中文'";
-      SqliteDataReader reader = cmd.ExecuteReader();
+      IDataReader reader = cmd.ExecuteReader();
       int r = 0;
       Console.WriteLine( "Read the data..." );
       while ( reader.Read() )
@@ -179,7 +179,7 @@ namespace SQLiteClientTests
       con.Open();
 
       Console.WriteLine( "create command..." );
-      SqliteCommand cmd = con.CreateCommand();
+      IDbCommand cmd = con.CreateCommand();
 
       Console.WriteLine( "create table TEST_TABLE..." );
       cmd.CommandText = "CREATE TABLE TBL ( ID NUMBER, DATE_TEXT REAL)";
@@ -188,7 +188,7 @@ namespace SQLiteClientTests
       Console.WriteLine( "insert ..." );
       cmd.CommandText = "INSERT INTO TBL  ( ID, DATE_TEXT) VALUES ( 1,  @DATETEXT)";
       cmd.Parameters.Add(
-        new SQLiteParameter
+        new SqliteParameter
         {
           ParameterName = "@DATETEXT",
           Value = DateTime.Now
@@ -200,7 +200,7 @@ namespace SQLiteClientTests
 
       Console.WriteLine( "SELECT data from TBL..." );
       cmd.CommandText = "SELECT * FROM tbl";
-      SqliteDataReader reader = cmd.ExecuteReader();
+      IDataReader reader = cmd.ExecuteReader();
       int r = 0;
       Console.WriteLine( "Read the data..." );
       while ( reader.Read() )
@@ -246,7 +246,7 @@ namespace SQLiteClientTests
         Console.WriteLine( "SELECT/INSERT ON Thread {0}", i );
         Thread worker = new Thread( () =>
         {
-          // Cannot use value of i, since it exceeds the scope of this thread and will be 
+          // Cannot use value of i, since it exceeds the scope of this thread and will be
           // reused by multiple threads
           int aValue = 100+Thread.CurrentThread.ManagedThreadId;
           int op = aValue % 2;
@@ -254,7 +254,7 @@ namespace SQLiteClientTests
           SqliteConnection con = new SqliteConnection();
           con.ConnectionString = connstring_T4;
           con.Open();
-          SqliteCommand cmd = con.CreateCommand();
+          IDbCommand cmd = con.CreateCommand();
           cmd = con.CreateCommand();
           if ( op == 0 )
           {
@@ -279,15 +279,15 @@ namespace SQLiteClientTests
         Console.WriteLine( "INSERTING ON Thread {0}", i );
         Thread worker = new Thread( () =>
         {
-          // Cannot use value of i, since it exceeds the scope of this thread and will be 
+          // Cannot use value of i, since it exceeds the scope of this thread and will be
           // reused by multiple threads
-          
+
           int aValue = Thread.CurrentThread.ManagedThreadId;
 
           SqliteConnection con = new SqliteConnection();
           con.ConnectionString = connstring_T4;
           con.Open();
-          SqliteCommand cmd = con.CreateCommand();
+          IDbCommand cmd = con.CreateCommand();
           cmd = con.CreateCommand();
           cmd.CommandText = String.Format( "INSERT INTO ATABLE ( A, B, C ) VALUES ({0},'threader', '1' )", aValue );
           Console.WriteLine( cmd.CommandText );
@@ -303,7 +303,7 @@ namespace SQLiteClientTests
       SqliteConnection con = new SqliteConnection();
       con.ConnectionString = connstring_T4;
       con.Open();
-      SqliteCommand cmd = con.CreateCommand();
+      IDbCommand cmd = con.CreateCommand();
       cmd = con.CreateCommand();
       cmd.CommandText = "CREATE TABLE IF NOT EXISTS ATABLE(A integer primary key , B varchar (50), C integer)";
       cmd.ExecuteNonQuery();
@@ -338,7 +338,7 @@ namespace SQLiteClientTests
           string commandt = String.Empty;
           try
           {
-            // Cannot use value of i, since it exceeds the scope of this thread and will be 
+            // Cannot use value of i, since it exceeds the scope of this thread and will be
             // reused by multiple threads
             int aValue = 100 + Thread.CurrentThread.ManagedThreadId;
             int op = aValue % 2;
@@ -346,7 +346,7 @@ namespace SQLiteClientTests
             SqliteConnection con = new SqliteConnection();
             con.ConnectionString = connstring_T5;
             con.Open();
-            SqliteCommand cmd = con.CreateCommand();
+            IDbCommand cmd = con.CreateCommand();
             cmd = con.CreateCommand();
             if ( op == 0 )
             {
@@ -364,7 +364,7 @@ namespace SQLiteClientTests
                     retry += 1; // Insert Failed
                     Console.WriteLine( cmd.CommandText );
                     Console.WriteLine( "retry {0}", retry );
-                    Console.WriteLine( cmd.GetLastError() );
+                    Console.WriteLine(((SqliteCommand)cmd).GetLastError());
                   }
                 } while ( rows == 0 && retry < 5 );
               }
@@ -391,7 +391,7 @@ namespace SQLiteClientTests
       SqliteConnection con = new SqliteConnection();
       con.ConnectionString = connstring_T5;
       con.Open();
-      SqliteCommand cmd = con.CreateCommand();
+      IDbCommand cmd = con.CreateCommand();
       cmd = con.CreateCommand();
       cmd.CommandText = "CREATE TABLE IF NOT EXISTS ATABLE(A integer primary key , B varchar (50), C integer)";
       cmd.ExecuteNonQuery();
@@ -426,7 +426,7 @@ namespace SQLiteClientTests
           string commandt = String.Empty;
           try
           {
-            // Cannot use value of i, since it exceeds the scope of this thread and will be 
+            // Cannot use value of i, since it exceeds the scope of this thread and will be
             // reused by multiple threads
             int aValue = 100 + Thread.CurrentThread.ManagedThreadId;
             int op = aValue % 2;
@@ -434,7 +434,7 @@ namespace SQLiteClientTests
             SqliteConnection con = new SqliteConnection();
             con.ConnectionString = connstring_T6;
             con.Open();
-            SqliteCommand cmd = con.CreateCommand();
+            IDbCommand cmd = con.CreateCommand();
             cmd = con.CreateCommand();
             if ( op == 0 )
             {
@@ -453,7 +453,7 @@ namespace SQLiteClientTests
                     retry += 1; // Insert Failed
                     Console.WriteLine( cmd.CommandText );
                     Console.WriteLine( "retry {0}", retry );
-                    Console.WriteLine( cmd.GetLastError() );
+                    Console.WriteLine(((SqliteCommand)cmd).GetLastError());
                   }
                 } while ( rows == 0 && retry < 5 );
               }
@@ -481,7 +481,7 @@ namespace SQLiteClientTests
       SqliteConnection con = new SqliteConnection();
       con.ConnectionString = connstring_T6;
       con.Open();
-      SqliteCommand cmd = con.CreateCommand();
+      IDbCommand cmd = con.CreateCommand();
       cmd = con.CreateCommand();
       cmd.CommandText = "CREATE TABLE IF NOT EXISTS ATABLE(A integer primary key , B varchar (50), C integer)";
       cmd.ExecuteNonQuery();
@@ -544,7 +544,7 @@ namespace SQLiteClientTests
 
     }
 
-    //Issue 76 Encryption is not implemented in C#SQLite client connection and command objects 
+    //Issue 76 Encryption is not implemented in C#SQLite client connection and command objects
     public void Issue_76()
     {
       Console.WriteLine( "Test for Issue_76 Start." );
@@ -566,7 +566,7 @@ namespace SQLiteClientTests
       con.Open();
 
       Console.WriteLine( "create command..." );
-      SqliteCommand cmd = con.CreateCommand();
+      IDbCommand cmd = con.CreateCommand();
 
       cmd.CommandText = "pragma hexkey='0x73656372657470617373776F72640f11'";
       Console.WriteLine( cmd.CommandText );

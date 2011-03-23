@@ -131,7 +131,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 			set { parent_conn = (SqliteConnection)value; }
 		}
 
-		public SqliteConnection Connection
+		public new SqliteConnection Connection
 		{
 			get
 			{
@@ -400,7 +400,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 			return o;
 		}
 
-		public SqliteDataReader ExecuteReader( CommandBehavior behavior )
+		public new SqliteDataReader ExecuteReader( CommandBehavior behavior )
 		{
 			int r;
 			return ExecuteReader( behavior, true, out r );
