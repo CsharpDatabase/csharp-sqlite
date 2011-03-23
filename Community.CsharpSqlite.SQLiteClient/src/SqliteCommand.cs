@@ -303,7 +303,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 		private void GetNextStatement( string pzStart, ref string pzTail, ref Sqlite3.Vdbe pStmt )
 		{
 			UTF8Encoding encoding = new UTF8Encoding();
-			SqliteError err = (SqliteError)Sqlite3.sqlite3_prepare( parent_conn.Handle2, pzStart, pzStart.Length, ref pStmt, ref pzTail );
+			SqliteError err = (SqliteError)Sqlite3.sqlite3_prepare_v2( parent_conn.Handle2, pzStart, pzStart.Length, ref pStmt, ref pzTail );
 			if ( err != SqliteError.OK )
 				throw new SqliteSyntaxException( GetError3() );
 		}
@@ -326,7 +326,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 			err = (SqliteError)Sqlite3.sqlite3_step( pStmt );
 
 			if ( err == SqliteError.ERROR )
-				throw new SqliteExecutionException( GetError3() );
+				throw new SqliteExecutionException( GetError3() + "\n" + pStmt.zErrMsg );
 
 			pazValue = IntPtr.Zero;
 			pazColName = IntPtr.Zero; // not used for v=3
