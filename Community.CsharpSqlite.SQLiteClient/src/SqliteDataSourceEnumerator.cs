@@ -37,29 +37,29 @@ using System.Data.Common;
         
 namespace Community.CsharpSqlite.SQLiteClient
 {
-        public sealed class SqliteDataSourceEnumerator : DbDataSourceEnumerator
-	{		
-                public SqliteDataSourceEnumerator ()
-                {
-                }
+	public sealed class SqliteDataSourceEnumerator : DbDataSourceEnumerator
+	{
+		public SqliteDataSourceEnumerator ()
+		{
+		}
 
-                public override DataTable GetDataSources ()
-                {
+		public override DataTable GetDataSources ()
+		{
 			DataTable dt = new DataTable ();
 			DataColumn col;
 
 			col = new DataColumn ("ServerName", typeof (string));
 			dt.Columns.Add (col);
-			
+
 			col = new DataColumn ("InstanceName", typeof (string));
 			dt.Columns.Add (col);
 
 			col = new DataColumn ("IsClustered", typeof (bool));
 			dt.Columns.Add (col);
-			
+
 			col = new DataColumn ("Version", typeof (string));
 			dt.Columns.Add (col);
-			
+
 			col = new DataColumn ("FactoryName", typeof (string));
 			dt.Columns.Add (col);
 
@@ -70,10 +70,10 @@ namespace Community.CsharpSqlite.SQLiteClient
 			dr [3] = "?";
 			dr [4] = "Community.CsharpSqlite.SQLiteClient.SqliteConnectionFactory";
 			dt.Rows.Add (dr);
-			
+
 			return dt;
-                }                
-        }
+		}
+	}
 }
 
 #endif

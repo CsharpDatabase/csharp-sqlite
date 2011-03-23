@@ -65,7 +65,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 			SqliteParameter sqlp = value as SqliteParameter;
 			if (sqlp.ParameterName == null || sqlp.ParameterName.Length == 0)
 				sqlp.ParameterName = this.GenerateParameterName();
-                 }
+		}
 
 		private void RecreateNamedHash ()
 		{

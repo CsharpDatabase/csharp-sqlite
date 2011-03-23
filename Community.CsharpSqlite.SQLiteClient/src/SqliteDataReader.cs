@@ -215,12 +215,12 @@ namespace Community.CsharpSqlite.SQLiteClient
 								// If the column was declared as a 'date' or 'datetime', let's play
 								// nice and return a DateTime (version 3 only).
 								if (declmode[i] == 2)
-                  if (data_row[i] == null) data_row[i] = null;
-                  else data_row[i] = DateTime.Parse((string)data_row[i], System.Globalization.CultureInfo.InvariantCulture);
+									if (data_row[i] == null) data_row[i] = null;
+									else data_row[i] = DateTime.Parse((string)data_row[i], System.Globalization.CultureInfo.InvariantCulture);
 								break;
 							case 4:
 								int blobbytes = Sqlite3.sqlite3_column_bytes16 (pVm, i);
-                                byte[] blob = Sqlite3.sqlite3_column_blob(pVm, i);
+								byte[] blob = Sqlite3.sqlite3_column_blob(pVm, i);
 								//byte[] blob = new byte[blobbytes];
 								//Marshal.Copy (blobptr, blob, 0, blobbytes);
 								data_row[i] = blob;
@@ -544,8 +544,8 @@ namespace Community.CsharpSqlite.SQLiteClient
 		public string GetString (int i)
 		{
 			if (((object[]) rows[current_row])[i] != null) 
-        return (((object[]) rows[current_row])[i]).ToString();
-      else return null;
+				return (((object[]) rows[current_row])[i]).ToString();
+			else return null;
 		}
 		
 #if NET_2_0
