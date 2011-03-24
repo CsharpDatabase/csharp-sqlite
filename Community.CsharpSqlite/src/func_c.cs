@@ -671,12 +671,12 @@ break;
     ** able to participate in upper-case-to-lower-case mappings in EBCDIC
     ** whereas only characters less than 0x80 do in ASCII.
     */
-#if (SQLITE_EBCDIC)
-//# define sqlite3Utf8Read(A,C)    (*(A++))
-//# define GlogUpperToLower(A)     A = sqlite3UpperToLower[A]
-#else
+    //#if (SQLITE_EBCDIC)
+    //# define sqlite3Utf8Read(A,C)    (*(A++))
+    //# define GlogUpperToLower(A)     A = sqlite3UpperToLower[A]
+    //#else
     //# define GlogUpperToLower(A)     if( A<0x80 ){ A = sqlite3UpperToLower[A]; }
-#endif
+    //#endif
 
     static compareInfo globInfo = new compareInfo( '*', '?', '[', false );
     /* The correct SQL-92 behavior is for the LIKE operator to ignore
@@ -2080,7 +2080,7 @@ LIKEFUNC("like", 3, likeInfoAlt, SQLITE_FUNC_LIKE|SQLITE_FUNC_CASE),
 LIKEFUNC("like", 2, likeInfoNorm, SQLITE_FUNC_LIKE),
 LIKEFUNC("like", 3, likeInfoNorm, SQLITE_FUNC_LIKE),
 #endif
-};
+FUNCTION("regexp",                2, 0, 0, regexpFunc          ),};
       int i;
 #if SQLITE_OMIT_WSD
 FuncDefHash pHash = GLOBAL( FuncDefHash, sqlite3GlobalFunctions );

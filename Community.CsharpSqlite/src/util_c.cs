@@ -1426,9 +1426,9 @@ return n;
 #if SQLITE_ASCII
       h += 9 * ( 1 & ( h >> 6 ) );
 #endif
-#if SQLITE_EBCDIC
-h += 9*(1&~(h>>4));
-#endif
+//#if SQLITE_EBCDIC
+//h += 9*(1&~(h>>4));
+//#endif
       return h & 0xf;
     }
 #endif // * !SQLITE_OMIT_BLOB_LITERAL || SQLITE_HAS_CODEC */

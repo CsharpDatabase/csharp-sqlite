@@ -10,6 +10,8 @@ using System.IO;
 using System.Management;
 #endif
 using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
 
 using i64 = System.Int64;
 
@@ -19,7 +21,6 @@ using time_t = System.Int64;
 namespace Community.CsharpSqlite
 {
   using sqlite3_value = Sqlite3.Mem;
-  using System.Threading;
 
   public partial class Sqlite3
   {
@@ -138,7 +139,45 @@ namespace Community.CsharpSqlite
         return 0;
       return rc < 0 ? -1 : +1;
     }
-    
+
+
+    // ----------------------------
+    // ** Builtin Functions
+    // ----------------------------
+
+
+    static Regex oRegex = null;
+    /*
+    ** The regexp() function.  two arguments are both strings
+    ** Collating sequences are not used.
+    */
+    static void regexpFunc(
+    sqlite3_context context,
+    int argc,
+    sqlite3_value[] argv
+    )
+    {
+      string zTest;       /* The input string A */
+      string zRegex;      /* The regex string B */
+
+      Debug.Assert( argc == 2 );
+      UNUSED_PARAMETER( argc );
+      zRegex = sqlite3_value_text( argv[0] );
+      zTest = sqlite3_value_text( argv[1] );
+
+      if ( zTest == null || String.IsNullOrEmpty( zRegex ) )
+      {
+        sqlite3_result_int( context, 0 );
+        return;
+      }
+
+      if ( oRegex == null || oRegex.ToString() == zRegex )
+      {
+        oRegex = new Regex( zRegex, RegexOptions.IgnoreCase );
+      }
+      sqlite3_result_int( context, oRegex.IsMatch( zTest ) ? 1 : 0 );
+    }
+
 
     // ----------------------------
     // ** Convertion routines

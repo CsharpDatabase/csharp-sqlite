@@ -807,9 +807,9 @@ public WhereTerm[] aStatic = new WhereTerm[1];    /* Initial static space for a[
       {
         return 0;
       }
-#if SQLITE_EBCDIC
-if( pnoCase ) return 0;
-#endif
+//#if SQLITE_EBCDIC
+//if( pnoCase ) return 0;
+//#endif
       pList = pExpr.x.pList;
       pLeft = pList.a[1].pExpr;
       if ( pLeft.op != TK_COLUMN || sqlite3ExprAffinity( pLeft ) != SQLITE_AFF_TEXT )

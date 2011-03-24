@@ -43,10 +43,10 @@ namespace Community.CsharpSqlite
 #if SQLITE_ASCII
     //# define charMap(X) sqlite3UpperToLower[(unsigned char)X]
 #endif
-#if SQLITE_EBCDIC
+//#if SQLITE_EBCDIC
 //# define charMap(X) ebcdicToAscii[(unsigned char)X]
 //const unsigned char ebcdicToAscii[] = {
-/* 0   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F */
+///* 0   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F */
 //   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  /* 0x */
 //   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  /* 1x */
 //   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  /* 2x */
@@ -64,7 +64,7 @@ namespace Community.CsharpSqlite
 //   0,  0,115,116,117,118,119,120,121,122,  0,  0,  0,  0,  0,  0,  /* Ex */
 //   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  /* Fx */
 //};
-#endif
+//#endif
 
     /*
 ** The sqlite3KeywordCode function looks up an identifier to determine if
@@ -99,9 +99,9 @@ namespace Community.CsharpSqlite
 #if SQLITE_ASCII
     //#define IdChar(C)  ((sqlite3CtypeMap[(unsigned char)C]&0x46)!=0)
 #endif
-#if SQLITE_EBCDIC
+//#if SQLITE_EBCDIC
 //const char sqlite3IsEbcdicIdChar[] = {
-/* x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 xA xB xC xD xE xF */
+///* x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 xA xB xC xD xE xF */
 //    0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0,  /* 4x */
 //    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0,  /* 5x */
 //    0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0,  /* 6x */
@@ -116,7 +116,7 @@ namespace Community.CsharpSqlite
 //    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0,  /* Fx */
 //};
 //#define IdChar(C)  (((c=C)>=0x42 && sqlite3IsEbcdicIdChar[c-0x40]))
-#endif
+//#endif
 
 
     /*

@@ -46,10 +46,10 @@ namespace Community.CsharpSqlite
       return ( sqlite3CtypeMap[(char)C] & 0x46 ) != 0;
     }
 #endif
-#if  SQLITE_EBCDIC
+//#if  SQLITE_EBCDIC
 //extern const char sqlite3IsEbcdicIdChar[];
 //#define IdChar(C)  (((c=C)>=0x42 && sqlite3IsEbcdicIdChar[c-0x40]))
-#endif
+//#endif
 #endif // * SQLITE_AMALGAMATION */
 
 
@@ -238,9 +238,9 @@ namespace Community.CsharpSqlite
             }
           default:
             {
-#if SQLITE_EBCDIC
-        unsigned char c;
-#endif
+//#if SQLITE_EBCDIC
+//        unsigned char c;
+//#endif
               if ( IdChar( (u8)zSql[zIdx] ) )
               {
                 /* Keywords and unquoted identifiers */
