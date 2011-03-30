@@ -117,8 +117,8 @@
     <Compile Include="..\Community.CsharpSqlite\src\crypto.cs">
       <Link>Community.CsharpSqlite\crypto.cs</Link>
     </Compile>
-    <Compile Include="..\Community.CsharpSqlite\src\ctime_cs.cs">
-      <Link>Community.CsharpSqlite\ctime_cs.cs</Link>
+    <Compile Include="..\Community.CsharpSqlite\src\ctime_c.cs">
+      <Link>Community.CsharpSqlite\ctime_c.cs</Link>
     </Compile>
     <Compile Include="..\Community.CsharpSqlite\src\date_c.cs">
       <Link>Community.CsharpSqlite\date_c.cs</Link>

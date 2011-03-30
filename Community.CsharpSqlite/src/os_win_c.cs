@@ -12,7 +12,9 @@ using i64 = System.Int64;
 using sqlite3_int64 = System.Int64;
 using u32 = System.UInt32;
 using u8 = System.Byte;
-
+#if WINDOWS_PHONE || SQLITE_SILVERLIGHT  
+using System.IO.IsolatedStorage;
+#endif
 namespace Community.CsharpSqlite
 {
   public partial class Sqlite3
@@ -2564,7 +2566,7 @@ dwFlagsAndAttributes |= FileOptions.RandomAccess; // FILE_FLAG_RANDOM_ACCESS;
           {
             retries--;
 #if WINDOWS_PHONE || SQLITE_SILVERLIGHT  
- fs = new IsolatedStorage.IsolatedStorageFileStream(zConverted, dwCreationDisposition, dwDesiredAccess, dwShareMode, IsolatedStorage.IsolatedStorageFile.GetUserStoreForApplication());
+ fs = new IsolatedStorageFileStream(zConverted, dwCreationDisposition, dwDesiredAccess, dwShareMode, IsolatedStorageFile.GetUserStoreForApplication());
 #elif !SQLITE_SILVERLIGHT
             fs = new FileStream( zConverted, dwCreationDisposition, dwDesiredAccess, dwShareMode, 4096, dwFlagsAndAttributes );
 #else

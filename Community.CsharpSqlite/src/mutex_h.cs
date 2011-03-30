@@ -68,6 +68,14 @@ namespace Community.CsharpSqlite
     //#  endif
     //#endif
 
+#if WINDOWS_PHONE && SQLITE_THREADSAFE
+#error  Cannot compile with both WINDOWS_PHONE and SQLITE_THREADSAFE
+#endif
+
+#if SQLITE_SILVERLIGHT && SQLITE_THREADSAFE
+#error  Cannot compile with both SQLITE_SILVERLIGHT and SQLITE_THREADSAFE
+#endif
+
 #if SQLITE_THREADSAFE && SQLITE_MUTEX_NOOP
 #error  Cannot compile with both SQLITE_THREADSAFE and SQLITE_MUTEX_NOOP
 #endif
@@ -89,7 +97,7 @@ namespace Community.CsharpSqlite
 #endif
 
 #if SQLITE_MUTEX_OMIT
-    /*
+      /*
 ** If this is a no-op implementation, implement everything as macros.
 */
     public class sqlite3_mutex
