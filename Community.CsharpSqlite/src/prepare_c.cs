@@ -299,7 +299,14 @@ sqlite3_prepare(db, argv[2], -1, ref pStmt, ref sDummy);
         rc = sqlite3BtreeBeginTrans( pDb.pBt, 0 );
         if ( rc != SQLITE_OK )
         {
+#if SQLITE_OMIT_WAL
+          if (pDb.pBt.pBt.pSchema.file_format > 1)
+            sqlite3SetString( ref pzErrMsg, db, "%s (wal format detected)", sqlite3ErrStr( rc ) );
+          else
           sqlite3SetString( ref pzErrMsg, db, "%s", sqlite3ErrStr( rc ) );
+#else
+          sqlite3SetString( ref pzErrMsg, db, "%s", sqlite3ErrStr( rc ) );
+#endif
           goto initone_error_out;
         }
         openedTransaction = 1;
