@@ -52,7 +52,13 @@ namespace Community.CsharpSqlite
       {
         {
           if ( zObj == null )
+          {
             zObj = "?";
+#if SQLITE_OMIT_UTF16
+            if (ENC(db) != SQLITE_UTF8)
+              zObj =encnames[(ENC(db))].zName;
+#endif
+          }
           sqlite3SetString( ref  pData.pzErrMsg, db,
           "malformed database schema (%s)", zObj );
           if ( !String.IsNullOrEmpty( zExtra ) )
