@@ -300,7 +300,7 @@ sqlite3_prepare(db, argv[2], -1, ref pStmt, ref sDummy);
         if ( rc != SQLITE_OK )
         {
 #if SQLITE_OMIT_WAL
-          if (pDb.pBt.pBt.pSchema.file_format > 1)
+          if (pDb.pBt.pBt.pSchema.file_format == 2)
             sqlite3SetString( ref pzErrMsg, db, "%s (wal format detected)", sqlite3ErrStr( rc ) );
           else
           sqlite3SetString( ref pzErrMsg, db, "%s", sqlite3ErrStr( rc ) );

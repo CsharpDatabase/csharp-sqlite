@@ -16,6 +16,8 @@ set csTests [test_set $allquicktests -exclude {
 _*
 mutex1.test
 mutex2.test
+e_select2.test
+pcache2.test
   }
 ]
 
