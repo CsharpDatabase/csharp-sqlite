@@ -46,7 +46,9 @@ namespace Community.CsharpSqlite.SQLiteClient
 		private bool typeSet;
 		private string source_column;
 		private ParameterDirection direction;
+#if !SQLITE_SILVERLIGHT 
 		private DataRowVersion row_version;
+#endif
 		private object param_value;
 		private byte precision;
 		private byte scale;
@@ -147,12 +149,12 @@ namespace Community.CsharpSqlite.SQLiteClient
 			get { return sourceColumnNullMapping; }
 			set { sourceColumnNullMapping = value; }
 		}
-
+#if !SQLITE_SILVERLIGHT
 		public override DataRowVersion SourceVersion {
 			get { return row_version; }
 			set { row_version = value; }
 		}
-
+#endif
 		public override object Value {
 			get { return param_value; }
 			set { param_value = value; }

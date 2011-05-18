@@ -595,7 +595,7 @@ static void CODEC_TRACE( string T, params object[] ap ) { if ( sqlite3PagerTrace
       /* do nothing, security enhancements are always active */
     }
 
-    static int sqlite3_key( sqlite3 db, string pKey, int nKey )
+    static public int sqlite3_key( sqlite3 db, string pKey, int nKey )
     {
       CODEC_TRACE( "sqlite3_key: entered db=%d pKey=%s nKey=%d\n", db, pKey, nKey );
       /* attach key if db and pKey are not null and nKey is > 0 */

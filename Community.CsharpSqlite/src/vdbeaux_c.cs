@@ -3378,7 +3378,7 @@ fclose(out);
         if ( serial_type == 7 )
         {
           //Debug.Assert( sizeof( v) == sizeof(pMem.r));
-#if WINDOWS_PHONE
+#if WINDOWS_PHONE || WINDOWS_MOBILE
 v = (ulong)BitConverter.ToInt64(BitConverter.GetBytes(pMem.r),0);
 #else
           v = (ulong)BitConverter.DoubleToInt64Bits( pMem.r );// memcpy( &v, pMem.r, v ).Length;
@@ -3521,8 +3521,8 @@ swapMixedEndianFloat(t2);
 #if  SQLITE_MIXED_ENDIAN_64BIT_FLOAT
 swapMixedEndianFloat(x);
 #endif
-#if WINDOWS_PHONE
-pMem.r = BitConverter.ToDouble(BitConverter.GetBytes((long)x), 0);
+#if WINDOWS_PHONE || WINDOWS_MOBILE
+              pMem.r = BitConverter.ToDouble(BitConverter.GetBytes((long)x), 0);
 #else
               pMem.r = BitConverter.Int64BitsToDouble( (long)x );// memcpy(pMem.r, x, sizeof(x))
 #endif
@@ -3644,8 +3644,8 @@ swapMixedEndianFloat(t2);
 #if  SQLITE_MIXED_ENDIAN_64BIT_FLOAT
 swapMixedEndianFloat(x);
 #endif
-#if WINDOWS_PHONE
-pMem.r = BitConverter.ToDouble(BitConverter.GetBytes((long)x), 0);
+#if WINDOWS_PHONE || WINDOWS_MOBILE
+              pMem.r = BitConverter.ToDouble(BitConverter.GetBytes((long)x), 0);
 #else
               pMem.r = BitConverter.Int64BitsToDouble( (long)x );// memcpy(pMem.r, x, sizeof(x))
 #endif

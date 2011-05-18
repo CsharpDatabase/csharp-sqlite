@@ -6,7 +6,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-#if !SQLITE_SILVERLIGHT
+#if !(SQLITE_SILVERLIGHT || WINDOWS_MOBILE)
 using System.Management;
 #endif
 using System.Text;
@@ -39,8 +39,13 @@ namespace Community.CsharpSqlite
           break;
       }
       int result = 0;
-
+#if WINDOWS_MOBILE 
+      try { result = Int32.Parse(inStr.Substring(0, i)); }
+      catch { }
+      return result;
+#else
       return ( Int32.TryParse( inStr.Substring( 0, i ), out result ) ? result : 0 );
+#endif
     }
 
     static void fprintf( TextWriter tw, string zFormat, params object[] ap )
@@ -379,7 +384,7 @@ namespace Community.CsharpSqlite
     // Example (C#)
     public static int GetbytesPerSector( StringBuilder diskPath )
     {
-#if !SQLITE_SILVERLIGHT
+#if !(SQLITE_SILVERLIGHT || WINDOWS_MOBILE)
       ManagementObjectSearcher mosLogicalDisks = new ManagementObjectSearcher( "select * from Win32_LogicalDisk where DeviceID = '" + diskPath.ToString().Remove( diskPath.Length - 1, 1 ) + "'" );
       try
       {
@@ -397,7 +402,7 @@ namespace Community.CsharpSqlite
       }
       return 4096;
 #else
-      return 4096;
+        return 4096;
 #endif
     }
 

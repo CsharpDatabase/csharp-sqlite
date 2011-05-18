@@ -2774,8 +2774,8 @@ error_out:
           Debug.Assert( fd != null );
           if ( op == SQLITE_FCNTL_FILE_POINTER )
           {
-#if SQLITE_SILVERLIGHT
-            pArg = (long)-1; // not supported
+#if (SQLITE_SILVERLIGHT || WINDOWS_MOBILE)
+              pArg = (long)-1; // not supported
 #else
             pArg = (long)fd.fs.Handle;
 #endif

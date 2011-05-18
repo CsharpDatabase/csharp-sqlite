@@ -40,7 +40,7 @@ using Community.CsharpSqlite;
 namespace Community.CsharpSqlite.SQLiteClient
 {
 	public class SqliteConnection : DbConnection, ICloneable
-	{
+  {
 
 #region Fields
 
@@ -196,6 +196,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 								db_file = tvalue.Substring (5);
 							} else if (tvalue_lc.StartsWith ("/")) {
 								db_file = tvalue;
+ #if !(SQLITE_SILVERLIGHT || WINDOWS_MOBILE)
 							} else if (tvalue_lc.StartsWith ("|DataDirectory|",
 											 StringComparison.InvariantCultureIgnoreCase)) {
 								AppDomainSetup ads = AppDomain.CurrentDomain.SetupInformation;
@@ -204,10 +205,15 @@ namespace Community.CsharpSqlite.SQLiteClient
 												 tvalue_lc.Substring (15));
 								
 								db_file = Path.Combine (ads.ApplicationBase, filePath);
+#endif
 							} else {
-								throw new InvalidOperationException ("Invalid connection string: invalid URI");
+#if !WINDOWS_PHONE
+                                throw new InvalidOperationException ("Invalid connection string: invalid URI");
+#else
+                                db_file = tvalue;		
+#endif
 							}
-							break;
+                            break;
 
 						case "mode": 
 							db_mode = Convert.ToInt32 (tvalue);
@@ -365,6 +371,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 			state = ConnectionState.Open;
 		}
 
+#if !SQLITE_SILVERLIGHT
 	public override DataTable GetSchema( String collectionName )
 	{
 		return GetSchema( collectionName, null );
@@ -555,12 +562,14 @@ namespace Community.CsharpSqlite.SQLiteClient
 		return GetSchemaDataTable( cmd, restrictionValues );
 	}
 
+#endif
 	void ValidateIdentifier( string value )
 	{
 		if ( value.Contains( "'" ) )
 		throw new ArgumentException( "Identifiers can not contain a single quote." );
 	}
 
+#if !SQLITE_SILVERLIGHT
 	DataTable GetSchemaViews( string[] restrictionValues )
 	{
 		SqliteCommand cmd = new SqliteCommand(
@@ -581,19 +590,35 @@ namespace Community.CsharpSqlite.SQLiteClient
 		dt.Columns.Add( "DataSourceProductName", typeof( System.String ) );
 		dt.Columns.Add( "DataSourceProductVersion", typeof( System.String ) );
 		dt.Columns.Add( "DataSourceProductVersionNormalized", typeof( System.String ) );
+#if !WINDOWS_MOBILE
 		dt.Columns.Add( "GroupByBehavior", typeof( System.Data.Common.GroupByBehavior ) );
+#else
+        dt.Columns.Add("GroupByBehavior", typeof(object));
+#endif
 		dt.Columns.Add( "IdentifierPattern", typeof( System.String ) );
+#if !WINDOWS_MOBILE
 		dt.Columns.Add( "IdentifierCase", typeof( System.Data.Common.IdentifierCase ) );
+#else
+        dt.Columns.Add("IdentifierCase", typeof(object ));
+#endif
 		dt.Columns.Add( "OrderByColumnsInSelect", typeof( System.Boolean ) );
 		dt.Columns.Add( "ParameterMarkerFormat", typeof( System.String ) );
 		dt.Columns.Add( "ParameterMarkerPattern", typeof( System.String ) );
 		dt.Columns.Add( "ParameterNameMaxLength", typeof( System.Int32 ) );
 		dt.Columns.Add( "ParameterNamePattern", typeof( System.String ) );
 		dt.Columns.Add( "QuotedIdentifierPattern", typeof( System.String ) );
+#if !WINDOWS_MOBILE
 		dt.Columns.Add( "QuotedIdentifierCase", typeof( System.Data.Common.IdentifierCase ) );
-		dt.Columns.Add( "StatementSeparatorPattern", typeof( System.String ) );
+#else
+        dt.Columns.Add("QuotedIdentifierCase", typeof(object));
+#endif
+        dt.Columns.Add( "StatementSeparatorPattern", typeof( System.String ) );
 		dt.Columns.Add( "StringLiteralPattern", typeof( System.String ) );
+#if !WINDOWS_MOBILE
 		dt.Columns.Add( "SupportedJoinOperators", typeof( System.Data.Common.SupportedJoinOperators ) );
+#else
+        dt.Columns.Add("SupportedJoinOperators", typeof(object ));
+#endif
 
 		// TODO: set correctly
 		dt.LoadDataRow( new object[] { "",
@@ -680,7 +705,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 		dt.LoadDataRow( new object[] { "DATETIME", "NUMERIC", 5, "System.DateTime" }, true );
 
 		return dt;
-	}
+    }
 
 	DataTable GetSchemaReservedWords()
 	{
@@ -824,6 +849,8 @@ namespace Community.CsharpSqlite.SQLiteClient
 
 		return dt;
 	}
+#endif
 #endregion
-	}
+
+  }
 }

@@ -293,7 +293,7 @@ namespace Community.CsharpSqlite
 
   }
 }
-#if NET_35 && !NET_40
+#if( NET_35 && !NET_40) || WINDOWS_PHONE
 namespace System
 {
   // Summary:

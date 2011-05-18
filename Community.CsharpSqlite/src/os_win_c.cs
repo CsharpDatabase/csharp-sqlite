@@ -709,7 +709,7 @@ return FALSE;
       catch ( Exception e )
       {
 #if SQLITE_SILVERLIGHT
-pFile.lastErrno = 1;
+        pFile.lastErrno = 1;
 #else
         pFile.lastErrno = (u32)Marshal.GetLastWin32Error();
 #endif
@@ -2409,7 +2409,7 @@ zBuf = "Unknown error";
       FileAccess dwDesiredAccess;
       FileShare dwShareMode;
       FileMode dwCreationDisposition;
-#if !SQLITE_SILVERLIGHT
+#if !(SQLITE_SILVERLIGHT || WINDOWS_MOBILE)
       FileOptions dwFlagsAndAttributes;
 #endif
 #if SQLITE_OS_WINCE
@@ -2527,7 +2527,7 @@ int isTemp = 0;
 dwFlagsAndAttributes = FILE_ATTRIBUTE_HIDDEN;
 isTemp = 1;
 #else
-#if !SQLITE_SILVERLIGHT
+#if !(SQLITE_SILVERLIGHT || WINDOWS_MOBILE)
         dwFlagsAndAttributes = FileOptions.DeleteOnClose; // FILE_ATTRIBUTE_TEMPORARY
         //| FILE_ATTRIBUTE_HIDDEN
         //| FILE_FLAG_DELETE_ON_CLOSE;
@@ -2536,7 +2536,7 @@ isTemp = 1;
       }
       else
       {
-#if !SQLITE_SILVERLIGHT
+#if !(SQLITE_SILVERLIGHT || WINDOWS_MOBILE)
         dwFlagsAndAttributes = FileOptions.None; // FILE_ATTRIBUTE_NORMAL;
 #endif
       }
@@ -2567,7 +2567,7 @@ dwFlagsAndAttributes |= FileOptions.RandomAccess; // FILE_FLAG_RANDOM_ACCESS;
             retries--;
 #if WINDOWS_PHONE || SQLITE_SILVERLIGHT  
  fs = new IsolatedStorageFileStream(zConverted, dwCreationDisposition, dwDesiredAccess, dwShareMode, IsolatedStorageFile.GetUserStoreForApplication());
-#elif !SQLITE_SILVERLIGHT
+#elif !(SQLITE_SILVERLIGHT || WINDOWS_MOBILE)
             fs = new FileStream( zConverted, dwCreationDisposition, dwDesiredAccess, dwShareMode, 4096, dwFlagsAndAttributes );
 #else
             fs = new FileStream( zConverted, dwCreationDisposition, dwDesiredAccess, dwShareMode, 4096);
@@ -2607,10 +2607,10 @@ dwFlagsAndAttributes |= FileOptions.RandomAccess; // FILE_FLAG_RANDOM_ACCESS;
       fs == null ? "failed" : "ok" );
       if ( fs == null
       ||
-#if !SQLITE_SILVERLIGHT
+#if !(SQLITE_SILVERLIGHT || WINDOWS_MOBILE)
  fs.SafeFileHandle.IsInvalid
 #else
-!fs.CanRead
+ !fs.CanRead
 #endif
  ) //(h == INVALID_HANDLE_VALUE)
       {
@@ -2719,7 +2719,7 @@ pFile.zDeleteOnClose = zConverted;
         //       && (Sleep(100), 1) );
         {
 #if WINDOWS_PHONE
-           if ( !IsolatedStorage.IsolatedStorageFile.GetUserStoreForApplication().FileExists( zFilename ) )
+           if ( !System.IO.IsolatedStorage.IsolatedStorageFile.GetUserStoreForApplication().FileExists( zFilename ) )
 #else
           if ( !File.Exists( zFilename ) )
 #endif
@@ -2730,7 +2730,7 @@ pFile.zDeleteOnClose = zConverted;
           try
           {
 #if WINDOWS_PHONE
-            IsolatedStorage.IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(zFilename);
+              System.IO.IsolatedStorage.IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(zFilename);
 #else
             File.Delete( zConverted );
 #endif
@@ -2814,7 +2814,7 @@ pFile.zDeleteOnClose = zConverted;
       if ( flags == SQLITE_ACCESS_EXISTS )
       {
 #if WINDOWS_PHONE
- pResOut = IsolatedStorage.IsolatedStorageFile.GetUserStoreForApplication().FileExists( zFilename ) ? 1 : 0;
+          pResOut = System.IO.IsolatedStorage.IsolatedStorageFile.GetUserStoreForApplication().FileExists(zFilename) ? 1 : 0;
 #else
         pResOut = File.Exists( zFilename ) ? 1 : 0;
 #endif
@@ -2846,7 +2846,7 @@ pFile.zDeleteOnClose = zConverted;
         //    attr = INVALID_FILE_ATTRIBUTES;
         //  }
         //}
-#if WINDOWS_PHONE
+#if WINDOWS_PHONE || WINDOWS_MOBILE
         if (new DirectoryInfo(zFilename).Exists)
 #else
         attr = File.GetAttributes( zFilename );// GetFileAttributesW( (WCHAR*)zConverted );
@@ -3422,7 +3422,7 @@ assert(winSysInfo.dwAllocationGranularity > 0);
     /// </summary>
     private class LockingStrategy
     {
-#if !SQLITE_SILVERLIGHT
+#if !(SQLITE_SILVERLIGHT || WINDOWS_MOBILE)
       [DllImport( "kernel32.dll" )]
       static extern bool LockFileEx( IntPtr hFile, uint dwFlags, uint dwReserved,
       uint nNumberOfBytesToLockLow, uint nNumberOfBytesToLockHigh,
@@ -3430,16 +3430,16 @@ assert(winSysInfo.dwAllocationGranularity > 0);
 
       const int LOCKFILE_FAIL_IMMEDIATELY = 1;
 #endif
-      public virtual void LockFile( sqlite3_file pFile, long offset, long length )
-      {
-#if !SQLITE_SILVERLIGHT
+        public virtual void LockFile( sqlite3_file pFile, long offset, long length )
+        {
+#if !(SQLITE_SILVERLIGHT || WINDOWS_MOBILE)
         pFile.fs.Lock( offset, length );
 #endif
-      }
+        }
 
       public virtual int SharedLockFile( sqlite3_file pFile, long offset, long length )
-      {
-#if !SQLITE_SILVERLIGHT
+        {
+#if !(SQLITE_SILVERLIGHT || WINDOWS_MOBILE)
         Debug.Assert( length == SHARED_SIZE );
         Debug.Assert( offset == SHARED_FIRST );
         NativeOverlapped ovlp = new NativeOverlapped();
@@ -3449,13 +3449,13 @@ assert(winSysInfo.dwAllocationGranularity > 0);
 
         return LockFileEx( pFile.fs.Handle, LOCKFILE_FAIL_IMMEDIATELY, 0, (uint)length, 0, ref ovlp ) ? 1 : 0;
 #else
-return 1;
+            return 1;
 #endif
       }
 
       public virtual void UnlockFile( sqlite3_file pFile, long offset, long length )
       {
-#if !SQLITE_SILVERLIGHT
+#if !(SQLITE_SILVERLIGHT || WINDOWS_MOBILE)
         pFile.fs.Unlock( offset, length );
 #endif
       }
@@ -3468,8 +3468,8 @@ return 1;
     private class MediumTrustLockingStrategy : LockingStrategy
     {
       public override int SharedLockFile( sqlite3_file pFile, long offset, long length )
-      {
-#if !SQLITE_SILVERLIGHT
+        {
+#if !(SQLITE_SILVERLIGHT || WINDOWS_MOBILE)
         Debug.Assert( length == SHARED_SIZE );
         Debug.Assert( offset == SHARED_FIRST );
         try
@@ -3481,7 +3481,7 @@ return 1;
           return 0;
         }
 #endif
-        return 1;
+            return 1;
       }
     }
   }

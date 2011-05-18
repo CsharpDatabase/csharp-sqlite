@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Community.CsharpSqlite.SQLiteClient.WM", "Community.CsharpSqlite.SQLiteClient.WM.csproj", "{3628A9EF-CCDB-4474-A0CD-4D0CFC0FAC07}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Community.CsharpSqlite.WinMobile", "..\Community.CsharpSqlite.WinMobile\Community.CsharpSqlite.WinMobile.csproj", "{3A036D50-E70A-4581-8891-352CCD69617A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3628A9EF-CCDB-4474-A0CD-4D0CFC0FAC07}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3628A9EF-CCDB-4474-A0CD-4D0CFC0FAC07}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3628A9EF-CCDB-4474-A0CD-4D0CFC0FAC07}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3628A9EF-CCDB-4474-A0CD-4D0CFC0FAC07}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3A036D50-E70A-4581-8891-352CCD69617A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3A036D50-E70A-4581-8891-352CCD69617A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3A036D50-E70A-4581-8891-352CCD69617A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3A036D50-E70A-4581-8891-352CCD69617A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

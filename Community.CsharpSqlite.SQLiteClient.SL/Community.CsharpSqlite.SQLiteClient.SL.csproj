@@ -1,0 +1,112 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{238EAD8B-B811-4FA6-8581-4CA4B816066D}</ProjectGuid>
+    <ProjectTypeGuids>{A1591282-1198-4647-A2B1-27E5FF5F6F3B};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Community.CsharpSqlite.SQLiteClient.SL</RootNamespace>
+    <AssemblyName>Community.CsharpSqlite.SQLiteClient.SL</AssemblyName>
+    <TargetFrameworkIdentifier>Silverlight</TargetFrameworkIdentifier>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <SilverlightVersion>$(TargetFrameworkVersion)</SilverlightVersion>
+    <SilverlightApplication>false</SilverlightApplication>
+    <ValidateXaml>true</ValidateXaml>
+    <ThrowErrorsInValidation>true</ThrowErrorsInValidation>
+  </PropertyGroup>
+  <!-- This property group is only here to support building this project using the 
+       MSBuild 3.5 toolset. In order to work correctly with this older toolset, it needs 
+       to set the TargetFrameworkVersion to v3.5 -->
+  <PropertyGroup Condition="'$(MSBuildToolsVersion)' == '3.5'">
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>Bin\Debug</OutputPath>
+    <DefineConstants>TRACE;DEBUG;SQLITE_SILVERLIGHT SQLITE_HAS_CODEC NET_2_0</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>Bin\Release</OutputPath>
+    <DefineConstants>TRACE;SILVERLIGHT</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="mscorlib" />
+    <Reference Include="system" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\Community.CsharpSqlite.SQLiteClient\src\SqliteCommand.cs">
+      <Link>src\SqliteCommand.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\Community.CsharpSqlite.SQLiteClient\src\SqliteConnection.cs">
+      <Link>src\SqliteConnection.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\Community.CsharpSqlite.SQLiteClient\src\SqliteDataReader.cs">
+      <Link>src\SqliteDataReader.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\Community.CsharpSqlite.SQLiteClient\src\SqliteError.cs">
+      <Link>src\SqliteError.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\Community.CsharpSqlite.SQLiteClient\src\SqliteExceptions.cs">
+      <Link>src\SqliteExceptions.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\Community.CsharpSqlite.SQLiteClient\src\SqliteParameter.cs">
+      <Link>src\SqliteParameter.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\Community.CsharpSqlite.SQLiteClient\src\SqliteParameterCollection.cs">
+      <Link>src\SqliteParameterCollection.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\Community.CsharpSqlite.SQLiteClient\src\SqliteTransaction.cs">
+      <Link>src\SqliteTransaction.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Community.CsharpSqlite.Silverlight\Community.CsharpSqlite.Silverlight.csproj">
+      <Project>{A3AE849B-B668-4BC9-A75F-6E9B0A8F6779}</Project>
+      <Name>Community.CsharpSqlite.Silverlight</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System.Data.Ersatz\Silverlight\System.Data.Ersatz.Silverlight.csproj">
+      <Project>{D7194231-DBAD-422B-819E-911037934F45}</Project>
+      <Name>System.Data.Ersatz.Silverlight</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Silverlight\$(SilverlightVersion)\Microsoft.Silverlight.CSharp.targets" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{A1591282-1198-4647-A2B1-27E5FF5F6F3B}">
+        <SilverlightProjectProperties />
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

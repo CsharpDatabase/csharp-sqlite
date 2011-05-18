@@ -32,6 +32,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic ;
 using System.Data;
 using System.Data.Common;
 using Community.CsharpSqlite;
@@ -44,9 +45,9 @@ namespace Community.CsharpSqlite.SQLiteClient
 		#region Fields
 		
 		private SqliteCommand command;
-		private ArrayList rows;
+        private List<object[]> rows;
 		private string[] columns;
-		private Hashtable column_names_sens, column_names_insens;
+		private Dictionary<String, Object> column_names_sens, column_names_insens;
 		private int current_row;
 		private bool closed;
 		private bool reading;
@@ -60,9 +61,9 @@ namespace Community.CsharpSqlite.SQLiteClient
 		internal SqliteDataReader (SqliteCommand cmd, Sqlite3.Vdbe pVm, int version)
 		{
 			command = cmd;
-			rows = new ArrayList ();
-			column_names_sens = new Hashtable ();
-			column_names_insens = new Hashtable (StringComparer.InvariantCultureIgnoreCase);
+            rows = new List<object[]>();
+            column_names_sens = new Dictionary<String, Object>();
+            column_names_insens = new Dictionary<String, Object>();
 			closed = false;
 			current_row = -1;
 			reading = true;
@@ -201,7 +202,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 								data_row[i] = null;
 								break;
 							default:
-								throw new ApplicationException ("FATAL: Unknown sqlite3_column_type");
+								throw new Exception ("FATAL: Unknown sqlite3_column_type");
 						//}
 					}
 				}
@@ -234,7 +235,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 		{
 			return new DbEnumerator (this);
 		}
-		
+#if !SQLITE_SILVERLIGHT 		
 		public override DataTable GetSchemaTable () 
 		{
 			DataTable dataTableSchema = new DataTable ();
@@ -297,8 +298,8 @@ namespace Community.CsharpSqlite.SQLiteClient
 			
 			return dataTableSchema;
 		}
-
-		public override bool NextResult ()
+#endif
+        public override bool NextResult ()
 		{
 			current_row++;
 			
@@ -328,8 +329,12 @@ namespace Community.CsharpSqlite.SQLiteClient
 		{
 			byte[] data = (byte[])(((object[]) rows[current_row])[i]);
 			if (buffer != null)
-				Array.Copy (data, fieldOffset, buffer, bufferOffset, length);
+				Array.Copy (data, (int)fieldOffset, buffer, bufferOffset, length);
+#if (SQLITE_SILVERLIGHT||WINDOWS_MOBILE)
+            return data.Length - fieldOffset;
+#else
 			return data.LongLength - fieldOffset;
+#endif
 		}
 
 		public override char GetChar (int i)
@@ -341,8 +346,12 @@ namespace Community.CsharpSqlite.SQLiteClient
 		{
 			char[] data = (char[])(((object[]) rows[current_row])[i]);
 			if (buffer != null)
-				Array.Copy (data, fieldOffset, buffer, bufferOffset, length);
+				Array.Copy (data, (int)fieldOffset, buffer, bufferOffset, length);
+#if (SQLITE_SILVERLIGHT||WINDOWS_MOBILE)
+            return data.Length - fieldOffset;
+#else
 			return data.LongLength - fieldOffset;
+#endif
 		}
 
 		public override string GetDataTypeName (int i)

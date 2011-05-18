@@ -670,7 +670,12 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
             /* Normalize realvalue to within 10.0 > realvalue >= 1.0 */
             exp = 0;
             double d = 0;
+#if WINDOWS_MOBILE
+            //alxwest: Tryparse doesn't exist on Windows Moble and what will Tryparsing a double do?
+            if ( Double.IsNaN( realvalue ))
+#else
             if ( Double.IsNaN( realvalue ) || !( Double.TryParse( Convert.ToString( realvalue ), out d ) ) )//if( sqlite3IsNaN((double)realvalue) )
+#endif
             {
               buf[0] = 'N';
               buf[1] = 'a';

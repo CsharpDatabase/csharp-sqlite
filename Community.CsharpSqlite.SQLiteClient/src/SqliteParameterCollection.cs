@@ -9,6 +9,7 @@
 //			Chris Turchin <chris@turchin.net>
 //			Jeroen Zwartepoorte <jeroen@xs4all.nl>
 //			Thomas Zoechling <thomas.zoechling@gmx.at>
+//          Alex West <alxwest@gmail.com>       
 //
 // Copyright (C) 2002  Vladimir Vukicevic
 //
@@ -36,6 +37,7 @@ using System;
 using System.Data;
 using System.Data.Common;
 using System.Collections;
+using System.Collections.Generic ;
 
 namespace Community.CsharpSqlite.SQLiteClient
 {
@@ -43,9 +45,9 @@ namespace Community.CsharpSqlite.SQLiteClient
 	{
 	
 		#region Fields
-		
-		ArrayList numeric_param_list = new ArrayList();
-		Hashtable named_param_hash = new Hashtable();
+
+        List<SqliteParameter> numeric_param_list = new List<SqliteParameter>();
+        Dictionary<string, int> named_param_hash = new Dictionary<string, int>();
 		
 		#endregion
 
@@ -115,7 +117,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 		protected override void SetParameter (int parameterIndex, DbParameter parameter)
 		{
 			if (this.Count >= parameterIndex+1)
-				numeric_param_list[parameterIndex] = parameter;
+				numeric_param_list[parameterIndex] = (SqliteParameter)parameter;
 			else          
 				throw new IndexOutOfRangeException("The specified parameter index does not exist: " + parameterIndex.ToString());
 		}
@@ -123,9 +125,9 @@ namespace Community.CsharpSqlite.SQLiteClient
 		protected override void SetParameter (string parameterName, DbParameter parameter)
 		{
 			if (this.Contains(parameterName))
-				numeric_param_list[(int) named_param_hash[parameterName]] = parameter;
+                numeric_param_list[(int)named_param_hash[parameterName]] = (SqliteParameter)parameter;
 			else if (parameterName.Length > 1 && this.Contains(parameterName.Substring(1)))
-				numeric_param_list[(int) named_param_hash[parameterName.Substring(1)]] = parameter;
+				numeric_param_list[(int) named_param_hash[parameterName.Substring(1)]] = (SqliteParameter)parameter;
 			else
 				throw new IndexOutOfRangeException("The specified name does not exist: " + parameterName);
 		}
@@ -138,37 +140,25 @@ namespace Community.CsharpSqlite.SQLiteClient
 			}
 		}
 
-		public override bool IsFixedSize
-		{
-			get
-			{
-				return this.numeric_param_list.IsFixedSize;
-			}
-		}
+        public override bool IsSynchronized
+        {
+            get { return ((IList)this.numeric_param_list).IsSynchronized ; }
+        }
 
-		public override bool IsReadOnly
-		{
-			get
-			{
-				return this.numeric_param_list.IsReadOnly;
-			}
-		}
+        public override bool IsFixedSize
+        {
+            get { return ((IList)this.numeric_param_list).IsFixedSize; }
+        }
 
-		public override bool IsSynchronized
-		{
-			get
-			{
-				return this.numeric_param_list.IsSynchronized;
-			}
-		}
+        public override bool IsReadOnly
+        {
+            get { return ((IList)this.numeric_param_list).IsReadOnly; }
+        }
 
-		public override object SyncRoot
-		{
-			get
-			{
-				return this.numeric_param_list.SyncRoot;
-			}
-		}
+        public override object SyncRoot
+        {
+            get { return ((IList)this.numeric_param_list).SyncRoot ; }
+        }
 
 		#endregion
 
@@ -187,9 +177,10 @@ namespace Community.CsharpSqlite.SQLiteClient
 		{
 			CheckSqliteParam (value);
 			SqliteParameter sqlp = value as SqliteParameter;
-			if (named_param_hash.Contains (sqlp.ParameterName))
+			if (named_param_hash.ContainsKey(sqlp.ParameterName))
 				throw new DuplicateNameException ("Parameter collection already contains the a SqliteParameter with the given ParameterName.");
-			named_param_hash[sqlp.ParameterName] = numeric_param_list.Add(value);
+            numeric_param_list.Add(sqlp);
+            named_param_hash.Add(sqlp.ParameterName, numeric_param_list.IndexOf(sqlp));
 				return (int) named_param_hash[sqlp.ParameterName];
 		}
 
@@ -217,7 +208,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 
 		public override void CopyTo (Array array, int index)
 		{
-			this.numeric_param_list.CopyTo(array, index);
+            this.numeric_param_list.CopyTo((SqliteParameter[])array, index);
 		}
 
 		public override bool Contains (object value)
@@ -227,7 +218,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 
 		public override bool Contains (string parameterName)
 		{
-			return named_param_hash.Contains (parameterName);
+			return named_param_hash.ContainsKey(parameterName);
 		}
 		
 		public bool Contains (SqliteParameter param)
@@ -235,10 +226,10 @@ namespace Community.CsharpSqlite.SQLiteClient
 			return Contains (param.ParameterName);
 		}
 
-		public override IEnumerator GetEnumerator ()
-		{
-			return this.numeric_param_list.GetEnumerator();
-		}
+        public override IEnumerator GetEnumerator()
+        {
+            return this.numeric_param_list.GetEnumerator();
+        }
 
 		public override int IndexOf (object param)
 		{
@@ -249,10 +240,10 @@ namespace Community.CsharpSqlite.SQLiteClient
 		{
 			if (isPrefixed (parameterName)){
 				string sub = parameterName.Substring (1);
-				if (named_param_hash.Contains(sub))
+				if (named_param_hash.ContainsKey(sub))
 					return (int) named_param_hash [sub];
 			}
-			if (named_param_hash.Contains(parameterName))
+			if (named_param_hash.ContainsKey(parameterName))
 				return (int) named_param_hash[parameterName];
 			else 
 				return -1;
@@ -272,7 +263,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 				return;
 			}
 			
-			numeric_param_list.Insert (index, value);
+			numeric_param_list.Insert(index,(SqliteParameter) value);
 			RecreateNamedHash ();
 		}
 
@@ -289,10 +280,10 @@ namespace Community.CsharpSqlite.SQLiteClient
 
 		public override void RemoveAt (string parameterName)
 		{
-			if (!named_param_hash.Contains (parameterName))
+			if (!named_param_hash.ContainsKey (parameterName))
 				throw new ApplicationException ("Parameter " + parameterName + " not found");
 			
-			numeric_param_list.RemoveAt ((int) named_param_hash[parameterName]);
+			numeric_param_list.RemoveAt((int) named_param_hash[parameterName]);
 			named_param_hash.Remove (parameterName);
 			
 			RecreateNamedHash ();

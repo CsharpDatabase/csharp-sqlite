@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Community.CsharpSqlite.SQLiteClient.SL", "Community.CsharpSqlite.SQLiteClient.SL.csproj", "{238EAD8B-B811-4FA6-8581-4CA4B816066D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Community.CsharpSqlite.Silverlight", "..\Community.CsharpSqlite.Silverlight\Community.CsharpSqlite.Silverlight.csproj", "{A3AE849B-B668-4BC9-A75F-6E9B0A8F6779}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Data.Ersatz.Silverlight", "..\System.Data.Ersatz\Silverlight\System.Data.Ersatz.Silverlight.csproj", "{D7194231-DBAD-422B-819E-911037934F45}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{238EAD8B-B811-4FA6-8581-4CA4B816066D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{238EAD8B-B811-4FA6-8581-4CA4B816066D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{238EAD8B-B811-4FA6-8581-4CA4B816066D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{238EAD8B-B811-4FA6-8581-4CA4B816066D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A3AE849B-B668-4BC9-A75F-6E9B0A8F6779}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3AE849B-B668-4BC9-A75F-6E9B0A8F6779}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A3AE849B-B668-4BC9-A75F-6E9B0A8F6779}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A3AE849B-B668-4BC9-A75F-6E9B0A8F6779}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D7194231-DBAD-422B-819E-911037934F45}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7194231-DBAD-422B-819E-911037934F45}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D7194231-DBAD-422B-819E-911037934F45}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D7194231-DBAD-422B-819E-911037934F45}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

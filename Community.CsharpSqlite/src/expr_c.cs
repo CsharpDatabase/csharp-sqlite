@@ -4428,7 +4428,7 @@ pDef = sqlite3VtabOverloadFunction( db, pDef, nFarg, pFarg.a[0].pExpr );
       n = pParse.nRangeReg;
       if ( nReg <= n )
       {
-        Debug.Assert( 1 == usedAsColumnCache( pParse, i, i + n - 1 ) );
+        //Debug.Assert( 1 == usedAsColumnCache( pParse, i, i + n - 1 ) );
         pParse.iRangeReg += nReg;
         pParse.nRangeReg -= nReg;
       }

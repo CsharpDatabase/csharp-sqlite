@@ -74,14 +74,15 @@ namespace SQLiteClientTests
       }
       Console.WriteLine( "Rows retrieved: {0}", r );
 
-
+//alxwest: DataTable & SqliteDataAdapter currently unavailable for Silverlight
+#if !SQLITE_SILVERLIGHT 
       SqliteCommand command = new SqliteCommand( "PRAGMA table_info('TEST_TABLE')", con );
       DataTable dataTable = new DataTable();
       SqliteDataAdapter dataAdapter = new SqliteDataAdapter();
       dataAdapter.SelectCommand = command;
       dataAdapter.Fill( dataTable );
       DisplayDataTable( dataTable, "Columns" );
-
+#endif
 
       Console.WriteLine( "Close and cleanup..." );
       con.Close();
@@ -145,14 +146,15 @@ namespace SQLiteClientTests
       }
       Console.WriteLine( "Rows retrieved: {0}", r );
 
-
+      //alxwest: DataTable & SqliteDataAdapter currently unavailable for Silverlight
+#if !SQLITE_SILVERLIGHT 
       SqliteCommand command = new SqliteCommand( "PRAGMA table_info('TEST_TABLE')", con );
       DataTable dataTable = new DataTable();
       SqliteDataAdapter dataAdapter = new SqliteDataAdapter();
       dataAdapter.SelectCommand = command;
       dataAdapter.Fill( dataTable );
       DisplayDataTable( dataTable, "Columns" );
-
+#endif
 
       Console.WriteLine( "Close and cleanup..." );
       con.Close();
@@ -573,7 +575,9 @@ namespace SQLiteClientTests
 
     public void Issue_65()
     {
-      string datasource = "file://" + TempDirectory.ToString() + "myBigDb.s3db";
+      //alxwest: causes error "Unable to open database" as TempDirectory.ToString() is set to "B:/TEMP/"
+      //string datasource = "file://" + TempDirectory.ToString() + "myBigDb.s3db";
+      string datasource = "file://" + "myBigDb.s3db";
 
       using ( IDbConnection conn = new SqliteConnection( "uri=" + datasource ) )
       {
@@ -610,7 +614,7 @@ namespace SQLiteClientTests
             cmd.ExecuteNonQuery();
           }
         }
-        catch ( Exception ex )
+        catch 
         {
           Console.WriteLine( ( (SqliteCommand)cmd ).GetLastError() );
         }
@@ -733,6 +737,9 @@ namespace SQLiteClientTests
       }
       Sqlite3.sqlite3_finalize( vm );
     }
+
+//alxwest: DataTable & SqliteDataAdapter currently unavailable for Silverlight
+#if !SQLITE_SILVERLIGHT 
     public void DisplayDataTable( DataTable table, string name )
     {
       Console.WriteLine( "Display DataTable: {0}", name );
@@ -753,7 +760,7 @@ namespace SQLiteClientTests
       Console.WriteLine( "Rows in data table: {0}", r );
 
     }
-
+#endif
     public static int Main( string[] args )
     {
       SQLiteClientTestDriver tests = new SQLiteClientTestDriver();
@@ -793,7 +800,7 @@ namespace SQLiteClientTests
           break;
       }
       Console.WriteLine( "Press Enter to Continue" );
-      Console.ReadKey();
+      //Console.ReadKey();
       tests = null;
 
       return 0;

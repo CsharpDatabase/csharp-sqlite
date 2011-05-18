@@ -1,0 +1,145 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>10.0.20506</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{60396C62-02C2-45FE-98BD-4A16E076722B}</ProjectGuid>
+    <ProjectTypeGuids>{C089C8C0-30E0-4E22-80C0-CE093F111A43};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>System.Data.Ersatz.WinPhone</RootNamespace>
+    <AssemblyName>System.Data.Ersatz.WinPhone</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <SilverlightVersion>$(TargetFrameworkVersion)</SilverlightVersion>
+    <TargetFrameworkProfile>WindowsPhone</TargetFrameworkProfile>
+    <TargetFrameworkIdentifier>Silverlight</TargetFrameworkIdentifier>
+    <SilverlightApplication>false</SilverlightApplication>
+    <ValidateXaml>true</ValidateXaml>
+    <ThrowErrorsInValidation>true</ThrowErrorsInValidation>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>Bin\Debug</OutputPath>
+    <DefineConstants>TRACE;DEBUG;SQLITE_SILVERLIGHT NET_40 TRUE WIN32 _MSC_VER NDEBUG NO_TCL SQLITE_ASCII SQLITE_DISABLE_LFS SQLITE_HAS_CODEC SQLITE_MEM_POOL SQLITE_MUTEX_OMIT SQLITE_OMIT_AUTHORIZATION SQLITE_OMIT_DEPRECATED SQLITE_OMIT_GET_TABLE SQLITE_OMIT_INCRBLOB SQLITE_OMIT_LOOKASIDE SQLITE_OMIT_SHARED_CACHE SQLITE_OMIT_UTF16 SQLITE_OMIT_VIRTUALTABLE SQLITE_OMIT_WAL SQLITE_OS_WIN SQLITE_SYSTEM_MALLOC VDBE_PROFILE_OFF  WINDOWS_PHONE</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>Bin\Release</OutputPath>
+    <DefineConstants>TRACE;SILVERLIGHT;WINDOWS_PHONE</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="system" />
+    <Reference Include="System.Core" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\src\System.Data.Common\DbCommand.cs">
+      <Link>System.Data.Common\DbCommand.cs</Link>
+    </Compile>
+    <Compile Include="..\src\System.Data.Common\DbConnection.cs">
+      <Link>System.Data.Common\DbConnection.cs</Link>
+    </Compile>
+    <Compile Include="..\src\System.Data.Common\DbDataReader.cs">
+      <Link>System.Data.Common\DbDataReader.cs</Link>
+    </Compile>
+    <Compile Include="..\src\System.Data.Common\DbDataRecord.cs">
+      <Link>System.Data.Common\DbDataRecord.cs</Link>
+    </Compile>
+    <Compile Include="..\src\System.Data.Common\DbEnumerator.cs">
+      <Link>System.Data.Common\DbEnumerator.cs</Link>
+    </Compile>
+    <Compile Include="..\src\System.Data.Common\DbException.cs">
+      <Link>System.Data.Common\DbException.cs</Link>
+    </Compile>
+    <Compile Include="..\src\System.Data.Common\DbParameter.cs">
+      <Link>System.Data.Common\DbParameter.cs</Link>
+    </Compile>
+    <Compile Include="..\src\System.Data.Common\DbParameterCollection.cs">
+      <Link>System.Data.Common\DbParameterCollection.cs</Link>
+    </Compile>
+    <Compile Include="..\src\System.Data.Common\DbTransaction.cs">
+      <Link>System.Data.Common\DbTransaction.cs</Link>
+    </Compile>
+    <Compile Include="..\src\System.Data.Common\DbTypes.cs">
+      <Link>System.Data.Common\DbTypes.cs</Link>
+    </Compile>
+    <Compile Include="..\src\System.Data.Common\SchemaInfo.cs">
+      <Link>System.Data.Common\SchemaInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\src\System.Data\CommandBehavior.cs">
+      <Link>System.Data\CommandBehavior.cs</Link>
+    </Compile>
+    <Compile Include="..\src\System.Data\CommandType.cs">
+      <Link>System.Data\CommandType.cs</Link>
+    </Compile>
+    <Compile Include="..\src\System.Data\ConnectionState.cs">
+      <Link>System.Data\ConnectionState.cs</Link>
+    </Compile>
+    <Compile Include="..\src\System.Data\DbType.cs">
+      <Link>System.Data\DbType.cs</Link>
+    </Compile>
+    <Compile Include="..\src\System.Data\IDataParameter.cs">
+      <Link>System.Data\IDataParameter.cs</Link>
+    </Compile>
+    <Compile Include="..\src\System.Data\IDataParameterCollection.cs">
+      <Link>System.Data\IDataParameterCollection.cs</Link>
+    </Compile>
+    <Compile Include="..\src\System.Data\IDataReader.cs">
+      <Link>System.Data\IDataReader.cs</Link>
+    </Compile>
+    <Compile Include="..\src\System.Data\IDataRecord.cs">
+      <Link>System.Data\IDataRecord.cs</Link>
+    </Compile>
+    <Compile Include="..\src\System.Data\IDbCommand.cs">
+      <Link>System.Data\IDbCommand.cs</Link>
+    </Compile>
+    <Compile Include="..\src\System.Data\IDbConnection.cs">
+      <Link>System.Data\IDbConnection.cs</Link>
+    </Compile>
+    <Compile Include="..\src\System.Data\IDbDataParameter.cs">
+      <Link>System.Data\IDbDataParameter.cs</Link>
+    </Compile>
+    <Compile Include="..\src\System.Data\IDbTransaction.cs">
+      <Link>System.Data\IDbTransaction.cs</Link>
+    </Compile>
+    <Compile Include="..\src\System.Data\IsolationLevel.cs">
+      <Link>System.Data\IsolationLevel.cs</Link>
+    </Compile>
+    <Compile Include="..\src\System.Data\ParameterDirection.cs">
+      <Link>System.Data\ParameterDirection.cs</Link>
+    </Compile>
+    <Compile Include="..\src\System\ApplicationException.cs">
+      <Link>System\ApplicationException.cs</Link>
+    </Compile>
+    <Compile Include="..\src\System\DuplicateNameException.cs">
+      <Link>System\DuplicateNameException.cs</Link>
+    </Compile>
+    <Compile Include="..\src\System\ICloneable.cs">
+      <Link>System\ICloneable.cs</Link>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\Silverlight for Phone\$(TargetFrameworkVersion)\Microsoft.Silverlight.$(TargetFrameworkProfile).Overrides.targets" />
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\Silverlight for Phone\$(TargetFrameworkVersion)\Microsoft.Silverlight.CSharp.targets" />
+  <ProjectExtensions />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

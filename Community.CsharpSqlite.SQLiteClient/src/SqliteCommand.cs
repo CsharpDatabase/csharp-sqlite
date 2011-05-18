@@ -52,7 +52,9 @@ namespace Community.CsharpSqlite.SQLiteClient
 		private string sql;
 		private int timeout;
 		private CommandType type;
+#if !SQLITE_SILVERLIGHT
 		private UpdateRowSource upd_row_source;
+#endif
 		private SqliteParameterCollection sql_params;
 		private bool prepared = false;
 		private bool _designTimeVisible = true;
@@ -175,7 +177,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 			get { return _designTimeVisible; }
 			set { _designTimeVisible = value; }
 		}
-
+#if !SQLITE_SILVERLIGHT
 		public override UpdateRowSource UpdatedRowSource
 		{
 			get
@@ -187,6 +189,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 				upd_row_source = value;
 			}
 		}
+#endif
 
 		#endregion
 
@@ -500,11 +503,12 @@ namespace Community.CsharpSqlite.SQLiteClient
 
 				return null;
 			}
-			catch ( Exception ex )
-			{
-				Console.WriteLine( ex.Message );
-				return null;
-			}
+            //alxwest: Console.WriteLine in shared functionality.
+            //catch ( Exception ex )
+            //{
+            //    Console.WriteLine( ex.Message );
+            //    return null;
+            //}
 			finally
 			{
 				parent_conn.EndExec();

@@ -1,0 +1,126 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{3628A9EF-CCDB-4474-A0CD-4D0CFC0FAC07}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Community.CsharpSqlite.SQLiteClient.WM</RootNamespace>
+    <AssemblyName>Community.CsharpSqlite.SQLiteClient.WM</AssemblyName>
+    <ProjectTypeGuids>{4D628B5B-2FBC-4AA6-8C16-197242AEB884};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <PlatformFamilyName>PocketPC</PlatformFamilyName>
+    <PlatformID>4118C335-430C-497f-BE48-11C3316B135E</PlatformID>
+    <OSVersion>5.1</OSVersion>
+    <DeployDirSuffix>Community.CsharpSqlite.SQLiteClient.WM</DeployDirSuffix>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <NativePlatformName>Windows Mobile 5.0 Pocket PC SDK</NativePlatformName>
+    <FormFactorID>
+    </FormFactorID>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;WINDOWS_MOBILE</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <ErrorReport>prompt</ErrorReport>
+    <FileAlignment>512</FileAlignment>
+    <WarningLevel>4</WarningLevel>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;$(PlatformFamilyName)</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <ErrorReport>prompt</ErrorReport>
+    <FileAlignment>512</FileAlignment>
+    <WarningLevel>4</WarningLevel>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="mscorlib" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\Community.CsharpSqlite.SQLiteClient\src\SqliteCommand.cs">
+      <Link>src\SqliteCommand.cs</Link>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="..\Community.CsharpSqlite.SQLiteClient\src\SqliteCommandBuilder.cs">
+      <Link>src\SqliteCommandBuilder.cs</Link>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="..\Community.CsharpSqlite.SQLiteClient\src\SqliteConnection.cs">
+      <Link>src\SqliteConnection.cs</Link>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="..\Community.CsharpSqlite.SQLiteClient\src\SqliteDataAdapter.cs">
+      <Link>src\SqliteDataAdapter.cs</Link>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="..\Community.CsharpSqlite.SQLiteClient\src\SqliteDataReader.cs">
+      <Link>src\SqliteDataReader.cs</Link>
+    </Compile>
+    <Compile Include="..\Community.CsharpSqlite.SQLiteClient\src\SqliteError.cs">
+      <Link>src\SqliteError.cs</Link>
+    </Compile>
+    <Compile Include="..\Community.CsharpSqlite.SQLiteClient\src\SqliteExceptions.cs">
+      <Link>src\SqliteExceptions.cs</Link>
+    </Compile>
+    <Compile Include="..\Community.CsharpSqlite.SQLiteClient\src\SqliteParameter.cs">
+      <Link>src\SqliteParameter.cs</Link>
+    </Compile>
+    <Compile Include="..\Community.CsharpSqlite.SQLiteClient\src\SqliteParameterCollection.cs">
+      <Link>src\SqliteParameterCollection.cs</Link>
+    </Compile>
+    <Compile Include="..\Community.CsharpSqlite.SQLiteClient\src\SqliteRowUpdatedEventArgs.cs">
+      <Link>src\SqliteRowUpdatedEventArgs.cs</Link>
+    </Compile>
+    <Compile Include="..\Community.CsharpSqlite.SQLiteClient\src\SqliteRowUpdatedEventHandler.cs">
+      <Link>src\SqliteRowUpdatedEventHandler.cs</Link>
+    </Compile>
+    <Compile Include="..\Community.CsharpSqlite.SQLiteClient\src\SqliteRowUpdatingEventArgs.cs">
+      <Link>src\SqliteRowUpdatingEventArgs.cs</Link>
+    </Compile>
+    <Compile Include="..\Community.CsharpSqlite.SQLiteClient\src\SqliteRowUpdatingEventHandler.cs">
+      <Link>src\SqliteRowUpdatingEventHandler.cs</Link>
+    </Compile>
+    <Compile Include="..\Community.CsharpSqlite.SQLiteClient\src\SqliteTransaction.cs">
+      <Link>src\SqliteTransaction.cs</Link>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Community.CsharpSqlite.WinMobile\Community.CsharpSqlite.WinMobile.csproj">
+      <Project>{3A036D50-E70A-4581-8891-352CCD69617A}</Project>
+      <Name>Community.CsharpSqlite.WinMobile</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}">
+        <HostingProcess disable="1" />
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
