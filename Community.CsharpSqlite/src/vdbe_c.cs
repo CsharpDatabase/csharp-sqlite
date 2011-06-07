@@ -1138,7 +1138,11 @@ pOp.p1 = pOut.n;
               sqlite3_free( ref pOut.zBLOB );
               pOut.z = pOp.p4.z;
               pOut.n = pOp.p1;
+#if SQLITE_OMIT_UTF16
+              pOut.enc = SQLITE_UTF8;
+#else             
               pOut.enc = encoding;
+#endif
 #if SQLITE_TEST
               UPDATE_MAX_BLOBSIZE( pOut );
 #endif

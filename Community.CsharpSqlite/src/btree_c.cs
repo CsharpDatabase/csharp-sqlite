@@ -2688,6 +2688,7 @@ return BTREE_AUTOVACUUM_NONE;
         }
         if ( page1[19] > 1 )
         {
+          pBt.pSchema.file_format = page1[19];
           goto page1_init_failed;
         }
 #else

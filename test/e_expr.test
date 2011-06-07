@@ -1077,6 +1077,7 @@ sqlite3 db test.db
 #
 #   There is a regexp function if ICU is enabled though.
 #
+if (0) {
 ifcapable !icu {
   do_catchsql_test e_expr-18.1.1 { 
     SELECT regexp('abc', 'def') 
@@ -1084,6 +1085,7 @@ ifcapable !icu {
   do_catchsql_test e_expr-18.1.2 { 
     SELECT 'abc' REGEXP 'def'
   } {1 {no such function: REGEXP}}
+}
 }
 
 # EVIDENCE-OF: R-33693-50180 The REGEXP operator is a special syntax for

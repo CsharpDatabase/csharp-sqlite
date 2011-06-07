@@ -393,6 +393,18 @@ new sPragmaType( "foreign_keys",             SQLITE_ForeignKeys ),
       }
     };
 
+    static EncName[] encnames = new EncName[]  {
+new EncName( "UTF8",     SQLITE_UTF8        ),
+new EncName( "UTF-8",    SQLITE_UTF8        ),/* Must be element [1] */
+new EncName( "UTF-16le (not supported)", SQLITE_UTF16LE     ),/* Must be element [2] */
+new EncName( "UTF-16be (not supported)", SQLITE_UTF16BE     ), /* Must be element [3] */
+new EncName( "UTF16le (not supported)",  SQLITE_UTF16LE     ),
+new EncName( "UTF16be (not supported)",  SQLITE_UTF16BE     ),
+new EncName( "UTF-16 (not supported)",   0                  ), /* SQLITE_UTF16NATIVE */
+new EncName( "UTF16",    0                  ), /* SQLITE_UTF16NATIVE */
+new EncName( null, 0 )
+};
+    
     // OVERLOADS, so I don't need to rewrite parse.c
     static void sqlite3Pragma( Parse pParse, Token pId1, Token pId2, int null_4, int minusFlag )
     {
@@ -1540,23 +1552,16 @@ new VdbeOpList( OP_ResultRow,    2,  1,  0),
 ** useful if invoked immediately after the main database i
 */
                                                       if ( zLeft.Equals( "encoding" ,StringComparison.InvariantCultureIgnoreCase )  )
-                                                      {
-                                                        EncName[] encnames = new EncName[]  {
-new EncName( "UTF8",     SQLITE_UTF8        ),
-new EncName( "UTF-8",    SQLITE_UTF8        ),/* Must be element [1] */
-new EncName( "UTF-16le", SQLITE_UTF16LE     ),/* Must be element [2] */
-new EncName( "UTF-16be", SQLITE_UTF16BE     ), /* Must be element [3] */
-new EncName( "UTF16le",  SQLITE_UTF16LE     ),
-new EncName( "UTF16be",  SQLITE_UTF16BE     ),
-new EncName( "UTF-16",   0                  ), /* SQLITE_UTF16NATIVE */
-new EncName( "UTF16",    0                  ), /* SQLITE_UTF16NATIVE */
-new EncName( null, 0 )
-};
+                                                      {                                                        
                                                         int iEnc;
                                                         if ( null == zRight )
                                                         {    /* "PRAGMA encoding" */
                                                           if ( sqlite3ReadSchema( pParse ) != 0 )
-                                                            goto pragma_out;
+                                                          {
+                                                            pParse.nErr = 0;
+                                                            pParse.zErrMsg = null;
+                                                            pParse.rc = 0;//  reset errors goto pragma_out;
+                                                          }
                                                           sqlite3VdbeSetNumCols( v, 1 );
                                                           sqlite3VdbeSetColName( v, 0, COLNAME_NAME, "encoding", SQLITE_STATIC );
                                                           sqlite3VdbeAddOp2( v, OP_String8, 0, 1 );
