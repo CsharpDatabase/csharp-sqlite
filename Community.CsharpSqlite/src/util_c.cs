@@ -38,7 +38,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2010-12-07 20:14:09 a586a4deeb25330037a49df295b36aaf624d0f45
+    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
     **
     *************************************************************************
     */
@@ -54,8 +54,8 @@ namespace Community.CsharpSqlite
 */
 #if SQLITE_COVERAGE_TEST
 void sqlite3Coverage(int x){
-static int dummy = 0;
-dummy += x;
+static uint dummy = 0;
+dummy += (uint)x;
 }
 #endif
 
@@ -634,14 +634,17 @@ return !sqlite3Atoi64(z, pResult, length, enc);
 
 
     /*
-    ** Convert zNum to a 64-bit signed integer and write
-    ** the value of the integer into *pNum.
-    ** If zNum is exactly 9223372036854665808, return 2.
-    ** This is a special case as the context will determine
-    ** if it is too big (used as a negative).
-    ** If zNum is not an integer or is an integer that 
-    ** is too large to be expressed with 64 bits,
-    ** then return 1.  Otherwise return 0.
+    ** Convert zNum to a 64-bit signed integer.
+    **
+    ** If the zNum value is representable as a 64-bit twos-complement 
+    ** integer, then write that value into *pNum and return 0.
+    **
+    ** If zNum is exactly 9223372036854665808, return 2.  This special
+    ** case is broken out because while 9223372036854665808 cannot be a 
+    ** signed 64-bit integer, its negative -9223372036854665808 can be.
+    **
+    ** If zNum is too big for a 64-bit integer and is not
+    ** 9223372036854665808 then return 1.
     **
     ** length is the number of bytes in the string (bytes, not characters).
     ** The string is not necessarily zero-terminated.  The encoding is
@@ -655,7 +658,7 @@ return !sqlite3Atoi64(z, pResult, length, enc);
         return 1;
       }
       int incr = ( enc == SQLITE_UTF8 ? 1 : 2 );
-      i64 v = 0;
+      u64 u = 0;
       int neg = 0; /* assume positive */
       int i;
       int c = 0;
@@ -666,18 +669,18 @@ return !sqlite3Atoi64(z, pResult, length, enc);
         zDx++;
       while ( zDx < length && sqlite3Isspace( zNum[zDx] ) )
         zDx += incr;
-      if ( zDx >= length )
-        goto do_atoi_calc;
-      if ( zNum[zDx] == '-' )
+      if ( zDx < length )
       {
-        neg = 1;
-        zDx += incr;
+        if ( zNum[zDx] == '-' )
+        {
+          neg = 1;
+          zDx += incr;
+        }
+        else if ( zNum[zDx] == '+' )
+        {
+          zDx += incr;
+        }
       }
-      else if ( zNum[zDx] == '+' )
-      {
-        zDx += incr;
-      }
-do_atoi_calc:
       //zStart = zNum;
       if ( length > zNum.Length )
         length = zNum.Length;
@@ -687,9 +690,20 @@ do_atoi_calc:
       } /* Skip leading zeros. */
       for ( i = zDx; i < length && ( c = zNum[i] ) >= '0' && c <= '9'; i += incr )
       {
-        v = v * 10 + c - '0';
+        u = u * 10 + (u64)(c - '0');
       }
-      pNum = neg != 0 ? -v : v;
+      if ( u > LARGEST_INT64 )
+      {
+        pNum = SMALLEST_INT64;
+      }
+      else if ( neg != 0)
+      {
+        pNum = -(i64)u;
+      }
+      else
+      {
+        pNum = (i64)u;
+      }
       testcase( i - zDx == 18 );
       testcase( i - zDx == 19 );
       testcase( i - zDx == 20 );
@@ -702,21 +716,34 @@ do_atoi_calc:
       else if ( i - zDx < 19 * incr )
       {
         /* Less than 19 digits, so we know that it fits in 64 bits */
+        Debug.Assert( u <= LARGEST_INT64 );
         return 0;
       }
       else
       {
-        /* 19-digit numbers must be no larger than 9223372036854775807 if positive
-        ** or 9223372036854775808 if negative.  Note that 9223372036854665808
-        ** is 2^63. Return 1 if to large */
-        c = compare2pow63( zNum.Substring( zDx ), incr );
-        if ( c == 0 && neg == 0 )
-          return 2; /* too big, exactly 9223372036854665808 */
-        return c < neg ? 0 : 1;
+        /* zNum is a 19-digit numbers.  Compare it against 9223372036854775808. */
+        c = compare2pow63( zNum, incr );
+        if ( c < 0 )
+        {
+          /* zNum is less than 9223372036854775808 so it fits */
+          Debug.Assert( u <= LARGEST_INT64 );
+          return 0;
+        }
+        else if ( c > 0 )
+        {
+          /* zNum is greater than 9223372036854775808 so it overflows */
+          return 1;
+        }
+        else
+        {
+          /* zNum is exactly 9223372036854775808.  Fits if negative.  The
+          ** special case 2 overflow if positive */
+          Debug.Assert( u - 1 == LARGEST_INT64 );
+          Debug.Assert( ( pNum ) == SMALLEST_INT64 );
+          return neg != 0 ? 0 : 2;
+        }
       }
-
     }
-
 
     /*
     ** If zNum represents an integer that will fit in 32-bits, then set
@@ -1527,5 +1554,98 @@ return n;
         return true;
       }
     }
+
+    /*
+    ** Attempt to add, substract, or multiply the 64-bit signed value iB against
+    ** the other 64-bit signed integer at *pA and store the result in *pA.
+    ** Return 0 on success.  Or if the operation would have resulted in an
+    ** overflow, leave *pA unchanged and return 1.
+    */
+    static int sqlite3AddInt64( ref i64 pA, i64 iB )
+    {
+      i64 iA = pA;
+      testcase( iA == 0 );
+      testcase( iA == 1 );
+      testcase( iB == -1 );
+      testcase( iB == 0 );
+      if ( iB >= 0 )
+      {
+        testcase( iA > 0 && LARGEST_INT64 - iA == iB );
+        testcase( iA > 0 && LARGEST_INT64 - iA == iB - 1 );
+        if ( iA > 0 && LARGEST_INT64 - iA < iB )
+          return 1;
+        pA += iB;
+      }
+      else
+      {
+        testcase( iA < 0 && -( iA + LARGEST_INT64 ) == iB + 1 );
+        testcase( iA < 0 && -( iA + LARGEST_INT64 ) == iB + 2 );
+        if ( iA < 0 && -( iA + LARGEST_INT64 ) > iB + 1 )
+          return 1;
+        pA += iB;
+      }
+      return 0;
+    }
+    static int sqlite3SubInt64( ref i64 pA, i64 iB )
+    {
+      testcase( iB == SMALLEST_INT64 + 1 );
+      if ( iB == SMALLEST_INT64 )
+      {
+        testcase( ( pA ) == ( -1 ) );
+        testcase( ( pA ) == 0 );
+        if ( ( pA ) >= 0 )
+          return 1;
+        pA -= iB;
+        return 0;
+      }
+      else
+      {
+        return sqlite3AddInt64( ref pA, -iB );
+      }
+    }
+    //#define TWOPOWER32 (((i64)1)<<32)
+    const i64 TWOPOWER32 = ( ( (i64)1 ) << 32 );
+    //#define TWOPOWER31 (((i64)1)<<31)
+    const i64 TWOPOWER31 = ( ( (i64)1 ) << 31 );
+
+    static int sqlite3MulInt64( ref i64 pA, i64 iB )
+    {
+      i64 iA = pA;
+      i64 iA1, iA0, iB1, iB0, r;
+
+      iA1 = iA / TWOPOWER32;
+      iA0 = iA % TWOPOWER32;
+      iB1 = iB / TWOPOWER32;
+      iB0 = iB % TWOPOWER32;
+      if ( iA1 * iB1 != 0 )
+        return 1;
+      Debug.Assert( iA1 * iB0 == 0 || iA0 * iB1 == 0 );
+      r = iA1 * iB0 + iA0 * iB1;
+      testcase( r == ( -TWOPOWER31 ) - 1 );
+      testcase( r == ( -TWOPOWER31 ) );
+      testcase( r == TWOPOWER31 );
+      testcase( r == TWOPOWER31 - 1 );
+      if ( r < ( -TWOPOWER31 ) || r >= TWOPOWER31 )
+        return 1;
+      r *= TWOPOWER32;
+      if ( sqlite3AddInt64( ref r, iA0 * iB0 ) != 0)
+        return 1;
+      pA = r;
+      return 0;
+    }
+
+    /*
+    ** Compute the absolute value of a 32-bit signed integer, if possible.  Or 
+    ** if the integer has a value of -2147483648, return +2147483647
+    */
+    static int sqlite3AbsInt32( int x )
+    {
+      if ( x >= 0 )
+        return x;
+      if ( x == -2147483648) // 0x80000000 
+        return 0x7fffffff;
+      return -x;
+    }
+
   }
 }

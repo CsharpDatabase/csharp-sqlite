@@ -24,6 +24,7 @@ source $testdir/tester.tcl
 #
 do_not_use_codec
 
+
 # Create a database to work with.
 #
 do_test corruptA-1.1 {
@@ -41,7 +42,7 @@ integrity_check corruptA-1.2
 db close
 file copy -force test.db test.db-template
 
-set unreadable_version 03
+set unreadable_version 02
 ifcapable wal { set unreadable_version 03 }
 do_test corruptA-2.1 {
   file copy -force test.db-template test.db

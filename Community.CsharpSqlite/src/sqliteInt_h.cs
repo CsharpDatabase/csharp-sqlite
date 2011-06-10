@@ -24,6 +24,17 @@ using ynVar = System.Int16;
 using ynVar = System.Int32; 
 #endif
 
+/*
+** The yDbMask datatype for the bitmask of all attached databases.
+*/
+#if SQLITE_MAX_ATTACHED//>30
+//  typedef sqlite3_uint64 yDbMask;
+using yDbMask = System.Int64; 
+#else
+//  typedef unsigned int yDbMask;
+using yDbMask = System.Int32; 
+#endif
+
 namespace Community.CsharpSqlite
 {
   using sqlite3_value = Sqlite3.Mem;
@@ -47,7 +58,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2011-01-28 17:03:50 ed759d5a9edb3bba5f48f243df47be29e3fe8cd7
+    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
     **
     *************************************************************************
     */
@@ -809,10 +820,25 @@ void *sqlite3_wsd_find(void *K, int L);
 
     /*
     ** An instance of the following structure stores a database schema.
+    **
+    ** Most Schema objects are associated with a Btree.  The exception is
+    ** the Schema for the TEMP databaes (sqlite3.aDb[1]) which is free-standing.
+    ** In shared cache mode, a single Schema object can be shared by multiple
+    ** Btrees that refer to the same underlying BtShared object.
+    ** 
+    ** Schema objects are automatically deallocated when the last Btree that
+    ** references them is destroyed.   The TEMP Schema is manually freed by
+    ** sqlite3_close().
+    *
+    ** A thread must be holding a mutex on the corresponding Btree in order
+    ** to access Schema content.  This implies that the thread must also be
+    ** holding a mutex on the sqlite3 connection pointer that owns the Btree.
+    ** For a TEMP Schema, on the connection mutex is required.
     */
     public class Schema
     {
       public int schema_cookie;         /* Database schema version number for this file */
+      public u32 iGeneration;           /* Generation counter.  Incremented with each change */
       public Hash tblHash = new Hash(); /* All tables indexed by name */
       public Hash idxHash = new Hash(); /* All (named) indices indexed by name */
       public Hash trigHash = new Hash();/* All triggers indexed by name */
@@ -843,7 +869,6 @@ void *sqlite3_wsd_find(void *K, int L);
           trigHash = new Hash();
           fkeyHash = new Hash();
           pSeqTab = null;
-          flags = 0;
         }
       }
     };
@@ -1117,6 +1142,7 @@ sqlite3 *pNextBlocked;        /* Next in list of all blocked connections */
     //#define SQLITE_AutoIndex      0x08000000  /* Enable automatic indexes */
     //#define SQLITE_PreferBuiltin  0x10000000  /* Preference to built-in funcs */
     //#define SQLITE_LoadExtension  0x20000000  /* Enable load_extension */
+    //define SQLITE_EnableTrigger  0x40000000  /* True to enable triggers */
     const int SQLITE_VdbeTrace = 0x00000100;
     const int SQLITE_InternChanges = 0x00000200;
     const int SQLITE_FullColNames = 0x00000400;
@@ -1139,6 +1165,7 @@ sqlite3 *pNextBlocked;        /* Next in list of all blocked connections */
     const int SQLITE_AutoIndex = 0x08000000;
     const int SQLITE_PreferBuiltin = 0x10000000;
     const int SQLITE_LoadExtension = 0x20000000;
+    const int SQLITE_EnableTrigger = 0x40000000;
 
     /*
     ** Bits of the sqlite3.flags field that are used by the
@@ -1521,7 +1548,7 @@ public   u8 isHidden;     /* True if this column is 'hidden' */
     ** schema is shared, as the implementation often stores the database
     ** connection handle passed to it via the xConnect() or xCreate() method
     ** during initialization internally. This database connection handle may
-    ** then used by the virtual table implementation to access real tables 
+    ** then be used by the virtual table implementation to access real tables 
     ** within the database. So that they appear as part of the callers 
     ** transaction, these accesses need to be made via the same database 
     ** connection as that used to execute SQL operations on the virtual table.
@@ -1878,6 +1905,7 @@ static bool IsVirtual( Column X) { return X.isHidden!=0;}
       public int tnum;          /* Page containing root of this index in database file */
       public u8 onError;        /* OE_Abort, OE_Ignore, OE_Replace, or OE_None */
       public u8 autoIndex;      /* True if is automatically created (ex: by UNIQUE) */
+      public u8 bUnordered;     /* Use this index for == or IN queries only */
       public string zColAff;    /* String defining the affinity of each column */
       public Index pNext;       /* The next index associated with the same table */
       public Schema pSchema;    /* Schema containing this index */
@@ -2139,14 +2167,14 @@ public string zToken
 get { return _zToken; }
 set { _zToken = value; }
 }
-public int iValue;            /* Integer value if EP_IntValue */
+public int iValue;            /* Non-negative integer value if EP_IntValue */
 }
 
 #else
       public struct _u
       {
         public string zToken;         /* Token value. Zero terminated and dequoted */
-        public int iValue;            /* Integer value if EP_IntValue */
+        public int iValue;            /* Non-negative integer value if EP_IntValue */
       }
       public u16 flags;             /* Various flags.  EP_* See below */
 #endif
@@ -2919,6 +2947,15 @@ static void ExprSetIrreducible( Expr X ) { }
     };
 
     /*
+    ** The yDbMask datatype for the bitmask of all attached databases.
+    */
+//#if SQLITE_MAX_ATTACHED>30
+//  typedef sqlite3_uint64 yDbMask;
+//#else
+//  typedef unsigned int yDbMask;
+//#endif
+
+    /*
     ** An SQL parser context.  A copy of this structure is passed through
     ** the parser and down into all the parser action routine in order to
     ** carry around information that is global to the entire parse.
@@ -2970,8 +3007,8 @@ static void ExprSetIrreducible( Expr X ) { }
       public u8 nColCache;        /* Number of entries in the column cache */
       public u8 iColCache;        /* Next entry of the cache to replace */
       public yColCache[] aColCache = new yColCache[SQLITE_N_COLCACHE];     /* One for each valid column cache entry */
-      public u32 writeMask;       /* Start a write transaction on these databases */
-      public u32 cookieMask;      /* Bitmask of schema verified databases */
+      public yDbMask writeMask;   /* Start a write transaction on these databases */
+      public yDbMask cookieMask;  /* Bitmask of schema verified databases */
       public u8 isMultiWrite;     /* True if statement may affect/insert multiple rows */
       public u8 mayAbort;         /* True if statement may throw an ABORT exception */
       public int cookieGoto;      /* Address of OP_Goto to cookie verifier subroutine */
@@ -3869,6 +3906,7 @@ const sqlite3_mem_methods *sqlite3MemGetMemsys5(void);
     //void sqlite3PrngResetState(void);
     //void sqlite3RollbackAll(sqlite3*);
     //void sqlite3CodeVerifySchema(Parse*, int);
+    //void sqlite3CodeVerifyNamedSchema(Parse*, const char *zDb);
     //void sqlite3BeginTransaction(Parse*, int);
     //void sqlite3CommitTransaction(Parse*);
     //void sqlite3RollbackTransaction(Parse*);
@@ -4123,6 +4161,10 @@ int sqlite3AuthReadCol(Parse*, const char *, const char *, int);
     //int sqlite3CheckCollSeq(Parse *, CollSeq *);
     //int sqlite3CheckObjectName(Parse *, const char *);
     //void sqlite3VdbeSetChanges(sqlite3 *, int);
+    //int sqlite3AddInt64(i64*,i64);
+    //int sqlite3SubInt64(i64*,i64);
+    //int sqlite3MulInt64(i64*,i64);
+    //int sqlite3AbsInt32(int);
 
     //const void *sqlite3ValueText(sqlite3_value*, u8);
     //int sqlite3ValueBytes(sqlite3_value*, u8);
@@ -4147,7 +4189,7 @@ int sqlite3AuthReadCol(Parse*, const char *, const char *, int);
     //extern int sqlite3PendingByte;
     //#endif
     //#endif
-    //void sqlite3RootPageMoved(Db*, int, int);
+    //void sqlite3RootPageMoved(sqlite3*, int, int, int);
     //void sqlite3Reindex(Parse*, Token*, Token*);
     //void sqlite3AlterFunctions(void);
     //void sqlite3AlterRenameTable(Parse*, SrcList*, Token*);
@@ -4174,7 +4216,7 @@ int sqlite3AuthReadCol(Parse*, const char *, const char *, int);
     //void sqlite3RegisterLikeFunctions(sqlite3*, int);
     //int sqlite3IsLikeFunction(sqlite3*,Expr*,int*,char*);
     //void sqlite3MinimumFileFormat(Parse*, int, int);
-    //void sqlite3SchemaFree(void *);
+    //void sqlite3SchemaClear(void *);
     //Schema *sqlite3SchemaGet(sqlite3 *, Btree *);
     //int sqlite3SchemaToIndex(sqlite3 db, Schema *);
     //KeyInfo *sqlite3IndexKeyinfo(Parse *, Index *);
@@ -4250,7 +4292,6 @@ int sqlite3ParserStackPeak(void*);
     {
     }
 
-    //#  define sqlite3VtabInSync(db) 0
     //#  define sqlite3VtabLock(X) 
     static void sqlite3VtabLock( VTable X )
     {
@@ -4265,22 +4306,30 @@ int sqlite3ParserStackPeak(void*);
     static void sqlite3VtabUnlockList( sqlite3 X )
     {
     }
-
-    static void sqlite3VtabArgExtend( Parse P, Token T )
-    {
-    }//#  define sqlite3VtabArgExtend(P, T)
-    static void sqlite3VtabArgInit( Parse P )
-    {
-    }//#  define sqlite3VtabArgInit(P)
-    static void sqlite3VtabBeginParse( Parse P, Token T, Token T1, Token T2 )
-    {
-    }//#  define sqlite3VtabBeginParse(P, T, T1, T2);
-    static void sqlite3VtabFinishParse<T>( Parse P, T t )
-    {
-    }//#  define sqlite3VtabFinishParse(P, T)
+    //#  define sqlite3VtabInSync(db) ((db)->nVTrans>0 && (db)->aVTrans==0)
     static bool sqlite3VtabInSync( sqlite3 db )
     {
       return false;
+    }
+
+    //#  define sqlite3VtabArgExtend(P, T)
+    static void sqlite3VtabArgExtend( Parse P, Token T )
+    {
+    }
+    
+    //#  define sqlite3VtabArgInit(P)
+    static void sqlite3VtabArgInit( Parse P )
+    {
+    }
+    
+    //#  define sqlite3VtabBeginParse(P, T, T1, T2);
+    static void sqlite3VtabBeginParse( Parse P, Token T, Token T1, Token T2 )
+    {
+    }
+    
+    //#  define sqlite3VtabFinishParse(P, T)
+    static void sqlite3VtabFinishParse<T>( Parse P, T t )
+    {
     }
 
     static VTable sqlite3GetVTable( sqlite3 db, Table T )
@@ -4317,7 +4366,7 @@ static bool sqlite3VtabInSync( sqlite3 db ) { return ( db.nVTrans > 0 && db.aVTr
     //int sqlite3TempInMemory(const sqlite3*);
     //VTable *sqlite3GetVTable(sqlite3*, Table*);
     //const char *sqlite3JournalModename(int);
-    //int sqlite3Checkpoint(sqlite3*, int);
+    //int sqlite3Checkpoint(sqlite3*, int, int, int*, int*);
     //int sqlite3WalDefaultHook(void*,sqlite3*,const char*,int);
 
     /* Declarations for functions in fkey.c. All of these are replaced by

@@ -5591,6 +5591,73 @@ TCL.Tcl_SetObjResult(interp, TCL.Tcl_NewIntObj(amt));
     }
 
     /*
+** tclcmd:  sqlite3_wal_checkpoint_v2 db MODE ?NAME?
+**
+** This command calls the wal_checkpoint_v2() function with the specified
+** mode argument (passive, full or restart). If present, the database name
+** NAME is passed as the second argument to wal_checkpoint_v2(). If it the
+** NAME argument is not present, a NULL pointer is passed instead.
+**
+** If wal_checkpoint_v2() returns any value other than SQLITE_BUSY or
+** SQLITE_OK, then this command returns TCL_ERROR. The Tcl result is set
+** to the error message obtained from sqlite3_errmsg().
+**
+** Otherwise, this command returns a list of three integers. The first integer
+** is 1 if SQLITE_BUSY was returned, or 0 otherwise. The following two integers
+** are the values returned via the output paramaters by wal_checkpoint_v2() -
+** the number of frames in the log and the number of frames in the log
+** that have been checkpointed.
+*/
+static int test_wal_checkpoint_v2(
+    ClientData clientData, /* Pointer to sqlite3_enable_XXX function */
+    Tcl_Interp interp, /* The TCL interpreter that invoked this command */
+    int objc, /* Number of arguments */
+    Tcl_Obj[] objv /* Command arguments */
+){
+  string zDb = "";
+  sqlite3 db = null;
+  int rc;
+
+  int eMode = 0;
+  int nLog = -555;
+  int nCkpt = -555;
+  Tcl_Obj pRet;
+
+  string[] aMode = new string[] { "passive", "full", "restart" };
+  Debug.Assert( SQLITE_CHECKPOINT_PASSIVE==0 );
+  Debug.Assert( SQLITE_CHECKPOINT_FULL == 1 );
+  Debug.Assert( SQLITE_CHECKPOINT_RESTART == 2 );
+
+  if( objc!=3 && objc!=4 ){
+    TCL.Tcl_WrongNumArgs( interp, 1, objv, "DB MODE ?NAME?" );
+    return TCL.TCL_ERROR;
+  }
+
+  if( objc==4 ){
+    zDb = TCL.Tcl_GetString( objv[3] );
+  }
+  if ( getDbPointer( interp, TCL.Tcl_GetString( objv[1] ), ref db ) != 0
+   || TCL.Tcl_GetIndexFromObj( interp, objv[2], aMode, "mode", 0, ref eMode ) 
+  ){
+    return TCL.TCL_ERROR;
+  }
+
+  rc = sqlite3_wal_checkpoint_v2(db, zDb, eMode, ref nLog, ref nCkpt);
+  if( rc!=SQLITE_OK && rc!=SQLITE_BUSY ){
+    TCL.Tcl_SetResult( interp, sqlite3_errmsg( db ), TCL.TCL_VOLATILE );
+    return TCL.TCL_ERROR;
+  }
+
+  pRet = TCL.Tcl_NewObj();
+  TCL.Tcl_ListObjAppendElement( interp, pRet, TCL.Tcl_NewIntObj( rc == SQLITE_BUSY ? 1 : 0 ) );
+  TCL.Tcl_ListObjAppendElement( interp, pRet, TCL.Tcl_NewIntObj( nLog ) );
+  TCL.Tcl_ListObjAppendElement( interp, pRet, TCL.Tcl_NewIntObj( nCkpt ) );
+  TCL.Tcl_SetObjResult( interp, pRet );
+
+  return TCL.TCL_OK;
+}
+
+    /*
     ** tclcmd: file_control_lockproxy_test DB PWD
     **
     ** This TCL command runs the sqlite3_file_control interface and

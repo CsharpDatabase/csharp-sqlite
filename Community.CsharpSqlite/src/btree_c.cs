@@ -33,7 +33,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2011-01-28 17:03:50 ed759d5a9edb3bba5f48f243df47be29e3fe8cd7
+    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
     **
     *************************************************************************
     */
@@ -1481,7 +1481,7 @@ static int cellSize(MemPage pPage, int iCell) { return -1; }
       */
       top -= nByte;
       put2byte( data, hdr + 5, top );
-      Debug.Assert( top + nByte <= pPage.pBt.usableSize );
+      Debug.Assert( top + nByte <= (int)pPage.pBt.usableSize );
       pIdx = top;
       return SQLITE_OK;
     }
@@ -1507,7 +1507,7 @@ static int cellSize(MemPage pPage, int iCell) { return -1; }
       Debug.Assert( pPage.pBt != null );
       Debug.Assert( sqlite3PagerIswriteable( pPage.pDbPage ) );
       Debug.Assert( start >= pPage.hdrOffset + 6 + pPage.childPtrSize );
-      Debug.Assert( ( start + size ) <= pPage.pBt.usableSize );
+      Debug.Assert( ( start + size ) <= (int)pPage.pBt.usableSize );
       Debug.Assert( sqlite3_mutex_held( pPage.pBt.mutex ) );
       Debug.Assert( size >= 0 );   /* Minimum cell size is 4 */
 
@@ -1555,7 +1555,7 @@ static int cellSize(MemPage pPage, int iCell) { return -1; }
       {
         int pnext, psize, x;
         Debug.Assert( pbegin > addr );
-        Debug.Assert( pbegin <= pPage.pBt.usableSize - 4 );
+        Debug.Assert( pbegin <= (int)pPage.pBt.usableSize - 4 );
         pnext = get2byte( data, pbegin );
         psize = get2byte( data, pbegin + 2 );
         if ( pbegin + psize + 3 >= pnext && pnext > 0 )
@@ -2473,8 +2473,7 @@ if( p.pNext ) p.pNext.pPrev = p.pPrev;
       return rc;
     }
 
-#if !(SQLITE_OMIT_PAGER_PRAGMAS) || !(SQLITE_OMIT_VACUUM)
-    /*
+/*
 ** Change the default pages size and the number of reserved bytes per page.
 ** Or, if the page size has already been fixed, return SQLITE_READONLY
 ** without changing anything.
@@ -2534,6 +2533,7 @@ if( p.pNext ) p.pNext.pPrev = p.pPrev;
       return (int)p.pBt.pageSize;
     }
 
+#if !(SQLITE_OMIT_PAGER_PRAGMAS) || !(SQLITE_OMIT_VACUUM)
     /*
     ** Return the number of bytes of space at the end of every page that
     ** are intentually left unused.  This is the "reserved" space that is
@@ -3640,10 +3640,21 @@ int nRef=0;
     ** the rollback journal (which causes the transaction to commit) and
     ** drop locks.
     **
+    ** Normally, if an error occurs while the pager layer is attempting to 
+    ** finalize the underlying journal file, this function returns an error and
+    ** the upper layer will attempt a rollback. However, if the second argument
+    ** is non-zero then this b-tree transaction is part of a multi-file 
+    ** transaction. In this case, the transaction has already been committed 
+    ** (by deleting a master journal file) and the caller will ignore this 
+    ** functions return code. So, even if an error occurs in the pager layer,
+    ** reset the b-tree objects internal state to indicate that the write
+    ** transaction has been closed. This is quite safe, as the pager will have
+    ** transitioned to the error state.
+    **
     ** This will release the write lock on the database file.  If there
     ** are no active cursors, it also releases the read lock.
     */
-    static int sqlite3BtreeCommitPhaseTwo( Btree p )
+    static int sqlite3BtreeCommitPhaseTwo( Btree p, int bCleanup)
     {
       if ( p.inTrans == TRANS_NONE )
         return SQLITE_OK;
@@ -3660,7 +3671,7 @@ int nRef=0;
         Debug.Assert( pBt.inTransaction == TRANS_WRITE );
         Debug.Assert( pBt.nTransaction > 0 );
         rc = sqlite3PagerCommitPhaseTwo( pBt.pPager );
-        if ( rc != SQLITE_OK )
+        if ( rc != SQLITE_OK && bCleanup == 0 )
         {
           sqlite3BtreeLeave( p );
           return rc;
@@ -3683,7 +3694,7 @@ int nRef=0;
       rc = sqlite3BtreeCommitPhaseOne( p, null );
       if ( rc == SQLITE_OK )
       {
-        rc = sqlite3BtreeCommitPhaseTwo( p );
+        rc = sqlite3BtreeCommitPhaseTwo( p, 0 );
       }
       sqlite3BtreeLeave( p );
       return rc;
@@ -5541,7 +5552,7 @@ moveto_finish:
             goto end_allocate_page;
           }
 
-          k = sqlite3Get4byte( pTrunk.aData, 4 );
+          k = sqlite3Get4byte( pTrunk.aData, 4 ); /* # of leaves on this trunk page */
           if ( k == 0 && 0 == searchList )
           {
             /* The trunk has no leaves and the list is not being searched.
@@ -5661,24 +5672,15 @@ moveto_finish:
             u32 closest;
             Pgno iPage;
             byte[] aData = pTrunk.aData;
-            rc = sqlite3PagerWrite( pTrunk.pDbPage );
-            if ( rc != 0 )
-            {
-              goto end_allocate_page;
-            }
             if ( nearby > 0 )
             {
               u32 i;
               int dist;
               closest = 0;
-              dist = (int)( sqlite3Get4byte( aData, 8 ) - nearby );
-              if ( dist < 0 )
-                dist = -dist;
+              dist = sqlite3AbsInt32( (int)(sqlite3Get4byte( aData, 8 ) - nearby ));
               for ( i = 1; i < k; i++ )
               {
-                int d2 = (int)( sqlite3Get4byte( aData, 8 + i * 4 ) - nearby );
-                if ( d2 < 0 )
-                  d2 = -d2;
+                int d2 = sqlite3AbsInt32( (int)(sqlite3Get4byte( aData, 8 + i * 4 ) - nearby ));
                 if ( d2 < dist )
                 {
                   closest = i;
@@ -5706,12 +5708,14 @@ moveto_finish:
               TRACE( "ALLOCATE: %d was leaf %d of %d on trunk %d" +
               ": %d more free pages\n",
               pPgno, closest + 1, k, pTrunk.pgno, n - 1 );
+              rc = sqlite3PagerWrite( pTrunk.pDbPage );
+              if ( rc != 0)
+                goto end_allocate_page;
               if ( closest < k - 1 )
               {
                 Buffer.BlockCopy( aData, (int)( 4 + k * 4 ), aData, 8 + (int)closest * 4, 4 );//memcpy( aData[8 + closest * 4], ref aData[4 + k * 4], 4 );
               }
               sqlite3Put4byte( aData, (u32)4, ( k - 1 ) );// sqlite3Put4byte( aData, 4, k - 1 );
-              Debug.Assert( sqlite3PagerIswriteable( pTrunk.pDbPage ) );
               noContent = !btreeGetHasContent( pBt, pPgno ) ? 1 : 0;
               rc = btreeGetPage( pBt, pPgno, ref ppPage, noContent );
               if ( rc == SQLITE_OK )
@@ -5798,6 +5802,7 @@ end_allocate_page:
       {
         ppPage = null;
       }
+      Debug.Assert( rc != SQLITE_OK || sqlite3PagerIswriteable( ( ppPage ).pDbPage ) );
       return rc;
     }
 
@@ -6377,7 +6382,7 @@ freepage_out:
         /* The allocateSpace() routine guarantees the following two properties
         ** if it returns success */
         Debug.Assert( idx >= end + 2 );
-        Debug.Assert( idx + sz <= pPage.pBt.usableSize );
+        Debug.Assert( idx + sz <= (int)pPage.pBt.usableSize );
         pPage.nCell++;
         pPage.nFree -= (u16)( 2 + sz );
         Buffer.BlockCopy( pCell, nSkip, data, idx + nSkip, sz - nSkip ); //memcpy( data[idx + nSkip], pCell + nSkip, sz - nSkip );
@@ -6428,7 +6433,9 @@ freepage_out:
 
       Debug.Assert( pPage.nOverflow == 0 );
       Debug.Assert( sqlite3_mutex_held( pPage.pBt.mutex ) );
-      Debug.Assert( nCell >= 0 && nCell <= MX_CELL( pPage.pBt ) && MX_CELL( pPage.pBt ) <= 10921 );
+      Debug.Assert( nCell >= 0 && nCell <= (int)MX_CELL( pPage.pBt )
+            && (int)MX_CELL( pPage.pBt ) <= 10921 );
+
       Debug.Assert( sqlite3PagerIswriteable( pPage.pDbPage ) );
 
       /* Check that the page has just been zeroed by zeroPage() */
@@ -6734,7 +6741,7 @@ return 1;
 
         Debug.Assert( pFrom.isInit != 0 );
         Debug.Assert( pFrom.nFree >= iToHdr );
-        Debug.Assert( get2byte( aFrom, iFromHdr + 5 ) <= pBt.usableSize );
+        Debug.Assert( get2byte( aFrom, iFromHdr + 5 ) <= (int)pBt.usableSize );
 
         /* Copy the b-tree node content from page pFrom to page pTo. */
         iData = get2byte( aFrom, iFromHdr + 5 );
@@ -7049,7 +7056,7 @@ TRACE("BALANCE: begin page %d child of %d\n", pPage.pgno, pParent.pgno);
           //pTemp = &aSpace1[iSpace1];
           //iSpace1 += sz;
           Debug.Assert( sz <= pBt.maxLocal + 23 );
-          //Debug.Assert(iSpace1 <= pBt.pageSize);
+          //Debug.Assert(iSpace1 <= (int)pBt.pageSize);
           Buffer.BlockCopy( pParent.aData, apDiv[i], pTemp, 0, sz );//memcpy( pTemp, apDiv[i], sz );
           if ( apCell[nCell] == null || apCell[nCell].Length < sz )
             Array.Resize( ref apCell[nCell], sz );
@@ -7250,9 +7257,7 @@ if (false)
         }
         if ( minI > i )
         {
-          int t;
           MemPage pT;
-          t = (int)apNew[i].pgno;
           pT = apNew[i];
           apNew[i] = apNew[minI];
           apNew[minI] = pT;
@@ -7343,7 +7348,7 @@ if (false)
           }
           iOvflSpace += sz;
           Debug.Assert( sz <= pBt.maxLocal + 23 );
-          Debug.Assert( iOvflSpace <= pBt.pageSize );
+          Debug.Assert( iOvflSpace <= (int)pBt.pageSize );
           insertCell( pParent, nxDiv, pCell, sz, pTemp, pNew.pgno, ref rc );
           if ( rc != SQLITE_OK )
             goto balance_cleanup;
@@ -9304,8 +9309,10 @@ checkAppendMsg(sCheck, 0, "Page %d is never used", i);
 **
 ** Return SQLITE_LOCKED if this or any other connection has an open 
 ** transaction on the shared-cache the argument Btree is connected to.
+**
+** Parameter eMode is one of SQLITE_CHECKPOINT_PASSIVE, FULL or RESTART.
 */
-static int sqlite3BtreeCheckpoint(Btree p){
+static int sqlite3BtreeCheckpointBtree *p, int eMode, int *pnLog, int *pnCkpt){
 int rc = SQLITE_OK;
 if( p != null){
 BtShared pBt = p.pBt;
@@ -9313,7 +9320,7 @@ sqlite3BtreeEnter(p);
 if( pBt.inTransaction!=TRANS_NONE ){
 rc = SQLITE_LOCKED;
 }else{
-rc = sqlite3PagerCheckpoint(pBt.pPager);
+rc = sqlite3PagerCheckpoint(pBt.pPager, eMode, pnLog, pnCkpt);
 }
 sqlite3BtreeLeave(p);
 }
@@ -9353,9 +9360,9 @@ return rc;
     ** allocated, a null pointer is returned. If the blob has already been
     ** allocated, it is returned as normal.
     **
-    ** Just before the shared-btree is closed, the function passed as the
-    ** xFree argument when the memory allocation was made is invoked on the
-    ** blob of allocated memory. This function should not call sqlite3_free(ref )
+    ** Just before the shared-btree is closed, the function passed as the 
+    ** xFree argument when the memory allocation was made is invoked on the 
+    ** blob of allocated memory. The xFree function should not call sqlite3_free()
     ** on the memory, the btree layer does that.
     */
     static Schema sqlite3BtreeSchema( Btree p, int nBytes, dxFreeSchema xFree )

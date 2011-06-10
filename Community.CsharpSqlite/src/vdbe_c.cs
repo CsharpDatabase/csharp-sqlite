@@ -15,7 +15,16 @@ using u64 = System.UInt64;
 using sqlite3_int64 = System.Int64;
 
 using Pgno = System.UInt32;
-
+/*
+** The yDbMask datatype for the bitmask of all attached databases.
+*/
+#if SQLITE_MAX_ATTACHED//>30
+//  typedef sqlite3_uint64 yDbMask;
+using yDbMask = System.Int64; 
+#else
+//  typedef unsigned int yDbMask;
+using yDbMask = System.Int32;
+#endif
 
 namespace Community.CsharpSqlite
 {
@@ -73,7 +82,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2010-12-07 20:14:09 a586a4deeb25330037a49df295b36aaf624d0f45
+    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
     **
     *************************************************************************
     */
@@ -694,7 +703,7 @@ static int checkSavepointCount( sqlite3 db ) { return 1; }
       Op pOp;                    /* Current operation */
       int rc = SQLITE_OK;        /* Value to return */
       sqlite3 db = p.db;         /* The database */
-      bool resetSchemaOnFault = false; /* Reset schema after an error if true */
+      u8 resetSchemaOnFault = 0; /* Reset schema after an error if positive */
       u8 encoding = ENC( db );   /* The database encoding */
 #if !SQLITE_OMIT_PROGRESS_CALLBACK
       bool checkProgress;        /* True if progress callbacks are enabled */
@@ -714,7 +723,7 @@ int origPc;                  /* Program counter at start of opcode */
       /*** INSERT STACK UNION HERE ***/
 
       Debug.Assert( p.magic == VDBE_MAGIC_RUN );  /* sqlite3_step() verifies this */
-      sqlite3VdbeMutexArrayEnter( p );
+      sqlite3VdbeEnter( p );
       if ( p.rc == SQLITE_NOMEM )
       {
         /* This happens if a malloc() inside a call to sqlite3_column_text() or
@@ -1486,7 +1495,7 @@ pOp.p1 = pOut.n;
             {           /* same as TK_REM, in1, in2, out3 */
               int flags;      /* Combined MEM_* flags from both inputs */
               i64 iA;         /* Integer value of left operand */
-              i64 iB;         /* Integer value of right operand */
+              i64 iB = 0;     /* Integer value of right operand */
               double rA;      /* Real value of left operand */
               double rB;      /* Real value of right operand */
 
@@ -1498,34 +1507,40 @@ pOp.p1 = pOut.n;
               flags = pIn1.flags | pIn2.flags;
               if ( ( flags & MEM_Null ) != 0 )
                 goto arithmetic_result_is_null;
-              if ( ( pIn1.flags & pIn2.flags & MEM_Int ) == MEM_Int )
+              bool fp_math;
+              if ( !( fp_math = !( ( pIn1.flags & pIn2.flags & MEM_Int ) == MEM_Int ) ) )
               {
                 iA = pIn1.u.i;
                 iB = pIn2.u.i;
                 switch ( pOp.opcode )
                 {
                   case OP_Add:
-                    iB += iA;
-                    break;
+                    {
+                      if ( sqlite3AddInt64( ref iB, iA ) != 0 )
+                        fp_math = true; // goto fp_math
+                      break;
+                    }
                   case OP_Subtract:
-                    iB -= iA;
-                    break;
+                    {
+                      if ( sqlite3SubInt64( ref iB, iA ) != 0 )
+                        fp_math = true; // goto fp_math
+                      break;
+                    }
                   case OP_Multiply:
-                    iB *= iA;
-                    break;
+                    {
+                      if ( sqlite3MulInt64( ref iB, iA ) != 0 )
+                        fp_math = true; // goto fp_math
+                      break;
+                    }
                   case OP_Divide:
                     {
                       if ( iA == 0 )
                         goto arithmetic_result_is_null;
-                      /* Dividing the largest possible negative 64-bit integer (1<<63) by
-                      ** -1 returns an integer too large to store in a 64-bit data-type. On
-                      ** some architectures, the value overflows to (1<<63). On others,
-                      ** a SIGFPE is issued. The following statement normalizes this
-                      ** behavior so that all architectures behave as if integer
-                      ** overflow occurred.
-                      */
                       if ( iA == -1 && iB == SMALLEST_INT64 )
-                        iA = 1;
+                      {
+                        fp_math = true; // goto fp_math
+                        break;
+                      }
                       iB /= iA;
                       break;
                     }
@@ -1539,11 +1554,15 @@ pOp.p1 = pOut.n;
                       break;
                     }
                 }
+              }
+              if ( !fp_math )
+              {
                 pOut.u.i = iB;
                 MemSetTypeFlag( pOut, MEM_Int );
               }
               else
               {
+//fp_math:
                 rA = sqlite3VdbeRealValue( pIn1 );
                 rB = sqlite3VdbeRealValue( pIn2 );
                 switch ( pOp.opcode )
@@ -1729,6 +1748,14 @@ arithmetic_result_is_null:
               {
                 goto too_big;
               }
+#if FALSE
+  /* The app-defined function has done something that as caused this
+  ** statement to expire.  (Perhaps the function called sqlite3_exec()
+  ** with a CREATE TABLE statement.)
+  */
+  if( p.expired ) rc = SQLITE_ABORT;
+#endif
+
               REGISTER_TRACE( p, pOp.p3, pOut );
 #if SQLITE_TEST
               UPDATE_MAX_BLOBSIZE( pOut );
@@ -1767,8 +1794,10 @@ arithmetic_result_is_null:
           case OP_ShiftLeft:              /* same as TK_LSHIFT, in1, in2, out3 */
           case OP_ShiftRight:
             {           /* same as TK_RSHIFT, in1, in2, out3 */
-              i64 a;
-              i64 b;
+              i64 iA;
+              u64 uA;
+              i64 iB;
+              u8 op;
 
               pIn1 = aMem[pOp.p1];
               pIn2 = aMem[pOp.p2];
@@ -1778,25 +1807,51 @@ arithmetic_result_is_null:
                 sqlite3VdbeMemSetNull( pOut );
                 break;
               }
-              a = sqlite3VdbeIntValue( pIn2 );
-              b = sqlite3VdbeIntValue( pIn1 );
-              switch ( pOp.opcode )
+              iA = sqlite3VdbeIntValue( pIn2 );
+              iB = sqlite3VdbeIntValue( pIn1 );
+              op = pOp.opcode;
+              if ( op == OP_BitAnd )
               {
-                case OP_BitAnd:
-                  a &= b;
-                  break;
-                case OP_BitOr:
-                  a |= b;
-                  break;
-                case OP_ShiftLeft:
-                  a <<= (int)b;
-                  break;
-                default:
-                  Debug.Assert( pOp.opcode == OP_ShiftRight );
-                  a >>= (int)b;
-                  break;
+                iA &= iB;
               }
-              pOut.u.i = a;
+              else if ( op == OP_BitOr )
+              {
+                iA |= iB;
+              }
+              else if ( iB != 0 )
+              {
+                Debug.Assert( op == OP_ShiftRight || op == OP_ShiftLeft );
+
+                /* If shifting by a negative amount, shift in the other direction */
+                if ( iB < 0 )
+                {
+                  Debug.Assert( OP_ShiftRight == OP_ShiftLeft + 1 );
+                  op = (u8)(2 * OP_ShiftLeft + 1 - op);
+                  iB = iB > ( -64 ) ? -iB : 64;
+                }
+
+                if ( iB >= 64 )
+                {
+                  iA = ( iA >= 0 || op == OP_ShiftLeft ) ? 0 : -1;
+                }
+                else
+                {
+                  uA = (ulong)(iA << 0); // memcpy( &uA, &iA, sizeof( uA ) );
+                  if ( op == OP_ShiftLeft )
+                  {
+                    uA = (ulong)( iB << 1 );
+                  }
+                  else
+                  {
+                    uA = (ulong)( iB >> 1 );
+                    /* Sign-extend on a right shift of a negative number */
+                    if ( iA < 0 )
+                      uA |= ( ( (0xffffffff ) << (u8)32 ) | 0xffffffff ) << (u8)( 64 - iB );
+                  }
+                  iA = (long)( uA << 0 ); //memcpy( &iA, &uA, sizeof( iA ) );
+                }
+              }
+              pOut.u.i = iA;
               MemSetTypeFlag( pOut, MEM_Int );
               break;
             }
@@ -2892,7 +2947,6 @@ op_column_out:
 
               nData = 0;         /* Number of bytes of data space */
               nHdr = 0;          /* Number of bytes of header space */
-              nByte = 0;         /* Data space required for this record */
               nZero = 0;         /* Number of zero bytes at the end of the record */
               nField = pOp.p1;
               zAffinity = ( pOp.p4.z == null || pOp.p4.z.Length == 0 ) ? "" : pOp.p4.z;
@@ -3098,7 +3152,7 @@ op_column_out:
                 ** an error is returned to the user.  */
                 for (
                 pSavepoint = db.pSavepoint;
-                pSavepoint != null && !pSavepoint.zName.Equals( zName ,StringComparison.InvariantCultureIgnoreCase ) ;
+                pSavepoint != null && !pSavepoint.zName.Equals( zName, StringComparison.InvariantCultureIgnoreCase );
                 pSavepoint = pSavepoint.pNext
                 )
                 {
@@ -3162,7 +3216,7 @@ op_column_out:
                     if ( p1 == SAVEPOINT_ROLLBACK && ( db.flags & SQLITE_InternChanges ) != 0 )
                     {
                       sqlite3ExpirePreparedStatements( db );
-                      sqlite3ResetInternalSchema( db, 0 );
+                      sqlite3ResetInternalSchema( db, -1 );
                       db.flags = ( db.flags | SQLITE_InternChanges );
                     }
                   }
@@ -3325,7 +3379,7 @@ op_column_out:
               Btree pBt;
 
               Debug.Assert( pOp.p1 >= 0 && pOp.p1 < db.nDb );
-              Debug.Assert( ( p.btreeMask & ( 1 << pOp.p1 ) ) != 0 );
+              Debug.Assert( ( p.btreeMask & ( ( (yDbMask)1 ) << pOp.p1 ) ) != 0 );
               pBt = db.aDb[pOp.p1].pBt;
 
               if ( pBt != null )
@@ -3388,7 +3442,7 @@ op_column_out:
               Debug.Assert( pOp.p3 < SQLITE_N_BTREE_META );
               Debug.Assert( iDb >= 0 && iDb < db.nDb );
               Debug.Assert( db.aDb[iDb].pBt != null );
-              Debug.Assert( ( p.btreeMask & ( 1 << iDb ) ) != 0 );
+              Debug.Assert( ( p.btreeMask & ( ( (yDbMask)1 ) << iDb ) ) != 0 );
               sqlite3BtreeGetMeta( db.aDb[iDb].pBt, iCookie, ref iMeta );
               pOut.u.i = (int)iMeta;
               break;
@@ -3409,9 +3463,10 @@ op_column_out:
               Db pDb;
               Debug.Assert( pOp.p2 < SQLITE_N_BTREE_META );
               Debug.Assert( pOp.p1 >= 0 && pOp.p1 < db.nDb );
-              Debug.Assert( ( p.btreeMask & ( 1 << pOp.p1 ) ) != 0 );
+              Debug.Assert( ( p.btreeMask & ( ( (yDbMask)1 ) << pOp.p1 ) ) != 0 );
               pDb = db.aDb[pOp.p1];
               Debug.Assert( pDb.pBt != null );
+              Debug.Assert( sqlite3SchemaMutexHeld( db, pOp.p1, null ) );
               pIn3 = aMem[pOp.p3];
               sqlite3VdbeMemIntegerify( pIn3 );
               /* See note about index shifting on OP_ReadCookie */
@@ -3437,10 +3492,12 @@ op_column_out:
               break;
             }
 
-          /* Opcode: VerifyCookie P1 P2 *
+          /* Opcode: VerifyCookie P1 P2 P3 * *
           **
           ** Check the value of global database parameter number 0 (the
-          ** schema version) and make sure it is equal to P2.
+          ** schema version) and make sure it is equal to P2 and that the
+          ** generation counter on the local schema parse equals P3.
+          **
           ** P1 is the database number which is 0 for the main database file
           ** and 1 for the file holding temporary tables and some higher number
           ** for auxiliary databases.
@@ -3456,19 +3513,22 @@ op_column_out:
           case OP_VerifyCookie:
             {
               u32 iMeta = 0;
+              u32 iGen;
               Btree pBt;
               Debug.Assert( pOp.p1 >= 0 && pOp.p1 < db.nDb );
-              Debug.Assert( ( p.btreeMask & ( 1 << pOp.p1 ) ) != 0 );
+              Debug.Assert( ( p.btreeMask & ( (yDbMask)1 << pOp.p1 ) ) != 0 );
+              Debug.Assert( sqlite3SchemaMutexHeld( db, pOp.p1, null ) );
               pBt = db.aDb[pOp.p1].pBt;
               if ( pBt != null )
               {
                 sqlite3BtreeGetMeta( pBt, BTREE_SCHEMA_VERSION, ref iMeta );
+                iGen = db.aDb[pOp.p1].pSchema.iGeneration;
               }
               else
               {
-                iMeta = 0;
+                iGen = iMeta = 0;
               }
-              if ( iMeta != pOp.p2 )
+              if ( iMeta != pOp.p2 || iGen != pOp.p3 )
               {
                 sqlite3DbFree( db, ref p.zErrMsg );
                 p.zErrMsg = "database schema has changed";// sqlite3DbStrDup(db, "database schema has changed");
@@ -3568,13 +3628,14 @@ op_column_out:
               p2 = pOp.p2;
               iDb = pOp.p3;
               Debug.Assert( iDb >= 0 && iDb < db.nDb );
-              Debug.Assert( ( p.btreeMask & ( 1 << iDb ) ) != 0 );
+              Debug.Assert( ( p.btreeMask & ( ( (yDbMask)1 ) << iDb ) ) != 0 );
               pDb = db.aDb[iDb];
               pX = pDb.pBt;
               Debug.Assert( pX != null );
               if ( pOp.opcode == OP_OpenWrite )
               {
                 wrFlag = 1;
+                Debug.Assert( sqlite3SchemaMutexHeld( db, iDb, null ) );
                 if ( pDb.pSchema.file_format < p.minWriteFileFormat )
                 {
                   p.minWriteFileFormat = pDb.pSchema.file_format;
@@ -4371,7 +4432,6 @@ op_column_out:
                 ** and try again, up to 100 times.
                 */
                 Debug.Assert( pC.isTable );
-                cnt = 0;
 
 #if SQLITE_32BIT_ROWID
 const int MAX_ROWID = i32.MaxValue;//#   define MAX_ROWID 0x7fffffff
@@ -5307,15 +5367,17 @@ iCnt++;
               {
                 iDb = pOp.p3;
                 Debug.Assert( iCnt == 1 );
-                Debug.Assert( ( p.btreeMask & ( 1 << iDb ) ) != 0 );
+                Debug.Assert( ( p.btreeMask & ( ( (yDbMask)1 ) << iDb ) ) != 0 );
                 rc = sqlite3BtreeDropTable( db.aDb[iDb].pBt, pOp.p1, ref iMoved );
                 pOut.flags = MEM_Int;
                 pOut.u.i = iMoved;
 #if !SQLITE_OMIT_AUTOVACUUM
                 if ( rc == SQLITE_OK && iMoved != 0 )
                 {
-                  sqlite3RootPageMoved( db.aDb[iDb], iMoved, pOp.p1 );
-                  resetSchemaOnFault = true;
+                  sqlite3RootPageMoved( db, iDb, iMoved, pOp.p1 );
+                  /* All OP_Destroy operations occur on the same btree */
+                  Debug.Assert( resetSchemaOnFault == 0 || resetSchemaOnFault == iDb + 1 );
+                  resetSchemaOnFault = (u8)( iDb + 1 );
                 }
 #endif
               }
@@ -5345,7 +5407,7 @@ iCnt++;
               int nChange;
 
               nChange = 0;
-              Debug.Assert( ( p.btreeMask & ( 1 << pOp.p2 ) ) != 0 );
+              Debug.Assert( ( p.btreeMask & ( ( (yDbMask)1 ) << pOp.p2 ) ) != 0 );
               int iDummy0 = 0;
               if ( pOp.p3 != 0 )
                 rc = sqlite3BtreeClearTable( db.aDb[pOp.p2].pBt, pOp.p1, ref nChange );
@@ -5395,7 +5457,7 @@ iCnt++;
 
               pgno = 0;
               Debug.Assert( pOp.p1 >= 0 && pOp.p1 < db.nDb );
-              Debug.Assert( ( p.btreeMask & ( 1 << pOp.p1 ) ) != 0 );
+              Debug.Assert( ( p.btreeMask & ( ( (yDbMask)1 ) << pOp.p1 ) ) != 0 );
               pDb = db.aDb[pOp.p1];
               Debug.Assert( pDb.pBt != null );
               if ( pOp.opcode == OP_CreateTable )
@@ -5412,14 +5474,10 @@ iCnt++;
               break;
             }
 
-          /* Opcode: ParseSchema P1 P2 * P4 *
+          /* Opcode: ParseSchema P1 * * P4 *
           **
           ** Read and parse all entries from the SQLITE_MASTER table of database P1
-          ** that match the WHERE clause P4.  P2 is the "force" flag.   Always do
-          ** the parsing if P2 is true.  If P2 is false, then this routine is a
-          ** no-op if the schema is not currently loaded.  In other words, if P2
-          ** is false, the SQLITE_MASTER table is only parsed if the rest of the
-          ** schema is already loaded into the symbol table.
+          ** that match the WHERE clause P4. 
           **
           ** This opcode invokes the parser to create a new virtual machine,
           ** then runs the new virtual machine.  It is thus a re-entrant opcode.
@@ -5431,34 +5489,21 @@ iCnt++;
               string zSql;
               InitData initData;
 
+              /* Any prepared statement that invokes this opcode will hold mutexes
+              ** on every btree.  This is a prerequisite for invoking
+              ** sqlite3InitCallback().
+              */
+#if SQLITE_DEBUG
+              for ( iDb = 0; iDb < db.nDb; iDb++ )
+              {
+                Debug.Assert( iDb == 1 || sqlite3BtreeHoldsMutex( db.aDb[iDb].pBt ) );
+              }
+#endif
 
               iDb = pOp.p1;
               Debug.Assert( iDb >= 0 && iDb < db.nDb );
-
-              /* If pOp.p2 is 0, then this opcode is being executed to read a
-              ** single row, for example the row corresponding to a new index
-              ** created by this VDBE, from the sqlite_master table. It only
-              ** does this if the corresponding in-memory schema is currently
-              ** loaded. Otherwise, the new index definition can be loaded along
-              ** with the rest of the schema when it is required.
-              **
-              ** Although the mutex on the BtShared object that corresponds to
-              ** database iDb (the database containing the sqlite_master table
-              ** read by this instruction) is currently held, it is necessary to
-              ** obtain the mutexes on all attached databases before checking if
-              ** the schema of iDb is loaded. This is because, at the start of
-              ** the sqlite3_exec() call below, SQLite will invoke
-              ** sqlite3BtreeEnterAll(). If all mutexes are not already held, the
-              ** iDb mutex may be temporarily released to avoid deadlock. If
-              ** this happens, then some other thread may delete the in-memory
-              ** schema of database iDb before the SQL statement runs. The schema
-              ** will not be reloaded becuase the db.init.busy flag is set. This
-              ** can result in a "no such table: sqlite_master" or "malformed
-              ** database schema" error being returned to the user.
-              */
-              Debug.Assert( sqlite3BtreeHoldsMutex( db.aDb[iDb].pBt ) );
-              sqlite3BtreeEnterAll( db );
-              if ( pOp.p2 != 0 || DbHasProperty( db, iDb, DB_SchemaLoaded ) )
+              Debug.Assert( DbHasProperty( db, iDb, DB_SchemaLoaded ) );
+              /* Used to be a conditional */
               {
                 zMaster = SCHEMA_TABLE( iDb );
                 initData = new InitData();
@@ -5485,7 +5530,6 @@ iCnt++;
                   db.init.busy = 0;
                 }
               }
-              sqlite3BtreeLeaveAll( db );
               if ( rc == SQLITE_NOMEM )
               {
                 goto no_mem;
@@ -5594,7 +5638,7 @@ iCnt++;
               }
               aRoot[j] = 0;
               Debug.Assert( pOp.p5 < db.nDb );
-              Debug.Assert( ( p.btreeMask & ( 1 << pOp.p5 ) ) != 0 );
+              Debug.Assert( ( p.btreeMask & ( ( (yDbMask)1 ) << pOp.p5 ) ) != 0 );
               z = sqlite3BtreeIntegrityCheck( db.aDb[pOp.p5].pBt, aRoot, nRoot,
               (int)pnErr.u.i, ref nErr );
               sqlite3DbFree( db, ref aRoot );
@@ -6128,14 +6172,33 @@ iCnt++;
 
 
 #if !SQLITE_OMIT_WAL
-/* Opcode: Checkpoint P1 * * * *
+/* Opcode: Checkpoint P1 P2 P3 * *
 **
 ** Checkpoint database P1. This is a no-op if P1 is not currently in
-** WAL mode.
+** WAL mode. Parameter P2 is one of SQLITE_CHECKPOINT_PASSIVE, FULL
+** or RESTART.  Write 1 or 0 into mem[P3] if the checkpoint returns
+** SQLITE_BUSY or not, respectively.  Write the number of pages in the
+** WAL after the checkpoint into mem[P3+1] and the number of pages
+** in the WAL that have been checkpointed after the checkpoint
+** completes into mem[P3+2].  However on an error, mem[P3+1] and
+** mem[P3+2] are initialized to -1.
 */
-case OP_Checkpoint: {
-rc = sqlite3Checkpoint(db, pOp.p1);
-break;
+cDebug.Ase OP_Checkpoint: {
+  aRes[0] = 0;
+  aRes[1] = aRes[2] = -1;
+  Debug.Assert( pOp.p2==SQLITE_CHECKPOINT_PDebug.AsSIVE
+       || pOp.p2==SQLITE_CHECKPOINT_FULL
+       || pOp.p2==SQLITE_CHECKPOINT_RESTART
+  );
+  rc = sqlite3Checkpoint(db, pOp.p1, pOp.p2, ref aRes[1], ref aRes[2]);
+  if( rc==SQLITE_BUSY ){
+    rc = SQLITE_OK;
+    aRes[0] = 1;
+  }
+  for(i=0, pMem = &aMem[pOp.p3]; i<3; i++, pMem++){
+    sqlite3VdbeMemSetInt64(pMem, (i64)aRes[i]);
+  }
+  break;
 };  
 #endif
 
@@ -6169,26 +6232,6 @@ break;
               || eNew == PAGER_JOURNALMODE_QUERY
               );
               Debug.Assert( pOp.p1 >= 0 && pOp.p1 < db.nDb );
-
-              /* This opcode is used in two places: PRAGMA journal_mode and ATTACH.
-              ** In PRAGMA journal_mode, the sqlite3VdbeUsesBtree() routine is called
-              ** when the statment is prepared and so p.aMutex.nMutex>0.  All mutexes
-              ** are already acquired.  But when used in ATTACH, sqlite3VdbeUsesBtree()
-              ** is not called when the statement is prepared because it requires the
-              ** iDb index of the database as a parameter, and the database has not
-              ** yet been attached so that index is unavailable.  We have to wait
-              ** until runtime (now) to get the mutex on the newly attached database.
-              ** No other mutexes are required by the ATTACH command so this is safe
-              ** to do.
-              */
-              Debug.Assert( ( p.btreeMask & ( 1 << pOp.p1 ) ) != 0 || p.aMutex.nMutex == 0 );
-              if ( p.aMutex != null && p.aMutex.nMutex == 0 )
-              {
-                /* This occurs right after ATTACH.  Get a mutex on the newly ATTACHed
-                ** database. */
-                sqlite3VdbeUsesBtree( p, pOp.p1 );
-                sqlite3VdbeMutexArrayEnter( p );
-              }
 
               pBt = db.aDb[pOp.p1].pBt;
               pPager = sqlite3BtreePager( pBt );
@@ -6292,7 +6335,7 @@ rc = sqlite3BtreeSetVersion(pBt, (eNew==PAGER_JOURNALMODE_WAL ? 2 : 1));
               Btree pBt;
 
               Debug.Assert( pOp.p1 >= 0 && pOp.p1 < db.nDb );
-              Debug.Assert( ( p.btreeMask & ( 1 << pOp.p1 ) ) != 0 );
+              Debug.Assert( ( p.btreeMask & ( ( (yDbMask)1 ) << pOp.p1 ) ) != 0 );
               pBt = db.aDb[pOp.p1].pBt;
               rc = sqlite3BtreeIncrVacuum( pBt );
               if ( rc == SQLITE_DONE )
@@ -6347,7 +6390,7 @@ u8 isWriteLock = (u8)pOp.p3;
 if( isWriteLock || 0==(db.flags&SQLITE_ReadUncommitted) ){
 int p1 = pOp.p1; 
 Debug.Assert( p1 >= 0 && p1 < db.nDb );
-Debug.Assert( ( p.btreeMask & ( 1 << p1 ) ) != 0 );
+Debug.Assert( ( p.btreeMask & ( ((yDbMask)1) << p1 ) ) != 0 );
 Debug.Assert( isWriteLock == 0 || isWriteLock == 1 );
 rc = sqlite3BtreeLockTable( db.aDb[p1].pBt, pOp.p2, isWriteLock );
 if ( ( rc & 0xFF ) == SQLITE_LOCKED )
@@ -6848,35 +6891,36 @@ vdbe_error_halt:
       sqlite3VdbeHalt( p );
       //if ( rc == SQLITE_IOERR_NOMEM ) db.mallocFailed = 1;
       rc = SQLITE_ERROR;
-      if ( resetSchemaOnFault )
-        sqlite3ResetInternalSchema( db, 0 );
-
-    /* This is the only way out of this procedure.  We have to
-    ** release the mutexes on btrees that were acquired at the
-    ** top. */
+      if ( resetSchemaOnFault > 0 )
+      {
+        sqlite3ResetInternalSchema( db, resetSchemaOnFault - 1 );
+      }
+/* This is the only way out of this procedure.  We have to
+** release the mutexes on btrees that were acquired at the
+** top. */
 vdbe_return:
-      sqlite3BtreeMutexArrayLeave( p.aMutex );
+      sqlite3VdbeLeave( p );
       return rc;
 
-    /* Jump to here if a string or blob larger than db.aLimit[SQLITE_LIMIT_LENGTH]
-    ** is encountered.
-    */
+        /* Jump to here if a string or blob larger than db.aLimit[SQLITE_LIMIT_LENGTH]
+        ** is encountered.
+        */
 too_big:
       sqlite3SetString( ref p.zErrMsg, db, "string or blob too big" );
       rc = SQLITE_TOOBIG;
       goto vdbe_error_halt;
 
-    /* Jump to here if a malloc() fails.
-    */
+        /* Jump to here if a malloc() fails.
+        */
 no_mem:
       //db.mallocFailed = 1;
       sqlite3SetString( ref p.zErrMsg, db, "out of memory" );
       rc = SQLITE_NOMEM;
       goto vdbe_error_halt;
 
-    /* Jump to here for any other kind of fatal error.  The "rc" variable
-    ** should hold the error number.
-    */
+        /* Jump to here for any other kind of fatal error.  The "rc" variable
+        ** should hold the error number.
+        */
 abort_due_to_error:
       //Debug.Assert( p.zErrMsg); /// Not needed in C#
       //if ( db.mallocFailed != 0 ) rc = SQLITE_NOMEM;
@@ -6886,9 +6930,9 @@ abort_due_to_error:
       }
       goto vdbe_error_halt;
 
-    /* Jump to here if the sqlite3_interrupt() API sets the interrupt
-    ** flag.
-    */
+        /* Jump to here if the sqlite3_interrupt() API sets the interrupt
+        ** flag.
+        */
 abort_due_to_interrupt:
       Debug.Assert( db.u1.isInterrupted );
       rc = SQLITE_INTERRUPT;

@@ -96,6 +96,9 @@ namespace Community.CsharpSqlite
     public delegate int dxCurrentTime( sqlite3_vfs vfs, ref double currenttime );
     public delegate int dxGetLastError( sqlite3_vfs pVfs, int nBuf, ref string zBuf );
     public delegate int dxCurrentTimeInt64( sqlite3_vfs pVfs, ref sqlite3_int64 pTime );
+    public delegate int dxSetSystemCall( sqlite3_vfs pVfs, string zName, sqlite3_int64 sqlite3_syscall_ptr );
+    public delegate int dxGetSystemCall( sqlite3_vfs pVfs, string zName, sqlite3_int64 sqlite3_syscall_ptr );
+    public delegate int dxNextSystemCall( sqlite3_vfs pVfs, string zName, sqlite3_int64 sqlite3_syscall_ptr );
 
     /*
      * Pager Delegates

@@ -18,6 +18,17 @@ using ynVar = System.Int16;
 #else
 using ynVar = System.Int32; 
 #endif
+/*
+** The yDbMask datatype for the bitmask of all attached databases.
+*/
+#if SQLITE_MAX_ATTACHED//>30
+//  typedef sqlite3_uint64 yDbMask;
+using yDbMask = System.Int64; 
+#else
+//  typedef unsigned int yDbMask;
+using yDbMask = System.Int32;
+#endif
+
 
 namespace Community.CsharpSqlite
 {
@@ -45,7 +56,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2011-01-28 17:03:50 ed759d5a9edb3bba5f48f243df47be29e3fe8cd7
+    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
     **
     *************************************************************************
     */
@@ -236,7 +247,11 @@ set { _flags = value; }
       {
       }
 
-      public Mem( sqlite3 db, string z, double r, int i, int n, u16 flags, u8 type, u8 enc )
+      public Mem( sqlite3 db, string z, double r, int i, int n, u16 flags, u8 type, u8 enc,
+#if SQLITE_DEBUG
+         Mem pScopyFrom, object pFiller  /* pScopyFrom, pFiller */
+#endif
+         )
       {
         this.db = db;
         this.z = z;
@@ -244,6 +259,8 @@ set { _flags = value; }
         this.u.i = i;
         this.n = n;
         this.flags = flags;
+        this.pScopyFrom = pScopyFrom;
+        this.pFiller = pFiller;
         this.type = type;
         this.enc = enc;
       }
@@ -453,10 +470,11 @@ static bool memIsValid( Mem M ) { return true; }
       public bool readOnly;          /* True for read-only statements */
       public int nChange;            /* Number of db changes made since last reset */
       public bool isPrepareV2;       /* True if prepared with prepare_v2() */
-      public int btreeMask;          /* Bitmask of db.aDb[] entries referenced */
+      public yDbMask btreeMask;          /* Bitmask of db.aDb[] entries referenced */
+      public yDbMask lockMask;       /* Subset of btreeMask that requires a lock */
+
       public int iStatement;         /* Statement number (or 0 if has not opened stmt) */
       public int[] aCounter = new int[3]; /* Counters used by sqlite3_stmt_status() */
-      public BtreeMutexArray aMutex; /* An array of Btree used here and needing locks */
 #if !SQLITE_OMIT_TRACE
       public i64 startTime;          /* Time when query started - used for profiling */
 #endif
@@ -520,7 +538,7 @@ static bool memIsValid( Mem M ) { return true; }
         ct.startTime = startTime;
 #endif
         ct.btreeMask = btreeMask;
-        ct.aMutex = aMutex;
+        ct.lockMask = lockMask;
         aCounter.CopyTo( ct.aCounter, 0 );
         ct.zSql = zSql;
         ct.pFree = pFree;
@@ -613,6 +631,20 @@ ct.pLruNext=pLruNext;
     //int sqlite3VdbeFrameRestore(VdbeFrame *);
     //void sqlite3VdbeMemStoreType(Mem *pMem);  
 
+#if !(SQLITE_OMIT_SHARED_CACHE) && SQLITE_THREADSAFE//>0
+  //void sqlite3VdbeEnter(Vdbe*);
+  //void sqlite3VdbeLeave(Vdbe*);
+#else
+//# define sqlite3VdbeEnter(X)
+    static void sqlite3VdbeEnter( Vdbe p )
+    {
+    }
+//# define sqlite3VdbeLeave(X)
+    static void sqlite3VdbeLeave( Vdbe p )
+    {
+    }
+#endif
+
 #if SQLITE_DEBUG
     //void sqlite3VdbeMemPrepareToChange(Vdbe*,Mem*);
 #endif
@@ -622,15 +654,6 @@ ct.pLruNext=pLruNext;
 #else
 //# define sqlite3VdbeCheckFk(p,i) 0
 static int sqlite3VdbeCheckFk( Vdbe p, int i ) { return 0; }
-#endif
-
-#if !SQLITE_OMIT_SHARED_CACHE
-//void sqlite3VdbeMutexArrayEnter(Vdbe *p);
-#else
-    //# define sqlite3VdbeMutexArrayEnter(p)
-    static void sqlite3VdbeMutexArrayEnter( Vdbe p )
-    {
-    }
 #endif
 
     //int sqlite3VdbeMemTranslate(Mem*, u8);

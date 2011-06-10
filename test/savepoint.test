@@ -910,7 +910,6 @@ if {[wal_is_wal_mode]==0} {
 
 db close
 file delete test.db
-if 0 {
 do_multiclient_test tn {
   do_test savepoint-14.$tn.1 {
     sql1 {
@@ -1018,7 +1017,6 @@ do_multiclient_test tn {
   do_test savepoint-16.$tn.3 {
     sql1 { SELECT * FROM foo }
   } {1 2 3 4}
-}
 }
 
 #-------------------------------------------------------------------------

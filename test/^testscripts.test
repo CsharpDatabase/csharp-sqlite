@@ -10,9 +10,15 @@ source $testdir/tester.tcl
 # or enter TCL commands such as the ones that are listed 
 # after these comments
 
+do_test SIMPLE_SQLITE_VERSION {
+    execsql { 
+    SELECT SQLITE_VERSION(), SQLITE_SOURCE_ID();
+  }
+} {3.7.6.3C# {Ported to C# from 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e}}
+
 
 ##########################################################################################
-#puts -nonewline "Press RETURN to exit..."; gets stdin; exit 0
+puts -nonewline "Press RETURN to exit..."; gets stdin; exit 0
 
 set filter ""
 if [string compare $filter "skip"] {
@@ -46,7 +52,7 @@ do_test SIMPLE_SQLITE_VERSION {
     execsql { 
     SELECT SQLITE_VERSION(), SQLITE_SOURCE_ID();
   }
-} {3.7.5.C# {Ported to C# from 2011-01-28 17:03:50 ed759d5a9edb3bba5f48f243df47be29e3fe8cd7}}
+} {3.7.6.3C# {Ported to C# from 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e}}
 
 
 do_test SIMPLE_COUNT_SQL_MASTER {

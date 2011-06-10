@@ -280,7 +280,6 @@ new sqlite3_mutex( SQLITE_W32_MUTEX_INITIALIZER, 0, 0, (DWORD)0
               p.id = iType;
               InitializeCriticalSection( p.mutex );
             }
-            //p.trace = 1;
             break;
           }
         default:

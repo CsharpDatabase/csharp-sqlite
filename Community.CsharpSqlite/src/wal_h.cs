@@ -27,7 +27,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2010-12-07 20:14:09 a586a4deeb25330037a49df295b36aaf624d0f45
+    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
     **
     *************************************************************************
     */
@@ -110,9 +110,11 @@ namespace Community.CsharpSqlite
       return 0;
     }
 
-    //# define sqlite3WalCheckpoint(u,v,w,x)         0
-    static int sqlite3WalCheckpoint( Wal u, int v, int w, u8[] x )
+    //# define sqlite3WalCheckpoint(r,s,t,u,v,w,x,y,z)         0
+    static int sqlite3WalCheckpoint( Wal r, int s, int t, u8[] u, int v, int w, u8[]x, out int y, out int z )//r,s,t,u,v,w,x,y,z
     {
+      y = 0;
+      z = 0;
       return 0;
     }
 
@@ -184,10 +186,15 @@ int sqlite3WalFrames(Wal *pWal, int, PgHdr *, Pgno, int, int);
 
 /* Copy pages from the log to the database file */ 
 int sqlite3WalCheckpoint(
-Wal *pWal,                      /* Write-ahead log connection */
-int sync_flags,                 /* Flags to sync db file with (or 0) */
-int nBuf,                       /* Size of buffer nBuf */
-u8 *zBuf                        /* Temporary buffer to use */
+  Wal *pWal,                      /* Write-ahead log connection */
+  int eMode,                      /* One of PASSIVE, FULL and RESTART */
+  int (*xBusy)(void*),            /* Function to call when busy */
+  void *pBusyArg,                 /* Context argument for xBusyHandler */
+  int sync_flags,                 /* Flags to sync db file with (or 0) */
+  int nBuf,                       /* Size of buffer nBuf */
+  u8 *zBuf,                       /* Temporary buffer to use */
+  int *pnLog,                     /* OUT: Number of frames in WAL */
+  int *pnCkpt                     /* OUT: Number of backfilled frames in WAL */
 );
 
 /* Return the value to pass to a sqlite3_wal_hook callback, the

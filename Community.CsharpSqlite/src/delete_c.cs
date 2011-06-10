@@ -26,16 +26,25 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2010-08-23 18:52:01 42537b60566f288167f1b5864a5435986838e3a3
+    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
     **
     *************************************************************************
     */
     //#include "sqliteInt.h"
 
     /*
-    ** Look up every table that is named in pSrc.  If any table is not found,
-    ** add an error message to pParse.zErrMsg and return NULL.  If all tables
-    ** are found, return a pointer to the last table.
+    ** While a SrcList can in general represent multiple tables and subqueries
+    ** (as in the FROM clause of a SELECT statement) in this case it contains
+    ** the name of a single table, as one might find in an INSERT, DELETE,
+    ** or UPDATE statement.  Look up that table in the symbol table and
+    ** return a pointer.  Set an error message and return NULL if the table 
+    ** name is not found or if any other error occurs.
+    **
+    ** The following fields are initialized appropriate in pSrc:
+    **
+    **    pSrc->a[0].pTab       Pointer to the Table object
+    **    pSrc->a[0].pIndex     Pointer to the INDEXED BY index, if there is one
+    **
     */
     static Table sqlite3SrcListLookup( Parse pParse, SrcList pSrc )
     {
@@ -607,7 +616,7 @@ sqlite3AuthContextPop(sContext);
         sqlite3VdbeAddOp2( v, OP_Delete, iCur, ( count != 0 ? (int)OPFLAG_NCHANGE : 0 ) );
         if ( count != 0 )
         {
-          sqlite3VdbeChangeP4( v, -1, pTab.zName, P4_STATIC );
+          sqlite3VdbeChangeP4( v, -1, pTab.zName, P4_TRANSIENT );
         }
       }
 
@@ -718,7 +727,7 @@ sqlite3AuthContextPop(sContext);
       if ( doMakeRec )
       {
         sqlite3VdbeAddOp3( v, OP_MakeRecord, regBase, nCol + 1, regOut );
-        sqlite3VdbeChangeP4( v, -1, sqlite3IndexAffinityStr( v, pIdx ), 0 );
+        sqlite3VdbeChangeP4( v, -1, sqlite3IndexAffinityStr( v, pIdx ), P4_TRANSIENT );
       }
       sqlite3ReleaseTempRange( pParse, regBase, nCol + 1 );
       return regBase;

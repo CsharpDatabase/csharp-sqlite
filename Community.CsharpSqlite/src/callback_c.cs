@@ -30,7 +30,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2010-12-07 20:14:09 a586a4deeb25330037a49df295b36aaf624d0f45
+    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
     **
     *************************************************************************
     */
@@ -487,18 +487,18 @@ FuncDefHash pHash = GLOBAL( FuncDefHash, sqlite3GlobalFunctions );
     /*
     ** Free all resources held by the schema structure. The void* argument points
     ** at a Schema struct. This function does not call sqlite3DbFree(db, ) on the
-    ** pointer itself, it just cleans up subsiduary resources (i.e. the contents
+    ** pointer itself, it just cleans up subsidiary resources (i.e. the contents
     ** of the schema hash tables).
     **
     ** The Schema.cache_size variable is not cleared.
     */
-    static void sqlite3SchemaFree( Schema p )
+    static void sqlite3SchemaClear( Schema p )
     {
       p.Clear();
       //Hash temp1;
       //Hash temp2;
       //HashElem pElem;
-      //Schema pSchema = p;
+      Schema pSchema = p;
 
       //temp1 = pSchema.tblHash;
       //temp2 = pSchema.trigHash;
@@ -519,7 +519,12 @@ FuncDefHash pHash = GLOBAL( FuncDefHash, sqlite3GlobalFunctions );
       //sqlite3HashClear( temp1 );
       //sqlite3HashClear( pSchema.fkeyHash );
       //pSchema.pSeqTab = null;
-      //pSchema.flags = (u16)( pSchema.flags & ~DB_SchemaLoaded );
+      if ( ( pSchema.flags & DB_SchemaLoaded ) != 0 )
+      {
+        pSchema.iGeneration++;
+        pSchema.flags = (u16)( pSchema.flags & ( ~DB_SchemaLoaded ) );
+      }
+
     }
 
     /*
@@ -531,7 +536,7 @@ FuncDefHash pHash = GLOBAL( FuncDefHash, sqlite3GlobalFunctions );
       Schema p;
       if ( pBt != null )
       {
-        p = sqlite3BtreeSchema( pBt, -1, (dxFreeSchema)sqlite3SchemaFree );//Schema.Length, sqlite3SchemaFree);
+        p = sqlite3BtreeSchema( pBt, -1, (dxFreeSchema)sqlite3SchemaClear );//Schema.Length, sqlite3SchemaFree);
       }
       else
       {

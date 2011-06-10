@@ -31,7 +31,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2010-12-07 20:14:09 a586a4deeb25330037a49df295b36aaf624d0f45
+    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
     **
     *************************************************************************
     */
@@ -406,7 +406,9 @@ end_of_vacuum:
         pDb.pSchema = null;
       }
 
-      sqlite3ResetInternalSchema( db, 0 );
+      /* This both clears the schemas and reduces the size of the db->aDb[]
+      ** array. */
+      sqlite3ResetInternalSchema( db, -1 );
 
       return rc;
     }

@@ -35,7 +35,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2011-01-28 17:03:50 ed759d5a9edb3bba5f48f243df47be29e3fe8cd7
+    **  SQLITE_SOURCE_ID: Normal	incomplete	2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
     **
     *************************************************************************
     */
@@ -877,14 +877,12 @@ return p.pMem.n;
     static Mem columnMem( sqlite3_stmt pStmt, int i )
     {
       Vdbe pVm;
-      int vals;
       Mem pOut;
 
       pVm = (Vdbe)pStmt;
       if ( pVm != null && pVm.pResultSet != null && i < pVm.nResColumn && i >= 0 )
       {
         sqlite3_mutex_enter( pVm.db.mutex );
-        vals = sqlite3_data_count( pStmt );
         pOut = pVm.pResultSet[i];
       }
       else
@@ -900,13 +898,21 @@ return p.pMem.n;
         ** this assert() from failing, when building with SQLITE_DEBUG defined
         ** using gcc, force nullMem to be 8-byte aligned using the magical
         ** __attribute__((aligned(8))) macro.  */
-        //    Mem nullMem
-        //#if (SQLITE_DEBUG) && (__GNUC__)
-        //__attribute__((aligned(8)))
+        //    static const Mem nullMem 
+        //#if defined(SQLITE_DEBUG) && defined(__GNUC__)
+        //      __attribute__((aligned(8))) 
         //#endif
-        //
-        //    public static const Mem nullMem       = {0, "", (double)0, {0}, 0, MEM_Null, SQLITE_NULL, 0, 0, 0 };
-        Mem nullMem = new Mem( null, "", (double)0, 0, 0, MEM_Null, SQLITE_NULL, 0 );
+        //      = {0, "", (double)0, {0}, 0, MEM_Null, SQLITE_NULL, 0,
+        //#ifdef SQLITE_DEBUG
+        //         0, 0,  /* pScopyFrom, pFiller */
+        //#endif
+        //         0, 0 };
+        Mem nullMem = new Mem( null, "", (double)0, 0, 0, MEM_Null, SQLITE_NULL, 0,
+#if SQLITE_DEBUG
+         null, null  /* pScopyFrom, pFiller */
+#endif
+         );
+
         if ( pVm != null && ALWAYS( pVm.db != null ) )
         {
           sqlite3_mutex_enter( pVm.db.mutex );

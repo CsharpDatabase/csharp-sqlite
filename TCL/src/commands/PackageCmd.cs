@@ -655,7 +655,7 @@ namespace tcl.lang
         {
           return;
         }
-        len = version.Replace( ".C#", "" ).Length;
+        len = version.Replace( ".C#", "" ).Replace( "C#", "" ).Length;
         for ( i = 1; i < len; i++ )
         {
           c = version[i];

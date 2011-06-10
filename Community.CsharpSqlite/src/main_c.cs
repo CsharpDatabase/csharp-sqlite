@@ -39,7 +39,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2011-01-28 17:03:50 ed759d5a9edb3bba5f48f243df47be29e3fe8cd7
+    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
     **
     *************************************************************************
     */
@@ -577,6 +577,13 @@ sqlite3GlobalConfig.pHeap = va_arg(ap, void*);
 sqlite3GlobalConfig.nHeap = va_arg(ap, int);
 sqlite3GlobalConfig.mnReq = va_arg(ap, int);
 
+if( sqlite3GlobalConfig.mnReq<1 ){
+  sqlite3GlobalConfig.mnReq = 1;
+}else if( sqlite3GlobalConfig.mnReq>(1<<12) ){
+  /* cap min request size at 2^12 */
+  sqlite3GlobalConfig.mnReq = (1<<12);
+}
+
 if(  sqlite3GlobalConfig.pHeap==0 ){
 /* If the heap pointer is NULL, then restore the malloc implementation
 ** back to NULL pointers too.  This will cause the malloc to go
@@ -715,6 +722,18 @@ break;
       return db.mutex;
     }
 
+    public class _aFlagOp
+    {
+      public int op;      /* The opcode */
+      public u32 mask;    /* Mask of the bit in sqlite3.flags to set/clear */
+
+      public _aFlagOp( int op, u32 mask )
+      {
+        this.op = op;
+        this.mask = mask;
+      }
+    }
+
     /*
     ** Configuration settings for an individual database connection
     */
@@ -729,7 +748,7 @@ break;
         {
           case SQLITE_DBCONFIG_LOOKASIDE:
             {
-              byte[] pBuf = (byte[])va_arg( ap, "byte[]" );   /* IMP: R-21112-12275 */
+              byte[] pBuf = (byte[])va_arg( ap, "byte[]" );   /* IMP: R-26835-10964 */
               int sz = (int)va_arg( ap, "int" );              /* IMP: R-47871-25994 */
               int cnt = (int)va_arg( ap, "int" );             /* IMP: R-04460-53386 */
               rc = setupLookaside( db, pBuf, sz, cnt );
@@ -737,7 +756,40 @@ break;
             }
           default:
             {
+              _aFlagOp[] aFlagOp = new _aFlagOp[]{
+        new _aFlagOp( SQLITE_DBCONFIG_ENABLE_FKEY,    SQLITE_ForeignKeys    ),
+        new _aFlagOp( SQLITE_DBCONFIG_ENABLE_TRIGGER, SQLITE_EnableTrigger  ),
+      };
+              uint i;
+
               rc = SQLITE_ERROR;                              /* IMP: R-42790-23372 */
+              for ( i = 0; i < ArraySize( aFlagOp ); i++ )
+              {
+                if ( aFlagOp[i].op == op )
+                {
+                  int onoff = (int)va_arg( ap, "int" );
+                  int pRes = (int)va_arg( ap, "int*" );
+                  int oldFlags = db.flags;
+                  if ( onoff > 0 )
+                  {
+                    db.flags = (int)( db.flags | aFlagOp[i].mask );
+                  }
+                  else if ( onoff == 0 )
+                  {
+                    db.flags = (int)( db.flags & ~aFlagOp[i].mask );
+                  }
+                  if ( oldFlags != db.flags )
+                  {
+                    sqlite3ExpirePreparedStatements( db );
+                  }
+                  if ( pRes != 0 )
+                  {
+                    pRes = ( db.flags & aFlagOp[i].mask ) != 0 ? 1 : 0;
+                  }
+                  rc = SQLITE_OK;
+                  break;
+                }
+              }
               break;
             }
         }
@@ -894,21 +946,16 @@ break;
       }
       sqlite3_mutex_enter( db.mutex );
 
-      sqlite3ResetInternalSchema( db, 0 );
-
-      /* Tell the code in notify.c that the connection no longer holds any
-      ** locks and does not require any further unlock-notify callbacks.
-      */
-      sqlite3ConnectionClosed( db );
+      /* Force xDestroy calls on all virtual tables */
+      sqlite3ResetInternalSchema( db, -1 );
 
       /* If a transaction is open, the ResetInternalSchema() call above
       ** will not have called the xDisconnect() method on any virtual
-      ** tables in the db.aVTrans[] array. The following sqlite3VtabRollback()
+      ** tables in the db->aVTrans[] array. The following sqlite3VtabRollback()
       ** call will do so. We need to do this before the check for active
       ** SQL statements below, as the v-table implementation may be storing
       ** some prepared statements internally.
       */
-
       sqlite3VtabRollback( db );
 
       /* If there are any outstanding VMs, return SQLITE_BUSY. */
@@ -950,7 +997,13 @@ break;
           }
         }
       }
-      sqlite3ResetInternalSchema( db, 0 );
+      sqlite3ResetInternalSchema( db, -1 );
+
+      /* Tell the code in notify.c that the connection no longer holds any
+      ** locks and does not require any further unlock-notify callbacks.
+      */
+      sqlite3ConnectionClosed( db );
+
       Debug.Assert( db.nDb <= 2 );
       Debug.Assert( db.aDb[0].Equals( db.aDbStatic[0] ) );
       for ( j = 0; j < ArraySize( db.aFunc.a ); j++ )
@@ -1052,7 +1105,7 @@ sqlite3HashClear(&db.aModule);
       if ( ( db.flags & SQLITE_InternChanges ) != 0 )
       {
         sqlite3ExpirePreparedStatements( db );
-        sqlite3ResetInternalSchema( db, 0 );
+        sqlite3ResetInternalSchema( db, -1 );
       }
 
       /* Any deferred constraint violations have now been resolved. */
@@ -1125,8 +1178,8 @@ sqlite3HashClear(&db.aModule);
 #if SQLITE_OS_WIN || HAVE_USLEEP
       u8[] delays = new u8[] { 1, 2, 5, 10, 15, 20, 25, 25, 25, 50, 50, 100 };
       u8[] totals = new u8[] { 0, 1, 3, 8, 18, 33, 53, 78, 103, 128, 178, 228 };
-      //# define NDELAY (delays.Length/sizeof(delays[0]))
-      int NDELAY = delays.Length;
+      //# define NDELAY ArraySize(delays)
+      int NDELAY = ArraySize( delays );
       sqlite3 db = (sqlite3)ptr;
       int timeout = db.busyTimeout;
       int delay, prior;
@@ -1417,7 +1470,7 @@ enc = SQLITE_UTF16BE;
         //xDestroy(p);
         sqlite3DbFree( db, ref pArg );
       }
-//_out:
+      //_out:
       rc = sqlite3ApiExit( db, rc );
       sqlite3_mutex_leave( db.mutex );
       return rc;
@@ -1654,33 +1707,60 @@ return pRet;
 
 
     /*
+    ** Checkpoint database zDb.
+    */
+    static int sqlite3_wal_checkpoint_v2(
+      sqlite3 db,                   /* Database handle */
+      string zDb,                   /* Name of attached database (or NULL) */
+      int eMode,                    /* SQLITE_CHECKPOINT_* value */
+      ref int pnLog,                /* OUT: Size of WAL log in frames */
+      ref int pnCkpt                /* OUT: Total number of frames checkpointed */
+    )
+    {
+#if SQLITE_OMIT_WAL
+      return SQLITE_OK;
+#else
+  int rc;                         /* Return code */
+  int iDb = SQLITE_MAX_ATTACHED;  /* sqlite3.aDb[] index of db to checkpoint */
+
+  /* Initialize the output variables to -1 in case an error occurs. */
+  if( pnLog ) *pnLog = -1;
+  if( pnCkpt ) *pnCkpt = -1;
+
+  assert( SQLITE_CHECKPOINT_FULL>SQLITE_CHECKPOINT_PASSIVE );
+  assert( SQLITE_CHECKPOINT_FULL<SQLITE_CHECKPOINT_RESTART );
+  assert( SQLITE_CHECKPOINT_PASSIVE+2==SQLITE_CHECKPOINT_RESTART );
+  if( eMode<SQLITE_CHECKPOINT_PASSIVE || eMode>SQLITE_CHECKPOINT_RESTART ){
+    return SQLITE_MISUSE;
+  }
+
+  sqlite3_mutex_enter(db->mutex);
+  if( zDb && zDb[0] ){
+    iDb = sqlite3FindDbName(db, zDb);
+  }
+  if( iDb<0 ){
+    rc = SQLITE_ERROR;
+    sqlite3Error(db, SQLITE_ERROR, "unknown database: %s", zDb);
+  }else{
+    rc = sqlite3Checkpoint(db, iDb, eMode, pnLog, pnCkpt);
+    sqlite3Error(db, rc, 0);
+  }
+  rc = sqlite3ApiExit(db, rc);
+  sqlite3_mutex_leave(db->mutex);
+  return rc;
+#endif
+    }
+
+
+    /*
     ** Checkpoint database zDb. If zDb is NULL, or if the buffer zDb points
     ** to contains a zero-length string, all attached databases are 
     ** checkpointed.
     */
     static int sqlite3_wal_checkpoint( sqlite3 db, string zDb )
     {
-#if SQLITE_OMIT_WAL
-      return SQLITE_OK;
-#else
-int rc;                         /* Return code */
-int iDb = SQLITE_MAX_ATTACHED;  /* sqlite3.aDb[] index of db to checkpoint */
-
-sqlite3_mutex_enter(db.mutex);
-if( zDb && zDb[0] ){
-iDb = sqlite3FindDbName(db, zDb);
-}
-if( iDb<0 ){
-rc = SQLITE_ERROR;
-sqlite3Error(db, SQLITE_ERROR, "unknown database: %s", zDb);
-}else{
-rc = sqlite3Checkpoint(db, iDb);
-sqlite3Error(db, rc, 0);
-}
-rc = sqlite3ApiExit(db, rc);
-sqlite3_mutex_leave(db.mutex);
-return rc;
-#endif
+      int dummy = 0;
+      return sqlite3_wal_checkpoint_v2( db, zDb, SQLITE_CHECKPOINT_PASSIVE, ref dummy, ref dummy );
     }
 
 #if !SQLITE_OMIT_WAL
@@ -1700,43 +1780,54 @@ return rc;
 ** If iDb is passed SQLITE_MAX_ATTACHED, then all attached databases are
 ** checkpointed. If an error is encountered it is returned immediately -
 ** no attempt is made to checkpoint any remaining databases.
+**
+** Parameter eMode is one of SQLITE_CHECKPOINT_PASSIVE, FULL or RESTART.
 */
-int sqlite3Checkpoint(sqlite3 *db, int iDb){
-int rc = SQLITE_OK;             /* Return code */
-int i;                          /* Used to iterate through attached dbs */
+int sqlite3Checkpoint(sqlite3 *db, int iDb, int eMode, int *pnLog, int *pnCkpt){
+  int rc = SQLITE_OK;             /* Return code */
+  int i;                          /* Used to iterate through attached dbs */
+  int bBusy = 0;                  /* True if SQLITE_BUSY has been encountered */
 
-assert( sqlite3_mutex_held(db.mutex) );
+  assert( sqlite3_mutex_held(db->mutex) );
+  assert( !pnLog || *pnLog==-1 );
+  assert( !pnCkpt || *pnCkpt==-1 );
 
-for(i=0; i<db.nDb && rc==SQLITE_OK; i++){
-if( i==iDb || iDb==SQLITE_MAX_ATTACHED ){
-rc = sqlite3BtreeCheckpoint(db->aDb[i].pBt);
-}
-}
+  for(i=0; i<db->nDb && rc==SQLITE_OK; i++){
+    if( i==iDb || iDb==SQLITE_MAX_ATTACHED ){
+      rc = sqlite3BtreeCheckpoint(db->aDb[i].pBt, eMode, pnLog, pnCkpt);
+      pnLog = 0;
+      pnCkpt = 0;
+      if( rc==SQLITE_BUSY ){
+        bBusy = 1;
+        rc = SQLITE_OK;
+      }
+    }
+  }
 
-return rc;
+  return (rc==SQLITE_OK && bBusy) ? SQLITE_BUSY : rc;
 }
 #endif //* SQLITE_OMIT_WAL */
 
     /*
-/*
-** This function returns true if main-memory should be used instead of
-** a temporary file for transient pager files and statement journals.
-** The value returned depends on the value of db->temp_store (runtime
-** parameter) and the compile time value of SQLITE_TEMP_STORE. The
-** following table describes the relationship between these two values
-** and this functions return value.
-**
-**   SQLITE_TEMP_STORE     db->temp_store     Location of temporary database
-**   -----------------     --------------     ------------------------------
-**   0                     any                file      (return 0)
-**   1                     1                  file      (return 0)
-**   1                     2                  memory    (return 1)
-**   1                     0                  file      (return 0)
-**   2                     1                  file      (return 0)
-**   2                     2                  memory    (return 1)
-**   2                     0                  memory    (return 1)
-**   3                     any                memory    (return 1)
-*/
+    /*
+    ** This function returns true if main-memory should be used instead of
+    ** a temporary file for transient pager files and statement journals.
+    ** The value returned depends on the value of db->temp_store (runtime
+    ** parameter) and the compile time value of SQLITE_TEMP_STORE. The
+    ** following table describes the relationship between these two values
+    ** and this functions return value.
+    **
+    **   SQLITE_TEMP_STORE     db->temp_store     Location of temporary database
+    **   -----------------     --------------     ------------------------------
+    **   0                     any                file      (return 0)
+    **   1                     1                  file      (return 0)
+    **   1                     2                  memory    (return 1)
+    **   1                     0                  file      (return 0)
+    **   2                     1                  file      (return 0)
+    **   2                     2                  memory    (return 1)
+    **   2                     0                  memory    (return 1)
+    **   3                     any                memory    (return 1)
+    */
     static bool sqlite3TempInMemory( sqlite3 db )
     {
       //#if SQLITE_TEMP_STORE==1
@@ -1994,8 +2085,8 @@ SQLITE_MAX_TRIGGER_DEPTH,
     //#if SQLITE_MAX_FUNCTION_ARG<0 || SQLITE_MAX_FUNCTION_ARG>1000
     //# error SQLITE_MAX_FUNCTION_ARG must be between 0 and 1000
     //#endif
-    //#if SQLITE_MAX_ATTACHED<0 || SQLITE_MAX_ATTACHED>30
-    //# error SQLITE_MAX_ATTACHED must be between 0 and 30
+    //#if SQLITE_MAX_ATTACHED<0 || SQLITE_MAX_ATTACHED>62
+    //# error SQLITE_MAX_ATTACHED must be between 0 and 62
     //#endif
     //#if SQLITE_MAX_LIKE_PATTERN_LENGTH<1
     //# error SQLITE_MAX_LIKE_PATTERN_LENGTH must be at least 1
@@ -2172,7 +2263,7 @@ SQLITE_MAX_TRIGGER_DEPTH,
       db.autoCommit = 1;
       db.nextAutovac = -1;
       db.nextPagesize = 0;
-      db.flags |= SQLITE_ShortColNames | SQLITE_AutoIndex;
+      db.flags |= SQLITE_ShortColNames | SQLITE_AutoIndex | SQLITE_EnableTrigger;
       if ( SQLITE_DEFAULT_FILE_FORMAT < 4 )
         db.flags |= SQLITE_LegacyFileFmt
 #if  SQLITE_ENABLE_LOAD_EXTENSION
@@ -2686,25 +2777,25 @@ error_out:
       ** this has the effect of zeroing all output parameters.
       */
       //if ( pzDataType )
-        pzDataType = zDataType;
+      pzDataType = zDataType;
       //if ( pzCollSeq )
-        pzCollSeq = zCollSeq;
+      pzCollSeq = zCollSeq;
       //if ( pNotNull )
-        pNotNull = notnull;
+      pNotNull = notnull;
       //if ( pPrimaryKey )
-        pPrimaryKey = primarykey;
+      pPrimaryKey = primarykey;
       //if ( pAutoinc )
-        pAutoinc = autoinc;
+      pAutoinc = autoinc;
 
-        if ( SQLITE_OK == rc && null == pTab )
-        {
+      if ( SQLITE_OK == rc && null == pTab )
+      {
         sqlite3DbFree( db, ref zErrMsg );
         zErrMsg = sqlite3MPrintf( db, "no such table column: %s.%s", zTableName,
         zColumnName );
         rc = SQLITE_ERROR;
       }
-        sqlite3Error( db, rc, ( !String.IsNullOrEmpty( zErrMsg ) ? "%s" : null ), zErrMsg );
-        sqlite3DbFree( db, ref zErrMsg );
+      sqlite3Error( db, rc, ( !String.IsNullOrEmpty( zErrMsg ) ? "%s" : null ), zErrMsg );
+      sqlite3DbFree( db, ref zErrMsg );
       rc = sqlite3ApiExit( db, rc );
       sqlite3_mutex_leave( db.mutex );
       return rc;
@@ -2896,7 +2987,7 @@ error_out:
                   if ( sqlite3PendingByte != newVal )
                     sqlite3PendingByte = (int)newVal;
 #if DEBUG && TCLSH
-                TCLsqlite3PendingByte.iValue = sqlite3PendingByte;
+                  TCLsqlite3PendingByte.iValue = sqlite3PendingByte;
 #endif
                   PENDING_BYTE = sqlite3PendingByte;
                 }

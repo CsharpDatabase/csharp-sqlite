@@ -27,7 +27,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2010-12-07 20:14:09 a586a4deeb25330037a49df295b36aaf624d0f45
+    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
     **
     *************************************************************************
     */
@@ -153,8 +153,7 @@ namespace Community.CsharpSqlite
       int regNewRowid;             /* The new rowid */
       int regNew;
       int regOld = 0;
-      int regRowSet = 0;     /* Rowset of rows to be updated */
-      int regRec;            /* Register used for new table record to insert */
+      int regRowSet = 0;           /* Rowset of rows to be updated */
 
       sContext = new AuthContext(); //memset( &sContext, 0, sizeof( sContext ) );
       db = pParse.db;
@@ -289,7 +288,7 @@ aXRef[j] = -1;
       for ( j = 0, pIdx = pTab.pIndex; pIdx != null; pIdx = pIdx.pNext, j++ )
       {
         int reg;
-        if ( chngRowid )
+        if ( hasFK || chngRowid )
         {
           reg = ++pParse.nMem;
         }
@@ -340,7 +339,6 @@ goto update_cleanup;
       }
       regNew = pParse.nMem + 1;
       pParse.nMem += pTab.nCol;
-      regRec = ++pParse.nMem;
 
       /* Start the view context. */
       if ( isView )
@@ -472,7 +470,7 @@ goto update_cleanup;
         );
         for ( i = 0; i < pTab.nCol; i++ )
         {
-          if ( aXRef[i] < 0 || oldmask == 0xffffffff || ( oldmask & ( 1 << i ) ) != 0 )
+          if ( aXRef[i] < 0 || oldmask == 0xffffffff || ( i < 32 && 0 != ( oldmask & ( 1 << i ) ) ) )
           {
             sqlite3ExprCodeGetColumnOfTable( v, pTab, iCur, i, regOld + i );
           }

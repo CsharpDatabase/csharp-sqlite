@@ -53,7 +53,7 @@ do_test progress-1.0 {
 } 1
 do_test progress-1.0.1 {
   db progress
-} {namespace inscope :: {incr counter} ; expr 0}
+} {::namespace inscope :: {incr counter} ; expr 0}
 do_test progress-1.0.2 {
   set v [catch {db progress xyz bogus} msg]
   lappend v $msg

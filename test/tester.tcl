@@ -12,14 +12,6 @@
 # testing the SQLite library
 #
 # $Id: tester.tcl,v 1.143 2009/04/09 01:23:49 drh Exp $
-########################################################################
-#  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
-#  C#-SQLite is an independent reimplementation of the SQLite software library
-#
-#  SQLITE_SOURCE_ID: 2010-03-09 19:31:43 4ae453ea7be69018d8c16eb8dabe05617397dc4d
-#
-#  $Header: C#-SQLite/test/tester.tcl,v 2009/12/11 20:47:52 Noah $
-#
 
 #-------------------------------------------------------------------------
 # The commands provided by the code in this file to help with creating 
@@ -162,6 +154,7 @@ if {[info exists cmdlinearg]==0} {
   #   --backtrace=N
   #   --binarylog=N
   #   --soak=N
+  #   --start=[$permutation:]$testfile
   #
   set cmdlinearg(soft-heap-limit)    0
   set cmdlinearg(maxerror)        1000
@@ -169,6 +162,7 @@ if {[info exists cmdlinearg]==0} {
   set cmdlinearg(backtrace)         10
   set cmdlinearg(binarylog)          0
   set cmdlinearg(soak)               0
+  set cmdlinearg(start)             "" 
 
   set leftover [list]
   foreach a $argv {
@@ -203,6 +197,16 @@ if {[info exists cmdlinearg]==0} {
         foreach {dummy cmdlinearg(soak)} [split $a =] break
         set ::G(issoak) $cmdlinearg(soak)
       }
+      {^-+start=.+$} {
+        foreach {dummy cmdlinearg(start)} [split $a =] break
+
+        set ::G(start:file) $cmdlinearg(start)
+        if {[regexp {(.*):(.*)} $cmdlinearg(start) -> s.perm s.file]} {
+          set ::G(start:permutation) ${s.perm}
+          set ::G(start:file)        ${s.file}
+        }
+        if {$::G(start:file) == ""} {unset ::G(start:file)}
+      }
       default {
         lappend leftover $a
       }
@@ -214,11 +218,7 @@ if {[info exists cmdlinearg]==0} {
   # extensions. This only needs to be done once for the process.
   #
   sqlite3_shutdown 
-################################
-# not implemented in C#-SQLite #
-################################
-#  install_malloc_faultsim 1 
-################################
+  install_malloc_faultsim 1 
   sqlite3_initialize
   autoinstall_test_functions
 
@@ -346,16 +346,8 @@ proc do_test {name cmd expected} {
     puts "\nError: $result"
     fail_test $name
   } elseif {[string compare $result $expected]} {
-	  set WHITESPACE "{} \t\r\n"					;# white space & Extra braces
-    set REPLACE "(\[$WHITESPACE])"
-    regsub -all $REPLACE $expected "" testEXP
-    regsub -all $REPLACE $result   "" testRES
-    if { [string compare $testRES $testEXP]} {
-      puts "\nExpected: \[$expected\]\n     Got: \[$result\]"
-      fail_test $name
-    } else {
-      puts " Ok"
-    }
+    puts "\nExpected: \[$expected\]\n     Got: \[$result\]"
+    fail_test $name
   } else {
     puts " Ok"
   }
@@ -377,10 +369,10 @@ proc do_execsql_test {testname sql {result {}}} {
 }
 proc do_catchsql_test {testname sql result} {
   fix_testname testname
-  uplevel do_test $testname [list "catchsql {$sql}"] [list [list {*}$result]]
+  uplevel do_test $testname [list "catchsql {$sql}"] [list $result]
 }
 proc do_eqp_test {name sql res} {
-  uplevel do_execsql_test $name [list "EXPLAIN QUERY PLAN $sql"] [list [list {*}$res]]
+  uplevel do_execsql_test $name [list "EXPLAIN QUERY PLAN $sql"] [list $res]
 }
 
 #-------------------------------------------------------------------------
@@ -571,7 +563,6 @@ proc finalize_testing {} {
     puts "$sqlite_open_file_count files were left open"
     incr nErr
   }
- ifcapable malloc {
   if {[lindex [sqlite3_status SQLITE_STATUS_MALLOC_COUNT 0] 1]>0 ||
               [sqlite3_memory_used]>0} {
     puts "Unfreed memory: [sqlite3_memory_used] bytes in\
@@ -605,17 +596,12 @@ proc finalize_testing {} {
       memdebug_log_sql leaks.sql
     }
   }
- } else {
-  puts "Memory usage not being tracked" 
- }
-
   foreach f [glob -nocomplain test.db-*-journal] {
     file delete -force $f
   }
   foreach f [glob -nocomplain test.db-mj*] {
     file delete -force $f
   }
-  puts -nonewline "Press RETURN to exit..."; gets stdin
   exit [expr {$nErr>0}]
 }
 
@@ -1350,6 +1336,15 @@ proc slave_test_script {script} {
 
 proc slave_test_file {zFile} {
   set tail [file tail $zFile]
+
+  if {[info exists ::G(start:permutation)]} {
+    if {[permutation] != $::G(start:permutation)} return
+    unset ::G(start:permutation)
+  }
+  if {[info exists ::G(start:file)]} {
+    if {$tail != $::G(start:file) && $tail!="$::G(start:file).test"} return
+    unset ::G(start:file)
+  }
 
   # Remember the value of the shared-cache setting. So that it is possible
   # to check afterwards that it was not modified by the test script.

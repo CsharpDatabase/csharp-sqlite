@@ -36,7 +36,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2011-01-28 17:03:50 ed759d5a9edb3bba5f48f243df47be29e3fe8cd7
+    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
     **
     *************************************************************************
     */
@@ -3368,7 +3368,7 @@ n += sizeof( long );
     }
 
     static sqlite3_vfs winVfs = new sqlite3_vfs(
-    2,                              /* iVersion */
+    3,                              /* iVersion */
     -1, //sqlite3_file.Length,      /* szOsFile */
     MAX_PATH,                       /* mxPathname */
     null,                           /* pNext */
@@ -3386,8 +3386,11 @@ n += sizeof( long );
     (dxRandomness)winRandomness,    /* xRandomness */
     (dxSleep)winSleep,              /* xSleep */
     (dxCurrentTime)winCurrentTime,  /* xCurrentTime */
-    (dxGetLastError)winGetLastError, /* xGetLastError */
-    (dxCurrentTimeInt64)winCurrentTimeInt64 /* xCurrentTimeInt64 */
+    (dxGetLastError)winGetLastError,/* xGetLastError */
+    (dxCurrentTimeInt64)winCurrentTimeInt64, /* xCurrentTimeInt64 */
+    null,                           /* xSetSystemCall */
+    null,                           /* xGetSystemCall */
+    null                            /* xNextSystemCall */
     );
 
     /*

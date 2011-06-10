@@ -20,7 +20,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2010-12-07 20:14:09 a586a4deeb25330037a49df295b36aaf624d0f45
+    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
     **
     *************************************************************************
     */
@@ -50,20 +50,6 @@ namespace Community.CsharpSqlite
     //typedef struct Btree Btree;
     //typedef struct BtCursor BtCursor;
     //typedef struct BtShared BtShared;
-    //typedef struct BtreeMutexArray BtreeMutexArray;
-
-    /*
-    ** This structure records all of the Btrees that need to hold
-    ** a mutex before we enter sqlite3VdbeExec().  The Btrees are
-    ** are placed in aBtree[] in order of aBtree[].pBt.  That way,
-    ** we can always lock and unlock them all quickly.
-    */
-    public class BtreeMutexArray
-    {
-      public int nMutex;
-      public Btree[] aBtree = new Btree[SQLITE_MAX_ATTACHED + 1];
-    };
-
 
     //int sqlite3BtreeOpen(
     //  string zFilename,       /* Name of database file to open */
@@ -104,7 +90,7 @@ namespace Community.CsharpSqlite
     //int sqlite3BtreeGetAutoVacuum(Btree );
     //int sqlite3BtreeBeginTrans(Btree*,int);
     //int sqlite3BtreeCommitPhaseOne(Btree*, string zMaster);
-    //int sqlite3BtreeCommitPhaseTwo(Btree*);
+    //int sqlite3BtreeCommitPhaseTwo(Btree*, int);
     //int sqlite3BtreeCommit(Btree*);
     //int sqlite3BtreeRollback(Btree*);
     //int sqlite3BtreeBeginStmt(Btree*);
@@ -235,7 +221,7 @@ namespace Community.CsharpSqlite
     //#endif
 
 #if !SQLITE_OMIT_WAL
-//int sqlite3BtreeCheckpoint(Btree*);
+//int sqlite3BtreeCheckpoint(Btree*, int, int *, int *);
 #endif
 
     /*
@@ -258,19 +244,23 @@ namespace Community.CsharpSqlite
 #endif
 
 #if !(SQLITE_OMIT_SHARED_CACHE) && SQLITE_THREADSAFE
+//int sqlite3BtreeSharable(Btree*);
 //void sqlite3BtreeLeave(Btree*);
 //void sqlite3BtreeEnterCursor(BtCursor*);
 //void sqlite3BtreeLeaveCursor(BtCursor*);
 //void sqlite3BtreeLeaveAll(sqlite3*);
-//void sqlite3BtreeMutexArrayEnter(BtreeMutexArray*);
-//void sqlite3BtreeMutexArrayLeave(BtreeMutexArray*);
-//void sqlite3BtreeMutexArrayInsert(BtreeMutexArray*, Btree*);
 #if !NDEBUG
 /* These routines are used inside assert() statements only. */
 int sqlite3BtreeHoldsMutex(Btree*);
 int sqlite3BtreeHoldsAllMutexes(sqlite3*);
+int sqlite3SchemaMutexHeld(sqlite3*,int,Schema*);
 #endif
 #else
+    //# define sqlite3BtreeSharable(X) 0
+    static bool sqlite3BtreeSharable( Btree X )
+    {
+      return false;
+    }
 
     //# define sqlite3BtreeLeave(X)
     static void sqlite3BtreeLeave( Btree X )
@@ -292,21 +282,6 @@ int sqlite3BtreeHoldsAllMutexes(sqlite3*);
     {
     }
 
-    //# define sqlite3BtreeMutexArrayEnter(X)
-    static void sqlite3BtreeMutexArrayEnter( BtreeMutexArray X )
-    {
-    }
-
-    //# define sqlite3BtreeMutexArrayLeave(X)
-    static void sqlite3BtreeMutexArrayLeave( BtreeMutexArray X )
-    {
-    }
-
-    //# define sqlite3BtreeMutexArrayInsert(X,Y)
-    static void sqlite3BtreeMutexArrayInsert( BtreeMutexArray X, Btree Y )
-    {
-    }
-
     //# define sqlite3BtreeHoldsMutex(X) 1
     static bool sqlite3BtreeHoldsMutex( Btree X )
     {
@@ -315,6 +290,11 @@ int sqlite3BtreeHoldsAllMutexes(sqlite3*);
 
     //# define sqlite3BtreeHoldsAllMutexes(X) 1
     static bool sqlite3BtreeHoldsAllMutexes( sqlite3 X )
+    {
+      return true;
+    }
+    //# define sqlite3SchemaMutexHeld(X,Y,Z) 1
+    static bool sqlite3SchemaMutexHeld( sqlite3 X, int y, Schema z )
     {
       return true;
     }

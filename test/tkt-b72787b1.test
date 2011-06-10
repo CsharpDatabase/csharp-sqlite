@@ -75,4 +75,3 @@ do_test tkt-b72787b1.1 {
 sqlite3_finalize $::STMT
 
 finish_test
-

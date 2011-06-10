@@ -29,7 +29,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2011-01-28 17:03:50 ed759d5a9edb3bba5f48f243df47be29e3fe8cd7
+    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
     **
     *************************************************************************
     */
@@ -113,7 +113,7 @@ namespace Community.CsharpSqlite
           while ( zRawSql[izRawSql++] != '\n' && izRawSql < zRawSql.Length )
             ;
           sqlite3StrAccumAppend( _out, "-- ", 3 );
-          sqlite3StrAccumAppend( _out, zRawSql, izRawSql );//zRawSql - zStart );
+          sqlite3StrAccumAppend( _out, zRawSql, (int)izRawSql );//zRawSql - zStart );
         }
       }
       else

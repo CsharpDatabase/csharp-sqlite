@@ -24,7 +24,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2009-12-07 16:39:13 1ed88e9d01e9eda5cbc622e7614277f29bcc551c
+    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
     **
     *************************************************************************
     */
@@ -158,11 +158,10 @@ static void sqlite3_mutex_leave(sqlite3_mutex p){
 ** intended for use inside assert() statements.
 */
 static bool sqlite3_mutex_held(sqlite3_mutex p){
-  if ( p != null && p.trace != 0 )
-    printf( "sqlite3_mutex_held {0} ({1}) with nRef={2}\n", p.GetHashCode(), p.owner, p.nRef );
   return p==null || sqlite3GlobalConfig.mutex.xMutexHeld(p);
 }
-static bool sqlite3_mutex_notheld(sqlite3_mutex p){
+
+    static bool sqlite3_mutex_notheld(sqlite3_mutex p){
   return p == null || sqlite3GlobalConfig.mutex.xMutexNotheld( p );
 }
 #endif

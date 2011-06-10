@@ -23,7 +23,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2010-08-23 18:52:01 42537b60566f288167f1b5864a5435986838e3a3
+    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
     **
     *************************************************************************
     */
@@ -77,6 +77,7 @@ namespace Community.CsharpSqlite
       if ( pTmpSchema != pTab.pSchema )
       {
         HashElem p;
+        Debug.Assert( sqlite3SchemaMutexHeld( pParse.db, 0, pTmpSchema ) );
         for ( p = sqliteHashFirst( pTmpSchema.trigHash ); p != null; p = sqliteHashNext( p ) )
         {
           Trigger pTrig = (Trigger)sqliteHashData( p );
@@ -202,12 +203,18 @@ namespace Community.CsharpSqlite
       {
         goto trigger_cleanup;
       }
+      Debug.Assert( sqlite3SchemaMutexHeld( db, iDb, null ) );
       if ( sqlite3HashFind( ( db.aDb[iDb].pSchema.trigHash ),
       zName, sqlite3Strlen30( zName ), (Trigger)null ) != null )
       {
         if ( noErr == 0 )
         {
           sqlite3ErrorMsg( pParse, "trigger %T already exists", pName );
+        }
+        else
+        {
+          Debug.Assert( 0==db.init.busy );
+          sqlite3CodeVerifySchema( pParse, iDb );
         }
         goto trigger_cleanup;
       }
@@ -310,7 +317,6 @@ trigger_cleanup:
       int iDb;                            /* Database containing the trigger */
       Token nameToken = new Token();      /* Trigger name for error reporting */
 
-      pTrig = pParse.pNewTrigger;
       pParse.pNewTrigger = null;
       if ( NEVER( pParse.nErr != 0 ) || pTrig == null )
         goto triggerfinish_cleanup;
@@ -359,6 +365,7 @@ trigger_cleanup:
       {
         Trigger pLink = pTrig;
         Hash pHash = db.aDb[iDb].pSchema.trigHash;
+        Debug.Assert( sqlite3SchemaMutexHeld( db, iDb, null ) );
         pTrig = sqlite3HashInsert( ref pHash, zName, sqlite3Strlen30( zName ), pTrig );
         if ( pTrig != null )
         {
@@ -576,11 +583,13 @@ triggerfinish_cleanup:
       zDb = pName.a[0].zDatabase;
       zName = pName.a[0].zName;
       nName = sqlite3Strlen30( zName );
+      Debug.Assert( zDb != null || sqlite3BtreeHoldsAllMutexes( db ) );
       for ( i = OMIT_TEMPDB; i < db.nDb; i++ )
       {
         int j = ( i < 2 ) ? i ^ 1 : i;  /* Search TEMP before MAIN */
         if ( zDb != null && !db.aDb[j].zName.Equals( zDb ,StringComparison.InvariantCultureIgnoreCase )  )
           continue;
+        Debug.Assert( sqlite3SchemaMutexHeld( db, j, null ) );
         pTrigger = sqlite3HashFind( ( db.aDb[j].pSchema.trigHash ), zName, nName, (Trigger)null );
         if ( pTrigger != null )
           break;
@@ -590,6 +599,10 @@ triggerfinish_cleanup:
         if ( noErr == 0 )
         {
           sqlite3ErrorMsg( pParse, "no such trigger: %S", pName, 0 );
+        }
+        else
+        {
+          sqlite3CodeVerifyNamedSchema( pParse, zDb );
         }
         pParse.checkSchema = 1;
         goto drop_trigger_cleanup;
@@ -660,7 +673,7 @@ new VdbeOpList( OP_Next,       0, ADDR(1),  0), /* 8 */
         sqlite3BeginWriteOperation( pParse, 0, iDb );
         sqlite3OpenMasterTable( pParse, iDb );
         _base = sqlite3VdbeAddOpList( v, dropTrigger.Length, dropTrigger );
-        sqlite3VdbeChangeP4( v, _base + 1, pTrigger.zName, 0 );
+        sqlite3VdbeChangeP4( v, _base + 1, pTrigger.zName, P4_TRANSIENT );
         sqlite3VdbeChangeP4( v, _base + 4, "trigger", P4_STATIC );
         sqlite3ChangeCookie( pParse, iDb );
         sqlite3VdbeAddOp2( v, OP_Close, 0, 0 );
@@ -677,8 +690,11 @@ new VdbeOpList( OP_Next,       0, ADDR(1),  0), /* 8 */
     */
     static void sqlite3UnlinkAndDeleteTrigger( sqlite3 db, int iDb, string zName )
     {
-      Hash pHash = db.aDb[iDb].pSchema.trigHash;
       Trigger pTrigger;
+      Hash pHash;
+
+      Debug.Assert( sqlite3SchemaMutexHeld( db, iDb, null ) );
+      pHash = ( db.aDb[iDb].pSchema.trigHash );
       pTrigger = sqlite3HashInsert( ref pHash, zName, sqlite3Strlen30( zName ), (Trigger)null );
       if ( ALWAYS( pTrigger != null ) )
       {
@@ -749,8 +765,13 @@ new VdbeOpList( OP_Next,       0, ADDR(1),  0), /* 8 */
     )
     {
       int mask = 0;
-      Trigger pList = sqlite3TriggerList( pParse, pTab );
+      Trigger pList = null;
       Trigger p;
+
+      if ( ( pParse.db.flags & SQLITE_EnableTrigger ) != 0 )
+      {
+        pList = sqlite3TriggerList( pParse, pTab );
+      }
       Debug.Assert( pList == null || IsVirtual( pTab ) == false );
       for ( p = pList; p != null; p = p.pNext )
       {

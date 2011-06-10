@@ -31,7 +31,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2010-12-07 20:14:09 a586a4deeb25330037a49df295b36aaf624d0f45
+    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
     **
     *************************************************************************
     */
@@ -974,7 +974,33 @@ namespace Community.CsharpSqlite
       }
     }
 
-    /*
+/*
+** Assign expression b to lvalue a. A second, no-op, version of this macro
+** is provided when SQLITE_OMIT_EXPLAIN is defined. This allows the code
+** in sqlite3Select() to assign values to structure member variables that
+** only exist if SQLITE_OMIT_EXPLAIN is not defined without polluting the
+** code with #ifndef directives.
+*/
+//# define explainSetInteger(a, b) a = b
+    static void explainSetInteger( ref int a, int b )
+    {
+      a = b;
+    }
+    static void explainSetInteger( ref byte a, int b )
+{
+  a = (byte)b;
+}
+#else
+/* No-op versions of the explainXXX() functions and macros. */
+//# define explainTempTable(y,z)
+static void explainTempTable(ref int a, int b){ a = b;}
+
+//# define explainSetInteger(y,z)
+static void explainSetInteger(ref int a, int b){ a = b;}
+#endif
+
+#if !(SQLITE_OMIT_EXPLAIN) && !(SQLITE_OMIT_COMPOUND_SELECT)
+/*
     ** Unless an "EXPLAIN QUERY PLAN" command is being processed, this function
     ** is a no-op. Otherwise, it adds a single row of output to the EQP result,
     ** where the caption is of one of the two forms:
@@ -1008,31 +1034,10 @@ namespace Community.CsharpSqlite
       }
     }
 
-    /*
-    ** Assign expression b to lvalue a. A second, no-op, version of this macro
-    ** is provided when SQLITE_OMIT_EXPLAIN is defined. This allows the code
-    ** in sqlite3Select() to assign values to structure member variables that
-    ** only exist if SQLITE_OMIT_EXPLAIN is not defined without polluting the
-    ** code with #ifndef directives.
-    */
-    //# define explainSetInteger(a, b) a = b
-    static void explainSetInteger( ref int a, int b )
-    {
-      a = b;
-    }
-    static void explainSetInteger( ref byte a, int b )
-    {
-      a = (byte)b;
-    }
 #else
 /* No-op versions of the explainXXX() functions and macros. */
-//# define explainTempTable(y,z)
-static void explainTempTable((Parse y, string z) {}
 //# define explainComposite(v,w,x,y,z)
 static void explainComposite(Parse v, int w,int x,int y,bool z) {}
-//# define explainSetInteger(y,z)
-static void explainSetInteger(ref int a, int b) {}
-static void explainSetInteger(ref byte a, int b) {}
 #endif
 
 

@@ -39,7 +39,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2010-12-07 20:14:09 a586a4deeb25330037a49df295b36aaf624d0f45
+    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
     **
     *************************************************************************
     */
@@ -132,7 +132,7 @@ namespace Community.CsharpSqlite
     {
       CollSeq pColl = null;
       Expr p = pExpr;
-      while ( p != null )
+      while ( ALWAYS( p ) )
       {
         int op;
         pColl = pExpr.pColl;
@@ -481,6 +481,7 @@ namespace Community.CsharpSqlite
         || sqlite3GetInt32( pToken.z.ToString(), ref iValue ) == false )
         {
           nExtra = pToken.n + 1;
+          Debug.Assert( iValue >= 0 );
         }
       }
       pNew = new Expr();//sqlite3DbMallocZero(db, sizeof(Expr)+nExtra);
@@ -794,6 +795,8 @@ sqlite3Dequote(ref pNew.u._zToken);
     {
       if ( p == null )
         return;
+      /* Sanity check: Assert that the IntValue is non-negative if it exists */
+     Debug.Assert( !ExprHasProperty( p, EP_IntValue ) || p.u.iValue >= 0 );
       if ( !ExprHasAnyProperty( p, EP_TokenOnly ) )
       {
         sqlite3ExprDelete( db, ref p.pLeft );
@@ -1522,14 +1525,6 @@ return null;
           }
         default:
           break;
-      }
-      if ( rc != 0 )
-      {
-        Debug.Assert( ExprHasAnyProperty( p, EP_Reduced | EP_TokenOnly )
-        || ( p.flags2 & EP2_MallocedToken ) == 0 );
-        p.op = TK_INTEGER;
-        p.flags |= EP_IntValue;
-        p.u.iValue = pValue;
       }
       return rc;
     }
@@ -2359,6 +2354,7 @@ return null;
       if ( ( pExpr.flags & EP_IntValue ) != 0 )
       {
         int i = pExpr.u.iValue;
+        Debug.Assert( i >= 0 );
         if ( negFlag )
           i = -i;
         sqlite3VdbeAddOp2( v, OP_Integer, i, iMem );
@@ -2375,7 +2371,7 @@ return null;
           //char* zV;
           if ( negFlag )
           {
-            value = -value;
+            value = c == 2 ? SMALLEST_INT64 : -value;
           }
           sqlite3VdbeAddOp4( v, OP_Int64, 0, iMem, 0, value, P4_INT64 );
         }
@@ -2840,7 +2836,7 @@ static int usedAsColumnCache( Parse pParse, int iFrom, int iTo ){return 0;}
             sqlite3VdbeAddOp2( v, OP_Variable, pExpr.iColumn, target );
             if ( pExpr.u.zToken.Length > 1 )
             {
-              sqlite3VdbeChangeP4( v, -1, pExpr.u.zToken, 0 );
+              sqlite3VdbeChangeP4( v, -1, pExpr.u.zToken, P4_TRANSIENT );
             }
             break;
           }
@@ -3853,6 +3849,7 @@ pDef = sqlite3VtabOverloadFunction( db, pDef, nFarg, pFarg.a[0].pExpr );
             exprCodeBetween( pParse, pExpr, dest, 1, jumpIfNull );
             break;
           }
+#if SQLITE_OMIT_SUBQUERY
         case TK_IN:
           {
             int destIfFalse = sqlite3VdbeMakeLabel( v );
@@ -3862,6 +3859,7 @@ pDef = sqlite3VtabOverloadFunction( db, pDef, nFarg, pFarg.a[0].pExpr );
             sqlite3VdbeResolveLabel( v, destIfFalse );
             break;
           }
+#endif
         default:
           {
             r1 = sqlite3ExprCodeTemp( pParse, pExpr, ref regFree1 );
@@ -4007,6 +4005,7 @@ pDef = sqlite3VtabOverloadFunction( db, pDef, nFarg, pFarg.a[0].pExpr );
             exprCodeBetween( pParse, pExpr, dest, 0, jumpIfNull );
             break;
           }
+#if SQLITE_OMIT_SUBQUERY
         case TK_IN:
           {
             if ( jumpIfNull != 0 )
@@ -4019,8 +4018,9 @@ pDef = sqlite3VtabOverloadFunction( db, pDef, nFarg, pFarg.a[0].pExpr );
               sqlite3ExprCodeIN( pParse, pExpr, dest, destIfNull );
               sqlite3VdbeResolveLabel( v, destIfNull );
             }
-            break;
+          break;
           }
+#endif
         default:
           {
             r1 = sqlite3ExprCodeTemp( pParse, pExpr, ref regFree1 );

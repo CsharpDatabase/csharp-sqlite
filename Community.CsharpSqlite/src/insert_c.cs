@@ -27,7 +27,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2010-08-23 18:52:01 42537b60566f288167f1b5864a5435986838e3a3
+    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
     **
     *************************************************************************
     */
@@ -152,7 +152,7 @@ namespace Community.CsharpSqlite
         pTab.zColAff = zColAff.ToString();
       }
 
-      sqlite3VdbeChangeP4( v, -1, pTab.zColAff, 0 );
+      sqlite3VdbeChangeP4( v, -1, pTab.zColAff, P4_TRANSIENT );
     }
 
     /*
@@ -280,6 +280,7 @@ return true;
       {
         pDb = db.aDb[p.iDb];
         memId = p.regCtr;
+        Debug.Assert( sqlite3SchemaMutexHeld( db, 0, pDb.pSchema ) );
         sqlite3OpenTable( pParse, 0, p.iDb, pDb.pSchema.pSeqTab, OP_OpenRead );
         addr = sqlite3VdbeCurrentAddr( v );
         sqlite3VdbeAddOp4( v, OP_String8, 0, memId - 1, 0, p.pTab.zName, 0 );
@@ -334,6 +335,7 @@ return true;
         int memId = p.regCtr;
 
         iRec = sqlite3GetTempReg( pParse );
+        Debug.Assert( sqlite3SchemaMutexHeld( db, 0, pDb.pSchema ) );
         sqlite3OpenTable( pParse, 0, p.iDb, pDb.pSchema.pSeqTab, OP_OpenWrite );
         j1 = sqlite3VdbeAddOp1( v, OP_NotNull, memId + 1 );
         j2 = sqlite3VdbeAddOp0( v, OP_Rewind );
@@ -528,7 +530,6 @@ return true;
       int regIns;           /* Block of regs holding rowid+data being inserted */
       int regRowid;         /* registers holding insert rowid */
       int regData;          /* register holding first column to insert */
-      int regRecord;        /* Holds the assemblied row record */
       int regEof = 0;       /* Register recording end of SELECT data */
       int[] aRegIdx = null; /* One register allocated to each index */
 
@@ -907,7 +908,6 @@ isView = false;
       /* Allocate registers for holding the rowid of the new row,
       ** the content of the new row, and the assemblied row record.
       */
-      regRecord = ++pParse.nMem;
       regRowid = regIns = pParse.nMem + 1;
       pParse.nMem += pTab.nCol + 1;
       if ( IsVirtual( pTab ) )
@@ -1380,7 +1380,7 @@ insert_cleanup:
           case OE_Fail:
             {
               string zMsg;
-              j1 = sqlite3VdbeAddOp3( v, OP_HaltIfNull,
+              sqlite3VdbeAddOp3( v, OP_HaltIfNull,
                           SQLITE_CONSTRAINT, onError, regData + i );
               zMsg = sqlite3MPrintf( pParse.db, "%s.%s may not be NULL",
               pTab.zName, pTab.aCol[i].zName );
@@ -1551,7 +1551,7 @@ insert_cleanup:
         }
         sqlite3VdbeAddOp2( v, OP_SCopy, regRowid, regIdx + i );
         sqlite3VdbeAddOp3( v, OP_MakeRecord, regIdx, pIdx.nColumn + 1, aRegIdx[iCur] );
-        sqlite3VdbeChangeP4( v, -1, sqlite3IndexAffinityStr( v, pIdx ), 0 );
+        sqlite3VdbeChangeP4( v, -1, sqlite3IndexAffinityStr( v, pIdx ), P4_TRANSIENT );
         sqlite3ExprCacheAffinityChange( pParse, regIdx, pIdx.nColumn + 1 );
 
         /* Find out what action to take in case there is an indexing conflict */
@@ -1719,7 +1719,7 @@ insert_cleanup:
       sqlite3VdbeAddOp3( v, OP_Insert, baseCur, regRec, regRowid );
       if ( pParse.nested == 0 )
       {
-        sqlite3VdbeChangeP4( v, -1, pTab.zName, P4_STATIC );
+        sqlite3VdbeChangeP4( v, -1, pTab.zName, P4_TRANSIENT );
       }
       sqlite3VdbeChangeP5( v, pik_flags );
     }

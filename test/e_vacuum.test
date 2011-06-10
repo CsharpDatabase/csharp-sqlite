@@ -18,12 +18,6 @@ source $testdir/tester.tcl
 
 sqlite3_test_control_pending_byte 0x1000000
 
-if {[catch {sqlite3 -has-codec} r] || $r} {
-  set has_codec 1
-} else {
-  set has_codec 0
-}
-
 proc create_db {{sql ""}} {
   catch { db close }
   forcedelete test.db
@@ -170,7 +164,6 @@ do_test e_vacuum-1.3.1.2 {
 # may be changed by using the page_size and/or pragma auto_vacuum
 # pragmas and then immediately VACUUMing the database.
 #
-if {!$has_codec} {
 do_test e_vacuum-1.3.2.1 {
   execsql { PRAGMA journal_mode = delete }
   execsql { PRAGMA page_size = 2048 }
@@ -178,18 +171,15 @@ do_test e_vacuum-1.3.2.1 {
   execsql VACUUM
   execsql { PRAGMA page_size ; PRAGMA auto_vacuum }
 } {2048 0}
-}
 
 # EVIDENCE-OF: R-48521-51450 When in write-ahead log mode, only the
 # auto_vacuum support property can be changed using VACUUM.
 #
-ifcapable wal { 
+ifcapable wal {
 do_test e_vacuum-1.3.3.1 {
   execsql { PRAGMA journal_mode = wal }
   execsql { PRAGMA page_size ; PRAGMA auto_vacuum }
 } {2048 0}
-}
-if {!$has_codec} {
 do_test e_vacuum-1.3.3.2 {
   execsql { PRAGMA page_size = 1024 }
   execsql { PRAGMA auto_vacuum = FULL }
@@ -197,6 +187,7 @@ do_test e_vacuum-1.3.3.2 {
   execsql { PRAGMA page_size ; PRAGMA auto_vacuum }
 } {2048 1}
 }
+
 # EVIDENCE-OF: R-38001-03952 VACUUM only works on the main database. It
 # is not possible to VACUUM an attached database file.
 forcedelete test.db2

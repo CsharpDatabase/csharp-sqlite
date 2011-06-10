@@ -36,7 +36,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2011-01-28 17:03:50 ed759d5a9edb3bba5f48f243df47be29e3fe8cd7
+    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
     **
     *************************************************************************
     */
@@ -1587,14 +1587,9 @@ sqlite3_result_text(context, "?000", 4, SQLITE_STATIC);
         {
           i64 v = sqlite3_value_int64( argv[0] );
           p.rSum += v;
-          if ( !( p.approx | p.overflow != 0 ) )
+          if ( !( p.approx | p.overflow != 0 ) && 0 != sqlite3AddInt64( ref p.iSum, v ) )
           {
-            i64 iNewSum = p.iSum + v;
-            int s1 = (int)( p.iSum >> ( sizeof( i64 ) * 8 - 1 ) );
-            int s2 = (int)( v >> ( sizeof( i64 ) * 8 - 1 ) );
-            int s3 = (int)( iNewSum >> ( sizeof( i64 ) * 8 - 1 ) );
-            p.overflow = ( ( s1 & s2 & ~s3 ) | ( ~s1 & ~s2 & s3 ) ) != 0 ? 1 : 0;
-            p.iSum = iNewSum;
+            p.overflow = 1;
           }
         }
         else

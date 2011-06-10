@@ -69,7 +69,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2011-01-28 17:03:50 ed759d5a9edb3bba5f48f243df47be29e3fe8cd7
+    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
     **
     *************************************************************************
     */
@@ -524,7 +524,14 @@ const int SQLITE_PRINT_BUF_SIZE = 50;
               }
               if ( v < 0 )
               {
-                longvalue = -v;
+                if ( v == SMALLEST_INT64 )
+                {
+                  longvalue = ( (long)( (u64)1 ) << 63 );
+                }
+                else
+                {
+                  longvalue = -v;
+                }
                 prefix = '-';
               }
               else

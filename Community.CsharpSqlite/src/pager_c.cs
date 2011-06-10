@@ -41,7 +41,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2011-01-28 17:03:50 ed759d5a9edb3bba5f48f243df47be29e3fe8cd7
+    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
     **
     *************************************************************************
     */
@@ -3269,6 +3269,29 @@ delmaster_out:
       return rc;
     }
 
+    /*
+    ** Update the value of the change-counter at offsets 24 and 92 in
+    ** the header and the sqlite version number at offset 96.
+    **
+    ** This is an unconditional update.  See also the pager_incr_changecounter()
+    ** routine which only updates the change-counter if the update is actually
+    ** needed, as determined by the pPager->changeCountDone state variable.
+    */
+    static void pager_write_changecounter( PgHdr pPg )
+    {
+      u32 change_counter;
+
+      /* Increment the value just read and write it back to byte 24. */
+      change_counter = sqlite3Get4byte( pPg.pPager.dbFileVers, 0 ) + 1;
+      put32bits(  pPg.pData, 24, change_counter );
+
+      /* Also store the SQLite version number in bytes 96..99 and in
+      ** bytes 92..95 store the change counter for which the version number
+      ** is valid. */
+      put32bits( pPg.pData, 92, change_counter );
+      put32bits( pPg.pData, 96, SQLITE_VERSION_NUMBER );
+    }
+
 #if !SQLITE_OMIT_WAL
 /*
 ** This function is invoked once for each page that has already been 
@@ -3369,6 +3392,20 @@ assert( p->pgno < p->pDirty->pgno );
 }
 #endif
 
+  if( isCommit ){
+    /* If a WAL transaction is being committed, there is no point in writing
+    ** any pages with page numbers greater than nTruncate into the WAL file.
+    ** They will never be read by any client. So remove them from the pDirty
+    ** list here. */
+    PgHdr *p;
+    PgHdr **ppNext = &pList;
+    for(p=pList; (*ppNext = p); p=p->pDirty){
+      if( p->pgno<=nTruncate ) ppNext = &p->pDirty;
+    }
+    assert( pList );
+  }
+
+
 if( pList->pgno==1 ) pager_write_changecounter(pList);
 rc = sqlite3WalFrames(pPager->pWal, 
 pPager->pageSize, pList, nTruncate, isCommit, syncFlags
@@ -3381,6 +3418,7 @@ sqlite3BackupUpdate(pPager->pBackup, p->pgno, (u8 *)p->pData);
 }
 
 #if SQLITE_CHECK_PAGES
+pList = sqlite3PcacheDirtyList(pPager->pPCache);
 for(p=pList; p; p=p->pDirty){
 pager_set_pagehash(p);
 }
@@ -3419,28 +3457,6 @@ pager_reset(pPager);
 return rc;
 }
 #endif
-    /*
-** Update the value of the change-counter at offsets 24 and 92 in
-** the header and the sqlite version number at offset 96.
-**
-** This is an unconditional update.  See also the pager_incr_changecounter()
-** routine which only updates the change-counter if the update is actually
-** needed, as determined by the pPager->changeCountDone state variable.
-*/
-    static void pager_write_changecounter( PgHdr pPg )
-    {
-      u32 change_counter;
-
-      /* Increment the value just read and write it back to byte 24. */
-      change_counter = sqlite3Get4byte( pPg.pPager.dbFileVers ) + 1;
-      put32bits( pPg.pData, 24, change_counter );
-
-      /* Also store the SQLite version number in bytes 96..99 and in
-      ** bytes 92..95 store the change counter for which the version number
-      ** is valid. */
-      put32bits( pPg.pData, 92, change_counter );
-      put32bits( pPg.pData, 96, SQLITE_VERSION_NUMBER );
-    }
 
     /*
     ** This function is called as part of the transition from PAGER_OPEN
@@ -6544,12 +6560,23 @@ int DIRECT_MODE = isDirectMode;
         if ( pagerUseWal( pPager ) )
         {
           PgHdr pList = sqlite3PcacheDirtyList( pPager.pPCache );
+          PgHdr pPageOne = null;
+          if ( pList == null )
+          {
+            /* Must have at least one page for the WAL commit flag.
+            ** Ticket [2d1a5c67dfc2363e44f29d9bbd57f] 2null11-null5-18 */
+            rc = sqlite3PagerGet( pPager, 1, ref pPageOne );
+            pList = pPageOne;
+            pList.pDirty = null;
+          }
+          Debug.Assert( pList != null || rc != SQLITE_OK );
           if ( pList != null )
           {
             rc = pagerWalFrames( pPager, pList, pPager.dbSize, 1,
             ( pPager.fullSync ? pPager.syncFlags : (byte)0 )
             );
           }
+          sqlite3PagerUnref( pPageOne );
           if ( rc == SQLITE_OK )
           {
             sqlite3PcacheCleanAll( pPager.pPCache );
@@ -7558,19 +7585,25 @@ return MEMDB != 0;
 
 #if !SQLITE_OMIT_WAL
 /*
-** This function is called when the user invokes "PRAGMA checkpoint".
+** This function is called when the user invokes "PRAGMA wal_checkpoint",
+** "PRAGMA wal_blocking_checkpoint" or calls the sqlite3_wal_checkpoint()
+** or wal_blocking_checkpoint() API functions.
+**
+** Parameter eMode is one of SQLITE_CHECKPOINT_PASSIVE, FULL or RESTART.
 */
-int sqlite3PagerCheckpoint(Pager *pPager){
-int rc = SQLITE_OK;
-if( pPager->pWal ){
-u8 *zBuf = (u8 *)pPager->pTmpSpace;
-rc = sqlite3WalCheckpoint(pPager->pWal, pPager->ckptSyncFlags,
-              pPager->pageSize, zBuf);
-}
-return rc;
+int sqlite3PagerCheckpoint(Pager *pPager, int eMode, int *pnLog, int *pnCkpt){
+  int rc = SQLITE_OK;
+  if( pPager->pWal ){
+    rc = sqlite3WalCheckpoint(pPager->pWal, eMode,
+        pPager->xBusyHandler, pPager->pBusyHandlerArg,
+        pPager->ckptSyncFlags, pPager->pageSize, (u8 *)pPager->pTmpSpace,
+        pnLog, pnCkpt
+    );
+  }
+  return rc;
 }
 
-int sqlite3PagerWalCallback(Pager *pPager){
+    int sqlite3PagerWalCallback(Pager *pPager){
 return sqlite3WalCallback(pPager->pWal);
 }
 

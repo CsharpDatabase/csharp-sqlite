@@ -10,6 +10,17 @@ using u32 = System.UInt32;
 
 using Pgno = System.UInt32;
 
+/*
+** The yDbMask datatype for the bitmask of all attached databases.
+*/
+#if SQLITE_MAX_ATTACHED//>30
+//  typedef sqlite3_uint64 yDbMask;
+using yDbMask = System.Int64; 
+#else
+//  typedef unsigned int yDbMask;
+using yDbMask = System.Int32; 
+#endif
+
 namespace Community.CsharpSqlite
 {
   public partial class Sqlite3
@@ -41,7 +52,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2010-12-07 20:14:09 a586a4deeb25330037a49df295b36aaf624d0f45
+    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
     **
     *************************************************************************
     */
@@ -200,7 +211,10 @@ p.zName, P4_STATIC );
             sqlite3VdbeAddOp2( v, OP_Transaction, iDb, ( mask & pParse.writeMask ) != 0 );
             if ( db.init.busy == 0 )
             {
-              sqlite3VdbeAddOp2( v, OP_VerifyCookie, iDb, pParse.cookieValue[iDb] );
+              Debug.Assert( sqlite3SchemaMutexHeld( db, iDb, null ) );
+              sqlite3VdbeAddOp3( v, OP_VerifyCookie,
+                                iDb, pParse.cookieValue[iDb],
+                                (int)db.aDb[iDb].pSchema.iGeneration );
             }
           }
 #if !SQLITE_OMIT_VIRTUALTABLE
@@ -328,11 +342,14 @@ pParse.nVtabLock = 0;
       int nName;
       Debug.Assert( zName != null );
       nName = sqlite3Strlen30( zName );
+      /* All mutexes are required for schema access.  Make sure we hold them. */
+      Debug.Assert( zDatabase != null || sqlite3BtreeHoldsAllMutexes( db ) );
       for ( i = OMIT_TEMPDB; i < db.nDb; i++ )
       {
         int j = ( i < 2 ) ? i ^ 1 : i;   /* Search TEMP before MAIN */
         if ( zDatabase != null && !zDatabase.Equals( db.aDb[j].zName, StringComparison.InvariantCultureIgnoreCase ) )
           continue;
+        Debug.Assert( sqlite3SchemaMutexHeld( db, j, null ) );
         p = sqlite3HashFind( db.aDb[j].pSchema.tblHash, zName, nName, (Table)null );
         if ( p != null )
           break;
@@ -400,6 +417,8 @@ pParse.nVtabLock = 0;
       Index p = null;
       int i;
       int nName = sqlite3Strlen30( zName );
+      /* All mutexes are required for schema access.  Make sure we hold them. */
+      Debug.Assert( zDb != null || sqlite3BtreeHoldsAllMutexes( db ) );
       for ( i = OMIT_TEMPDB; i < db.nDb; i++ )
       {
         int j = ( i < 2 ) ? i ^ 1 : i;  /* Search TEMP before MAIN */
@@ -407,6 +426,7 @@ pParse.nVtabLock = 0;
         Debug.Assert( pSchema != null );
         if ( zDb != null && !zDb.Equals( db.aDb[j].zName, StringComparison.InvariantCultureIgnoreCase ) )
           continue;
+        Debug.Assert( sqlite3SchemaMutexHeld( db, j, null ) );
         p = sqlite3HashFind( pSchema.idxHash, zName, nName, (Index)null );
         if ( p != null )
           break;
@@ -436,11 +456,14 @@ pParse.nVtabLock = 0;
     {
       Index pIndex;
       int len;
-      Hash pHash = db.aDb[iDb].pSchema.idxHash;
+      Hash pHash;
+
+      Debug.Assert( sqlite3SchemaMutexHeld( db, iDb, null ) );
+      pHash = db.aDb[iDb].pSchema.idxHash;
 
       len = sqlite3Strlen30( zIdxName );
       pIndex = sqlite3HashInsert( ref pHash, zIdxName, len, (Index)null );
-      if ( pIndex != null )
+      if ( ALWAYS(pIndex) )
       {
         if ( pIndex.pTable.pIndex == pIndex )
         {
@@ -473,32 +496,47 @@ pParse.nVtabLock = 0;
     ** if there were schema changes during the transaction or if a
     ** schema-cookie mismatch occurs.
     **
-    ** If iDb==0 then reset the internal schema tables for all database
-    ** files.  If iDb>=1 then reset the internal schema for only the
+    ** If iDb<0 then reset the internal schema tables for all database
+    ** files.  If iDb>=0 then reset the internal schema for only the
     ** single file indicated.
     */
     static void sqlite3ResetInternalSchema( sqlite3 db, int iDb )
     {
       int i, j;
-      Debug.Assert( iDb >= 0 && iDb < db.nDb );
+      Debug.Assert( iDb < db.nDb );
 
-      if ( iDb == 0 )
+      if ( iDb >= 0 )
       {
-        sqlite3BtreeEnterAll( db );
+        /* Case 1:  Reset the single schema identified by iDb */
+        Db pDb = db.aDb[iDb];
+        Debug.Assert( sqlite3SchemaMutexHeld( db, iDb, null ) );
+        Debug.Assert( pDb.pSchema != null);
+        sqlite3SchemaClear( pDb.pSchema );
+
+        /* If any database other than TEMP is reset, then also reset TEMP
+        ** since TEMP might be holding triggers that reference tables in the
+        ** other database.
+        */
+        if ( iDb != 1 )
+        {
+          pDb = db.aDb[1];
+          Debug.Assert( pDb.pSchema != null );
+          sqlite3SchemaClear( pDb.pSchema );
+        }
+        return;
       }
-      for ( i = iDb; i < db.nDb; i++ )
+      /* Case 2 (from here to the end): Reset all schemas for all attached
+      ** databases. */
+      Debug.Assert( iDb < 0 );
+      sqlite3BtreeEnterAll( db );
+      for ( i = 0; i < db.nDb; i++ )
       {
         Db pDb = db.aDb[i];
         if ( pDb.pSchema != null )
         {
-          Debug.Assert( i == 1 || ( pDb.pBt != null && sqlite3BtreeHoldsMutex( pDb.pBt ) ) );
-          Debug.Assert( i == 1 || ( pDb.pBt != null ) );
-          sqlite3SchemaFree( pDb.pSchema );
+          sqlite3SchemaClear( pDb.pSchema );
         }
-        if ( iDb > 0 )
-          return;
       }
-      Debug.Assert( iDb == 0 );
       db.flags &= ~SQLITE_InternChanges;
       sqlite3VtabUnlockList( db );
       sqlite3BtreeLeaveAll( db );
@@ -602,6 +640,7 @@ pParse.nVtabLock = 0;
         Index pOld = sqlite3HashInsert(
       ref pIndex.pSchema.idxHash, zName, sqlite3Strlen30( zName ), (Index)null
         );
+        Debug.Assert( db == null || sqlite3SchemaMutexHeld( db, 0, pIndex.pSchema ) );
         Debug.Assert( pOld == pIndex || pOld == null );
 #else
     //  TESTONLY ( Index pOld = ) sqlite3HashInsert(
@@ -645,6 +684,7 @@ pParse.nVtabLock = 0;
       Debug.Assert( db != null );
       Debug.Assert( iDb >= 0 && iDb < db.nDb );
       Debug.Assert( zTabName != null );
+      Debug.Assert( sqlite3SchemaMutexHeld( db, iDb, null ) );
       testcase( zTabName.Length == 0 );  /* Zero-length table names are allowed */
       pDb = db.aDb[iDb];
       p = sqlite3HashInsert( ref pDb.pSchema.tblHash, zTabName,
@@ -932,6 +972,11 @@ goto begin_table_error;
           {
             sqlite3ErrorMsg( pParse, "table %T already exists", pName );
           }
+          else
+          {
+            Debug.Assert( 0 == db.init.busy );
+            sqlite3CodeVerifySchema( pParse, iDb );
+          }
           goto begin_table_error;
         }
         if ( sqlite3FindIndex( db, zName, zDb ) != null )
@@ -964,6 +1009,7 @@ goto begin_table_error;
 #if !SQLITE_OMIT_AUTOINCREMENT
       if ( pParse.nested == 0 && zName == "sqlite_sequence" )
       {
+        Debug.Assert( sqlite3SchemaMutexHeld( db, iDb, null ) );
         pTable.pSchema.pSeqTab = pTable;
       }
 #endif
@@ -1491,6 +1537,7 @@ primary_key_exit:
       int r1 = sqlite3GetTempReg( pParse );
       sqlite3 db = pParse.db;
       Vdbe v = pParse.pVdbe;
+      Debug.Assert( sqlite3SchemaMutexHeld( db, iDb, null ) );
       sqlite3VdbeAddOp2( v, OP_Integer, db.aDb[iDb].pSchema.schema_cookie + 1, r1 );
       sqlite3VdbeAddOp3( v, OP_SetCookie, iDb, BTREE_SCHEMA_VERSION, r1 );
       sqlite3ReleaseTempReg( pParse, r1 );
@@ -1638,7 +1685,7 @@ primary_key_exit:
         zSep = zSep2;
         identPut( zStmt, ref k, pCol.zName );
         Debug.Assert( pCol.affinity - SQLITE_AFF_TEXT >= 0 );
-        Debug.Assert( pCol.affinity - SQLITE_AFF_TEXT < azType.Length );//sizeof(azType)/sizeof(azType[0]) );
+        Debug.Assert( pCol.affinity - SQLITE_AFF_TEXT < ArraySize( azType ) );
         testcase( pCol.affinity == SQLITE_AFF_TEXT );
         testcase( pCol.affinity == SQLITE_AFF_NONE );
         testcase( pCol.affinity == SQLITE_AFF_NUMERIC );
@@ -1863,6 +1910,7 @@ primary_key_exit:
         if ( ( p.tabFlags & TF_Autoincrement ) != 0 )
         {
           Db pDb = db.aDb[iDb];
+          Debug.Assert( sqlite3SchemaMutexHeld( db, iDb, null ) );
           if ( pDb.pSchema.pSeqTab == null )
           {
             sqlite3NestedParse( pParse,
@@ -1885,6 +1933,7 @@ primary_key_exit:
       {
         Table pOld;
         Schema pSchema = p.pSchema;
+        Debug.Assert( sqlite3SchemaMutexHeld( db, iDb, null ) );
         pOld = sqlite3HashInsert( ref pSchema.tblHash, p.zName,
         sqlite3Strlen30( p.zName ), p );
         if ( pOld != null )
@@ -2101,6 +2150,7 @@ db.xAuth = xAuth;
           pSelTab.nCol = 0;
           pSelTab.aCol = null;
           sqlite3DeleteTable( db, ref pSelTab );
+          Debug.Assert( sqlite3SchemaMutexHeld( db, 0, pTable.pSchema ) );
           pTable.pSchema.flags |= DB_UnresetViews;
         }
         else
@@ -2126,6 +2176,7 @@ db.xAuth = xAuth;
     static void sqliteViewResetAll( sqlite3 db, int idx )
     {
       HashElem i;
+      Debug.Assert( sqlite3SchemaMutexHeld( db, idx, null ) );
       if ( !DbHasProperty( db, idx, DB_UnresetViews ) )
         return;
       //for(i=sqliteHashFirst(&db.aDb[idx].pSchema.tblHash); i;i=sqliteHashNext(i)){
@@ -2167,10 +2218,14 @@ db.xAuth = xAuth;
 ** in order to be certain that we got the right one.
 */
 #if !SQLITE_OMIT_AUTOVACUUM
-    static void sqlite3RootPageMoved( Db pDb, int iFrom, int iTo )
+    static void sqlite3RootPageMoved( sqlite3 db, int iDb, int iFrom, int iTo )
     {
       HashElem pElem;
       Hash pHash;
+      Db pDb;
+
+      Debug.Assert( sqlite3SchemaMutexHeld( db, iDb, null ) );
+      pDb = db.aDb[iDb];
 
       pHash = pDb.pSchema.tblHash;
       for ( pElem = pHash.first; pElem != null; pElem = pElem.next )// ( pElem = sqliteHashFirst( pHash ) ; pElem ; pElem = sqliteHashNext( pElem ) )
@@ -2316,6 +2371,8 @@ destroyRootPage( pParse, pIdx.tnum, iDb );
 
       if ( pTab == null )
       {
+        if ( noErr != 0)
+          sqlite3CodeVerifyNamedSchema( pParse, pName.a[0].zDatabase );
         goto exit_drop_table;
       }
       iDb = sqlite3SchemaToIndex( db, pTab.pSchema );
@@ -2602,6 +2659,7 @@ exit_drop_table:
       pFKey.aAction[0] = (u8)( flags & 0xff );            /* ON DELETE action */
       pFKey.aAction[1] = (u8)( ( flags >> 8 ) & 0xff );    /* ON UPDATE action */
 
+      Debug.Assert( sqlite3SchemaMutexHeld( db, 0, p.pSchema ) );
       pNextTo = sqlite3HashInsert( ref p.pSchema.fkeyHash,
           pFKey.zTo, sqlite3Strlen30( pFKey.zTo ), pFKey
       );
@@ -2910,6 +2968,11 @@ return;
           {
             sqlite3ErrorMsg( pParse, "index %s already exists", zName );
           }
+          else
+          {
+            Debug.Assert( 0 == db.init.busy );
+            sqlite3CodeVerifySchema( pParse, iDb );
+          }
           goto exit_create_index;
         }
       }
@@ -3012,7 +3075,8 @@ goto exit_create_index;
       pIndex.onError = (u8)onError;
       pIndex.autoIndex = (u8)( pName == null ? 1 : 0 );
       pIndex.pSchema = db.aDb[iDb].pSchema;
-
+      Debug.Assert( sqlite3SchemaMutexHeld( db, iDb, null ) );
+      
       /* Check to see if we should honor DESC requests on index columns
       */
       if ( pDb.pSchema.file_format >= 4 )
@@ -3166,6 +3230,7 @@ goto exit_create_index;
       if ( db.init.busy != 0 )
       {
         Index p;
+        Debug.Assert( sqlite3SchemaMutexHeld( db, 0, pIndex.pSchema ) );
         p = sqlite3HashInsert( ref pIndex.pSchema.idxHash,
         pIndex.zName, sqlite3Strlen30( pIndex.zName ),
         pIndex );
@@ -3365,6 +3430,10 @@ exit_create_index:
         if ( ifExists == 0 )
         {
           sqlite3ErrorMsg( pParse, "no such index: %S", pName, 0 );
+        }
+        else
+        {
+          sqlite3CodeVerifyNamedSchema( pParse, pName.a[0].zDatabase );
         }
         pParse.checkSchema = 1;
         goto exit_drop_index;
@@ -4034,14 +4103,15 @@ Debug.Assert( !SAVEPOINT_BEGIN && SAVEPOINT_RELEASE==1 && SAVEPOINT_ROLLBACK==2 
       if ( iDb >= 0 )
       {
         sqlite3 db = pToplevel.db;
-        int mask;
+        yDbMask mask;
         Debug.Assert( iDb < db.nDb );
         Debug.Assert( db.aDb[iDb].pBt != null || iDb == 1 );
         Debug.Assert( iDb < SQLITE_MAX_ATTACHED + 2 );
-        mask = (int)( 1 << iDb );
+        Debug.Assert( sqlite3SchemaMutexHeld( db, iDb, null ) );
+        mask = ( (yDbMask)1 ) << iDb;
         if ( ( pToplevel.cookieMask & mask ) == 0 )
         {
-          pToplevel.cookieMask |= (u32)mask;
+          pToplevel.cookieMask |= mask;
           pToplevel.cookieValue[iDb] = db.aDb[iDb].pSchema.schema_cookie;
           if ( 0 == OMIT_TEMPDB && iDb == 1 )
           {
@@ -4051,6 +4121,23 @@ Debug.Assert( !SAVEPOINT_BEGIN && SAVEPOINT_RELEASE==1 && SAVEPOINT_ROLLBACK==2 
       }
     }
 
+    /*
+    ** If argument zDb is NULL, then call sqlite3CodeVerifySchema() for each 
+    ** attached database. Otherwise, invoke it for the database named zDb only.
+    */
+    static void sqlite3CodeVerifyNamedSchema( Parse pParse, string zDb )
+    {
+      sqlite3 db = pParse.db;
+      int i;
+      for ( i = 0; i < db.nDb; i++ )
+      {
+        Db pDb = db.aDb[i];
+        if ( pDb.pBt != null && ( null != zDb || 0 == zDb.CompareTo(pDb.zName ) ) )
+        {
+          sqlite3CodeVerifySchema( pParse, i );
+        }
+      }
+    }
     /*
     ** Generate VDBE code that prepares for doing an operation that
     ** might change the database.
@@ -4068,7 +4155,7 @@ Debug.Assert( !SAVEPOINT_BEGIN && SAVEPOINT_RELEASE==1 && SAVEPOINT_ROLLBACK==2 
     {
       Parse pToplevel = sqlite3ParseToplevel( pParse );
       sqlite3CodeVerifySchema( pParse, iDb );
-      pToplevel.writeMask |= (u32)( 1 << iDb );
+      pToplevel.writeMask |= ( (yDbMask)1 ) << iDb;
       pToplevel.isMultiWrite |= (u8)setStatement;
     }
 
@@ -4189,6 +4276,7 @@ Debug.Assert( !SAVEPOINT_BEGIN && SAVEPOINT_RELEASE==1 && SAVEPOINT_ROLLBACK==2 
       HashElem k;                /* For looping over tables in pDb */
       Table pTab;                /* A table in the database */
 
+      Debug.Assert( sqlite3BtreeHoldsAllMutexes( db ) );  /* Needed for schema access */
       for ( iDb = 0; iDb < db.nDb; iDb++ )//, pDb++ )
       {
         pDb = db.aDb[iDb];

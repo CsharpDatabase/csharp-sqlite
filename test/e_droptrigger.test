@@ -31,7 +31,7 @@ proc list_all_triggers {{db db}} {
     } else {
       set tbl "$name.sqlite_master"
     }
-    lappend res [
+    lappend res {*}[
       db eval "SELECT '$name.' || name FROM $tbl WHERE type = 'trigger'"
     ]
   }

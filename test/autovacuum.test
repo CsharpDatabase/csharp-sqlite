@@ -56,8 +56,8 @@ lappend delete_orders {1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20}
 lappend delete_orders {20 19 18 17 16 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1} 
 lappend delete_orders {8 18 2 4 14 11 13 3 10 7 9 5 12 17 19 15 20 6 16 1}
 lappend delete_orders {10 3 11 17 19 20 7 4 13 6 1 14 16 12 9 18 8 15 5 2}
-lappend delete_orders { {1 2 3 4 5 6 7 8 9 10} {11 12 13 14 15 16 17 18 19 20} }
-lappend delete_orders { {19 8 17 15} {16 11 9 14} {18 5 3 1} {13 20 7 2} {6 12} }
+lappend delete_orders {{1 2 3 4 5 6 7 8 9 10} {11 12 13 14 15 16 17 18 19 20}}
+lappend delete_orders {{19 8 17 15} {16 11 9 14} {18 5 3 1} {13 20 7 2} {6 12}}
 
 # The length of each table entry. 
 # set ENTRY_LEN 3500

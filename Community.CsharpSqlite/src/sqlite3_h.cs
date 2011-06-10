@@ -40,7 +40,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2011-01-28 17:03:50 ed759d5a9edb3bba5f48f243df47be29e3fe8cd7
+    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
     **
     *************************************************************************
     */
@@ -121,12 +121,12 @@ namespace Community.CsharpSqlite
     ** [sqlite3_libversion_number()], [sqlite3_sourceid()],
     ** [sqlite_version()] and [sqlite_source_id()].
     */
-    //#define SQLITE_VERSION        "3.7.5"
-    //#define SQLITE_VERSION_NUMBER 3007005
-    //#define SQLITE_SOURCE_ID      "2011-01-28 17:03:50 ed759d5a9edb3bba5f48f243df47be29e3fe8cd7"
-    const string SQLITE_VERSION = "3.7.5.C#";
-    const int SQLITE_VERSION_NUMBER = 300700567;
-    const string SQLITE_SOURCE_ID = "Ported to C# from 2011-01-28 17:03:50 ed759d5a9edb3bba5f48f243df47be29e3fe8cd7";
+    //#define SQLITE_VERSION        "3.7.6.3"
+    //#define SQLITE_VERSION_NUMBER 3007006
+    //#define SQLITE_SOURCE_ID      "2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e"
+    const string SQLITE_VERSION = "3.7.6.3C#";
+    const int SQLITE_VERSION_NUMBER = 300700601;
+    const string SQLITE_SOURCE_ID = "Ported to C# from 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e";
 
     /*
     ** CAPI3REF: Run-Time Library Version Numbers
@@ -553,6 +553,7 @@ namespace Community.CsharpSqlite
     //#define SQLITE_OPEN_WAL              0x00080000  /* VFS only */
 
     /* Reserved:                           0x00F00000 */
+
     public const int SQLITE_OPEN_READONLY = 0x00000001;
     public const int SQLITE_OPEN_READWRITE = 0x00000002;
     public const int SQLITE_OPEN_CREATE = 0x00000004;
@@ -902,7 +903,7 @@ namespace Community.CsharpSqlite
     ** when [PRAGMA synchronous | PRAGMA synchronous=OFF] is set, but most 
     ** VFSes do not need this signal and should silently ignore this opcode.
     ** Applications should not call [sqlite3_file_control()] with this
-    ** opcode as doing so may disrupt the operation of the specilized VFSes
+    ** opcode as doing so may disrupt the operation of the specialized VFSes
     ** that do require it.  
     */
     //#define SQLITE_FCNTL_LOCKSTATE        1
@@ -1076,10 +1077,23 @@ namespace Community.CsharpSqlite
     ** date and time if that method is available (if iVersion is 2 or 
     ** greater and the function pointer is not NULL) and will fall back
     ** to xCurrentTime() if xCurrentTimeInt64() is unavailable.
+    **
+    ** ^The xSetSystemCall(), xGetSystemCall(), and xNestSystemCall() interfaces
+    ** are not used by the SQLite core.  These optional interfaces are provided
+    ** by some VFSes to facilitate testing of the VFS code. By overriding 
+    ** system calls with functions under its control, a test program can
+    ** simulate faults and error conditions that would otherwise be difficult
+    ** or impossible to induce.  The set of system calls that can be overridden
+    ** varies from one VFS to another, and from one version of the same VFS to the
+    ** next.  Applications that use these interfaces must be prepared for any
+    ** or all of these interfaces to be NULL or for their behavior to change
+    ** from one release to the next.  Applications must not attempt to access
+    ** any of these methods if the iVersion of the VFS is less than 3.
     */
     //typedef struct sqlite3_vfs sqlite3_vfs;
+    //typedef void (*sqlite3_syscall_ptr)(void);
     //struct sqlite3_vfs {
-    //  int iVersion;            /* Structure version number (currently 2) */
+    //  int iVersion;            /* Structure version number (currently 3) */
     //  int szOsFile;            /* Size of subclassed sqlite3_file */
     //  int mxPathname;          /* Maximum file pathname length */
     //  sqlite3_vfs *pNext;      /* Next registered VFS */
@@ -1111,12 +1125,12 @@ namespace Community.CsharpSqlite
     //};
     public class sqlite3_vfs
     {
-      public int iVersion;            /* Structure version number */
+      public int iVersion;            /* Structure version number (currently 3) */
       public int szOsFile;            /* Size of subclassed sqlite3_file */
       public int mxPathname;          /* Maximum file pathname length */
-      public sqlite3_vfs pNext;      /* Next registered VFS */
-      public string zName;       /* Name of this virtual file system */
-      public object pAppData;          /* Pointer to application-specific data */
+      public sqlite3_vfs pNext;       /* Next registered VFS */
+      public string zName;            /* Name of this virtual file system */
+      public object pAppData;         /* Pointer to application-specific data */
       public dxOpen xOpen;
       public dxDelete xDelete;
       public dxAccess xAccess;
@@ -1136,6 +1150,16 @@ namespace Community.CsharpSqlite
       public dxCurrentTimeInt64 xCurrentTimeInt64;
       /*
       ** The methods above are in versions 1 and 2 of the sqlite_vfs object.
+      ** Those below are for version 3 and greater.
+      */
+      //int (*xSetSystemCall)(sqlite3_vfs*, const char *zName, sqlite3_syscall_ptr);
+      public dxSetSystemCall xSetSystemCall;
+      //sqlite3_syscall_ptr (*xGetSystemCall)(sqlite3_vfs*, const char *zName);
+      public dxGetSystemCall xGetSystemCall;
+      //const char *(*xNextSystemCall)(sqlite3_vfs*, const char *zName);
+      public dxNextSystemCall xNextSystemCall;
+      /*
+      ** The methods above are in versions 1 through 3 of the sqlite_vfs object.
       ** New fields may be appended in figure versions.  The iVersion
       ** value will increment whenever this happens. 
       */
@@ -1164,7 +1188,10 @@ namespace Community.CsharpSqlite
       dxSleep xSleep,
       dxCurrentTime xCurrentTime,
       dxGetLastError xGetLastError,
-      dxCurrentTimeInt64 xCurrentTimeInt64 )
+      dxCurrentTimeInt64 xCurrentTimeInt64,
+      dxSetSystemCall xSetSystemCall,
+      dxGetSystemCall xGetSystemCall,
+      dxNextSystemCall xNextSystemCall)
       {
         this.iVersion = iVersion;
         this.szOsFile = szOsFile;
@@ -1377,17 +1404,12 @@ namespace Community.CsharpSqlite
     ** The sqlite3_db_config() interface is used to make configuration
     ** changes to a [database connection].  The interface is similar to
     ** [sqlite3_config()] except that the changes apply to a single
-    ** [database connection] (specified in the first argument).  The
-    ** sqlite3_db_config() interface should only be used immediately after
-    ** the database connection is created using [sqlite3_open()],
-    ** [sqlite3_open16()], or [sqlite3_open_v2()].  
+    ** [database connection] (specified in the first argument).
     **
     ** The second argument to sqlite3_db_config(D,V,...)  is the
-    ** configuration verb - an integer code that indicates what
-    ** aspect of the [database connection] is being configured.
-    ** The only choice for this value is [SQLITE_DBCONFIG_LOOKASIDE].
-    ** New verbs are likely to be added in future releases of SQLite.
-    ** Additional arguments depend on the verb.
+    ** [SQLITE_DBCONFIG_LOOKASIDE | configuration verb] - an integer code 
+    ** that indicates what aspect of the [database connection] is being configured.
+    ** Subsequent arguments vary depending on the configuration verb.
     **
     ** ^Calls to sqlite3_db_config() return SQLITE_OK if and only if
     ** the call is considered successful.
@@ -1610,7 +1632,7 @@ namespace Community.CsharpSqlite
     ** <dt>SQLITE_CONFIG_SCRATCH</dt>
     ** <dd> ^This option specifies a static memory buffer that SQLite can use for
     ** scratch memory.  There are three arguments:  A pointer an 8-byte
-    ** aligned memory buffer from which the scrach allocations will be
+    ** aligned memory buffer from which the scratch allocations will be
     ** drawn, the size of each scratch allocation (sz),
     ** and the maximum number of scratch allocations (N).  The sz
     ** argument must be a multiple of 16.
@@ -1657,7 +1679,9 @@ namespace Community.CsharpSqlite
     ** [SQLITE_ENABLE_MEMSYS5] are defined, then the alternative memory
     ** allocator is engaged to handle all of SQLites memory allocation needs.
     ** The first pointer (the memory pointer) must be aligned to an 8-byte
-    ** boundary or subsequent behavior of SQLite will be undefined.</dd>
+    ** boundary or subsequent behavior of SQLite will be undefined.
+    ** The minimum allocation size is capped at 2^12. Reasonable values
+    ** for the minimum allocation size are 2^5 through 2^8.</dd>
     **
     ** <dt>SQLITE_CONFIG_MUTEX</dt>
     ** <dd> ^(This option takes a single argument which is a pointer to an
@@ -1775,7 +1799,7 @@ namespace Community.CsharpSqlite
     ** <dd> ^This option takes three additional arguments that determine the 
     ** [lookaside memory allocator] configuration for the [database connection].
     ** ^The first argument (the third parameter to [sqlite3_db_config()] is a
-    ** pointer to an memory buffer to use for lookaside memory.
+    ** pointer to a memory buffer to use for lookaside memory.
     ** ^The first argument after the SQLITE_DBCONFIG_LOOKASIDE verb
     ** may be NULL in which case SQLite will allocate the
     ** lookaside buffer itself using [sqlite3_malloc()]. ^The second argument is the
@@ -1793,10 +1817,34 @@ namespace Community.CsharpSqlite
     ** memory is in use leaves the configuration unchanged and returns 
     ** [SQLITE_BUSY].)^</dd>
     **
+    ** <dt>SQLITE_DBCONFIG_ENABLE_FKEY</dt>
+    ** <dd> ^This option is used to enable or disable the enforcement of
+    ** [foreign key constraints].  There should be two additional arguments.
+    ** The first argument is an integer which is 0 to disable FK enforcement,
+    ** positive to enable FK enforcement or negative to leave FK enforcement
+    ** unchanged.  The second parameter is a pointer to an integer into which
+    ** is written 0 or 1 to indicate whether FK enforcement is off or on
+    ** following this call.  The second parameter may be a NULL pointer, in
+    ** which case the FK enforcement setting is not reported back. </dd>
+    **
+    ** <dt>SQLITE_DBCONFIG_ENABLE_TRIGGER</dt>
+    ** <dd> ^This option is used to enable or disable [CREATE TRIGGER | triggers].
+    ** There should be two additional arguments.
+    ** The first argument is an integer which is 0 to disable triggers,
+    ** positive to enable triggers or negative to leave the setting unchanged.
+    ** The second parameter is a pointer to an integer into which
+    ** is written 0 or 1 to indicate whether triggers are disabled or enabled
+    ** following this call.  The second parameter may be a NULL pointer, in
+    ** which case the trigger setting is not reported back. </dd>
+    **
     ** </dl>
     */
-    //#define SQLITE_DBCONFIG_LOOKASIDE    1001  /* void* int int */
+    //#define SQLITE_DBCONFIG_LOOKASIDE       1001  /* void* int int */
+    //#define SQLITE_DBCONFIG_ENABLE_FKEY     1002  /* int int* */
+    //#define SQLITE_DBCONFIG_ENABLE_TRIGGER  1003  /* int int* */
     const int SQLITE_DBCONFIG_LOOKASIDE = 1001;
+    const int SQLITE_DBCONFIG_ENABLE_FKEY = 1002;
+    const int SQLITE_DBCONFIG_ENABLE_TRIGGER = 1003;
 
     /*
     ** CAPI3REF: Enable Or Disable Extended Result Codes
@@ -2398,7 +2446,7 @@ namespace Community.CsharpSqlite
     /*
     ** CAPI3REF: Compile-Time Authorization Callbacks
     **
-    ** ^This routine registers a authorizer callback with a particular
+    ** ^This routine registers an authorizer callback with a particular
     ** [database connection], supplied in the first argument.
     ** ^The authorizer callback is invoked as SQL statements are being compiled
     ** by [sqlite3_prepare()] or its variants [sqlite3_prepare_v2()],
@@ -3090,7 +3138,7 @@ namespace Community.CsharpSqlite
     ** whether or not it requires a protected sqlite3_value.
     **
     ** The terms "protected" and "unprotected" refer to whether or not
-    ** a mutex is held.  A internal mutex is held for a protected
+    ** a mutex is held.  An internal mutex is held for a protected
     ** sqlite3_value object but no mutex is held for an unprotected
     ** sqlite3_value object.  If SQLite is compiled to be single-threaded
     ** (with [SQLITE_THREADSAFE=0] and with [sqlite3_threadsafe()] returning 0)
@@ -3314,7 +3362,9 @@ namespace Community.CsharpSqlite
     ** column number.  ^The leftmost column is number 0.
     **
     ** ^The returned string pointer is valid until either the [prepared statement]
-    ** is destroyed by [sqlite3_finalize()] or until the next call to
+    ** is destroyed by [sqlite3_finalize()] or until the statement is automatically
+    ** reprepared by the first call to [sqlite3_step()] for a particular run
+    ** or until the next call to
     ** sqlite3_column_name() or sqlite3_column_name16() on the same column.
     **
     ** ^If sqlite3_malloc() fails during the processing of either routine
@@ -3340,7 +3390,9 @@ namespace Community.CsharpSqlite
     ** the database name, the _table_ routines return the table name, and
     ** the origin_ routines return the column name.
     ** ^The returned string is valid until the [prepared statement] is destroyed
-    ** using [sqlite3_finalize()] or until the same information is requested
+    ** using [sqlite3_finalize()] or until the statement is automatically
+    ** reprepared by the first call to [sqlite3_step()] for a particular run
+    ** or until the same information is requested
     ** again in a different encoding.
     **
     ** ^The names returned are the original un-aliased names of the
@@ -3778,7 +3830,7 @@ namespace Community.CsharpSqlite
     ** are used to add SQL functions or aggregates or to redefine the behavior
     ** of existing SQL functions or aggregates.  The only differences between
     ** these routines are the text encoding expected for
-    ** the the second parameter (the name of the function being created)
+    ** the second parameter (the name of the function being created)
     ** and the presence or absence of a destructor callback for
     ** the application data pointer.
     **
@@ -3823,7 +3875,7 @@ namespace Community.CsharpSqlite
     ** callback only; NULL pointers must be passed as the xStep and xFinal
     ** parameters. ^An aggregate SQL function requires an implementation of xStep
     ** and xFinal and NULL pointer must be passed for xFunc. ^To delete an existing
-    ** SQL function or aggregate, pass NULL poiners for all three function
+    ** SQL function or aggregate, pass NULL pointers for all three function
     ** callbacks.
     **
     ** ^(If the ninth parameter to sqlite3_create_function_v2() is not NULL,
@@ -4265,7 +4317,7 @@ namespace Community.CsharpSqlite
     ** ^The [SQLITE_UTF16_ALIGNED] value for eTextRep forces strings to begin
     ** on an even byte address.
     **
-    ** ^The fourth argument, pArg, is a application data pointer that is passed
+    ** ^The fourth argument, pArg, is an application data pointer that is passed
     ** through as the first argument to the collating function callback.
     **
     ** ^The fifth argument, xCallback, is a pointer to the collating function.
@@ -4281,7 +4333,7 @@ namespace Community.CsharpSqlite
     ** by the eTextRep argument.  The collating function must return an
     ** integer that is negative, zero, or positive
     ** if the first string is less than, equal to, or greater than the second,
-    ** respectively.  A collating function must alway return the same answer
+    ** respectively.  A collating function must always return the same answer
     ** given the same inputs.  If two or more collating functions are registered
     ** to the same collation name (using different eTextRep values) then all
     ** must give an equivalent answer when invoked with equivalent strings.
@@ -4693,7 +4745,7 @@ namespace Community.CsharpSqlite
     ** <li> Memory accounting is disabled using a combination of the
     **      [sqlite3_config]([SQLITE_CONFIG_MEMSTATUS],...) start-time option and
     **      the [SQLITE_DEFAULT_MEMSTATUS] compile-time option.
-    ** <li> An alternative page cache implementation is specifed using
+    ** <li> An alternative page cache implementation is specified using
     **      [sqlite3_config]([SQLITE_CONFIG_PCACHE],...).
     ** <li> The page cache allocates from its own memory pool supplied
     **      by [sqlite3_config]([SQLITE_CONFIG_PAGECACHE],...) rather than
@@ -4914,7 +4966,7 @@ namespace Community.CsharpSqlite
     ** CAPI3REF: Virtual Table Object
     ** KEYWORDS: sqlite3_module {virtual table module}
     **
-    ** This structure, sometimes called a a "virtual table module", 
+    ** This structure, sometimes called a "virtual table module", 
     ** defines the implementation of a [virtual tables].  
     ** This structure consists mostly of methods for the module.
     **
@@ -5304,7 +5356,7 @@ namespace Community.CsharpSqlite
     ** This is true if any column of the row is changed, even a column
     ** other than the one the BLOB handle is open on.)^
     ** ^Calls to [sqlite3_blob_read()] and [sqlite3_blob_write()] for
-    ** a expired BLOB handle fail with an return code of [SQLITE_ABORT].
+    ** a expired BLOB handle fail with a return code of [SQLITE_ABORT].
     ** ^(Changes written into a BLOB prior to the BLOB expiring are not
     ** rolled back by the expiration of the BLOB.  Such changes will eventually
     ** commit if the transaction continues to completion.)^
@@ -6095,24 +6147,21 @@ namespace Community.CsharpSqlite
     ** ^(<dt>SQLITE_DBSTATUS_LOOKASIDE_HIT</dt>
     ** <dd>This parameter returns the number malloc attempts that were 
     ** satisfied using lookaside memory. Only the high-water value is meaningful;
-    ** the current value is always zero.
-    ** checked out.</dd>)^
+    ** the current value is always zero.)^
     **
     ** ^(<dt>SQLITE_DBSTATUS_LOOKASIDE_MISS_SIZE</dt>
     ** <dd>This parameter returns the number malloc attempts that might have
     ** been satisfied using lookaside memory but failed due to the amount of
     ** memory requested being larger than the lookaside slot size.
     ** Only the high-water value is meaningful;
-    ** the current value is always zero.
-    ** checked out.</dd>)^
+    ** the current value is always zero.)^
     **
     ** ^(<dt>SQLITE_DBSTATUS_LOOKASIDE_MISS_FULL</dt>
     ** <dd>This parameter returns the number malloc attempts that might have
     ** been satisfied using lookaside memory but failed due to all lookaside
     ** memory already being in use.
     ** Only the high-water value is meaningful;
-    ** the current value is always zero.
-    ** checked out.</dd>)^
+    ** the current value is always zero.)^
     **
     ** ^(<dt>SQLITE_DBSTATUS_CACHE_USED</dt>
     ** <dd>This parameter returns the approximate number of of bytes of heap
@@ -6855,9 +6904,104 @@ namespace Community.CsharpSqlite
     ** from SQL.  ^The [sqlite3_wal_autocheckpoint()] interface and the
     ** [wal_autocheckpoint pragma] can be used to cause this interface to be
     ** run whenever the WAL reaches a certain size threshold.
+    **
+    ** See also: [sqlite3_wal_checkpoint_v2()]
     */
     //SQLITE_API int sqlite3_wal_checkpoint(sqlite3 *db, const char *zDb);
 
+    /*
+    ** CAPI3REF: Checkpoint a database
+    **
+    ** Run a checkpoint operation on WAL database zDb attached to database 
+    ** handle db. The specific operation is determined by the value of the 
+    ** eMode parameter:
+    **
+    ** <dl>
+    ** <dt>SQLITE_CHECKPOINT_PASSIVE<dd>
+    **   Checkpoint as many frames as possible without waiting for any database 
+    **   readers or writers to finish. Sync the db file if all frames in the log
+    **   are checkpointed. This mode is the same as calling 
+    **   sqlite3_wal_checkpoint(). The busy-handler callback is never invoked.
+    **
+    ** <dt>SQLITE_CHECKPOINT_FULL<dd>
+    **   This mode blocks (calls the busy-handler callback) until there is no
+    **   database writer and all readers are reading from the most recent database
+    **   snapshot. It then checkpoints all frames in the log file and syncs the
+    **   database file. This call blocks database writers while it is running,
+    **   but not database readers.
+    **
+    ** <dt>SQLITE_CHECKPOINT_RESTART<dd>
+    **   This mode works the same way as SQLITE_CHECKPOINT_FULL, except after 
+    **   checkpointing the log file it blocks (calls the busy-handler callback)
+    **   until all readers are reading from the database file only. This ensures 
+    **   that the next client to write to the database file restarts the log file 
+    **   from the beginning. This call blocks database writers while it is running,
+    **   but not database readers.
+    ** </dl>
+    **
+    ** If pnLog is not NULL, then *pnLog is set to the total number of frames in
+    ** the log file before returning. If pnCkpt is not NULL, then *pnCkpt is set to
+    ** the total number of checkpointed frames (including any that were already
+    ** checkpointed when this function is called). *pnLog and *pnCkpt may be
+    ** populated even if sqlite3_wal_checkpoint_v2() returns other than SQLITE_OK.
+    ** If no values are available because of an error, they are both set to -1
+    ** before returning to communicate this to the caller.
+    **
+    ** All calls obtain an exclusive "checkpoint" lock on the database file. If
+    ** any other process is running a checkpoint operation at the same time, the 
+    ** lock cannot be obtained and SQLITE_BUSY is returned. Even if there is a 
+    ** busy-handler configured, it will not be invoked in this case.
+    **
+    ** The SQLITE_CHECKPOINT_FULL and RESTART modes also obtain the exclusive 
+    ** "writer" lock on the database file. If the writer lock cannot be obtained
+    ** immediately, and a busy-handler is configured, it is invoked and the writer
+    ** lock retried until either the busy-handler returns 0 or the lock is
+    ** successfully obtained. The busy-handler is also invoked while waiting for
+    ** database readers as described above. If the busy-handler returns 0 before
+    ** the writer lock is obtained or while waiting for database readers, the
+    ** checkpoint operation proceeds from that point in the same way as 
+    ** SQLITE_CHECKPOINT_PASSIVE - checkpointing as many frames as possible 
+    ** without blocking any further. SQLITE_BUSY is returned in this case.
+    **
+    ** If parameter zDb is NULL or points to a zero length string, then the
+    ** specified operation is attempted on all WAL databases. In this case the
+    ** values written to output parameters *pnLog and *pnCkpt are undefined. If 
+    ** an SQLITE_BUSY error is encountered when processing one or more of the 
+    ** attached WAL databases, the operation is still attempted on any remaining 
+    ** attached databases and SQLITE_BUSY is returned to the caller. If any other 
+    ** error occurs while processing an attached database, processing is abandoned 
+    ** and the error code returned to the caller immediately. If no error 
+    ** (SQLITE_BUSY or otherwise) is encountered while processing the attached 
+    ** databases, SQLITE_OK is returned.
+    **
+    ** If database zDb is the name of an attached database that is not in WAL
+    ** mode, SQLITE_OK is returned and both *pnLog and *pnCkpt set to -1. If
+    ** zDb is not NULL (or a zero length string) and is not the name of any
+    ** attached database, SQLITE_ERROR is returned to the caller.
+    */
+    //SQLITE_API int sqlite3_wal_checkpoint_v2(
+    //  sqlite3 *db,                    /* Database handle */
+    //  const char *zDb,                /* Name of attached database (or NULL) */
+    //  int eMode,                      /* SQLITE_CHECKPOINT_* value */
+    //  int *pnLog,                     /* OUT: Size of WAL log in frames */
+    //  int *pnCkpt                     /* OUT: Total number of frames checkpointed */
+    //);
+
+    /*
+    ** CAPI3REF: Checkpoint operation parameters
+    **
+    ** These constants can be used as the 3rd parameter to
+    ** [sqlite3_wal_checkpoint_v2()].  See the [sqlite3_wal_checkpoint_v2()]
+    ** documentation for additional information about the meaning and use of
+    ** each of these values.
+    */
+    //#define SQLITE_CHECKPOINT_PASSIVE 0
+    //#define SQLITE_CHECKPOINT_FULL    1
+    //#define SQLITE_CHECKPOINT_RESTART 2
+    static public int SQLITE_CHECKPOINT_PASSIVE = 0;
+    static public int SQLITE_CHECKPOINT_FULL = 1;
+    static public int SQLITE_CHECKPOINT_RESTART = 2;
+    
     /*
     ** Undo the hack that converts floating point types to integer for
     ** builds on processors without floating point support.

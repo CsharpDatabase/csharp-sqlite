@@ -18,6 +18,17 @@ using ynVar = System.Int16;
 using ynVar = System.Int32; 
 #endif
 
+/*
+** The yDbMask datatype for the bitmask of all attached databases.
+*/
+#if SQLITE_MAX_ATTACHED//>30
+//  typedef sqlite3_uint64 yDbMask;
+using yDbMask = System.Int64; 
+#else
+//  typedef unsigned int yDbMask;
+using yDbMask = System.Int32;
+#endif
+
 namespace Community.CsharpSqlite
 {
   using Op = Sqlite3.VdbeOp;
@@ -46,7 +57,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2011-01-28 17:03:50 ed759d5a9edb3bba5f48f243df47be29e3fe8cd7
+    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
     **
     *************************************************************************
     */
@@ -212,7 +223,14 @@ if( 0==isPrepareV2 ) return;
       pOp.p4.p = null;
       pOp.p4type = P4_NOTUSED;
       p.expired = false;
-      //sqlite3VdbePrintOp(null, i, p.aOp[i]);
+      if ( op == OP_ParseSchema )
+      {
+        /* Any program that uses the OP_ParseSchema opcode needs to lock
+        ** all btrees. */
+        int j;
+        for ( j = 0; j < p.db.nDb; j++ )
+          sqlite3VdbeUsesBtree( p, j );
+      }
 #if  SQLITE_DEBUG
       pOp.zComment = null;
       if ( sqlite3VdbeAddopTrace )
@@ -671,7 +689,7 @@ if( n>nMaxArgs ) nMaxArgs = n;
       Debug.Assert( aOp != null );// && 0==p.db.mallocFailed );
 
       /* Check that sqlite3VdbeUsesBtree() was not called on this VM */
-      Debug.Assert( p.aMutex == null || p.aMutex.nMutex == 0 );
+      Debug.Assert( p.btreeMask == 0 );
 
       resolveP2Values( p, ref pnMaxArg );
       pnOp = p.nOp;
@@ -793,6 +811,7 @@ if( n>nMaxArgs ) nMaxArgs = n;
     */
     static void sqlite3VdbeJumpHere( Vdbe p, int addr )
     {
+      Debug.Assert( addr >= 0 );
       sqlite3VdbeChangeP2( p, addr, p.nOp );
     }
 
@@ -1386,25 +1405,84 @@ break;
 #endif
 
     /*
-** Declare to the Vdbe that the BTree object at db.aDb[i] is used.
-**
-** The prepared statement has to know in advance which Btree objects
-** will be used so that it can acquire mutexes on them all in sorted
-** order (via sqlite3VdbeMutexArrayEnter().  Mutexes are acquired
-** in order (and released in reverse order) to avoid deadlocks.
-*/
+    ** Declare to the Vdbe that the BTree object at db->aDb[i] is used.
+    **
+    ** The prepared statements need to know in advance the complete set of
+    ** attached databases that they will be using.  A mask of these databases
+    ** is maintained in p->btreeMask and is used for locking and other purposes.
+    */
     static void sqlite3VdbeUsesBtree( Vdbe p, int i )
     {
-      int mask;
-      Debug.Assert( i >= 0 && i < p.db.nDb && i < sizeof( u32 ) * 8 );
-      Debug.Assert( i < sizeof( int ) * 8 );
-      mask = (int)( (u32)1 ) << i;
-      if ( ( p.btreeMask & mask ) == 0 )
+      Debug.Assert( i >= 0 && i < p.db.nDb && i < (int)sizeof( yDbMask ) * 8 );
+      Debug.Assert( i < (int)sizeof( yDbMask ) * 8 );
+      p.btreeMask |= ( (yDbMask)1 ) << i;
+      if ( i != 1 && sqlite3BtreeSharable( p.db.aDb[i].pBt ) )
       {
-        p.btreeMask |= mask;
-        sqlite3BtreeMutexArrayInsert( p.aMutex, p.db.aDb[i].pBt );
+        p.lockMask |= ( (yDbMask)1 ) << i;
       }
     }
+
+#if !(SQLITE_OMIT_SHARED_CACHE) && SQLITE_THREADSAFE//>0
+/*
+** If SQLite is compiled to support shared-cache mode and to be threadsafe,
+** this routine obtains the mutex Debug.Associated with each BtShared structure
+** that may be accessed by the VM pDebug.Assed as an argument. In doing so it also
+** sets the BtShared.db member of each of the BtShared structures, ensuring
+** that the correct busy-handler callback is invoked if required.
+**
+** If SQLite is not threadsafe but does support shared-cache mode, then
+** sqlite3BtreeEnter() is invoked to set the BtShared.db variables
+** of all of BtShared structures accessible via the database handle 
+** Debug.Associated with the VM.
+**
+** If SQLite is not threadsafe and does not support shared-cache mode, this
+** function is a no-op.
+**
+** The p.btreeMask field is a bitmask of all btrees that the prepared 
+** statement p will ever use.  Let N be the number of bits in p.btreeMask
+** corresponding to btrees that use shared cache.  Then the runtime of
+** this routine is N*N.  But as N is rarely more than 1, this should not
+** be a problem.
+*/
+void sqlite3VdbeEnter(Vdbe *p){
+  int i;
+  yDbMask mask;
+  sqlite3 *db;
+  Db *aDb;
+  int nDb;
+  if( p.lockMask==0 ) return;  /* The common case */
+  db = p.db;
+  aDb = db.aDb;
+  nDb = db.nDb;
+  for(i=0, mask=1; i<nDb; i++, mask += mask){
+    if( i!=1 && (mask & p.lockMask)!=0 && ALWAYS(aDb[i].pBt!=0) ){
+      sqlite3BtreeEnter(aDb[i].pBt);
+    }
+  }
+}
+#endif
+
+#if !(SQLITE_OMIT_SHARED_CACHE) && SQLITE_THREADSAFE//>0
+/*
+** Unlock all of the btrees previously locked by a call to sqlite3VdbeEnter().
+*/
+void sqlite3VdbeLeave(Vdbe *p){
+  int i;
+  yDbMask mask;
+  sqlite3 *db;
+  Db *aDb;
+  int nDb;
+  if( p.lockMask==0 ) return;  /* The common case */
+  db = p.db;
+  aDb = db.aDb;
+  nDb = db.nDb;
+  for(i=0, mask=1; i<nDb; i++, mask += mask){
+    if( i!=1 && (mask & p.lockMask)!=0 && ALWAYS(aDb[i].pBt!=0) ){
+      sqlite3BtreeLeave(aDb[i].pBt);
+    }
+  }
+}
+#endif
 
 
 #if VDBE_PROFILE || SQLITE_DEBUG
@@ -2120,7 +2198,7 @@ p.inVtabMethod = 0;
     {
       if ( p.pFrame != null )
       {
-        VdbeFrame pFrame = p.pFrame;
+        VdbeFrame pFrame;
         for ( pFrame = p.pFrame; pFrame.pParent != null; pFrame = pFrame.pParent )
           ;
         sqlite3VdbeFrameRestore( pFrame );
@@ -2329,7 +2407,7 @@ p.inVtabMethod = 0;
           Btree pBt = db.aDb[i].pBt;
           if ( pBt != null )
           {
-            rc = sqlite3BtreeCommitPhaseTwo( pBt );
+            rc = sqlite3BtreeCommitPhaseTwo( pBt, 0 );
           }
         }
         if ( rc == SQLITE_OK )
@@ -2480,7 +2558,7 @@ p.inVtabMethod = 0;
           Btree pBt = db.aDb[i].pBt;
           if ( pBt != null )
           {
-            sqlite3BtreeCommitPhaseTwo( pBt );
+            sqlite3BtreeCommitPhaseTwo( pBt, 0 );
           }
         }
         sqlite3EndBenignMalloc();
@@ -2620,42 +2698,15 @@ static void checkActiveVdbeCnt( sqlite3 db ){}
     }
 
     /*
-    ** If SQLite is compiled to support shared-cache mode and to be threadsafe,
-    ** this routine obtains the mutex associated with each BtShared structure
-    ** that may be accessed by the VM passed as an argument. In doing so it
-    ** sets the BtShared.db member of each of the BtShared structures, ensuring
-    ** that the correct busy-handler callback is invoked if required.
+    ** This function is called when a transaction opened by the database 
+    ** handle associated with the VM passed as an argument is about to be 
+    ** committed. If there are outstanding deferred foreign key constraint
+    ** violations, return SQLITE_ERROR. Otherwise, SQLITE_OK.
     **
-    ** If SQLite is not threadsafe but does support shared-cache mode, then
-    ** sqlite3BtreeEnterAll() is invoked to set the BtShared.db variables
-    ** of all of BtShared structures accessible via the database handle
-    ** associated with the VM. Of course only a subset of these structures
-    ** will be accessed by the VM, and we could use Vdbe.btreeMask to figure
-    ** that subset out, but there is no advantage to doing so.
-    **
-    ** If SQLite is not threadsafe and does not support shared-cache mode, this
-    ** function is a no-op.
+    ** If there are outstanding FK violations and this function returns 
+    ** SQLITE_ERROR, set the result of the VM to SQLITE_CONSTRAINT and write
+    ** an error message to it. Then return SQLITE_ERROR.
     */
-#if !SQLITE_OMIT_SHARED_CACHE
-static void sqlite3VdbeMutexArrayEnter(Vdbe p){
-#if SQLITE_THREADSAFE
-sqlite3BtreeMutexArrayEnter(&p->aMutex);
-#else
-sqlite3BtreeEnterAll(p.db);
-#endif
-}
-#endif
-
-    /*
-** This function is called when a transaction opened by the database 
-** handle associated with the VM passed as an argument is about to be 
-** committed. If there are outstanding deferred foreign key constraint
-** violations, return SQLITE_ERROR. Otherwise, SQLITE_OK.
-**
-** If there are outstanding FK violations and this function returns 
-** SQLITE_ERROR, set the result of the VM to SQLITE_CONSTRAINT and write
-** an error message to it. Then return SQLITE_ERROR.
-*/
 #if !SQLITE_OMIT_FOREIGN_KEY
     static int sqlite3VdbeCheckFk( Vdbe p, int deferred )
     {
@@ -2724,7 +2775,7 @@ sqlite3BtreeEnterAll(p.db);
         bool isSpecialError = false;            /* Set to true if a 'special' error */
 
         /* Lock all btrees used by the statement */
-        sqlite3VdbeMutexArrayEnter( p );
+        sqlite3VdbeEnter( p );
         /* Check for one of the special errors */
         mrc = p.rc & 0xff;
         Debug.Assert( p.rc != SQLITE_IOERR_BLOCKED );  /* This error no longer exists */
@@ -2787,22 +2838,22 @@ sqlite3BtreeEnterAll(p.db);
             {
               if ( NEVER( p.readOnly ) )
               {
-                sqlite3BtreeMutexArrayLeave( p.aMutex );
+                sqlite3VdbeLeave( p );
                 return SQLITE_ERROR;
               }
               rc = SQLITE_CONSTRAINT;
             }
             else
             {
-              /* The auto-commit flag is true, the vdbe program was successful
+              /* The auto-commit flag is true, the vdbe program was successful 
               ** or hit an 'OR FAIL' constraint and there are no deferred foreign
-              ** key constraints to hold up the transaction. This means a commit
+              ** key constraints to hold up the transaction. This means a commit 
               ** is required. */
               rc = vdbeCommit( db, p );
             }
             if ( rc == SQLITE_BUSY && p.readOnly )
             {
-              sqlite3BtreeMutexArrayLeave( p.aMutex );
+              sqlite3VdbeLeave( p );
               return SQLITE_BUSY;
             }
             else if ( rc != SQLITE_OK )
@@ -2890,12 +2941,12 @@ sqlite3BtreeEnterAll(p.db);
         /* Rollback or commit any schema changes that occurred. */
         if ( p.rc != SQLITE_OK && ( db.flags & SQLITE_InternChanges ) != 0 )
         {
-          sqlite3ResetInternalSchema( db, 0 );
+          sqlite3ResetInternalSchema( db, -1 );
           db.flags = ( db.flags | SQLITE_InternChanges );
         }
 
         /* Release the locks */
-        sqlite3BtreeMutexArrayLeave( p.aMutex );
+        sqlite3VdbeLeave( p );
       }
 
       /* We have successfully halted and closed the VM.  Record this fact. */
@@ -3238,7 +3289,17 @@ fclose(out);
         {
           return 8 + (u32)i;
         }
-        u = (ulong)( i < 0 ? -i : i );
+        if ( i < 0 )
+        {
+          if ( i < ( -MAX_6BYTE ) )
+            return 6;
+          /* Previous test prevents:  u = -(-9223372036854775808) */
+          u = (u64)( -i );
+        }
+        else
+        {
+          u = (u64)i;
+        }
         if ( u <= 127 )
           return 1;
         if ( u <= 32767 )

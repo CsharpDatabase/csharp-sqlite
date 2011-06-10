@@ -548,13 +548,9 @@ parameter_test e_expr-11.2.1 {SELECT :AAAA}         {1 :AAAA}       -1
 parameter_test e_expr-11.2.2 {SELECT :123}          {1 :123}        -1
 parameter_test e_expr-11.2.3 {SELECT :__}           {1 :__}         -1
 parameter_test e_expr-11.2.4 {SELECT :_$_}          {1 :_$_}        -1
-
-#TODO -- Determine why this test fails
-if 0 {
 parameter_test e_expr-11.2.5 "
   SELECT :\u0e40\u0e2d\u0e28\u0e02\u0e39\u0e40\u0e2d\u0e25
 " "1 :\u0e40\u0e2d\u0e28\u0e02\u0e39\u0e40\u0e2d\u0e25" -1
-}
 parameter_test e_expr-11.2.6 "SELECT :\u0080" "1 :\u0080" -1
 
 # EVIDENCE-OF: R-49783-61279 An "at" sign works exactly like a colon,
@@ -564,13 +560,9 @@ parameter_test e_expr-11.3.1 {SELECT @AAAA}         {1 @AAAA}       -1
 parameter_test e_expr-11.3.2 {SELECT @123}          {1 @123}        -1
 parameter_test e_expr-11.3.3 {SELECT @__}           {1 @__}         -1
 parameter_test e_expr-11.3.4 {SELECT @_$_}          {1 @_$_}        -1
-
-#TODO -- Determine why this test fails
-if 0 {
 parameter_test e_expr-11.3.5 "
   SELECT @\u0e40\u0e2d\u0e28\u0e02\u0e39\u0e40\u0e2d\u0e25
 " "1 @\u0e40\u0e2d\u0e28\u0e02\u0e39\u0e40\u0e2d\u0e25" -1
-}
 parameter_test e_expr-11.3.6 "SELECT @\u0080" "1 @\u0080" -1
 
 # EVIDENCE-OF: R-62610-51329 A dollar-sign followed by an identifier
@@ -588,13 +580,9 @@ parameter_test e_expr-11.4.1 {SELECT $AAAA}         {1 $AAAA}       -1
 parameter_test e_expr-11.4.2 {SELECT $123}          {1 $123}        -1
 parameter_test e_expr-11.4.3 {SELECT $__}           {1 $__}         -1
 parameter_test e_expr-11.4.4 {SELECT $_$_}          {1 $_$_}        -1
-
-#TODO -- Determine why this test fails
-if 0 {
 parameter_test e_expr-11.4.5 "
   SELECT \$\u0e40\u0e2d\u0e28\u0e02\u0e39\u0e40\u0e2d\u0e25
 " "1 \$\u0e40\u0e2d\u0e28\u0e02\u0e39\u0e40\u0e2d\u0e25" -1
-}
 parameter_test e_expr-11.4.6 "SELECT \$\u0080" "1 \$\u0080" -1
 
 parameter_test e_expr-11.5.1 {SELECT $::::a(++--++)} {1 $::::a(++--++)} -1
@@ -1077,7 +1065,6 @@ sqlite3 db test.db
 #
 #   There is a regexp function if ICU is enabled though.
 #
-if (0) {
 ifcapable !icu {
   do_catchsql_test e_expr-18.1.1 { 
     SELECT regexp('abc', 'def') 
@@ -1085,7 +1072,6 @@ ifcapable !icu {
   do_catchsql_test e_expr-18.1.2 { 
     SELECT 'abc' REGEXP 'def'
   } {1 {no such function: REGEXP}}
-}
 }
 
 # EVIDENCE-OF: R-33693-50180 The REGEXP operator is a special syntax for
@@ -1366,7 +1352,7 @@ do_execsql_test e_expr-25.1.1 {
 do_test e_expr-25.1.2 { set ::varlist } {a b}
 set varlist [list]
 do_execsql_test e_expr-25.1.3 {
-  SELECT CASE 0 WHEN var('a') THEN 'A' 
+  SELECT CASE '0' WHEN var('a') THEN 'A' 
                   WHEN var('b') THEN 'B' 
                   WHEN var('c') THEN 'C' 
   END
@@ -1456,23 +1442,24 @@ do_expr_test e_expr-27.3.3 { CAST('ghi' AS abbLOb10)   } blob ghi
 do_qexpr_test e_expr-27.4.1 { CAST('ghi' AS blob) } X'676869'
 do_qexpr_test e_expr-27.4.2 { CAST(456 AS blob) }   X'343536'
 do_qexpr_test e_expr-27.4.3 { CAST(1.78 AS blob) }  X'312E3738'
-
-ifcapable utf16 {
 rename db db2
 sqlite3 db :memory:
+ifcapable {utf16} {
 db eval { PRAGMA encoding = 'utf-16le' }
 do_qexpr_test e_expr-27.4.4 { CAST('ghi' AS blob) } X'670068006900'
 do_qexpr_test e_expr-27.4.5 { CAST(456 AS blob) }   X'340035003600'
 do_qexpr_test e_expr-27.4.6 { CAST(1.78 AS blob) }  X'31002E0037003800'
+}
 db close
 sqlite3 db :memory:
 db eval { PRAGMA encoding = 'utf-16be' }
+ifcapable {utf16} {
 do_qexpr_test e_expr-27.4.7 { CAST('ghi' AS blob) } X'006700680069'
 do_qexpr_test e_expr-27.4.8 { CAST(456 AS blob) }   X'003400350036'
 do_qexpr_test e_expr-27.4.9 { CAST(1.78 AS blob) }  X'0031002E00370038'
+}
 db close
 rename db2 db
-}
 
 # EVIDENCE-OF: R-04207-37981 To cast a BLOB value to TEXT, the sequence
 # of bytes that make up the BLOB is interpreted as text encoded using
@@ -1480,16 +1467,15 @@ rename db2 db
 #
 do_expr_test e_expr-28.1.1 { CAST (X'676869' AS text) } text ghi
 do_expr_test e_expr-28.1.2 { CAST (X'670068006900' AS text) } text g
-#rename db db2
+rename db db2
 sqlite3 db :memory:
-ifcapable utf16 {
 db eval { PRAGMA encoding = 'utf-16le' }
+ifcapable {utf16} {
 do_expr_test e_expr-28.1.3 { CAST (X'676869' AS text) == 'ghi' } integer 0
 do_expr_test e_expr-28.1.4 { CAST (X'670068006900' AS text) } text ghi
+}
 db close
 rename db2 db
-db eval { PRAGMA encoding = 'utf-16le' }
-}
 
 # EVIDENCE-OF: R-22235-47006 Casting an INTEGER or REAL value into TEXT
 # renders the value as if via sqlite3_snprintf() except that the
@@ -1513,7 +1499,7 @@ do_expr_test e_expr-29.1.3 { CAST (X'2D392E3837' AS REAL) } real -9.87
 do_expr_test e_expr-29.1.4 { CAST (X'302E30303031' AS REAL) } real 0.0001
 rename db db2
 sqlite3 db :memory:
-ifcapable utf16 {
+ifcapable {utf16} {
 db eval { PRAGMA encoding = 'utf-16le' }
 do_expr_test e_expr-29.1.5 { 
     CAST (X'31002E0032003300' AS REAL) } real 1.23
@@ -1523,9 +1509,9 @@ do_expr_test e_expr-29.1.7 {
     CAST (X'2D0039002E0038003700' AS REAL) } real -9.87
 do_expr_test e_expr-29.1.8 { 
     CAST (X'30002E003000300030003100' AS REAL) } real 0.0001
+}
 db close
 rename db2 db
-}
 
 # EVIDENCE-OF: R-54898-34554 When casting a TEXT value to REAL, the
 # longest possible prefix of the value that can be interpreted as a real
@@ -1563,9 +1549,9 @@ do_expr_test e_expr-30.1.4 {
   CAST(X'2D31313235383939393036383432363234' AS INTEGER) 
 } integer -1125899906842624
 
-#rename db db2
+rename db db2
 sqlite3 db :memory:
-ifcapable utf16 {
+ifcapable {utf16} {
 execsql { PRAGMA encoding = 'utf-16be' }
 do_expr_test e_expr-30.1.5 { CAST(X'003100320033' AS INTEGER) } integer 123
 do_expr_test e_expr-30.1.6 { CAST(X'002D003600370038' AS INTEGER) } integer -678
@@ -1575,9 +1561,9 @@ do_expr_test e_expr-30.1.7 {
 do_expr_test e_expr-30.1.8 { 
   CAST(X'002D0031003100320035003800390039003900300036003800340032003600320034' AS INTEGER) 
 } integer -1125899906842624
+}
 db close
 rename db2 db
-}
 
 # EVIDENCE-OF: R-47612-45842 When casting a TEXT value to INTEGER, the
 # longest possible prefix of the value that can be interpreted as an
@@ -1651,13 +1637,12 @@ do_expr_test e_expr-32.2.4 {
   CAST(9223372036854775807 AS NUMERIC)
 } integer 9223372036854775807
 
-ifcapable utf16 {
-
 # EVIDENCE-OF: R-64550-29191 Note that the result from casting any
 # non-BLOB value into a BLOB and the result from casting any BLOB value
 # into a non-BLOB value may be different depending on whether the
 # database encoding is UTF-8, UTF-16be, or UTF-16le.
 #
+ifcapable {utf16} {
 sqlite3 db1 :memory: ; db1 eval { PRAGMA encoding = 'utf-8' }
 sqlite3 db2 :memory: ; db2 eval { PRAGMA encoding = 'utf-16le' }
 sqlite3 db3 :memory: ; db3 eval { PRAGMA encoding = 'utf-16be' }
@@ -1684,7 +1669,6 @@ foreach {tn castexpr differs} {
 db1 close
 db2 close
 db3 close
-
 }
 
 #-------------------------------------------------------------------------

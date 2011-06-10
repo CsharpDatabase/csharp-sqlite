@@ -26,7 +26,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2010-12-07 20:14:09 a586a4deeb25330037a49df295b36aaf624d0f45
+    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
     **
     *************************************************************************
     */
@@ -218,7 +218,10 @@ namespace Community.CsharpSqlite
           case SQLITE_NULL:
             /* No key specified.  Use the key from the main database */
             sqlite3CodecGetKey( db, 0, out zKey, out nKey ); //sqlite3CodecGetKey(db, 0, (void**)&zKey, nKey);
-            rc = sqlite3CodecAttach( db, db.nDb - 1, zKey, nKey );
+            if ( nKey > 0 || sqlite3BtreeGetReserve( db.aDb[0].pBt ) > 0 )
+            {
+              rc = sqlite3CodecAttach( db, db.nDb - 1, zKey, nKey );
+            }
             break;
         }
       }
@@ -245,7 +248,7 @@ namespace Community.CsharpSqlite
           db.aDb[iDb].pBt = null;
           db.aDb[iDb].pSchema = null;
         }
-        sqlite3ResetInternalSchema( db, 0 );
+        sqlite3ResetInternalSchema( db, -1 );
         db.nDb = iDb;
         if ( rc == SQLITE_NOMEM || rc == SQLITE_IOERR_NOMEM )
         {
@@ -331,7 +334,7 @@ attach_error:
       sqlite3BtreeClose( ref pDb.pBt );
       pDb.pBt = null;
       pDb.pSchema = null;
-      sqlite3ResetInternalSchema( db, 0 );
+      sqlite3ResetInternalSchema( db, -1 );
       return;
 
 detach_error:
@@ -373,10 +376,12 @@ detach_error:
 
 #if !SQLITE_OMIT_AUTHORIZATION
 if( pAuthArg ){
-char *zAuthArg = pAuthArg->u.zToken;
-if( NEVER(zAuthArg==0) ){
-goto attach_end;
-}
+    char *zAuthArg;
+    if( pAuthArg->op==TK_STRING ){
+      zAuthArg = pAuthArg->u.zToken;
+    }else{
+      zAuthArg = 0;
+    }
 rc = sqlite3AuthCheck(pParse, type, zAuthArg, 0, 0);
 if(rc!=SQLITE_OK ){
 goto attach_end;

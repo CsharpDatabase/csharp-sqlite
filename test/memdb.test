@@ -363,19 +363,13 @@ do_test memdb-6.15 {
   }
 } {}
 
-ifcapable subquery {
+ifcapable subquery&&vtab {
   do_test memdb-7.1 {
+    register_wholenumber_module db
     execsql {
       CREATE TABLE t6(x);
-      INSERT INTO t6 VALUES(1);
-      INSERT INTO t6 SELECT x+1 FROM t6;
-      INSERT INTO t6 SELECT x+2 FROM t6;
-      INSERT INTO t6 SELECT x+4 FROM t6;
-      INSERT INTO t6 SELECT x+8 FROM t6;
-      INSERT INTO t6 SELECT x+16 FROM t6;
-      INSERT INTO t6 SELECT x+32 FROM t6;
-      INSERT INTO t6 SELECT x+64 FROM t6;
-      INSERT INTO t6 SELECT x+128 FROM t6;
+      CREATE VIRTUAL TABLE nums USING wholenumber;
+      INSERT INTO t6 SELECT value FROM nums WHERE value BETWEEN 1 AND 256;
       SELECT count(*) FROM (SELECT DISTINCT x FROM t6);
     }
   } {256}
@@ -414,7 +408,6 @@ do_test memdb-8.2 {
 # Test that auto-vacuum works with in-memory databases.
 # 
 ifcapable autovacuum {
-ifcapable malloc {
   do_test memdb-9.1 {
     db close
     sqlite3 db test.db
@@ -433,7 +426,7 @@ ifcapable malloc {
     expr {($memused2 + 2048 < $memused) || $pgovfl==0}
   } {1}
 }
-}
+
 } ;# ifcapable memorydb
 
 finish_test

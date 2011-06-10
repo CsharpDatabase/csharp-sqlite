@@ -16,7 +16,7 @@
 set testdir [file dirname $argv0]
 source $testdir/tester.tcl
 
-# Do not use a codec for tests in this file, as the database file is 
+# Do not use a codec for tests in this file, as the database file is
 # manipulated directly using tcl scripts (using the [hexio_write] command).
 #
 do_not_use_codec
@@ -55,7 +55,7 @@ do_test vacuum2-2.1 {
   }
   hexio_get_int [hexio_read test.db 24 4]
 } [expr {[hexio_get_int [hexio_read test.db 24 4]]+3}]
-do_test vacuum2-2.2 {
+do_test vacuum2-2.1 {
   execsql {
     VACUUM
   }

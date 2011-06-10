@@ -53,4 +53,3 @@ sqlite3_finalize $::STMT1
 sqlite3_finalize $::STMT2
 
 finish_test
-

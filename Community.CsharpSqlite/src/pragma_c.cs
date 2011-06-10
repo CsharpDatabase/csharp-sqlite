@@ -29,7 +29,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2010-12-07 20:14:09 a586a4deeb25330037a49df295b36aaf624d0f45
+    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
     **
     *************************************************************************
     */
@@ -161,7 +161,7 @@ namespace Community.CsharpSqlite
         }
         sqlite3BtreeClose( ref db.aDb[1].pBt );
         db.aDb[1].pBt = null;
-        sqlite3ResetInternalSchema( db, 0 );
+        sqlite3ResetInternalSchema( db, -1 );
       }
       return SQLITE_OK;
     }
@@ -511,12 +511,11 @@ new VdbeOpList( OP_ResultRow,   1, 1,        0),
         }
         else
         {
-          int size = sqlite3Atoi( zRight );
-          if ( size < 0 )
-            size = -size;
+          int size = sqlite3AbsInt32(sqlite3Atoi( zRight ));
           sqlite3BeginWriteOperation( pParse, 0, iDb );
           sqlite3VdbeAddOp2( v, OP_Integer, size, 1 );
           sqlite3VdbeAddOp3( v, OP_SetCookie, iDb, BTREE_DEFAULT_CACHE_SIZE, 1 );
+          Debug.Assert( sqlite3SchemaMutexHeld( db, iDb, null ) );
           pDb.pSchema.cache_size = size;
           sqlite3BtreeSetCacheSize( pDb.pBt, pDb.pSchema.cache_size );
         }
@@ -896,15 +895,14 @@ new VdbeOpList( OP_SetCookie,      0,               BTREE_INCR_VACUUM, 1),    /*
                           {
                             if ( sqlite3ReadSchema( pParse ) != 0 )
                               goto pragma_out;
+                            Debug.Assert( sqlite3SchemaMutexHeld( db, iDb, null ) );
                             if ( null == zRight )
                             {
                               returnSingleInt( pParse, "cache_size", pDb.pSchema.cache_size );
                             }
                             else
                             {
-                              int size = sqlite3Atoi( zRight );
-                              if ( size < 0 )
-                                size = -size;
+                              int size = sqlite3AbsInt32(sqlite3Atoi( zRight ));
                               pDb.pSchema.cache_size = size;
                               sqlite3BtreeSetCacheSize( pDb.pBt, pDb.pSchema.cache_size );
                             }
@@ -1414,6 +1412,7 @@ new  VdbeOpList( OP_ResultRow,   3, 1,        0),
                                                         ** Begin by filling registers 2, 3, ... with the root pages numbers
                                                         ** for all tables and indices in the database.
                                                         */
+                                                        Debug.Assert( sqlite3SchemaMutexHeld( db, iDb, null ) );
                                                         pTbls = db.aDb[i].pSchema.tblHash;
                                                         for ( x = pTbls.first; x != null; x = x.next )
                                                         {//          for(x=sqliteHashFirst(pTbls); x; x=sqliteHashNext(x)){
@@ -1486,7 +1485,7 @@ new VdbeOpList(  OP_Halt,        0,  0,  0),
                                                             addr = sqlite3VdbeAddOpList( v, ArraySize( idxErr ), idxErr );
                                                             sqlite3VdbeChangeP4( v, addr + 1, "rowid ", SQLITE_STATIC );
                                                             sqlite3VdbeChangeP4( v, addr + 3, " missing from index ", SQLITE_STATIC );
-                                                            sqlite3VdbeChangeP4( v, addr + 4, pIdx.zName, P4_STATIC );
+                                                            sqlite3VdbeChangeP4( v, addr + 4, pIdx.zName, P4_TRANSIENT );
                                                             sqlite3VdbeJumpHere( v, addr + 9 );
                                                             sqlite3VdbeJumpHere( v, jmp2 );
                                                           }
@@ -1517,7 +1516,7 @@ new VdbeOpList( OP_ResultRow,    2,  1,  0),
                                                             sqlite3VdbeJumpHere( v, addr + 4 );
                                                             sqlite3VdbeChangeP4( v, addr + 6,
                                                                        "wrong # of entries in index ", P4_STATIC );
-                                                            sqlite3VdbeChangeP4( v, addr + 7, pIdx.zName, P4_STATIC );
+                                                            sqlite3VdbeChangeP4( v, addr + 7, pIdx.zName, P4_TRANSIENT );
                                                           }
                                                         }
                                                       }
@@ -1684,12 +1683,12 @@ new VdbeOpList( OP_ResultRow,       1,  1,  0)
                                                         else if ( zLeft.Equals( "reload_schema" ,StringComparison.InvariantCultureIgnoreCase )  )
                                                         {
                                                           /* force schema reloading*/
-                                                          sqlite3ResetInternalSchema( db, 0 );
+                                                          sqlite3ResetInternalSchema( db, -1 );
                                                         }
                                                         else if ( zLeft.Equals( "file_format" ,StringComparison.InvariantCultureIgnoreCase )  )
                                                         {
                                                           pDb.pSchema.file_format = (u8)atoi( zRight );
-                                                          sqlite3ResetInternalSchema( db, 0 );
+                                                          sqlite3ResetInternalSchema( db, -1 );
                                                         }
                                                         else
 #endif // * SQLITE_OMIT_SCHEMA_VERSION_PRAGMAS */
@@ -1719,32 +1718,48 @@ new VdbeOpList( OP_ResultRow,       1,  1,  0)
 
 
 #if !SQLITE_OMIT_WAL
-/*
-**   PRAGMA [database.]wal_checkpoint
-**
-** Checkpoint the database.
-*/
-if( zLeft.Equals("wal_checkpoint", StringComparison.InvariantCultureIgnoreCase ) ){
-if( sqlite3ReadSchema(pParse) ) goto pragma_out;
-sqlite3VdbeAddOp3(v, OP_Checkpoint, pId2->z?iDb:SQLITE_MAX_ATTACHED, 0, 0);
-}else
+  /*
+  **   PRAGMA [database.]wal_checkpoint = passive|full|restart
+  **
+  ** Checkpoint the database.
+  */
+  if( sqlite3StrICmp(zLeft, "wal_checkpoint")==0 ){
+    int iBt = (pId2->z?iDb:SQLITE_MAX_ATTACHED);
+    int eMode = SQLITE_CHECKPOINT_PASSIVE;
+    if( zRight ){
+      if( sqlite3StrICmp(zRight, "full")==0 ){
+        eMode = SQLITE_CHECKPOINT_FULL;
+      }else if( sqlite3StrICmp(zRight, "restart")==0 ){
+        eMode = SQLITE_CHECKPOINT_RESTART;
+      }
+    }
+    if( sqlite3ReadSchema(pParse) ) goto pragma_out;
+    sqlite3VdbeSetNumCols(v, 3);
+    pParse->nMem = 3;
+    sqlite3VdbeSetColName(v, 0, COLNAME_NAME, "busy", SQLITE_STATIC);
+    sqlite3VdbeSetColName(v, 1, COLNAME_NAME, "log", SQLITE_STATIC);
+    sqlite3VdbeSetColName(v, 2, COLNAME_NAME, "checkpointed", SQLITE_STATIC);
 
-/*
-**   PRAGMA wal_autocheckpoint
-**   PRAGMA wal_autocheckpoint = N
-**
-** Configure a database connection to automatically checkpoint a database
-** after accumulating N frames in the log. Or query for the current value
-** of N.
-*/
-if( zLeft.Equals( "wal_autocheckpoint", StringComparison.InvariantCultureIgnoreCase ) ){
-if( zRight ){
-sqlite3_wal_autocheckpoint(db, sqlite3Atoi(zRight));
-}
-returnSingleInt(pParse, "wal_autocheckpoint", 
-db->xWalCallback==sqlite3WalDefaultHook ? 
-SQLITE_PTR_TO_INT(db->pWalArg) : 0);
-}else
+    sqlite3VdbeAddOp3(v, OP_Checkpoint, iBt, eMode, 1);
+    sqlite3VdbeAddOp2(v, OP_ResultRow, 1, 3);
+  }else
+
+  /*
+  **   PRAGMA wal_autocheckpoint
+  **   PRAGMA wal_autocheckpoint = N
+  **
+  ** Configure a database connection to automatically checkpoint a database
+  ** after accumulating N frames in the log. Or query for the current value
+  ** of N.
+  */
+  if( sqlite3StrICmp(zLeft, "wal_autocheckpoint")==0 ){
+    if( zRight ){
+      sqlite3_wal_autocheckpoint(db, sqlite3Atoi(zRight));
+    }
+    returnSingleInt(pParse, "wal_autocheckpoint", 
+       db->xWalCallback==sqlite3WalDefaultHook ? 
+           SQLITE_PTR_TO_INT(db->pWalArg) : 0);
+  }else
 #endif
 
 #if SQLITE_DEBUG || SQLITE_TEST

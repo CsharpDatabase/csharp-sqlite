@@ -235,7 +235,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2011-01-28 17:03:50 ed759d5a9edb3bba5f48f243df47be29e3fe8cd7
+    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
     **
     *************************************************************************
     */
@@ -244,7 +244,7 @@ namespace Community.CsharpSqlite
     /* The following value is the maximum cell size assuming a maximum page
     ** size give above.
     */
-    //#define MX_CELL_SIZE(pBt)  (pBt.pageSize-8)
+    //#define MX_CELL_SIZE(pBt)  ((int)(pBt->pageSize-8))
     static int MX_CELL_SIZE( BtShared pBt )
     {
       return (int)( pBt.pageSize - 8 );
@@ -418,7 +418,7 @@ namespace Community.CsharpSqlite
     ** All fields in this structure are accessed under sqlite3.mutex.
     ** The pBt pointer itself may not be changed while there exists cursors
     ** in the referenced BtShared that point back to this Btree since those
-    ** cursors have to do go through this Btree to find their BtShared and
+    ** cursors have to go through this Btree to find their BtShared and
     ** they often do so without holding sqlite3.mutex.
     */
     public class Btree
@@ -510,7 +510,7 @@ BtLock lock;              /* Object used to lock page 1 */
       public Pgno nPage;              /* Number of pages in the database */
       public Schema pSchema;          /* Pointer to space allocated by sqlite3BtreeSchema() */
       public dxFreeSchema xFreeSchema;/* Destructor for BtShared.pSchema */
-      public sqlite3_mutex mutex;     /* Non-recursive mutex required to access this struct */
+      public sqlite3_mutex mutex;     /* Non-recursive mutex required to access this object */
       public Bitvec pHasContent;      /* Set of pages moved to free-list this transaction */
 #if !SQLITE_OMIT_SHARED_CACHE
 public int nRef;                /* Number of references to this structure */

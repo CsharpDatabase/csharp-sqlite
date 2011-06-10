@@ -31,7 +31,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2011-01-28 17:03:50 ed759d5a9edb3bba5f48f243df47be29e3fe8cd7
+    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
     **
     *************************************************************************
     */
@@ -209,7 +209,7 @@ sqlite3_prepare(db, argv[2], -1, ref pStmt, ref sDummy);
       u32[] meta = new u32[5];
       InitData initData = new InitData();
       string zMasterSchema;
-      string zMasterName = SCHEMA_TABLE( iDb );
+      string zMasterName;
       int openedTransaction = 0;
 
       /*
@@ -372,13 +372,11 @@ sqlite3_prepare(db, argv[2], -1, ref pStmt, ref sDummy);
 
       if ( pDb.pSchema.cache_size == 0 )
       {
-        size = (int)meta[BTREE_DEFAULT_CACHE_SIZE - 1];
+        size = sqlite3AbsInt32((int)meta[BTREE_DEFAULT_CACHE_SIZE - 1]);
         if ( size == 0 )
         {
           size = SQLITE_DEFAULT_CACHE_SIZE;
         }
-        if ( size < 0 )
-          size = -size;
         pDb.pSchema.cache_size = size;
         sqlite3BtreeSetCacheSize( pDb.pBt, pDb.pSchema.cache_size );
       }
@@ -444,7 +442,7 @@ db.xAuth = xAuth;
       //if ( db.mallocFailed != 0 )
       //{
       //  rc = SQLITE_NOMEM;
-      //  sqlite3ResetInternalSchema( db, 0 );
+      //  sqlite3ResetInternalSchema( db, -1 );
       //}
       if ( rc == SQLITE_OK || ( db.flags & SQLITE_RecoveryMode ) != 0 )
       {
@@ -594,8 +592,10 @@ error_out:
         ** value stored as part of the in-memory schema representation,
         ** set Parse.rc to SQLITE_SCHEMA. */
         sqlite3BtreeGetMeta( pBt, BTREE_SCHEMA_VERSION, ref cookie );
+        Debug.Assert( sqlite3SchemaMutexHeld( db, iDb, null ) );
         if ( cookie != db.aDb[iDb].pSchema.schema_cookie )
         {
+          sqlite3ResetInternalSchema( db, iDb );
           pParse.rc = SQLITE_SCHEMA;
         }
 
@@ -758,10 +758,6 @@ error_out:
       if ( pParse.checkSchema != 0 )
       {
         schemaIsValid( pParse );
-      }
-      if ( pParse.rc == SQLITE_SCHEMA )
-      {
-        sqlite3ResetInternalSchema( db, 0 );
       }
       //if ( db.mallocFailed != 0 )
       //{

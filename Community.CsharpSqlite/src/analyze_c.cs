@@ -27,7 +27,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2011-01-28 17:03:50 ed759d5a9edb3bba5f48f243df47be29e3fe8cd7
+    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
     **
     *************************************************************************
     */
@@ -71,7 +71,8 @@ new _aTable( "sqlite_stat2", "tbl,idx,sampleno,sample" ),
     Parse pParse,       /* Parsing context */
     int iDb,            /* The database we are looking in */
     int iStatCur,       /* Open the sqlite_stat1 table on this cursor */
-    string zWhere       /* Delete entries associated with this table */
+    string zWhere,      /* Delete entries for this table or index */
+    string zWhereType   /* Either "tbl" or "idx" */
     )
     {
       int[] aRoot = new int[] { 0, 0 };
@@ -114,7 +115,7 @@ new _aTable( "sqlite_stat2", "tbl,idx,sampleno,sample" ),
           if ( !String.IsNullOrEmpty( zWhere ) )
           {
             sqlite3NestedParse( pParse,
-            "DELETE FROM %Q.%s WHERE tbl=%Q", pDb.zName, zTab, zWhere
+            "DELETE FROM %Q.%s WHERE %s=%Q", pDb.zName, zTab, zWhereType, zWhere
             );
           }
           else
@@ -141,6 +142,7 @@ new _aTable( "sqlite_stat2", "tbl,idx,sampleno,sample" ),
     static void analyzeOneTable(
     Parse pParse,    /* Parser context */
     Table pTab,      /* Table whose indices are to be analyzed */
+    Index pOnlyIdx,   /* If not NULL, only analyze this one index */
     int iStatCur,    /* Index of VdbeCursor that writes the sqlite_stat1 table */
     int iMem         /* Available memory locations begin here */
     )
@@ -152,8 +154,7 @@ new _aTable( "sqlite_stat2", "tbl,idx,sampleno,sample" ),
       int i;                       /* Loop counter */
       int topOfLoop;               /* The top of the loop */
       int endOfLoop;               /* The end of the loop */
-      int addr = 0;                /* The address of an instruction */
-      int jZeroRows = 0;           /* Jump from here if number of rows is zero */
+      int jZeroRows = -1;          /* Jump from here if number of rows is zero */
       int iDb;                     /* Index of database containing pTab */
       int regTabname = iMem++;     /* Register containing table name */
       int regIdxname = iMem++;     /* Register containing index name */
@@ -164,6 +165,7 @@ new _aTable( "sqlite_stat2", "tbl,idx,sampleno,sample" ),
       int regRowid = iMem++;       /* Rowid for the inserted record */
 
 #if SQLITE_ENABLE_STAT2
+      int addr = 0;                /* Instruction address */
       int regTemp2 = iMem++;       /* Temporary use register */
       int regSamplerecno = iMem++; /* Index of next sample to record */
       int regRecno = iMem++;       /* Current sample index */
@@ -189,6 +191,7 @@ new _aTable( "sqlite_stat2", "tbl,idx,sampleno,sample" ),
       Debug.Assert( sqlite3BtreeHoldsAllMutexes( db ) );
       iDb = sqlite3SchemaToIndex( db, pTab.pSchema );
       Debug.Assert( iDb >= 0 );
+      Debug.Assert( sqlite3SchemaMutexHeld(db, iDb, null) );
 #if !SQLITE_OMIT_AUTHORIZATION
 if( sqlite3AuthCheck(pParse, SQLITE_ANALYZE, pTab.zName, 0,
 db.aDb[iDb].zName ) ){
@@ -203,8 +206,12 @@ return;
       sqlite3VdbeAddOp4( v, OP_String8, 0, regTabname, 0, pTab.zName, 0 );
       for ( pIdx = pTab.pIndex; pIdx != null; pIdx = pIdx.pNext )
       {
-        int nCol = pIdx.nColumn;
-        KeyInfo pKey = sqlite3IndexKeyinfo( pParse, pIdx );
+        int nCol;
+        KeyInfo pKey;
+        if ( pOnlyIdx != null && pOnlyIdx != pIdx )
+          continue;
+        nCol = pIdx.nColumn;
+        pKey = sqlite3IndexKeyinfo( pParse, pIdx );
 
         if ( iMem + 1 + ( nCol * 2 ) > pParse.nMem )
         {
@@ -370,7 +377,7 @@ return;
         ** is never possible.
         */
         sqlite3VdbeAddOp2( v, OP_SCopy, iMem, regSampleno );
-        if ( jZeroRows == 0 )
+        if ( jZeroRows < 0 )
         {
           jZeroRows = sqlite3VdbeAddOp1( v, OP_IfNot, iMem );
         }
@@ -399,12 +406,12 @@ return;
         VdbeComment( v, "%s", pTab.zName );
         sqlite3VdbeAddOp2( v, OP_Count, iIdxCur, regSampleno );
         sqlite3VdbeAddOp1( v, OP_Close, iIdxCur );
+        jZeroRows = sqlite3VdbeAddOp1( v, OP_IfNot, regSampleno );
       }
       else
       {
-        Debug.Assert( jZeroRows > 0 );
-        addr = sqlite3VdbeAddOp0( v, OP_Goto );
         sqlite3VdbeJumpHere( v, jZeroRows );
+        jZeroRows = sqlite3VdbeAddOp0( v, OP_Goto );
       }
       sqlite3VdbeAddOp2( v, OP_Null, 0, regIdxname );
       sqlite3VdbeAddOp4( v, OP_MakeRecord, regTabname, 3, regRec, "aaa", 0 );
@@ -413,10 +420,7 @@ return;
       sqlite3VdbeChangeP5( v, OPFLAG_APPEND );
       if ( pParse.nMem < regRec )
         pParse.nMem = regRec;
-      if ( jZeroRows != 0 )
-      {
-        sqlite3VdbeJumpHere( v, addr );
-      }
+      sqlite3VdbeJumpHere( v, jZeroRows );
     }
 
     /*
@@ -446,22 +450,24 @@ return;
       sqlite3BeginWriteOperation( pParse, 0, iDb );
       iStatCur = pParse.nTab;
       pParse.nTab += 2;
-      openStatTable( pParse, iDb, iStatCur, null );
+      openStatTable( pParse, iDb, iStatCur, null, null );
       iMem = pParse.nMem + 1;
+      Debug.Assert( sqlite3SchemaMutexHeld( db, iDb, null ) );
       //for(k=sqliteHashFirst(pSchema.tblHash); k; k=sqliteHashNext(k)){
       for ( k = pSchema.tblHash.first; k != null; k = k.next )
       {
         Table pTab = (Table)k.data;// sqliteHashData( k );
-        analyzeOneTable( pParse, pTab, iStatCur, iMem );
+        analyzeOneTable( pParse, pTab, null, iStatCur, iMem );
       }
       loadAnalysis( pParse, iDb );
     }
 
     /*
     ** Generate code that will do an analysis of a single table in
-    ** a database.
+    ** a database.  If pOnlyIdx is not NULL then it is a single index
+    ** in pTab that should be analyzed.
     */
-    static void analyzeTable( Parse pParse, Table pTab )
+    static void analyzeTable( Parse pParse, Table pTab, Index pOnlyIdx)
     {
       int iDb;
       int iStatCur;
@@ -472,8 +478,14 @@ return;
       sqlite3BeginWriteOperation( pParse, 0, iDb );
       iStatCur = pParse.nTab;
       pParse.nTab += 2;
-      openStatTable( pParse, iDb, iStatCur, pTab.zName );
-      analyzeOneTable( pParse, pTab, iStatCur, pParse.nMem + 1 );
+      if ( pOnlyIdx != null )
+      {
+        openStatTable( pParse, iDb, iStatCur, pOnlyIdx.zName, "idx" );
+      }
+      else
+      {
+        openStatTable( pParse, iDb, iStatCur, pTab.zName, "tbl" );
+      }
       loadAnalysis( pParse, iDb );
     }
 
@@ -501,6 +513,7 @@ return;
       int i;
       string z, zDb;
       Table pTab;
+      Index pIdx;
       Token pTableName = null;
 
       /* Read the database schema. If an error occurs, leave an error message
@@ -535,12 +548,15 @@ return;
           z = sqlite3NameFromToken( db, pName1 );
           if ( z != null )
           {
-            pTab = sqlite3LocateTable( pParse, 0, z, null );
-            sqlite3DbFree( db, ref z );
-            if ( pTab != null )
+            if ( ( pIdx = sqlite3FindIndex( db, z, null ) ) != null )
             {
-              analyzeTable( pParse, pTab );
+              analyzeTable( pParse, pIdx.pTable, pIdx );
             }
+            else if ( ( pTab = sqlite3LocateTable( pParse, 0, z, null ) ) != null )
+            {
+              analyzeTable( pParse, pTab, null );
+            }
+            z = null;//sqlite3DbFree( db, z );
           }
         }
       }
@@ -554,12 +570,15 @@ return;
           z = sqlite3NameFromToken( db, pTableName );
           if ( z != null )
           {
-            pTab = sqlite3LocateTable( pParse, 0, z, zDb );
-            sqlite3DbFree( db, ref z );
-            if ( pTab != null )
+            if ( ( pIdx = sqlite3FindIndex( db, z, zDb ) ) != null )
             {
-              analyzeTable( pParse, pTab );
+              analyzeTable( pParse, pIdx.pTable, pIdx );
             }
+            else if ( ( pTab = sqlite3LocateTable( pParse, 0, z, zDb ) ) != null )
+            {
+              analyzeTable( pParse, pTab, null );
+            }
+            z = null; //sqlite3DbFree( db, z );
           }
         }
       }
@@ -635,6 +654,11 @@ return;
         pIndex.aiRowEst[i] = v;
         if ( zIndex < z.Length && z[zIndex] == ' ' )
           zIndex++;
+        if ( z.Substring(zIndex).CompareTo("unordered")==0)//memcmp( z, "unordered", 10 ) == 0 )
+        {
+          pIndex.bUnordered = 1;
+          break;
+        }
       }
       return 0;
     }
@@ -695,8 +719,8 @@ UNUSED_PARAMETER( pIdx );
 
       Debug.Assert( iDb >= 0 && iDb < db.nDb );
       Debug.Assert( db.aDb[iDb].pBt != null );
-      Debug.Assert( sqlite3BtreeHoldsMutex( db.aDb[iDb].pBt ) );
       /* Clear any prior statistics */
+      Debug.Assert( sqlite3SchemaMutexHeld( db, iDb, null ) );
       //for(i=sqliteHashFirst(&db.aDb[iDb].pSchema.idxHash);i;i=sqliteHashNext(i)){
       for ( i = db.aDb[iDb].pSchema.idxHash.first; i != null; i = i.next )
       {

@@ -394,7 +394,7 @@ det 5.3.1 "SELECT a, b FROM t1 WHERE a=1" {
 # (~1000000 rows)
 do_execsql_test 5.4.0 {CREATE TABLE t2(c, d)}
 det 5.4.1 "SELECT t1.*, t2.* FROM t1, t2 WHERE t1.a=1 AND t1.b>2" {
-  0 0 0 {SEARCH TABLE t1 USING COVERING INDEX i2 (a=? AND b>?) (~3 rows)}
+  0 0 0 {SEARCH TABLE t1 USING COVERING INDEX i2 (a=? AND b>?) (~2 rows)}
   0 1 1 {SCAN TABLE t2 (~1000000 rows)}
 }
 
@@ -403,7 +403,7 @@ det 5.4.1 "SELECT t1.*, t2.* FROM t1, t2 WHERE t1.a=1 AND t1.b>2" {
 # USING COVERING INDEX i2 (a=? AND b>?) (~3 rows) 0|1|0|SCAN TABLE t2
 # (~1000000 rows)
 det 5.5 "SELECT t1.*, t2.* FROM t2, t1 WHERE t1.a=1 AND t1.b>2" {
-  0 0 1 {SEARCH TABLE t1 USING COVERING INDEX i2 (a=? AND b>?) (~3 rows)}
+  0 0 1 {SEARCH TABLE t1 USING COVERING INDEX i2 (a=? AND b>?) (~2 rows)}
   0 1 0 {SCAN TABLE t2 (~1000000 rows)}
 }
 
@@ -492,7 +492,6 @@ det 5.13 "SELECT a FROM t1 EXCEPT SELECT d FROM t2 ORDER BY 1" {
 }
 
 
-if 0 {
 #-------------------------------------------------------------------------
 # The following tests - eqp-6.* - test that the example C code on 
 # documentation page eqp.html works. The C code is duplicated in test1.c
@@ -532,7 +531,6 @@ do_peqp_test 6.1 {
 2 0 0 USE TEMP B-TREE FOR ORDER BY
 0 0 0 COMPOUND SUBQUERIES 1 AND 2 (EXCEPT)
 }]
-}
 
 #-------------------------------------------------------------------------
 # The following tests - eqp-7.* - test that queries that use the OP_Count
@@ -561,7 +559,7 @@ do_execsql_test 7.3 {
   INSERT INTO t2 VALUES(1, 2);
   INSERT INTO t2 VALUES(3, 4);
   INSERT INTO t2 VALUES(5, 6);
-
+ 
   ANALYZE;
 }
 
@@ -571,7 +569,7 @@ sqlite3 db test.db
 det 7.4 "SELECT count(*) FROM t1" {
   0 0 0 {SCAN TABLE t1 (~2 rows)}
 }
- 
+
 det 7.5 "SELECT count(*) FROM t2" {
   0 0 0 {SCAN TABLE t2 USING COVERING INDEX i1(~3 rows)}
 }

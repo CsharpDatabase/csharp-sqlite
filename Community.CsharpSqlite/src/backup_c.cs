@@ -32,7 +32,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2011-01-28 17:03:50 ed759d5a9edb3bba5f48f243df47be29e3fe8cd7
+    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
     **
     *************************************************************************
     */
@@ -264,6 +264,10 @@ namespace Community.CsharpSqlite
       int nDestPgsz = sqlite3BtreeGetPageSize( p.pDest );
       int nCopy = MIN( nSrcPgsz, nDestPgsz );
       i64 iEnd = (i64)iSrcPg * (i64)nSrcPgsz;
+#if SQLITE_HAS_CODEC
+      int nSrcReserve = sqlite3BtreeGetReserve(p.pSrc);
+      int nDestReserve = sqlite3BtreeGetReserve(p.pDest);
+#endif
 
       int rc = SQLITE_OK;
       i64 iOff;
@@ -283,18 +287,31 @@ namespace Community.CsharpSqlite
 
 #if SQLITE_HAS_CODEC
       /* Backup is not possible if the page size of the destination is changing
-** a a codec is in use.
-*/
+      ** and a codec is in use.
+      */
       if ( nSrcPgsz != nDestPgsz && sqlite3PagerGetCodec( pDestPager ) != null )
       {
         rc = SQLITE_READONLY;
       }
+
+      /* Backup is not possible if the number of bytes of reserve space differ
+      ** between source and destination.  If there is a difference, try to
+      ** fix the destination to agree with the source.  If that is not possible,
+      ** then the backup cannot proceed.
+      */
+      if ( nSrcReserve != nDestReserve )
+      {
+        u32 newPgsz = (u32)nSrcPgsz;
+        rc = sqlite3PagerSetPagesize( pDestPager, ref newPgsz, nSrcReserve );
+        if ( rc == SQLITE_OK && newPgsz != nSrcPgsz )
+          rc = SQLITE_READONLY;
+      }
 #endif
 
       /* This loop runs once for each destination page spanned by the source
-** page. For each iteration, variable iOff is set to the byte offset
-** of the destination page.
-*/
+      ** page. For each iteration, variable iOff is set to the byte offset
+      ** of the destination page.
+      */
       for ( iOff = iEnd - (i64)nSrcPgsz; rc == SQLITE_OK && iOff < iEnd; iOff += nDestPgsz )
       {
         DbPage pDestPg = null;
@@ -473,7 +490,7 @@ namespace Community.CsharpSqlite
           Pgno nDestTruncate;
           if ( p.pDestDb != null )
           {
-            sqlite3ResetInternalSchema( p.pDestDb, 0 );
+            sqlite3ResetInternalSchema( p.pDestDb, -1 );
           }
 
           /* Set nDestTruncate to the final number of pages in the destination
@@ -571,7 +588,7 @@ namespace Community.CsharpSqlite
 
           /* Finish committing the transaction to the destination database. */
           if ( SQLITE_OK == rc
-          && SQLITE_OK == ( rc = sqlite3BtreeCommitPhaseTwo( p.pDest ) )
+          && SQLITE_OK == ( rc = sqlite3BtreeCommitPhaseTwo( p.pDest, 0 ) )
           )
           {
             rc = SQLITE_DONE;
@@ -591,7 +608,7 @@ namespace Community.CsharpSqlite
           //TESTONLY( rc2 |= ) sqlite3BtreeCommitPhaseTwo(p.pSrc);
           int rc2;
           rc2 = sqlite3BtreeCommitPhaseOne( p.pSrc, "" );
-          rc2 |= sqlite3BtreeCommitPhaseTwo( p.pSrc );
+          rc2 |= sqlite3BtreeCommitPhaseTwo( p.pSrc, 0 );
           Debug.Assert( rc2 == SQLITE_OK );
 #else
 sqlite3BtreeCommitPhaseOne(p.pSrc, null);
@@ -715,7 +732,11 @@ sqlite3BtreeCommitPhaseTwo(p.pSrc);
           ** has been modified by a transaction on the source pager. Copy
           ** the new data into the backup.
           */
-          int rc = backupOnePage( p, iPage, aData );
+          int rc;
+          Debug.Assert( p.pDestDb != null );
+          sqlite3_mutex_enter( p.pDestDb.mutex );
+          rc = backupOnePage( p, iPage, aData );
+          sqlite3_mutex_leave( p.pDestDb.mutex );
           Debug.Assert( rc != SQLITE_BUSY && rc != SQLITE_LOCKED );
           if ( rc != SQLITE_OK )
           {

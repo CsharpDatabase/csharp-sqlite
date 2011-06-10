@@ -44,7 +44,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2010-08-23 18:52:01 42537b60566f288167f1b5864a5435986838e3a3
+    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
     **
     *************************************************************************
     */
@@ -183,7 +183,7 @@ namespace Community.CsharpSqlite
     ref string pzNext   /* Write first byte past UTF-8 char here */
     )
     {
-      //int c;
+      //unsigned int c;
       /* Same as READ_UTF8() above but without the zTerm parameter.
       ** For this routine, we assume the UTF8 string is always zero-terminated.
       */
@@ -459,15 +459,15 @@ return rc;
 ** This has the effect of making sure that the string is well-formed
 ** UTF-8.  Miscoded characters are removed.
 **
-** The translation is done in-place (since it is impossible for the
-** correct UTF-8 encoding to be longer than a malformed encoding).
+** The translation is done in-place and aborted if the output
+** overruns the input.
 */
     //int sqlite3Utf8To8(unsigned char *zIn){
     //  unsigned char *zOut = zIn;
     //  unsigned char *zStart = zIn;
     //  u32 c;
 
-    //  while( zIn[0] ){
+    //    while( zIn[0] && zOut<=zIn ){
     //    c = sqlite3Utf8Read(zIn, (const u8**)&zIn);
     //    if( c!=0xfffd ){
     //      WRITE_UTF8(zOut, c);

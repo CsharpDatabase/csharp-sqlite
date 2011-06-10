@@ -146,7 +146,6 @@ proc te_join {data1 data2 args} {
   set isleft 0
   for {set i 0} {$i < [llength $args]} {incr i} {
     set a [lindex $args $i]
-    if { $a != "{}" } {
     switch -- $a {
       -on     { set testproc [lindex $args [incr i]] }
       -using  { set usinglist [lindex $args [incr i]] }
@@ -156,7 +155,6 @@ proc te_join {data1 data2 args} {
       }
     }
   }
-}
 
   set c1 [lindex $data1 0]
   set c2 [lindex $data2 0]

@@ -239,7 +239,7 @@ static void CODEC_TRACE( string T, params object[] ap ) { if ( sqlite3PagerTrace
     }
 
     /**
-    * Initialize a a new cipher_ctx struct. This function will allocate memory
+    * Initialize a new cipher_ctx struct. This function will allocate memory
     * for the cipher context and for the key
     *
     * returns SQLITE_OK if initialization was successful

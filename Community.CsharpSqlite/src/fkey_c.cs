@@ -26,7 +26,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2010-12-07 20:14:09 a586a4deeb25330037a49df295b36aaf624d0f45
+    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
     **
     *************************************************************************    */
     //#include "sqliteInt.h"
@@ -189,7 +189,7 @@ namespace Community.CsharpSqlite
     **
     **   4) No parent key columns were provided explicitly as part of the
     **      foreign key definition, and the PRIMARY KEY of the parent table 
-    **      consists of a a different number of columns to the child key in 
+    **      consists of a different number of columns to the child key in 
     **      the child table.
     **
     ** then non-zero is returned, and a "foreign key mismatch" error loaded
@@ -438,7 +438,13 @@ namespace Community.CsharpSqlite
           /* If the parent table is the same as the child table, and we are about
           ** to increment the constraint-counter (i.e. this is an INSERT operation),
           ** then check if the row being inserted matches itself. If so, do not
-          ** increment the constraint-counter.  */
+          ** increment the constraint-counter. 
+          **
+          ** If any of the parent-key values are NULL, then the row cannot match 
+          ** itself. So set JUMPIFNULL to make sure we do the OP_Found if any
+          ** of the parent-key values are NULL (at this point it is known that
+          ** none of the child key values are).
+          */
           if ( pTab == pFKey.pFrom && nIncr == 1 )
           {
             int iJump = sqlite3VdbeCurrentAddr( v ) + nCol + 1;
@@ -446,13 +452,20 @@ namespace Community.CsharpSqlite
             {
               int iChild = aiCol[i] + 1 + regData;
               int iParent = pIdx.aiColumn[i] + 1 + regData;
+              Debug.Assert( aiCol[i] != pTab.iPKey );
+              if ( pIdx.aiColumn[i] == pTab.iPKey )
+              {
+                /* The parent key is a composite key that includes the IPK column */
+                iParent = regData;
+              }
               sqlite3VdbeAddOp3( v, OP_Ne, iChild, iJump, iParent );
+              sqlite3VdbeChangeP5( v, SQLITE_JUMPIFNULL );
             }
             sqlite3VdbeAddOp2( v, OP_Goto, 0, iOk );
           }
 
           sqlite3VdbeAddOp3( v, OP_MakeRecord, regTemp, nCol, regRec );
-          sqlite3VdbeChangeP4( v, -1, sqlite3IndexAffinityStr( v, pIdx ), 0 );
+          sqlite3VdbeChangeP4( v, -1, sqlite3IndexAffinityStr( v, pIdx ), P4_TRANSIENT );
           sqlite3VdbeAddOp4Int( v, OP_Found, iCur, iOk, regRec, 0 );
 
           sqlite3ReleaseTempReg( pParse, regRec );
@@ -770,7 +783,6 @@ namespace Community.CsharpSqlite
     )
     {
       sqlite3 db = pParse.db;        /* Database handle */
-      Vdbe v;                        /* VM to write code to */
       FKey pFKey;                    /* Used to iterate through FKs */
       int iDb;                       /* Index of database containing pTab */
       string zDb;                    /* Name of database containing pTab */
@@ -783,7 +795,6 @@ namespace Community.CsharpSqlite
       if ( ( db.flags & SQLITE_ForeignKeys ) == 0 )
         return;
 
-      v = sqlite3GetVdbe( pParse );
       iDb = sqlite3SchemaToIndex( db, pTab.pSchema );
       zDb = db.aDb[iDb].zName;
 
@@ -1318,6 +1329,7 @@ namespace Community.CsharpSqlite
       FKey pFKey;                    /* Iterator variable */
       FKey pNext;                    /* Copy of pFKey.pNextFrom */
 
+      Debug.Assert( db == null || sqlite3SchemaMutexHeld( db, 0, pTab.pSchema ) );
       for ( pFKey = pTab.pFKey; pFKey != null; pFKey = pNext )
       {
 

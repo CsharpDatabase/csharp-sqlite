@@ -38,7 +38,7 @@ proc do_trace_test {tn sql expected} {
   #
   set ::trace [list]
   execsql $sql
-  uplevel do_test $tn [list {set ::trace}] [list [list $expected]]
+  uplevel do_test $tn [list {set ::trace}] [list [list {*}$expected]]
 }
 
 proc do_trace_select_test {tn sql expected} {
@@ -58,13 +58,16 @@ proc do_trace_select_test {tn sql expected} {
 
 do_trace_select_test 1.1  {
   SELECT 1, 2, 3;
-} {SELECT 1, 2, 3;}
+} {
+  "SELECT 1, 2, 3;"
+}
 
 do_trace_select_test 1.2  {
   SELECT sql('SELECT 1, 2, 3');
-} {SELECT sql('SELECT 1, 2, 3');-- SELECT 1, 2, 3}
-
-if 0 {
+} {
+  "SELECT sql('SELECT 1, 2, 3');"
+  "-- SELECT 1, 2, 3"
+}
 
 do_trace_select_test 1.3  {
   SELECT sql('SELECT 1, 
@@ -113,7 +116,7 @@ do_trace_select_test 1.5  {
 --     $var, 
 --     3"
 }
-}
+
 ifcapable fts3 {
   do_execsql_test 2.1 {
     CREATE VIRTUAL TABLE x1 USING fts4;
@@ -125,7 +128,7 @@ ifcapable fts3 {
     INSERT INTO x1 VALUES('North northwest wind between 8 and 14 mph');
   } {
     "INSERT INTO x1 VALUES('North northwest wind between 8 and 14 mph');" 
-    "-- INSERT INTO 'main'.'x1_content' VALUES(?,?)" 
+    "-- INSERT INTO 'main'.'x1_content' VALUES(?,(?))" 
     "-- REPLACE INTO 'main'.'x1_docsize' VALUES(?,?)" 
     "-- SELECT value FROM 'main'.'x1_stat' WHERE id=0" 
     "-- REPLACE INTO 'main'.'x1_stat' VALUES(0,?)" 
@@ -138,8 +141,8 @@ ifcapable fts3 {
     INSERT INTO x1(x1) VALUES('optimize');
   } {
     "INSERT INTO x1(x1) VALUES('optimize');"
-    "-- SELECT count(*), max(level) FROM 'main'.'x1_segdir'"
     "-- SELECT idx, start_block, leaves_end_block, end_block, root FROM 'main'.'x1_segdir' ORDER BY level DESC, idx ASC"
+    "-- SELECT count(*), max(level) FROM 'main'.'x1_segdir'"
     "-- SELECT coalesce((SELECT max(blockid) FROM 'main'.'x1_segments') + 1, 1)"
     "-- DELETE FROM 'main'.'x1_segdir'"
     "-- INSERT INTO 'main'.'x1_segdir' VALUES(?,?,?,?,?,?)"

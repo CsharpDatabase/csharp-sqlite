@@ -28,7 +28,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2011-01-28 17:03:50 ed759d5a9edb3bba5f48f243df47be29e3fe8cd7
+    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
     **
     *************************************************************************
     */
@@ -628,6 +628,33 @@ scratch_overflow:
           scratchAllocOut = 0;
 #endif
         }
+    //if( p>=sqlite3GlobalConfig.pScratch && p<mem0.pScratchEnd ){
+    //  /* Release memory from the SQLITE_CONFIG_SCRATCH allocation */
+    //  ScratchFreeslot *pSlot;
+    //  pSlot = (ScratchFreeslot*)p;
+    //  sqlite3_mutex_enter(mem0.mutex);
+    //  pSlot->pNext = mem0.pScratchFree;
+    //  mem0.pScratchFree = pSlot;
+    //  mem0.nScratchFree++;
+    //  assert( mem0.nScratchFree <= (u32)sqlite3GlobalConfig.nScratch );
+    //  sqlite3StatusAdd(SQLITE_STATUS_SCRATCH_USED, -1);
+    //  sqlite3_mutex_leave(mem0.mutex);
+    //}else{
+    //  /* Release memory back to the heap */
+    //  assert( sqlite3MemdebugHasType(p, MEMTYPE_SCRATCH) );
+    //  assert( sqlite3MemdebugNoType(p, ~MEMTYPE_SCRATCH) );
+    //  sqlite3MemdebugSetType(p, MEMTYPE_HEAP);
+    //  if( sqlite3GlobalConfig.bMemstat ){
+    //    int iSize = sqlite3MallocSize(p);
+    //    sqlite3_mutex_enter(mem0.mutex);
+    //    sqlite3StatusAdd(SQLITE_STATUS_SCRATCH_OVERFLOW, -iSize);
+    //    sqlite3StatusAdd(SQLITE_STATUS_MEMORY_USED, -iSize);
+    //    sqlite3StatusAdd(SQLITE_STATUS_MALLOC_COUNT, -1);
+    //    sqlite3GlobalConfig.m.xFree(p);
+    //    sqlite3_mutex_leave(mem0.mutex);
+    //  }else{
+    //    sqlite3GlobalConfig.m.xFree(p);
+    //  }
         p = null;
       }
     }

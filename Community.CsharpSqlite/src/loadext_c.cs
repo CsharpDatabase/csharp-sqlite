@@ -24,7 +24,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2010-12-07 20:14:09 a586a4deeb25330037a49df295b36aaf624d0f45
+    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
     **
     *************************************************************************
     */
@@ -92,6 +92,11 @@ namespace Community.CsharpSqlite
 #if SQLITE_OMIT_COMPLETE
 //# define sqlite3_complete 0
 //# define sqlite3_complete16 0
+#endif
+
+#if SQLITE_OMIT_DECLTYPE
+//# define sqlite3_column_decltype16      0
+//# define sqlite3_column_decltype        0
 #endif
 
 #if SQLITE_OMIT_PROGRESS_CALLBACK

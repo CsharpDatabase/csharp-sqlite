@@ -19,7 +19,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2010-08-23 18:52:01 42537b60566f288167f1b5864a5435986838e3a3
+    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
     **
     *************************************************************************
     */
@@ -128,9 +128,9 @@ namespace Community.CsharpSqlite
 #endif
 
 
-    /*
+/*
 ** The maximum number of attached databases.  This must be between 0
-** and 30.  The upper bound on 30 is because a 32-bit integer bitmap
+** and 62.  The upper bound on 62 is because a 64-bit integer bitmap
 ** is used internally to track attached databases.
 */
 #if !SQLITE_MAX_ATTACHED

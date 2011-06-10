@@ -26,7 +26,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2011-01-28 17:03:50 ed759d5a9edb3bba5f48f243df47be29e3fe8cd7
+    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
     **
     *************************************************************************
     */
@@ -201,6 +201,7 @@ namespace Community.CsharpSqlite
             int i;                      /* Used to iterate through schemas */
             int nByte = 0;              /* Used to accumulate return value */
 
+            sqlite3BtreeEnterAll( db );
             //db.pnBytesFreed = nByte;
             for ( i = 0; i < db.nDb; i++ )
             {
@@ -233,6 +234,7 @@ namespace Community.CsharpSqlite
               }
             }
             db.pnBytesFreed = 0;
+            sqlite3BtreeLeaveAll( db );
 
             pHighwater = 0;
             pCurrent = nByte;

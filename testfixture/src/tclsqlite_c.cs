@@ -55,7 +55,7 @@ using sqlite3_blob = sqlite.Incrblob;
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2011-01-28 17:03:50 ed759d5a9edb3bba5f48f243df47be29e3fe8cd7
+    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
     **
     *************************************************************************
     */
@@ -2944,7 +2944,7 @@ break;
               {
                 pDb.zProfile = null;
               }
-#if !SQLITE_OMIT_TRACE
+#if !SQLITE_OMIT_TRACE && !(SQLITE_OMIT_FLOATING_POINT)
               if ( !String.IsNullOrEmpty( pDb.zProfile ) )
               {
                 pDb.interp = interp;
@@ -3190,7 +3190,7 @@ break;
               {
                 pDb.zTrace = null;
               }
-#if !SQLITE_OMIT_TRACE
+#if !SQLITE_OMIT_TRACE && !(SQLITE_OMIT_FLOATING_POINT)
               if ( pDb.zTrace != null )
               {
                 pDb.interp = interp;
@@ -4282,10 +4282,14 @@ TCL.Tcl_AppendResult( interp, "0", null );
       //extern int Sqlitetestintarray_Init(Tcl_Interp*);
       //extern int Sqlitetestvfs_Init(Tcl_Interp *);
       //extern int SqlitetestStat_Init(Tcl_Interp*);
-      //    extern int Sqlitetestrtree_Init(Tcl_Interp*);
-      //    extern int Sqlitequota_Init(Tcl_Interp*);
-      //    extern int Sqlitemultiplex_Init(Tcl_Interp*);
-      //    extern int SqliteSuperlock_Init(Tcl_Interp*);
+      //extern int Sqlitetestrtree_Init(Tcl_Interp*);
+      //extern int Sqlitequota_Init(Tcl_Interp*);
+      //extern int Sqlitemultiplex_Init(Tcl_Interp*);
+      //extern int SqliteSuperlock_Init(Tcl_Interp*);
+      //extern int SqlitetestSyscall_Init(Tcl_Interp*);
+      //extern int Sqlitetestfuzzer_Init(Tcl_Interp*);
+      //extern int Sqlitetestwholenumber_Init(Tcl_Interp*);
+
 
 #if SQLITE_ENABLE_ZIPVFS
 //    extern int Zipvfs_Init(Tcl_Interp*);
@@ -4353,6 +4357,13 @@ TCL.Tcl_AppendResult( interp, "0", null );
 
       //virtual table interfaces not implemented under C#
       //SqlitetestStat_Init(interp);
+      //Sqlitetestrtree_Init( interp );
+      //Sqlitequota_Init( interp );
+      //Sqlitemultiplex_Init( interp );
+      //SqliteSuperlock_Init( interp );
+      //SqlitetestSyscall_Init( interp );
+      //Sqlitetestfuzzer_Init( interp );
+      //Sqlitetestwholenumber_Init( interp );
 
       TCL.Tcl_CreateObjCommand( interp, "load_testfixture_extensions", init_all_cmd, 0, null );
 

@@ -181,6 +181,8 @@ test_suite "fts3" -prefix "" -description {
   fts3near.test fts3query.test fts3shared.test fts3snippet.test 
 
   fts3fault.test fts3malloc.test fts3matchinfo.test
+
+  fts3aux1.test fts3comp1.test
 }
 
 
@@ -196,6 +198,7 @@ test_suite "coverage-wal" -description {
   wal.test       wal2.test     wal3.test       walmode.test    
   walbak.test    walhook.test  walcrash2.test  walcksum.test
   walfault.test  walbig.test   walnoshm.test
+  wal5.test
 } 
 
 test_suite "coverage-pager" -description {
@@ -829,22 +832,13 @@ proc help {} {
       array set o $::testspec($k)
       puts "Test suite: \"$k\""
       set d [string trim $o(-description)]
-#      set d [regsub {\n *} $d "\n  " d]
+      set d [regsub {\n *} $d "\n  "]
       puts "  $d"
       puts ""
     }
   }
-  #exit -1
+  exit -1
 }
-
-proc test_list {name} {
-      array set o $::testspec($name)
-      puts "Test suite: \"$name\""
-      puts [string trim $o(-description)]
-      foreach file [lsort $o(-files)] {
-         puts "source \$testdir/$file"
-      }
-  }
 
 if {[info script] == $argv0} {
   proc main {argv} {

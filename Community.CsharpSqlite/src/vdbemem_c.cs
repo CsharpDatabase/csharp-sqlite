@@ -33,7 +33,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2010-12-07 20:14:09 a586a4deeb25330037a49df295b36aaf624d0f45
+    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
     **
     *************************************************************************
     */
@@ -1500,17 +1500,25 @@ if( NEVER(op==TK_REGISTER) ) op = pExpr.op2;
         if ( SQLITE_OK == sqlite3ValueFromExpr( db, pExpr.pLeft, enc, affinity, ref pVal ) )
         {
           sqlite3VdbeMemNumerify( pVal );
-          pVal.u.i = -1 * pVal.u.i;
-          /* (double)-1 In case of SQLITE_OMIT_FLOATING_POINT... */
-          pVal.r = (double)-1 * pVal.r;
+          if ( pVal.u.i == SMALLEST_INT64 )
+          {
+            pVal.flags &= MEM_Int;
+            pVal.flags |= MEM_Real;
+            pVal.r = (double)LARGEST_INT64;
+          }
+          else
+          {
+            pVal.u.i = -pVal.u.i;
+          }
+          pVal.r = -pVal.r;
           sqlite3ValueApplyAffinity( pVal, affinity, enc );
         }
-        else if ( op == TK_NULL )
-        {
-          pVal = sqlite3ValueNew( db );
-          if ( pVal == null )
-            goto no_mem;
-        }
+      }
+      else if ( op == TK_NULL )
+      {
+        pVal = sqlite3ValueNew( db );
+        if ( pVal == null)
+          goto no_mem;
       }
 #if !SQLITE_OMIT_BLOB_LITERAL
       else if ( op == TK_BLOB )

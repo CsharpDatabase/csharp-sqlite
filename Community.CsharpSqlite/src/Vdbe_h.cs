@@ -26,7 +26,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2010-08-23 18:52:01 42537b60566f288167f1b5864a5435986838e3a3
+    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
     **
     *************************************************************************
     */
@@ -160,7 +160,7 @@ public u64 cycles;         /* Total time spend executing this instruction */
     const int P4_KEYINFO = ( -6 );  /* P4 is a pointer to a KeyInfo structure */
     const int P4_VDBEFUNC = ( -7 );  /* P4 is a pointer to a VdbeFunc structure */
     const int P4_MEM = ( -8 );  /* P4 is a pointer to a Mem*    structure */
-    const int P4_TRANSIENT = ( -9 ); /* P4 is a pointer to a transient string */
+    const int P4_TRANSIENT =  0; /* P4 is a pointer to a transient string */
     const int P4_VTAB = ( -10 ); /* P4 is a pointer to an sqlite3_vtab structure */
     const int P4_MPRINTF = ( -11 ); /* P4 is a string obtained from sqlite3_mprintf=(); */
     const int P4_REAL = ( -12 ); /* P4 is a 64-bit floating point value */
