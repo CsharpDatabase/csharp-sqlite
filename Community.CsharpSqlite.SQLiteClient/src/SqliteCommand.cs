@@ -217,8 +217,8 @@ namespace Community.CsharpSqlite.SQLiteClient
 				String name = Sqlite3.sqlite3_bind_parameter_name( pStmt, i );
 
 				SqliteParameter param = null;
-				if ( name != null )
-					param = sql_params[name] as SqliteParameter;
+        if ( !String.IsNullOrEmpty( name ) )
+          param = sql_params[name] as SqliteParameter;
 				else
 					param = sql_params[i - 1] as SqliteParameter;
 
