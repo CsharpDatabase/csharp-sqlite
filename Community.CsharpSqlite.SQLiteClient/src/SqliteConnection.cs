@@ -175,20 +175,25 @@ namespace Community.CsharpSqlite.SQLiteClient
 				db_mode = 0644;
 				
 				string[] conn_pieces = connstring.Split (',');
-				for (int i = 0; i < conn_pieces.Length; i++) {
-					string piece = conn_pieces [i].Trim ();
-					if (piece.Length == 0) { // ignore empty elements
-												continue;
-					}
-					string[] arg_pieces = piece.Split ('=');
-					if (arg_pieces.Length != 2) {
-						throw new InvalidOperationException ("Invalid connection string");
-					}
-					string token = arg_pieces[0].ToLower (System.Globalization.CultureInfo.InvariantCulture).Trim ();
-					string tvalue = arg_pieces[1].Trim ();
-					string tvalue_lc = arg_pieces[1].ToLower (System.Globalization.CultureInfo.InvariantCulture).Trim ();
-					switch (token) {
-						case "data source":
+        for ( int i = 0; i < conn_pieces.Length; i++ )
+        {
+          string piece = conn_pieces[i].Trim();
+          // ignore empty elements
+          if ( piece.Length == 0 )
+          {
+            continue;
+          }
+          int firstEqual = piece.IndexOf( '=' );
+          if ( firstEqual == -1 )
+          {
+            throw new InvalidOperationException( "Invalid connection string" );
+          }
+          string token = piece.Substring( 0, firstEqual );
+          string tvalue = piece.Remove( 0, firstEqual + 1 ).Trim();
+          string tvalue_lc = tvalue.ToLower( System.Globalization.CultureInfo.InvariantCulture ).Trim();
+          switch ( token )
+          {
+            case "data source":
 						case "uri": 
 							if (tvalue_lc.StartsWith ("file://")) {
 								db_file = tvalue.Substring (7);
