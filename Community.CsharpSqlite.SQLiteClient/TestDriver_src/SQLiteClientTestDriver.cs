@@ -761,11 +761,78 @@ namespace SQLiteClientTests
 
     }
 #endif
+
+
+    public void Issue_119()
+    {
+      Console.WriteLine( "Test Start." );
+
+      Console.WriteLine( "Create connection..." );
+      SqliteConnection con = new SqliteConnection();
+
+      string dbFilename = @"=SqliteTest3=.db";
+      string cs = string.Format( "Version=3,uri=file:{0}", dbFilename );
+
+      Console.WriteLine( "Set connection String: {0}", cs );
+
+      if ( File.Exists( dbFilename ) )
+        File.Delete( dbFilename );
+
+      con.ConnectionString = cs;
+
+      Console.WriteLine( "Open database..." );
+      con.Open();
+
+      Console.WriteLine( "create command..." );
+      IDbCommand cmd = con.CreateCommand();
+
+      Console.WriteLine( "create table TEST_TABLE..." );
+      cmd.CommandText = "CREATE TABLE TEST_TABLE ( COLA INTEGER, COLB TEXT, COLC DATETIME )";
+      cmd.ExecuteNonQuery();
+
+      Console.WriteLine( "insert row 1..." );
+      cmd.CommandText = "INSERT INTO TEST_TABLE ( COLA, COLB, COLC ) VALUES (123,'ABC','2008-12-31 18:19:20' )";
+      cmd.ExecuteNonQuery();
+
+      Console.WriteLine( "insert row 2..." );
+      cmd.CommandText = "INSERT INTO TEST_TABLE ( COLA, COLB, COLC ) VALUES (124,'DEF', '2009-11-16 13:35:36' )";
+      cmd.ExecuteNonQuery();
+
+      Console.WriteLine( "SELECT data from TEST_TABLE..." );
+      cmd.CommandText = "SELECT RowID, COLA, COLB, COLC FROM TEST_TABLE";
+      IDataReader reader = cmd.ExecuteReader();
+      int r = 0;
+      Console.WriteLine( "Read the data..." );
+      while ( reader.Read() )
+      {
+        Console.WriteLine( "  Row: {0}", r );
+        int rowid = reader.GetInt32( reader.GetOrdinal( "RowID" ) );
+        Console.WriteLine( "    RowID: {0}", rowid );
+
+        int i = reader.GetInt32( reader.GetOrdinal( "COLA" ) );
+        Console.WriteLine( "    COLA: {0}", i );
+
+        string s = reader.GetString( reader.GetOrdinal( "COLB" ) );
+        Console.WriteLine( "    COLB: {0}", s );
+
+        DateTime dt = reader.GetDateTime( reader.GetOrdinal( "COLC" ) );
+        Console.WriteLine( "    COLB: {0}", dt.ToString( "MM/dd/yyyy HH:mm:ss" ) );
+
+        r++;
+      }
+
+      Console.WriteLine( "Close and cleanup..." );
+      con.Close();
+      con = null;
+
+      Console.WriteLine( "Test Done." );
+    }
+    
     public static int Main( string[] args )
     {
       SQLiteClientTestDriver tests = new SQLiteClientTestDriver();
 
-      int Test = 7;
+      int Test = 119;
       switch ( Test )
       {
         case 1:
@@ -797,6 +864,9 @@ namespace SQLiteClientTests
           break;
         case 86:
           tests.Issue_86();
+          break;
+        case 119:
+          tests.Issue_119();
           break;
       }
       Console.WriteLine( "Press Enter to Continue" );

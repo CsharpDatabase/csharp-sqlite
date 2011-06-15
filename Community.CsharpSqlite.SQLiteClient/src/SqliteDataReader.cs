@@ -63,7 +63,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 			command = cmd;
             rows = new List<object[]>();
             column_names_sens = new Dictionary<String, Object>();
-            column_names_insens = new Dictionary<String, Object>();
+            column_names_insens = new Dictionary<String, Object>( StringComparer.InvariantCultureIgnoreCase );
 			closed = false;
 			current_row = -1;
 			reading = true;
@@ -430,12 +430,12 @@ namespace Community.CsharpSqlite.SQLiteClient
 
 		public override int GetOrdinal (string name)
 		{
-			object v = column_names_sens[name];
-			if (v == null)
-				v = column_names_insens[name];
-			if (v == null)
-				throw new ArgumentException("Column does not exist.");
-			return (int) v;
+      object v = column_names_sens.ContainsKey( name ) ? column_names_sens[name] : null;
+      if ( v == null )
+        v = column_names_insens.ContainsKey( name ) ? column_names_insens[name] : null;
+      if ( v == null )
+        throw new ArgumentException( "Column does not exist." );
+      return (int)v;
 		}
 
 		public override string GetString (int i)
