@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Text;
+using u32 = System.UInt32;
 
 namespace Community.CsharpSqlite
 {
@@ -462,20 +463,35 @@ return rc;
 ** The translation is done in-place and aborted if the output
 ** overruns the input.
 */
-    //int sqlite3Utf8To8(unsigned char *zIn){
-    //  unsigned char *zOut = zIn;
-    //  unsigned char *zStart = zIn;
-    //  u32 c;
+    static int sqlite3Utf8To8(byte[] zIn){
+      //byte[] zOut = zIn;
+      //byte[] zStart = zIn;
+      //u32 c;
 
-    //    while( zIn[0] && zOut<=zIn ){
-    //    c = sqlite3Utf8Read(zIn, (const u8**)&zIn);
-    //    if( c!=0xfffd ){
-    //      WRITE_UTF8(zOut, c);
-    //    }
-    //  }
-    //  *zOut = 0;
-    //  return (int)(zOut - zStart);
-    //}
+      //  while( zIn[0] && zOut<=zIn ){
+      //  c = sqlite3Utf8Read(zIn, (const u8**)&zIn);
+      //  if( c!=0xfffd ){
+      //    WRITE_UTF8(zOut, c);
+      //  }
+      //}
+      //zOut = 0;
+      //return (int)(zOut - zStart);
+      try
+      {
+        string z1 = Encoding.UTF8.GetString( zIn );
+        byte[] zOut = Encoding.UTF8.GetBytes( z1 );
+        //if ( zOut.Length != zIn.Length )
+        //  return 0;
+        //else
+        {
+          Array.Copy( zOut, 0, zIn, 0,zIn.Length );
+          return zIn.Length;}
+      }
+      catch ( EncoderFallbackException e )
+      {
+        return 0;
+      }
+    }
 #endif
 
 #if !SQLITE_OMIT_UTF16

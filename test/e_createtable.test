@@ -678,7 +678,7 @@ do_createtable_tests 2.2 -tclquery {
 } {
   1    "CREATE TABLE x1 AS SELECT a FROM t1"     {""}
   2    "CREATE TABLE x1 AS SELECT * FROM t3"     {INT TEXT}
-  3    "CREATE TABLE x1 AS SELECT * FROM t4"     {"" NUM}
+  3    "CREATE TABLE x1 AS SELECT * FROM t4"     {"" NUM }
   4    "CREATE TABLE x1 AS SELECT * FROM t5"     {REAL INT}
 }
 

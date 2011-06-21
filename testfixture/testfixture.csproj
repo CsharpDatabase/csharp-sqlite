@@ -845,11 +845,23 @@
     <None Include="..\test\analyze4.test">
       <Link>test\analyze4.test</Link>
     </None>
+    <None Include="..\test\analyze5.test">
+      <Link>test\analyze5.test</Link>
+    </None>
+    <None Include="..\test\analyze6.test">
+      <Link>test\analyze6.test</Link>
+    </None>
+    <None Include="..\test\analyze7.test">
+      <Link>test\analyze7.test</Link>
+    </None>
     <None Include="..\test\async.test">
       <Link>test\async.test</Link>
     </None>
     <None Include="..\test\async2.test">
       <Link>test\async2.test</Link>
+    </None>
+    <None Include="..\test\async3.test">
+      <Link>test\async3.test</Link>
     </None>
     <None Include="..\test\async4.test">
       <Link>test\async4.test</Link>
@@ -865,6 +877,9 @@
     </None>
     <None Include="..\test\attach3.test">
       <Link>test\attach3.test</Link>
+    </None>
+    <None Include="..\test\attach4.test">
+      <Link>test\attach4.test</Link>
     </None>
     <None Include="..\test\auth.test">
       <Link>test\auth.test</Link>
@@ -898,6 +913,9 @@
     </None>
     <None Include="..\test\badutf.test">
       <Link>test\badutf.test</Link>
+    </None>
+    <None Include="..\test\badutf2.test">
+      <Link>test\badutf2.test</Link>
     </None>
     <None Include="..\test\between.test">
       <Link>test\between.test</Link>
@@ -1151,6 +1169,9 @@
     <None Include="..\test\exec.test">
       <Link>test\exec.test</Link>
     </None>
+    <None Include="..\test\exists.test">
+      <Link>test\exists.test</Link>
+    </None>
     <None Include="..\test\expr.test">
       <Link>test\expr.test</Link>
     </None>
@@ -1232,6 +1253,9 @@
     <None Include="..\test\fuzz3.test">
       <Link>test\fuzz3.test</Link>
     </None>
+    <None Include="..\test\fuzzer1.test">
+      <Link>test\fuzzer1.test</Link>
+    </None>
     <None Include="..\test\fuzz_common.tcl">
       <Link>test\fuzz_common.tcl</Link>
     </None>
@@ -1259,6 +1283,9 @@
     <None Include="..\test\incrblob2.test">
       <Link>test\incrblob2.test</Link>
     </None>
+    <None Include="..\test\incrblob3.test">
+      <Link>test\incrblob3.test</Link>
+    </None>
     <None Include="..\test\incrvacuum.test">
       <Link>test\incrvacuum.test</Link>
     </None>
@@ -1277,6 +1304,9 @@
     <None Include="..\test\indexedby.test">
       <Link>test\indexedby.test</Link>
     </None>
+    <None Include="..\test\init.test">
+      <Link>test\init.test</Link>
+    </None>
     <None Include="..\test\insert.test">
       <Link>test\insert.test</Link>
     </None>
@@ -1294,6 +1324,9 @@
     </None>
     <None Include="..\test\intarray.test">
       <Link>test\intarray.test</Link>
+    </None>
+    <None Include="..\test\interrupt.test">
+      <Link>test\interrupt.test</Link>
     </None>
     <None Include="..\test\intpkey.test">
       <Link>test\intpkey.test</Link>
@@ -1318,6 +1351,9 @@
     </None>
     <None Include="..\test\journal1.test">
       <Link>test\journal1.test</Link>
+    </None>
+    <None Include="..\test\journal2.test">
+      <Link>test\journal2.test</Link>
     </None>
     <None Include="..\test\journal3.test">
       <Link>test\journal3.test</Link>
@@ -1358,9 +1394,6 @@
     <None Include="..\test\lock.test">
       <Link>test\lock.test</Link>
     </None>
-    <None Include="..\test\lock3.test">
-      <Link>test\lock3.test</Link>
-    </None>
     <None Include="..\test\lock5.test">
       <Link>test\lock5.test</Link>
     </None>
@@ -1387,6 +1420,9 @@
     </None>
     <None Include="..\test\manydb.test">
       <Link>test\manydb.test</Link>
+    </None>
+    <None Include="..\test\mem5.test">
+      <Link>test\mem5.test</Link>
     </None>
     <None Include="..\test\memdb.test">
       <Link>test\memdb.test</Link>
@@ -1456,6 +1492,12 @@
     </None>
     <None Include="..\test\openv2.test">
       <Link>test\openv2.test</Link>
+    </None>
+    <None Include="..\test\pager1.test">
+      <Link>test\pager1.test</Link>
+    </None>
+    <None Include="..\test\pager2.test">
+      <Link>test\pager2.test</Link>
     </None>
     <None Include="..\test\pager3.test">
       <Link>test\pager3.test</Link>
@@ -1537,6 +1579,9 @@
     </None>
     <None Include="..\test\schema2.test">
       <Link>test\schema2.test</Link>
+    </None>
+    <None Include="..\test\schema3.test">
+      <Link>test\schema3.test</Link>
     </None>
     <None Include="..\test\schema4.test">
       <Link>test\schema4.test</Link>
@@ -1694,6 +1739,9 @@
     <None Include="..\test\tkt-26ff0c2d1e.test">
       <Link>test\tkt-26ff0c2d1e.test</Link>
     </None>
+    <None Include="..\test\tkt-2d1a5c67d.test">
+      <Link>test\tkt-2d1a5c67d.test</Link>
+    </None>
     <None Include="..\test\tkt-2ea2425d34.test">
       <Link>test\tkt-2ea2425d34.test</Link>
     </None>
@@ -1714,6 +1762,9 @@
     </None>
     <None Include="..\test\tkt-4a03edc4c8.test">
       <Link>test\tkt-4a03edc4c8.test</Link>
+    </None>
+    <None Include="..\test\tkt-5d863f876e.test">
+      <Link>test\tkt-5d863f876e.test</Link>
     </None>
     <None Include="..\test\tkt-5e10420e8d.test">
       <Link>test\tkt-5e10420e8d.test</Link>
@@ -1739,6 +1790,9 @@
     <None Include="..\test\tkt-94c04eaadb.test">
       <Link>test\tkt-94c04eaadb.test</Link>
     </None>
+    <None Include="..\test\tkt-9d68c883.test">
+      <Link>test\tkt-9d68c883.test</Link>
+    </None>
     <None Include="..\test\tkt-b351d95f9.test">
       <Link>test\tkt-b351d95f9.test</Link>
     </None>
@@ -1754,11 +1808,20 @@
     <None Include="..\test\tkt-d82e3f3721.test">
       <Link>test\tkt-d82e3f3721.test</Link>
     </None>
+    <None Include="..\test\tkt-f3e5abed55.test">
+      <Link>test\tkt-f3e5abed55.test</Link>
+    </None>
     <None Include="..\test\tkt-f777251dc7a.test">
       <Link>test\tkt-f777251dc7a.test</Link>
     </None>
+    <None Include="..\test\tkt-f7b4edec.test">
+      <Link>test\tkt-f7b4edec.test</Link>
+    </None>
     <None Include="..\test\tkt-f973c7ac31.test">
       <Link>test\tkt-f973c7ac31.test</Link>
+    </None>
+    <None Include="..\test\tkt-fc62af4523.test">
+      <Link>test\tkt-fc62af4523.test</Link>
     </None>
     <None Include="..\test\tkt1435.test">
       <Link>test\tkt1435.test</Link>
@@ -1831,6 +1894,9 @@
     </None>
     <None Include="..\test\tkt2450.test">
       <Link>test\tkt2450.test</Link>
+    </None>
+    <None Include="..\test\tkt2565.test">
+      <Link>test\tkt2565.test</Link>
     </None>
     <None Include="..\test\tkt2640.test">
       <Link>test\tkt2640.test</Link>
@@ -2003,6 +2069,9 @@
     <None Include="..\test\tkt3997.test">
       <Link>test\tkt3997.test</Link>
     </None>
+    <None Include="..\test\tkt4018.test">
+      <Link>test\tkt4018.test</Link>
+    </None>
     <None Include="..\test\tokenize.test">
       <Link>test\tokenize.test</Link>
     </None>
@@ -2072,6 +2141,9 @@
     <None Include="..\test\unique.test">
       <Link>test\unique.test</Link>
     </None>
+    <None Include="..\test\unordered.test">
+      <Link>test\unordered.test</Link>
+    </None>
     <None Include="..\test\update.test">
       <Link>test\update.test</Link>
     </None>
@@ -2095,6 +2167,60 @@
     </None>
     <None Include="..\test\view.test">
       <Link>test\view.test</Link>
+    </None>
+    <None Include="..\test\wal.test">
+      <Link>test\wal.test</Link>
+    </None>
+    <None Include="..\test\wal2.test">
+      <Link>test\wal2.test</Link>
+    </None>
+    <None Include="..\test\wal3.test">
+      <Link>test\wal3.test</Link>
+    </None>
+    <None Include="..\test\wal4.test">
+      <Link>test\wal4.test</Link>
+    </None>
+    <None Include="..\test\wal5.test">
+      <Link>test\wal5.test</Link>
+    </None>
+    <None Include="..\test\wal6.test">
+      <Link>test\wal6.test</Link>
+    </None>
+    <None Include="..\test\walbak.test">
+      <Link>test\walbak.test</Link>
+    </None>
+    <None Include="..\test\walbig.test">
+      <Link>test\walbig.test</Link>
+    </None>
+    <None Include="..\test\walcksum.test">
+      <Link>test\walcksum.test</Link>
+    </None>
+    <None Include="..\test\walcrash.test">
+      <Link>test\walcrash.test</Link>
+    </None>
+    <None Include="..\test\walcrash2.test">
+      <Link>test\walcrash2.test</Link>
+    </None>
+    <None Include="..\test\walfault.test">
+      <Link>test\walfault.test</Link>
+    </None>
+    <None Include="..\test\walhook.test">
+      <Link>test\walhook.test</Link>
+    </None>
+    <None Include="..\test\walmode.test">
+      <Link>test\walmode.test</Link>
+    </None>
+    <None Include="..\test\walnoshm.test">
+      <Link>test\walnoshm.test</Link>
+    </None>
+    <None Include="..\test\walshared.test">
+      <Link>test\walshared.test</Link>
+    </None>
+    <None Include="..\test\walslow.test">
+      <Link>test\walslow.test</Link>
+    </None>
+    <None Include="..\test\walthread.test">
+      <Link>test\walthread.test</Link>
     </None>
     <None Include="..\test\wal_common.tcl">
       <Link>test\wal_common.tcl</Link>

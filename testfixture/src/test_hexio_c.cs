@@ -34,7 +34,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2010-08-23 18:52:01 42537b60566f288167f1b5864a5435986838e3a3
+    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
     **
     *************************************************************************
     */
@@ -356,32 +356,37 @@ namespace Community.CsharpSqlite
     ** The UTF8 might not be well-formed.  Run this string through
     ** sqlite3Utf8to8() convert it back to hex and return the result.
     */
-    //static int utf8_to_utf8(
-    //  void * clientData,
-    //  Tcl_Interp *interp,
-    //  int objc,
-    //  Tcl_Obj *CONST objv[]
-    //){
-    //#if SQLITE_DEBUG
-    //  int n;
-    //  int nOut;
-    //  const unsigned char *zOrig;
-    //  unsigned char *z;
-    //  if( objc!=2 ){
-    //    TCL.Tcl_WrongNumArgs(interp, 1, objv, "HEX");
-    //    return TCL.TCL_ERROR;
-    //  }
-    //  zOrig = (unsigned char *)Tcl_GetStringFromObj(objv[1], n);
-    //  z = sqlite3Malloc( n+3 );
-    //  n = sqlite3TestHexToBin(zOrig, n, z);
-    //  z[n] = 0;
-    //  nOut = sqlite3Utf8To8(z);
-    //  sqlite3TestBinToHex(z,nOut);
-    //  TCL.Tcl_AppendResult(interp, (char*)z, 0);
-    //  sqlite3DbFree(db,z);
-    //#endif
-    //  return TCL.TCL_OK;
-    //}
+    static int utf8_to_utf8(
+    object clientdata,
+    Tcl_Interp interp,
+    int objc,
+    Tcl_Obj[] objv
+    ){
+    #if SQLITE_DEBUG
+      int n = 0;
+      int nOut;
+      string zOrig;
+      byte[] z;
+      if( objc!=2 ){
+        TCL.Tcl_WrongNumArgs(interp, 1, objv, "HEX");
+        return TCL.TCL_ERROR;
+      }
+      zOrig = TCL.Tcl_GetStringFromObj(objv[1], ref n);
+      z = new byte[2 * n + 1];//sqlite3Malloc( n + 3 );
+      nOut = sqlite3TestHexToBin( zOrig, n, z );
+      //z[n] = 0;
+      nOut = sqlite3Utf8To8(z);
+      sqlite3TestBinToHex( z, zOrig.Length );
+      TCL.Tcl_AppendResult(interp, Encoding.ASCII.GetString(z,0,n));
+      //sqlite3_free( z );
+      return TCL.TCL_OK;
+    #else
+      Tcl_AppendResult(interp, 
+          "[utf8_to_utf8] unavailable - SQLITE_DEBUG not defined", 0
+      );
+      return TCL_ERROR;
+    #endif
+    }
 
 
     //static int getFts3Varint(const char *p, sqlite_int64 *v){
@@ -442,7 +447,7 @@ new _aObjCmd(  "hexio_write",                  hexio_write           ),
 new _aObjCmd(  "hexio_get_int",                hexio_get_int         ),
 new _aObjCmd(  "hexio_render_int16",           hexio_render_int16    ),
 new _aObjCmd(  "hexio_render_int32",           hexio_render_int32    ),
-//new _aObjCmd(  "utf8_to_utf8",                 utf8_to_utf8          },
+new _aObjCmd(  "utf8_to_utf8",                 utf8_to_utf8          ),
 //     { "read_fts3varint",                  read_fts3varint           },
 };
       int i;

@@ -23,6 +23,7 @@ ifcapable !stat2 {
 }
 
 set testprefix analyze5
+do_not_use_codec
 
 proc eqp {sql {db db}} {
   uplevel execsql [list "EXPLAIN QUERY PLAN $sql"] $db
@@ -31,7 +32,7 @@ proc eqp {sql {db db}} {
 unset -nocomplain i t u v w x y z
 do_test analyze5-1.0 {
   db eval {CREATE TABLE t1(t,u,v TEXT COLLATE nocase,w,x,y,z)}
-  for {set i 0} {$i < 1000} {incr i} {
+  for {set i [expr 0]} {$i < 1000} {incr i} {
     set y [expr {$i>=25 && $i<=50}]
     set z [expr {($i>=400) + ($i>=700) + ($i>=875)}]
     set x $z

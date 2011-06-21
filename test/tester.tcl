@@ -12,6 +12,11 @@
 # testing the SQLite library
 #
 # $Id: tester.tcl,v 1.143 2009/04/09 01:23:49 drh Exp $
+########################################################################
+#  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
+#  C#-SQLite is an independent reimplementation of the SQLite software library
+#
+#  SQLITE_SOURCE_ID: SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
 
 #-------------------------------------------------------------------------
 # The commands provided by the code in this file to help with creating 
@@ -218,7 +223,7 @@ if {[info exists cmdlinearg]==0} {
   # extensions. This only needs to be done once for the process.
   #
   sqlite3_shutdown 
-  install_malloc_faultsim 1 
+  #install_malloc_faultsim 1 
   sqlite3_initialize
   autoinstall_test_functions
 
@@ -345,13 +350,33 @@ proc do_test {name cmd expected} {
   if {[catch {uplevel #0 "$cmd;\n"} result]} {
     puts "\nError: $result"
     fail_test $name
-  } elseif {[string compare $result $expected]} {
+  } else {
+  #
+  # TCL implementation BUG can return {{}} for empty string
+  # 2011-06-11 Noah Hart -- To be fixed
+  #
+  set REPLACE "{{}} "
+  regsub -all $REPLACE $expected "" expected
+  regsub -all $REPLACE $result "" result
+  set REPLACE "{{}}"
+  regsub -all $REPLACE $expected "" expected
+  regsub -all $REPLACE $result "" result
+  if {[string compare $result $expected]} {
+  set WHITESPACE "{} \t\r\n" ;# white space & Extra braces
+  set REPLACE "(\[$WHITESPACE])"
+  regsub -all $REPLACE $expected "" testEXP
+  regsub -all $REPLACE $result   "" testRES
+  if { [string compare $testRES $testEXP]} {
     puts "\nExpected: \[$expected\]\n     Got: \[$result\]"
     fail_test $name
   } else {
     puts " Ok"
   }
-  flush stdout
+  } else {
+    puts " Ok"
+  }
+} 
+flush stdout
 }
 
 proc fix_testname {varname} {
@@ -563,6 +588,7 @@ proc finalize_testing {} {
     puts "$sqlite_open_file_count files were left open"
     incr nErr
   }
+ifcapable malloc {
   if {[lindex [sqlite3_status SQLITE_STATUS_MALLOC_COUNT 0] 1]>0 ||
               [sqlite3_memory_used]>0} {
     puts "Unfreed memory: [sqlite3_memory_used] bytes in\
@@ -579,8 +605,8 @@ proc finalize_testing {} {
     }
   }
   show_memstats
-  puts "Maximum memory usage: [sqlite3_memory_highwater 1] bytes"
-  puts "Current memory usage: [sqlite3_memory_highwater] bytes"
+  #puts "Maximum memory usage: [sqlite3_memory_highwater 1] bytes"
+  #puts "Current memory usage: [sqlite3_memory_highwater] bytes"
   if {[info commands sqlite3_memdebug_malloc_count] ne ""} {
     puts "Number of malloc()  : [sqlite3_memdebug_malloc_count] calls"
   }
@@ -596,12 +622,17 @@ proc finalize_testing {} {
       memdebug_log_sql leaks.sql
     }
   }
+ } else {
+  puts "Memory usage not tracked"
+}
+
   foreach f [glob -nocomplain test.db-*-journal] {
     file delete -force $f
   }
   foreach f [glob -nocomplain test.db-mj*] {
     file delete -force $f
   }
+  puts -nonewline "Press RETURN to exit..."; gets stdin
   exit [expr {$nErr>0}]
 }
 
@@ -1379,7 +1410,7 @@ proc slave_test_file {zFile} {
   # Add some info to the output.
   #
   puts "Time: $tail $ms ms"
-  show_memstats
+  #show_memstats
 }
 
 # Open a new connection on database test.db and execute the SQL script

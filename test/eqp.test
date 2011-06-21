@@ -491,7 +491,7 @@ det 5.13 "SELECT a FROM t1 EXCEPT SELECT d FROM t2 ORDER BY 1" {
   0 0 0 {COMPOUND SUBQUERIES 1 AND 2 (EXCEPT)}
 }
 
-
+if 0 {
 #-------------------------------------------------------------------------
 # The following tests - eqp-6.* - test that the example C code on 
 # documentation page eqp.html works. The C code is duplicated in test1.c
@@ -531,7 +531,7 @@ do_peqp_test 6.1 {
 2 0 0 USE TEMP B-TREE FOR ORDER BY
 0 0 0 COMPOUND SUBQUERIES 1 AND 2 (EXCEPT)
 }]
-
+}
 #-------------------------------------------------------------------------
 # The following tests - eqp-7.* - test that queries that use the OP_Count
 # optimization return something sensible with EQP.

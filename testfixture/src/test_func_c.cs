@@ -33,7 +33,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2010-08-23 18:52:01 42537b60566f288167f1b5864a5435986838e3a3
+    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
     **
     *************************************************************************
     */
@@ -193,8 +193,13 @@ sqlite3_result_text16(pCtx, zVal, -1, destructor);
     ** arguments. It returns the text value returned by the sqlite3_errmsg16()
     ** API function.
     */
-    //void sqlite3BeginBenignMalloc(void);
-    //void sqlite3EndBenignMalloc(void);
+#if SQLITE_OMIT_BUILTIN_TEST
+//void sqlite3BeginBenignMalloc(void);
+//void sqlite3EndBenignMalloc(void);
+#else
+  //#define sqlite3BeginBenignMalloc()
+  //#define sqlite3EndBenignMalloc()
+#endif
     static void test_agg_errmsg16_step( sqlite3_context a, int b, sqlite3_value[] c )
     {
     }

@@ -69,9 +69,9 @@ do_test capi3d-1.1 {
   sqlite3_next_stmt db 0
 } {}
 
-# Run the following tests for between 1 and 100 prepared statements.
+# Run the following tests for between 1 and 15 prepared statements.
 #
-for {set i 1} {$i<=100} {incr i} {
+for {set i 1} {$i<=15} {incr i} {
   set stmtlist [make_prepared_statements $i]
   do_test capi3d-1.2.$i.1 {
     set p [sqlite3_next_stmt db 0]
@@ -82,7 +82,7 @@ for {set i 1} {$i<=100} {incr i} {
     }
     lsort $x
   } [lsort $stmtlist]
-  do_test capi3-1.2.$i.2 {
+  do_test capi3d-1.2.$i.2 {
     foreach p [scramble $::stmtlist] {
       sqlite3_finalize $p
     }

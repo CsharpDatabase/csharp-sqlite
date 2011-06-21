@@ -36,7 +36,7 @@ namespace Community.CsharpSqlite
     ** Included in SQLite3 port to C#-SQLite; 2008 Noah B Hart
     ** C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    ** SQLITE_SOURCE_ID: 2011-01-28 17:03:50 ed759d5a9edb3bba5f48f243df47be29e3fe8cd7
+    ** SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
     **
     *************************************************************************
     */
@@ -2811,6 +2811,7 @@ return TCL.TCL_ERROR;
 if ( getStmtPointer( interp, TCL.Tcl_GetString( objv[1] ), ref pStmt ) != 0 ) return TCL.TCL_ERROR;
 TCL.Tcl_SetObjResult( interp, TCL.Tcl_NewBooleanObj( sqlite3_expired( pStmt ) ) );
 #endif
+      TCL.Tcl_SetResult( interp, "0", 0);
       return TCL.TCL_OK;
     }
 
@@ -4921,21 +4922,23 @@ pRet = TCL.Tcl_NewByteArrayObj(zName16, n+2);
     **
     ** Trigger an interrupt on DB
     */
-    //static int test_interrupt(
-    // object clientdata,
-    // Tcl_Interp interp,
-    // int argc,
-    // char **argv
-    //){
-    // sqlite3 db=null;
-    // if( argc!=2 ){
-    // TCL.Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0], " DB");
-    // return TCL.TCL_ERROR;
-    // }
-    // if( getDbPointer(interp, argv[1].ToString(), ref db) !=0) return TCL.TCL_ERROR;
-    // sqlite3_interrupt(db);
-    // return TCL.TCL_OK;
-    //}
+    static int test_interrupt(
+     object clientdata,
+    Tcl_Interp interp,
+    int argc,
+    Tcl_Obj[] argv )
+    {
+      sqlite3 db = null;
+      if ( argc != 2 )
+      {
+        TCL.Tcl_AppendResult( interp, "wrong # args: should be \"", argv[0], " DB" );
+        return TCL.TCL_ERROR;
+      }
+      if ( getDbPointer( interp, argv[1].ToString(), ref db ) != 0 )
+        return TCL.TCL_ERROR;
+      sqlite3_interrupt( db );
+      return TCL.TCL_OK;
+    }
 
     //static u8 *sqlite3_stack_baseline = 0;
 
@@ -5590,72 +5593,50 @@ TCL.Tcl_SetObjResult(interp, TCL.Tcl_NewIntObj(amt));
       return TCL.TCL_OK;
     }
 
+
+
     /*
-** tclcmd:  sqlite3_wal_checkpoint_v2 db MODE ?NAME?
-**
-** This command calls the wal_checkpoint_v2() function with the specified
-** mode argument (passive, full or restart). If present, the database name
-** NAME is passed as the second argument to wal_checkpoint_v2(). If it the
-** NAME argument is not present, a NULL pointer is passed instead.
-**
-** If wal_checkpoint_v2() returns any value other than SQLITE_BUSY or
-** SQLITE_OK, then this command returns TCL_ERROR. The Tcl result is set
-** to the error message obtained from sqlite3_errmsg().
-**
-** Otherwise, this command returns a list of three integers. The first integer
-** is 1 if SQLITE_BUSY was returned, or 0 otherwise. The following two integers
-** are the values returned via the output paramaters by wal_checkpoint_v2() -
-** the number of frames in the log and the number of frames in the log
-** that have been checkpointed.
-*/
-static int test_wal_checkpoint_v2(
-    ClientData clientData, /* Pointer to sqlite3_enable_XXX function */
-    Tcl_Interp interp, /* The TCL interpreter that invoked this command */
-    int objc, /* Number of arguments */
-    Tcl_Obj[] objv /* Command arguments */
-){
-  string zDb = "";
-  sqlite3 db = null;
-  int rc;
+    ** tclcmd:   file_control_sizehint_test DB DBNAME SIZE
+    **
+    ** This TCL command runs the sqlite3_file_control interface and
+    ** verifies correct operation of the SQLITE_GET_LOCKPROXYFILE and
+    ** SQLITE_SET_LOCKPROXYFILE verbs.
+    */
+    static int file_control_sizehint_test(
+        ClientData clientData, /* Pointer to sqlite3_enable_XXX function */
+        Tcl_Interp interp, /* The TCL interpreter that invoked this command */
+        int objc, /* Number of arguments */
+        Tcl_Obj[] objv /* Command arguments */
+    )
+    {
+      sqlite3_int64 nSize = 0;         /* Hinted size */
+      string zDb;                      /* Db name ("main", "temp" etc.) */
+      sqlite3 db = null;               /* Database handle */
+      int rc;                          /* file_control() return code */
 
-  int eMode = 0;
-  int nLog = -555;
-  int nCkpt = -555;
-  Tcl_Obj pRet;
+      if ( objc != 4 )
+      {
+        TCL.Tcl_WrongNumArgs( interp, 1, objv, "DB DBNAME SIZE" );
+        return TCL.TCL_ERROR;
+      }
+      if ( getDbPointer( interp, TCL.Tcl_GetString( objv[1] ), ref db ) != 0
+       || TCL.Tcl_GetWideIntFromObj( interp, objv[3], ref nSize )
+      )
+      {
+        return TCL.TCL_ERROR;
+      }
+      zDb = TCL.Tcl_GetString( objv[2] );
+      if ( zDb[0] == '\0' )
+        zDb = null;
 
-  string[] aMode = new string[] { "passive", "full", "restart" };
-  Debug.Assert( SQLITE_CHECKPOINT_PASSIVE==0 );
-  Debug.Assert( SQLITE_CHECKPOINT_FULL == 1 );
-  Debug.Assert( SQLITE_CHECKPOINT_RESTART == 2 );
-
-  if( objc!=3 && objc!=4 ){
-    TCL.Tcl_WrongNumArgs( interp, 1, objv, "DB MODE ?NAME?" );
-    return TCL.TCL_ERROR;
-  }
-
-  if( objc==4 ){
-    zDb = TCL.Tcl_GetString( objv[3] );
-  }
-  if ( getDbPointer( interp, TCL.Tcl_GetString( objv[1] ), ref db ) != 0
-   || TCL.Tcl_GetIndexFromObj( interp, objv[2], aMode, "mode", 0, ref eMode ) 
-  ){
-    return TCL.TCL_ERROR;
-  }
-
-  rc = sqlite3_wal_checkpoint_v2(db, zDb, eMode, ref nLog, ref nCkpt);
-  if( rc!=SQLITE_OK && rc!=SQLITE_BUSY ){
-    TCL.Tcl_SetResult( interp, sqlite3_errmsg( db ), TCL.TCL_VOLATILE );
-    return TCL.TCL_ERROR;
-  }
-
-  pRet = TCL.Tcl_NewObj();
-  TCL.Tcl_ListObjAppendElement( interp, pRet, TCL.Tcl_NewIntObj( rc == SQLITE_BUSY ? 1 : 0 ) );
-  TCL.Tcl_ListObjAppendElement( interp, pRet, TCL.Tcl_NewIntObj( nLog ) );
-  TCL.Tcl_ListObjAppendElement( interp, pRet, TCL.Tcl_NewIntObj( nCkpt ) );
-  TCL.Tcl_SetObjResult( interp, pRet );
-
-  return TCL.TCL_OK;
-}
+      rc = sqlite3_file_control( db, zDb, SQLITE_FCNTL_SIZE_HINT, ref nSize );
+      if ( rc != 0 )
+      {
+        TCL.Tcl_SetResult( interp, sqlite3TestErrorName( rc ), TCL.TCL_STATIC );
+        return TCL.TCL_ERROR;
+      }
+      return TCL.TCL_OK;
+    }
 
     /*
     ** tclcmd: file_control_lockproxy_test DB PWD
@@ -5996,6 +5977,78 @@ return TCL.TCL_OK;
     }
 
     /*
+** tclcmd:  sqlite3_wal_checkpoint_v2 db MODE ?NAME?
+**
+** This command calls the wal_checkpoint_v2() function with the specified
+** mode argument (passive, full or restart). If present, the database name
+** NAME is passed as the second argument to wal_checkpoint_v2(). If it the
+** NAME argument is not present, a NULL pointer is passed instead.
+**
+** If wal_checkpoint_v2() returns any value other than SQLITE_BUSY or
+** SQLITE_OK, then this command returns TCL_ERROR. The Tcl result is set
+** to the error message obtained from sqlite3_errmsg().
+**
+** Otherwise, this command returns a list of three integers. The first integer
+** is 1 if SQLITE_BUSY was returned, or 0 otherwise. The following two integers
+** are the values returned via the output paramaters by wal_checkpoint_v2() -
+** the number of frames in the log and the number of frames in the log
+** that have been checkpointed.
+*/
+    static int test_wal_checkpoint_v2(
+        ClientData clientData, /* Pointer to sqlite3_enable_XXX function */
+        Tcl_Interp interp, /* The TCL interpreter that invoked this command */
+        int objc, /* Number of arguments */
+        Tcl_Obj[] objv /* Command arguments */
+    )
+    {
+      string zDb = "";
+      sqlite3 db = null;
+      int rc;
+
+      int eMode = 0;
+      int nLog = -555;
+      int nCkpt = -555;
+      Tcl_Obj pRet;
+
+      string[] aMode = new string[] { "passive", "full", "restart" };
+      Debug.Assert( SQLITE_CHECKPOINT_PASSIVE == 0 );
+      Debug.Assert( SQLITE_CHECKPOINT_FULL == 1 );
+      Debug.Assert( SQLITE_CHECKPOINT_RESTART == 2 );
+
+      if ( objc != 3 && objc != 4 )
+      {
+        TCL.Tcl_WrongNumArgs( interp, 1, objv, "DB MODE ?NAME?" );
+        return TCL.TCL_ERROR;
+      }
+
+      if ( objc == 4 )
+      {
+        zDb = TCL.Tcl_GetString( objv[3] );
+      }
+      if ( getDbPointer( interp, TCL.Tcl_GetString( objv[1] ), ref db ) != 0
+       || TCL.Tcl_GetIndexFromObj( interp, objv[2], aMode, "mode", 0, ref eMode )
+      )
+      {
+        return TCL.TCL_ERROR;
+      }
+
+      rc = sqlite3_wal_checkpoint_v2( db, zDb, eMode, ref nLog, ref nCkpt );
+      if ( rc != SQLITE_OK && rc != SQLITE_BUSY )
+      {
+        TCL.Tcl_SetResult( interp, sqlite3_errmsg( db ), TCL.TCL_VOLATILE );
+        return TCL.TCL_ERROR;
+      }
+
+      pRet = TCL.Tcl_NewObj();
+      TCL.Tcl_ListObjAppendElement( interp, pRet, TCL.Tcl_NewIntObj( rc == SQLITE_BUSY ? 1 : 0 ) );
+      TCL.Tcl_ListObjAppendElement( interp, pRet, TCL.Tcl_NewIntObj( nLog ) );
+      TCL.Tcl_ListObjAppendElement( interp, pRet, TCL.Tcl_NewIntObj( nCkpt ) );
+      TCL.Tcl_SetObjResult( interp, pRet );
+
+      return TCL.TCL_OK;
+    }
+
+    /*
     ** tclcmd: test_sqlite3_log ?SCRIPT?
     */
     struct LogCallback
@@ -6230,6 +6283,7 @@ new _aOpt( "factor-constants", SQLITE_FactorOutConst ),
 
     static Var.SQLITE3_GETSET sqlite3_query_plan = new Var.SQLITE3_GETSET( "sqlite_query_plan" );
     static Var.SQLITE3_GETSET sqlite3_like_count = new Var.SQLITE3_GETSET( "sqlite3_like_count" );
+    static Var.SQLITE3_GETSET sqlite3_interrupt_count = new Var.SQLITE3_GETSET( "sqlite3_interrupt_count" );
     static Var.SQLITE3_GETSET sqlite3_sort_count = new Var.SQLITE3_GETSET( "sqlite_sort_count" );
     static Var.SQLITE3_GETSET sqlite3_current_time = new Var.SQLITE3_GETSET( "sqlite3_current_time" );
 #if SQLITE_OS_UNIX && (__APPLE__) && SQLITE_ENABLE_LOCKING_STYLE
@@ -6295,7 +6349,7 @@ new _aCmd( "breakpoint", test_breakpoint ),
 new _aCmd( "sqlite3_key", test_key ),
 new _aCmd( "sqlite3_rekey", test_rekey ),
 new _aCmd( "sqlite_set_magic", sqlite_set_magic ),
-// new _aCmd( "sqlite3_interrupt", test_interrupt ),
+new _aCmd( "sqlite3_interrupt", test_interrupt ),
 new _aCmd( "sqlite_delete_function", delete_function ),
 new _aCmd( "sqlite_delete_collation", delete_collation ),
 new _aCmd( "sqlite3_get_autocommit", get_autocommit ),
@@ -6406,6 +6460,7 @@ new _aObjCmd( "file_control_test", file_control_test, 0 ),
 new _aObjCmd("file_control_lasterrno_test", file_control_lasterrno_test, 0 ),
 new _aObjCmd("file_control_lockproxy_test", file_control_lockproxy_test, 0 ),
 new _aObjCmd("file_control_chunksize_test", file_control_chunksize_test, 0 ),
+new _aObjCmd("file_control_sizehint_test", file_control_sizehint_test,  0),
 //new _aObjCmd( "sqlite3_vfs_list", vfs_list, 0 ),
 new _aObjCmd( "sqlite3_create_function_v2", test_create_function_v2, 0 ),
 
@@ -6437,9 +6492,12 @@ new _aObjCmd( "pcache_stats", test_pcache_stats, 0 ),
 { "sqlite3_unlock_notify", test_unlock_notify, 0 },
 #endif
 new _aObjCmd( "sqlite3_wal_checkpoint", test_wal_checkpoint, 0 ),
+new _aObjCmd( "sqlite3_wal_checkpoint_v2", test_wal_checkpoint_v2, 0 ),
 new _aObjCmd( "test_sqlite3_log", test_sqlite3_log, 0 ),
+#if !SQLITE_OMIT_EXPLAIN
 new _aObjCmd( "print_explain_query_plan", test_print_eqp, 0 ),
-};
+#endif
+      };
       bitmask_size.iValue = BMS;
       int i;
       // extern int sqlite3_sync_count, sqlite3_fullsync_count;
@@ -6485,8 +6543,8 @@ extern int sqlite3_fts3_enable_parentheses;
       sqlite3_max_blobsize, VarFlags.SQLITE3_LINK_INT );
       TCL.Tcl_LinkVar( interp, "sqlite_like_count",
       sqlite3_like_count, VarFlags.SQLITE3_LINK_INT );
-      // TCL.Tcl_LinkVar(interp, "sqlite_interrupt_count",
-      // (char*)&sqlite3_interrupt_count, VarFlag.SQLITE3_LINK_INT);
+      TCL.Tcl_LinkVar(interp, "sqlite_interrupt_count",
+      sqlite3_interrupt_count, VarFlags.SQLITE3_LINK_INT );
       TCL.Tcl_LinkVar( interp, "sqlite_open_file_count",
       sqlite3_open_file_count, VarFlags.SQLITE3_LINK_INT );
       TCL.Tcl_LinkVar( interp, "sqlite_current_time",

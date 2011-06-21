@@ -66,7 +66,7 @@ proc eqp {sql {db db}} {
 
 do_test analyze2-1.1 {
   execsql { CREATE TABLE t1(x PRIMARY KEY) }
-  for {set i 0} {$i < 1000} {incr i} {
+  for {set i [expr 0]} {$i < 1000} {incr i} {
     execsql { INSERT INTO t1 VALUES($i) }
   }
   execsql { 
@@ -115,7 +115,7 @@ do_test analyze2-2.1 {
     CREATE INDEX t1_x ON t1(x);
     CREATE INDEX t1_y ON t1(y);
   }
-  for {set i 0} {$i < 1000} {incr i} {
+  for {set i [expr 0]} {$i < 1000} {incr i} {
     execsql { INSERT INTO t1 VALUES($i, $i) }
   }
   execsql COMMIT

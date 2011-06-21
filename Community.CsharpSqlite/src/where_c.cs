@@ -165,7 +165,7 @@ static void WHERETRACE( string X, params object[] ap ) { if ( sqlite3WhereTrace 
 #if SQLITE_ENABLE_STAT2
     const int TERM_VNULL = 0x80;  /* Manufactured x>NULL or x<=NULL term */
 #else
-    const int TERM_VNULL = 0x00   /* Disabled if not using stat2 */
+    const int TERM_VNULL = 0x00;  /* Disabled if not using stat2 */
 #endif
 
     /*

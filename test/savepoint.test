@@ -910,6 +910,7 @@ if {[wal_is_wal_mode]==0} {
 
 db close
 file delete test.db
+if 0 {
 do_multiclient_test tn {
   do_test savepoint-14.$tn.1 {
     sql1 {
@@ -1018,7 +1019,7 @@ do_multiclient_test tn {
     sql1 { SELECT * FROM foo }
   } {1 2 3 4}
 }
-
+}
 #-------------------------------------------------------------------------
 # This next block of tests verifies that a problem reported on the mailing
 # list has been resolved. At one point the second "CREATE TABLE t6" would

@@ -1,7 +1,8 @@
 #########################################################################################
 # This file drives the testharness
 #
-#########################################################################################
+##########
+###############################################################################
 set testdir [file dirname $argv0]
 source $testdir/tester.tcl
 
@@ -18,7 +19,7 @@ do_test SIMPLE_SQLITE_VERSION {
 
 
 ##########################################################################################
-puts -nonewline "Press RETURN to exit..."; gets stdin; exit 0
+#puts -nonewline "Press RETURN to exit..."; gets stdin; exit 0
 
 set filter ""
 if [string compare $filter "skip"] {

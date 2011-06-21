@@ -74,10 +74,14 @@ do_test 1.4 {
 set L [list]
 set S ""
 foreach {name f} $files {
-  if {[permutation] == "journaltest"} {
-    lappend L delete
+ifcapable wal {
+  if {[permutation] == "journaltest"  } {
+      lappend L delete
+    } else {
+      lappend L wal
+    }
   } else {
-    lappend L wal
+    lappend L delete
   }
   append S "
     PRAGMA $name.journal_mode = WAL;

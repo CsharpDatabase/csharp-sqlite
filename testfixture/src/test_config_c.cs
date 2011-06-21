@@ -114,7 +114,13 @@ TCL.Tcl_SetVar2(interp, "sqlite_options", "mem5", "1", TCL.TCL_GLOBAL_ONLY);
 #if SQLITE_MUTEX_OMIT
       TCL.Tcl_SetVar2( interp, "sqlite_options", "mutex", "0", TCL.TCL_GLOBAL_ONLY );
 #else
-TCL.Tcl_SetVar2( interp, "sqlite_options", "mutex", "1", TCL.TCL_GLOBAL_ONLY );
+      TCL.Tcl_SetVar2( interp, "sqlite_options", "mutex", "1", TCL.TCL_GLOBAL_ONLY );
+#endif
+
+#if SQLITE_MUTEX_NOOP
+  TCL.Tcl_SetVar2(interp, "sqlite_options", "mutex_noop", "1", TCL.TCL_GLOBAL_ONLY);
+#else
+      TCL.Tcl_SetVar2( interp, "sqlite_options", "mutex_noop", "0", TCL.TCL_GLOBAL_ONLY );
 #endif
 
 #if SQLITE_OMIT_ALTERTABLE
@@ -208,7 +214,7 @@ TCL.Tcl_SetVar2(interp, "sqlite_options", "check", "0", TCL.TCL_GLOBAL_ONLY);
 #endif
 
 #if SQLITE_ENABLE_COLUMN_METADATA
-TCL.Tcl_SetVar2(interp, "sqlite_options", "columnmetadata", "1", TCL.TCL_GLOBAL_ONLY);
+      TCL.Tcl_SetVar2( interp, "sqlite_options", "columnmetadata", "1", TCL.TCL_GLOBAL_ONLY );
 #else
       TCL.Tcl_SetVar2( interp, "sqlite_options", "columnmetadata", "0", TCL.TCL_GLOBAL_ONLY );
 #endif

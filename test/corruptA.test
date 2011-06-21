@@ -49,7 +49,7 @@ do_test corruptA-2.1 {
   hexio_write test.db 19 $unreadable_version   ;# the read format number
   sqlite3 db test.db
   catchsql {SELECT * FROM t1}  
-} {1 {file is encrypted or is not a database}}
+} {1 {file is encrypted or is not a database (wal format detected)}}
  
 do_test corruptA-2.2 {
   db close

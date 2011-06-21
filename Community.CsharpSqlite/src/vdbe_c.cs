@@ -125,7 +125,7 @@ static void memAboutToChange(Vdbe P, Mem M) {}
 ** in an ordinary build.
 */
 #if SQLITE_TEST
-    static int sqlite3_interrupt_count = 0;
+    // use SQLITE3_LINK_INT version static int sqlite3_interrupt_count = 0;
 #endif
 
     /*
@@ -787,10 +787,10 @@ start = sqlite3Hwtime();
 ** if we have a special test build.
 */
 #if SQLITE_TEST
-        if ( sqlite3_interrupt_count > 0 )
+        if ( sqlite3_interrupt_count.iValue > 0 )
         {
-          sqlite3_interrupt_count--;
-          if ( sqlite3_interrupt_count == 0 )
+          sqlite3_interrupt_count.iValue--;
+          if ( sqlite3_interrupt_count.iValue == 0 )
           {
             sqlite3_interrupt( db );
           }
