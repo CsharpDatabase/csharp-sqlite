@@ -907,11 +907,11 @@ return p.pMem.n;
         //         0, 0,  /* pScopyFrom, pFiller */
         //#endif
         //         0, 0 };
-        Mem nullMem = new Mem( null, "", (double)0, 0, 0, MEM_Null, SQLITE_NULL, 0,
+        Mem nullMem = new Mem( null, "", (double)0, 0, 0, MEM_Null, SQLITE_NULL, 0
 #if SQLITE_DEBUG
-         null, null  /* pScopyFrom, pFiller */
+         , null, null  /* pScopyFrom, pFiller */
 #endif
-         );
+ );
 
         if ( pVm != null && ALWAYS( pVm.db != null ) )
         {

@@ -612,7 +612,7 @@ namespace Community.CsharpSqlite
           Debug.Assert( rc2 == SQLITE_OK );
 #else
 sqlite3BtreeCommitPhaseOne(p.pSrc, null);
-sqlite3BtreeCommitPhaseTwo(p.pSrc);
+sqlite3BtreeCommitPhaseTwo(p.pSrc, 0);
 #endif
         }
 

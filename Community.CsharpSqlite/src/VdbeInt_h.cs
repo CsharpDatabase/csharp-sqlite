@@ -247,11 +247,11 @@ set { _flags = value; }
       {
       }
 
-      public Mem( sqlite3 db, string z, double r, int i, int n, u16 flags, u8 type, u8 enc,
+      public Mem( sqlite3 db, string z, double r, int i, int n, u16 flags, u8 type, u8 enc
 #if SQLITE_DEBUG
-         Mem pScopyFrom, object pFiller  /* pScopyFrom, pFiller */
+         , Mem pScopyFrom, object pFiller  /* pScopyFrom, pFiller */
 #endif
-         )
+        )
       {
         this.db = db;
         this.z = z;
@@ -259,8 +259,10 @@ set { _flags = value; }
         this.u.i = i;
         this.n = n;
         this.flags = flags;
+#if SQLITE_DEBUG
         this.pScopyFrom = pScopyFrom;
         this.pFiller = pFiller;
+#endif
         this.type = type;
         this.enc = enc;
       }
