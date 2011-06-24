@@ -486,6 +486,7 @@ return;
       {
         openStatTable( pParse, iDb, iStatCur, pTab.zName, "tbl" );
       }
+      analyzeOneTable( pParse, pTab, pOnlyIdx, iStatCur, pParse.nMem + 1 );
       loadAnalysis( pParse, iDb );
     }
 

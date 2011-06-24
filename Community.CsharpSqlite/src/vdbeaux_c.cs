@@ -3471,7 +3471,7 @@ swapMixedEndianFloat( v );
           if ( pMem.zBLOB == null && String.IsNullOrEmpty( pMem.z ) )
           {
           }
-          else if ( ( pMem.flags & MEM_Blob ) != 0 || pMem.z == null )
+          else if ( pMem.zBLOB != null && (( pMem.flags & MEM_Blob ) != 0 || pMem.z == null ))
             Buffer.BlockCopy( pMem.zBLOB, 0, buf, offset, (int)len );//memcpy( buf, pMem.z, len );
           else
             Buffer.BlockCopy( Encoding.UTF8.GetBytes( pMem.z ), 0, buf, offset, (int)len );//memcpy( buf, pMem.z, len );

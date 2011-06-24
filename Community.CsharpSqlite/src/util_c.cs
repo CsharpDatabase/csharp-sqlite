@@ -722,7 +722,7 @@ return !sqlite3Atoi64(z, pResult, length, enc);
       else
       {
         /* zNum is a 19-digit numbers.  Compare it against 9223372036854775808. */
-        c = compare2pow63( zNum, incr );
+        c = compare2pow63( zNum.Substring(zDx), incr );
         if ( c < 0 )
         {
           /* zNum is less than 9223372036854775808 so it fits */

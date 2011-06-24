@@ -386,7 +386,7 @@ do_execsql_test e_update-2.3.0 {
   SELECT 'temp', tbl_name FROM sqlite_temp_master WHERE type = 'table'
     UNION ALL
   SELECT 'aux', tbl_name FROM aux.sqlite_master WHERE type = 'table'
-} [list {*}{
+} [list {
     main t1
     main t2
     main t3

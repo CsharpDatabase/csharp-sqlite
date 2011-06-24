@@ -11,15 +11,44 @@
 #########################################################################################
 source $testdir/permutations.test
 
-set csTests [test_set $allquicktests -exclude {
-^*
-_*
-mutex1.test
-mutex2.test
-e_select2.test
-pcache2.test
-  }
-]
+set excludeList { ^* _* *.tcl memleak.test soak.test}
+
+######################################
+#Exclude Configuration Tests
+######################################
+append excludeList { dbstatus.test init.test pcache2.test tkt2565.test}
+
+######################################
+#Exclude Multiclient & pipe tests
+######################################
+append excludeList { exists.test pager1.test schema3.test tkt-5d863f876e.test tkt-fc62af4523.test tkt4018.test}
+
+######################################
+#Exclude Mutex tests
+######################################
+append excludeList { mutex1.test mutex2.test }
+
+######################################
+#Exclude Shared Cache
+######################################
+append excludeList { tkt-f7b4edec.test }
+
+######################################
+#Exclude for VFS tests
+######################################
+append excludeList { incrblob3.test journal2.test pager2.test tkt-9d68c883.test tkt-f3e5abed55.test}
+
+######################################
+#Exclude for some other reason
+######################################
+append excludeList { e_select2.test }
+
+######################################
+#Exclude for now TODO
+######################################
+append excludeList { fuzz3.test misc7.test sqllimits1.test trace2.test}
+
+set csTests [test_set $allquicktests -exclude $excludeList]
 
 test_suite "C#SQLitetests" -prefix "" -description {
   Quick test suite for C#-SQLite. Runs in around 7 minutes on a workstation.
@@ -35,5 +64,5 @@ diskfull.test
 
 test_suite "C#SQLiteFilterTests" -prefix "" -description {
   Run all the tests, following a pattern of filenames
-}  -files [glob -nocomplain $::testdir/$filter*]
+}  -files [test_set [glob -nocomplain $::testdir/$filter*] -exclude $excludeList]
 

@@ -90,10 +90,10 @@ do_test types3-2.4.2 {
 do_test types3-2.5 {
   set V [db one {SELECT '1234567890123456.0'}]
   tcl_variable_type V
-} {}
+} {string}
 do_test types3-2.6 {
   set V [db one {SELECT NULL}]
   tcl_variable_type V
-} {}
+} {string}
 
 finish_test

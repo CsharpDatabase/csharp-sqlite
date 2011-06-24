@@ -1,8 +1,7 @@
 #########################################################################################
 # This file drives the testharness
 #
-##########
-###############################################################################
+#########################################################################################
 set testdir [file dirname $argv0]
 source $testdir/tester.tcl
 
@@ -16,7 +15,6 @@ do_test SIMPLE_SQLITE_VERSION {
     SELECT SQLITE_VERSION(), SQLITE_SOURCE_ID();
   }
 } {3.7.6.3C# {Ported to C# from 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e}}
-
 
 ##########################################################################################
 #puts -nonewline "Press RETURN to exit..."; gets stdin; exit 0

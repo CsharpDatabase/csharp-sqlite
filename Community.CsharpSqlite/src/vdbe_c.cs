@@ -1836,19 +1836,19 @@ arithmetic_result_is_null:
                 }
                 else
                 {
-                  uA = (ulong)(iA << 0); // memcpy( &uA, &iA, sizeof( uA ) );
+                  //uA = (ulong)(iA << 0); // memcpy( &uA, &iA, sizeof( uA ) );
                   if ( op == OP_ShiftLeft )
                   {
-                    uA = (ulong)( iB << 1 );
+                    iA = iA << (int)iB ;
                   }
                   else
                   {
-                    uA = (ulong)( iB >> 1 );
+                    iA = iA >> (int)iB;
                     /* Sign-extend on a right shift of a negative number */
-                    if ( iA < 0 )
-                      uA |= ( ( (0xffffffff ) << (u8)32 ) | 0xffffffff ) << (u8)( 64 - iB );
+                    //if ( iA < 0 )
+                    //  uA |= ( ( (0xffffffff ) << (u8)32 ) | 0xffffffff ) << (u8)( 64 - iB );
                   }
-                  iA = (long)( uA << 0 ); //memcpy( &iA, &uA, sizeof( iA ) );
+                  //iA = (long)( uA << 0 ); //memcpy( &iA, &uA, sizeof( iA ) );
                 }
               }
               pOut.u.i = iA;

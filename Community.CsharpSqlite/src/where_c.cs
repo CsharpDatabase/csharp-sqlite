@@ -2940,7 +2940,7 @@ UNUSED_PARAMETER(nEq);
       Parse pParse,       /* Parsing & code generating context */
       Index p,            /* The index whose left-most column is pTerm */
       Expr pExpr,         /* Expression for VALUE in the x=VALUE constraint */
-      double pnRow        /* Write the revised row estimate here */
+      ref double pnRow    /* Write the revised row estimate here */
     )
     {
       sqlite3_value pRhs = null;/* VALUE on right-hand side of pTerm */
@@ -3010,7 +3010,7 @@ whereEqualScanEst_cancel:
       Parse pParse,       /* Parsing & code generating context */
       Index p,            /* The index whose left-most column is pTerm */
       ExprList pList,     /* The value list on the RHS of "x IN (v1,v2,v3,...)" */
-      double pnRow        /* Write the revised row estimate here */
+      ref double pnRow    /* Write the revised row estimate here */
     )
     {
       sqlite3_value pVal = null;/* One value from list */
@@ -3423,11 +3423,11 @@ whereEqualScanEst_cancel:
           {
             testcase( pFirstTerm.eOperator == WO_EQ );
             testcase( pFirstTerm.eOperator == WO_ISNULL );
-            whereEqualScanEst( pParse, pProbe, pFirstTerm.pExpr.pRight, nRow );
+            whereEqualScanEst( pParse, pProbe, pFirstTerm.pExpr.pRight, ref nRow );
           }
           else if ( pFirstTerm.eOperator == WO_IN && bInEst == 0 )
           {
-            whereInScanEst( pParse, pProbe, pFirstTerm.pExpr.x.pList, nRow );
+            whereInScanEst( pParse, pProbe, pFirstTerm.pExpr.x.pList, ref nRow );
           }
         }
 #endif //* SQLITE_ENABLE_STAT2 */
