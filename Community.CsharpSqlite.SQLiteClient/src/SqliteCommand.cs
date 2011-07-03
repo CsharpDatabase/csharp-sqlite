@@ -308,7 +308,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 			UTF8Encoding encoding = new UTF8Encoding();
 			SqliteError err = (SqliteError)Sqlite3.sqlite3_prepare_v2( parent_conn.Handle2, pzStart, pzStart.Length, ref pStmt, ref pzTail );
 			if ( err != SqliteError.OK )
-				throw new SqliteSyntaxException( GetError3() );
+				throw new SqliteSyntaxException( parent_conn.Handle2.errCode, GetError3() );
 		}
 
 		// Executes a statement and ignores its result.
@@ -329,7 +329,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 			err = (SqliteError)Sqlite3.sqlite3_step( pStmt );
 
 			if ( err == SqliteError.ERROR )
-				throw new SqliteExecutionException( GetError3() + "\n" + pStmt.zErrMsg );
+				throw new SqliteExecutionException(parent_conn.Handle2.errCode, GetError3() + "\n" + pStmt.zErrMsg );
 
 			pazValue = IntPtr.Zero;
 			pazColName = IntPtr.Zero; // not used for v=3
