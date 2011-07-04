@@ -36,7 +36,7 @@ namespace Community.CsharpSqlite
     ** Included in SQLite3 port to C#-SQLite; 2008 Noah B Hart
     ** C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    ** SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
+    ** SQLITE_SOURCE_ID: 2011-06-23 19:49:22 4374b7e83ea0a3fbc3691f9c0c936272862f32f2
     **
     *************************************************************************
     */
@@ -180,13 +180,16 @@ namespace Community.CsharpSqlite
     static string sqlite3TestErrorName( int rc )
     {
       string zName = "";
-      switch ( rc & 0xff )
+      switch ( rc )
       {
         case SQLITE_OK:
           zName = "SQLITE_OK";
           break;
         case SQLITE_ERROR:
           zName = "SQLITE_ERROR";
+          break;
+        case SQLITE_INTERNAL:
+          zName = "SQLITE_INTERNAL";
           break;
         case SQLITE_PERM:
           zName = "SQLITE_PERM";
@@ -218,6 +221,9 @@ namespace Community.CsharpSqlite
         case SQLITE_CORRUPT:
           zName = "SQLITE_CORRUPT";
           break;
+        case SQLITE_NOTFOUND:
+          zName = "SQLITE_NOTFOUND";
+          break;
         case SQLITE_FULL:
           zName = "SQLITE_FULL";
           break;
@@ -232,6 +238,9 @@ namespace Community.CsharpSqlite
           break;
         case SQLITE_SCHEMA:
           zName = "SQLITE_SCHEMA";
+          break;
+        case SQLITE_TOOBIG:
+          zName = "SQLITE_TOOBIG";
           break;
         case SQLITE_CONSTRAINT:
           zName = "SQLITE_CONSTRAINT";
@@ -254,17 +263,68 @@ namespace Community.CsharpSqlite
         case SQLITE_RANGE:
           zName = "SQLITE_RANGE";
           break;
+        case SQLITE_NOTADB:
+          zName = "SQLITE_NOTADB";
+          break;
         case SQLITE_ROW:
           zName = "SQLITE_ROW";
           break;
         case SQLITE_DONE:
           zName = "SQLITE_DONE";
           break;
-        case SQLITE_NOTADB:
-          zName = "SQLITE_NOTADB";
+        case SQLITE_IOERR_READ:
+          zName = "SQLITE_IOERR_READ";
           break;
-        case SQLITE_TOOBIG:
-          zName = "SQLITE_TOOBIG";
+        case SQLITE_IOERR_SHORT_READ:
+          zName = "SQLITE_IOERR_SHORT_READ";
+          break;
+        case SQLITE_IOERR_WRITE:
+          zName = "SQLITE_IOERR_WRITE";
+          break;
+        case SQLITE_IOERR_FSYNC:
+          zName = "SQLITE_IOERR_FSYNC";
+          break;
+        case SQLITE_IOERR_DIR_FSYNC:
+          zName = "SQLITE_IOERR_DIR_FSYNC";
+          break;
+        case SQLITE_IOERR_TRUNCATE:
+          zName = "SQLITE_IOERR_TRUNCATE";
+          break;
+        case SQLITE_IOERR_FSTAT:
+          zName = "SQLITE_IOERR_FSTAT";
+          break;
+        case SQLITE_IOERR_UNLOCK:
+          zName = "SQLITE_IOERR_UNLOCK";
+          break;
+        case SQLITE_IOERR_RDLOCK:
+          zName = "SQLITE_IOERR_RDLOCK";
+          break;
+        case SQLITE_IOERR_DELETE:
+          zName = "SQLITE_IOERR_DELETE";
+          break;
+        case SQLITE_IOERR_BLOCKED:
+          zName = "SQLITE_IOERR_BLOCKED";
+          break;
+        case SQLITE_IOERR_NOMEM:
+          zName = "SQLITE_IOERR_NOMEM";
+          break;
+        case SQLITE_IOERR_ACCESS:
+          zName = "SQLITE_IOERR_ACCESS";
+          break;
+        case SQLITE_IOERR_CHECKRESERVEDLOCK:
+          zName = "SQLITE_IOERR_CHECKRESERVEDLOCK";
+          break;
+        case SQLITE_IOERR_LOCK:
+          zName = "SQLITE_IOERR_LOCK";
+          break;
+        case SQLITE_CORRUPT_VTAB:
+          zName = "SQLITE_CORRUPT_VTAB";
+          break;
+        case SQLITE_READONLY_RECOVERY:
+          zName = "SQLITE_READONLY_RECOVERY";
+          break;
+        case SQLITE_READONLY_CANTLOCK:
+          zName = "SQLITE_READONLY_CANTLOCK";
           break;
         default:
           zName = "SQLITE_Unknown";
@@ -2748,6 +2808,34 @@ new _aOp( "SQLITE_STMTSTATUS_AUTOINDEX", SQLITE_STMTSTATUS_AUTOINDEX )
       return TCL.TCL_OK;
     }
 
+    /*
+    ** Usage:  uses_stmt_journal  STMT
+    **
+    ** Return true if STMT uses a statement journal.
+    */
+    static int uses_stmt_journal(
+        object clientdata,
+        Tcl_Interp interp,
+        int objc,
+        Tcl_Obj[] objv
+    )
+    {
+      sqlite3_stmt pStmt = null;
+      int rc;
+
+      if ( objc != 2 )
+      {
+        TCL.Tcl_AppendResult( interp, "wrong # args: should be \"",
+            TCL.Tcl_GetStringFromObj( objv[0], 0 ), " STMT", 0 );
+        return TCL.TCL_ERROR;
+      }
+
+      if ( getStmtPointer( interp, TCL.Tcl_GetString( objv[1] ), ref pStmt ) != 0 )
+        return TCL.TCL_ERROR;
+      rc = sqlite3_stmt_readonly( pStmt ) ? 1 : 0;
+      TCL.Tcl_SetObjResult( interp, TCL.Tcl_NewBooleanObj( pStmt.usesStmtJournal ? 1 : 0 ) );
+      return TCL.TCL_OK;
+    }
 
     /*
     ** Usage: sqlite3_reset STMT
@@ -2811,7 +2899,7 @@ return TCL.TCL_ERROR;
 if ( getStmtPointer( interp, TCL.Tcl_GetString( objv[1] ), ref pStmt ) != 0 ) return TCL.TCL_ERROR;
 TCL.Tcl_SetObjResult( interp, TCL.Tcl_NewBooleanObj( sqlite3_expired( pStmt ) ) );
 #endif
-      TCL.Tcl_SetResult( interp, "0", 0);
+      TCL.Tcl_SetResult( interp, "0", 0 );
       return TCL.TCL_OK;
     }
 
@@ -4412,6 +4500,93 @@ TCL.Tcl_DecrRefCount(pTail);
       return TCL.TCL_OK;
     }
 
+    class OpenFlag
+    {
+      public string zFlag;
+      public int flag;
+
+      public OpenFlag( string zFlag, int flag )
+      {
+        this.zFlag = zFlag;
+        this.flag = flag;
+      }
+    }
+    /*
+    ** Usage: sqlite3_open_v2 FILENAME FLAGS VFS
+    */
+    static int test_open_v2(
+        object clientdata,
+        Tcl_Interp interp,
+        int objc,
+        Tcl_Obj[] objv
+    )
+    {
+      string zFilename;
+      string zVfs;
+      int flags = 0;
+      sqlite3 db = null;
+      int rc;
+      StringBuilder zBuf = new StringBuilder( 100 );
+
+      int nFlag = 0;
+      Tcl_Obj[] apFlag = null;
+      int i;
+
+      if ( objc != 4 )
+      {
+        TCL.Tcl_WrongNumArgs( interp, 1, objv, "FILENAME FLAGS VFS" );
+        return TCL.TCL_ERROR;
+      }
+      zFilename = TCL.Tcl_GetString( objv[1] );
+      zVfs = TCL.Tcl_GetString( objv[3] );
+      if ( zVfs[0] == 0x00 )
+        zVfs = null;
+
+      rc = TCL.Tcl_ListObjGetElements( interp, objv[2], ref nFlag, ref apFlag ) ? TCL.TCL_OK : 1;
+      if ( rc != TCL.TCL_OK )
+        return rc;
+      for ( i = 0; i < nFlag; i++ )
+      {
+        int iFlag;
+        OpenFlag[] aFlag = new OpenFlag[] {
+      new OpenFlag( "SQLITE_OPEN_READONLY", SQLITE_OPEN_READONLY ),
+      new OpenFlag( "SQLITE_OPEN_READWRITE", SQLITE_OPEN_READWRITE ),
+      new OpenFlag( "SQLITE_OPEN_CREATE", SQLITE_OPEN_CREATE ),
+      new OpenFlag( "SQLITE_OPEN_DELETEONCLOSE", SQLITE_OPEN_DELETEONCLOSE ),
+      new OpenFlag( "SQLITE_OPEN_EXCLUSIVE", SQLITE_OPEN_EXCLUSIVE ),
+      new OpenFlag( "SQLITE_OPEN_AUTOPROXY", SQLITE_OPEN_AUTOPROXY ),
+      new OpenFlag( "SQLITE_OPEN_MAIN_DB", SQLITE_OPEN_MAIN_DB ),
+      new OpenFlag( "SQLITE_OPEN_TEMP_DB", SQLITE_OPEN_TEMP_DB ),
+      new OpenFlag( "SQLITE_OPEN_TRANSIENT_DB", SQLITE_OPEN_TRANSIENT_DB ),
+      new OpenFlag( "SQLITE_OPEN_MAIN_JOURNAL", SQLITE_OPEN_MAIN_JOURNAL ),
+      new OpenFlag( "SQLITE_OPEN_TEMP_JOURNAL", SQLITE_OPEN_TEMP_JOURNAL ),
+      new OpenFlag( "SQLITE_OPEN_SUBJOURNAL", SQLITE_OPEN_SUBJOURNAL ),
+      new OpenFlag( "SQLITE_OPEN_MASTER_JOURNAL", SQLITE_OPEN_MASTER_JOURNAL ),
+      new OpenFlag( "SQLITE_OPEN_NOMUTEX", SQLITE_OPEN_NOMUTEX ),
+      new OpenFlag( "SQLITE_OPEN_FULLMUTEX", SQLITE_OPEN_FULLMUTEX ),
+      new OpenFlag( "SQLITE_OPEN_SHAREDCACHE", SQLITE_OPEN_SHAREDCACHE ),
+      new OpenFlag( "SQLITE_OPEN_PRIVATECACHE", SQLITE_OPEN_PRIVATECACHE ),
+      new OpenFlag( "SQLITE_OPEN_WAL", SQLITE_OPEN_WAL ),
+      new OpenFlag( "SQLITE_OPEN_URI", SQLITE_OPEN_URI ),
+      new OpenFlag( null, 0 )
+    };
+        //rc = TCL.Tcl_GetIndexFromObjStruct( interp, apFlag[i], aFlag, sizeof( aFlag[0] ), 
+        //       "flag", 0, ref iFlag    );
+
+        for ( iFlag = 0; iFlag < aFlag.Length && ( aFlag[iFlag].zFlag != objv[4].ToString() ); iFlag++ )
+        {
+        }
+        if ( iFlag >= aFlag.Length )
+          return TCL.TCL_ERROR;
+        flags |= aFlag[iFlag].flag;
+      }
+
+      rc = sqlite3_open_v2( zFilename, ref db, flags, zVfs );
+      if ( sqlite3TestMakePointerStr( interp, zBuf, db ) != 0 )
+        return TCL.TCL_ERROR;
+      TCL.Tcl_AppendResult( interp, zBuf, 0 );
+      return TCL.TCL_OK;
+    }
     /*
     ** Usage: sqlite3_open16 filename options
     */
@@ -6196,18 +6371,89 @@ return TCL.TCL_OK;
       if ( getStmtPointer( interp, TCL.Tcl_GetString( objv[1] ), ref pStmt ) != 0 )
         return TCL.TCL_ERROR;
       rc = printExplainQueryPlan( pStmt );
+      /* This is needed on Windows so that a test case using this 
+      ** function can open a read pipe and get the output of
+      ** printExplainQueryPlan() immediately.
+      */
+      //fflush( stdout );
       TCL.Tcl_SetResult( interp, t1ErrorName( rc ), 0 );
       return TCL.TCL_OK;
     }
 #endif //* SQLITE_OMIT_EXPLAIN */
 
+    class Verb
+    {
+      public string zName;
+      public int i;
+
+      public Verb( string zName, int i )
+      {
+        this.zName = zName;
+        this.i = i;
+      }
+    }
+
     /*
-** optimization_control DB OPT BOOLEAN
-**
-** Enable or disable query optimizations using the sqlite3_test_control()
-** interface. Disable if BOOLEAN is false and enable if BOOLEAN is true.
-** OPT is the name of the optimization to be disabled.
+** sqlite3_test_control VERB ARGS...
 */
+    static int test_test_control(
+        object clientData,
+        Tcl_Interp interp,
+        int objc,
+        Tcl_Obj[] objv
+    )
+    {
+      Verb[] aVerb = new Verb[] {
+    new Verb( "SQLITE_TESTCTRL_LOCALTIME_FAULT", SQLITE_TESTCTRL_LOCALTIME_FAULT ), 
+  };
+      int iVerb;
+      int iFlag;
+      int rc;
+
+      if ( objc < 2 )
+      {
+        TCL.Tcl_WrongNumArgs( interp, 1, objv, "VERB ARGS..." );
+        return TCL.TCL_ERROR;
+      }
+
+      //rc = Tcl_GetIndexFromObjStruct(
+      //    interp, objv[1], aVerb, sizeof(aVerb[0]), "VERB", 0, &iVerb
+      //);
+      for ( iVerb = 0; iVerb < aVerb.Length && ( aVerb[iVerb].zName != objv[1].ToString() ); iVerb++ )
+      {
+      }
+      if ( iVerb >= aVerb.Length )
+        return TCL.TCL_ERROR;
+
+      iFlag = aVerb[iVerb].i;
+      switch ( iFlag )
+      {
+        case SQLITE_TESTCTRL_LOCALTIME_FAULT:
+          {
+            bool val = false;
+            if ( objc != 3 )
+            {
+              TCL.Tcl_WrongNumArgs( interp, 2, objv, "ONOFF" );
+              return TCL.TCL_ERROR;
+            }
+            if ( TCL.Tcl_GetBooleanFromObj( interp, objv[2], ref val ) )
+              return TCL.TCL_ERROR;
+            sqlite3_test_control( SQLITE_TESTCTRL_LOCALTIME_FAULT, val );
+            break;
+          }
+      }
+
+      TCL.Tcl_ResetResult( interp );
+      return TCL.TCL_OK;
+    }
+
+    /*
+    ** optimization_control DB OPT BOOLEAN
+    **
+    ** Enable or disable query optimizations using the sqlite3_test_control()
+    ** interface. Disable if BOOLEAN is false and enable if BOOLEAN is true.
+    ** OPT is the name of the optimization to be disabled.
+    */
     public class _aOpt
     {
       public string zOptName;
@@ -6241,6 +6487,7 @@ new _aOpt( "index-search", SQLITE_IndexSearch ),
 new _aOpt( "index-cover", SQLITE_IndexCover ),
 new _aOpt( "groupby-order", SQLITE_GroupByOrder ),
 new _aOpt( "factor-constants", SQLITE_FactorOutConst ),
+new _aOpt( "real-as-int", SQLITE_IdxRealAsInt   ),
 };
 
       if ( objc != 4 )
@@ -6278,30 +6525,13 @@ new _aOpt( "factor-constants", SQLITE_FactorOutConst ),
     }
 
 
-
     static Var.SQLITE3_GETSET bitmask_size = new Var.SQLITE3_GETSET( "bitmask_size" );
 
-    static Var.SQLITE3_GETSET sqlite3_query_plan = new Var.SQLITE3_GETSET( "sqlite_query_plan" );
-    static Var.SQLITE3_GETSET sqlite3_like_count = new Var.SQLITE3_GETSET( "sqlite3_like_count" );
-    static Var.SQLITE3_GETSET sqlite3_interrupt_count = new Var.SQLITE3_GETSET( "sqlite3_interrupt_count" );
-    static Var.SQLITE3_GETSET sqlite3_sort_count = new Var.SQLITE3_GETSET( "sqlite_sort_count" );
-    static Var.SQLITE3_GETSET sqlite3_current_time = new Var.SQLITE3_GETSET( "sqlite3_current_time" );
 #if SQLITE_OS_UNIX && (__APPLE__) && SQLITE_ENABLE_LOCKING_STYLE
 extern int sqlite3_hostid_num;
 #endif
-    static Var.SQLITE3_GETSET sqlite3_max_blobsize = new Var.SQLITE3_GETSET( "sqlite3_max_blobsize" );
-    static Var.SQLITE3_GETSET sqlite3_open_file_count = new Var.SQLITE3_GETSET( "sqlite3_open_file_count" );
-    static Var.SQLITE3_GETSET sqlite3_opentemp_count = new Var.SQLITE3_GETSET( "sqlite3_opentemp_count" );
-    static Var.SQLITE3_GETSET sqlite3_search_count = new Var.SQLITE3_GETSET( "sqlite3_search_count" );
-    static Var.SQLITE3_GETSET sqlite3_found_count = new Var.SQLITE3_GETSET( "sqlite3_found_count" );
-    static Var.SQLITE3_GETSET sqlite3_xferopt_count = new Var.SQLITE3_GETSET( "sqlite3_xferopt_count" );
     static Var.SQLITE3_GETSET sqlite_static_bind_nbyte = new Var.SQLITE3_GETSET( "static_bind_nbyte" );
     static Var.SQLITE3_GETSET sqlite_static_bind_value = new Var.SQLITE3_GETSET( "static_bind_value" );
-
-    static Var.SQLITE3_GETSET sqlite3_pager_readdb_count = new Var.SQLITE3_GETSET( "sqlite3_pager_readdb_count" ); /* Number of full pages read from DB */
-    static Var.SQLITE3_GETSET sqlite3_pager_writedb_count = new Var.SQLITE3_GETSET( "sqlite3_pager_writedb_count" ); /* Number of full pages written to DB */
-    static Var.SQLITE3_GETSET sqlite3_pager_writej_count = new Var.SQLITE3_GETSET( "sqlite3_pager_writej_count" ); /* Number of pages written to journal */
-
 
     public static int Sqlitetest1_Init( Tcl_Interp interp )
     {
@@ -6383,6 +6613,7 @@ new _aObjCmd( "sqlite3_errmsg", test_errmsg ,0 ),
 // new _aObjCmd( "sqlite3_errmsg16", test_errmsg16 ,0 ),
 new _aObjCmd( "sqlite3_open", test_open ,0 ),
 // new _aObjCmd( "sqlite3_open16", test_open16 ,0 ),
+new _aObjCmd( "sqlite3_open_v2", test_open_v2 ,0 ),
 // new _aObjCmd( "sqlite3_complete16", test_complete16 ,0 ),
 
 new _aObjCmd( "sqlite3_prepare", test_prepare ,0 ),
@@ -6399,6 +6630,7 @@ new _aObjCmd( "sqlite3_step", test_step ,0 ),
 // { "sqlite3_sql", test_sql ,0 },
 new _aObjCmd( "sqlite3_next_stmt", test_next_stmt ,0 ),
 new _aObjCmd( "sqlite3_stmt_readonly", test_stmt_readonly ,0 ),
+new _aObjCmd( "uses_stmt_journal",  uses_stmt_journal ,0 ),
 
 new _aObjCmd( "sqlite3_release_memory", test_release_memory, 0),
 new _aObjCmd( "sqlite3_soft_heap_limit", test_soft_heap_limit, 0),
@@ -6497,6 +6729,7 @@ new _aObjCmd( "test_sqlite3_log", test_sqlite3_log, 0 ),
 #if !SQLITE_OMIT_EXPLAIN
 new _aObjCmd( "print_explain_query_plan", test_print_eqp, 0 ),
 #endif
+new _aObjCmd( "sqlite3_test_control", test_test_control ),
       };
       bitmask_size.iValue = BMS;
       int i;
@@ -6543,7 +6776,7 @@ extern int sqlite3_fts3_enable_parentheses;
       sqlite3_max_blobsize, VarFlags.SQLITE3_LINK_INT );
       TCL.Tcl_LinkVar( interp, "sqlite_like_count",
       sqlite3_like_count, VarFlags.SQLITE3_LINK_INT );
-      TCL.Tcl_LinkVar(interp, "sqlite_interrupt_count",
+      TCL.Tcl_LinkVar( interp, "sqlite_interrupt_count",
       sqlite3_interrupt_count, VarFlags.SQLITE3_LINK_INT );
       TCL.Tcl_LinkVar( interp, "sqlite_open_file_count",
       sqlite3_open_file_count, VarFlags.SQLITE3_LINK_INT );
@@ -6601,10 +6834,10 @@ TCL.Tcl_LinkVar((interp, "sqlite_wal_trace",
       // (char*)&sqlite3_temp_directory, VarFlag.TCL_LINK_STRING);
       TCL.Tcl_LinkVar( interp, "bitmask_size",
       bitmask_size, VarFlags.SQLITE3_LINK_INT | VarFlags.SQLITE3_LINK_READ_ONLY );
-      // TCL.Tcl_LinkVar(interp, "sqlite_sync_count",
-      // (char*)&sqlite3_sync_count, VarFlag.SQLITE3_LINK_INT);
-      // TCL.Tcl_LinkVar(interp, "sqlite_fullsync_count",
-      // (char*)&sqlite3_fullsync_count, VarFlag.SQLITE3_LINK_INT);
+      TCL.Tcl_LinkVar( interp, "sqlite_sync_count",
+      sqlite3_sync_count, VarFlags.SQLITE3_LINK_INT );
+      TCL.Tcl_LinkVar( interp, "sqlite_fullsync_count",
+      sqlite3_fullsync_count, VarFlags.SQLITE3_LINK_INT );
 #if (SQLITE_ENABLE_FTS3) && (SQLITE_TEST)
 TCL.Tcl_LinkVar(interp, "sqlite_fts3_enable_parentheses",
 (char*)&sqlite3_fts3_enable_parentheses, TCL.Tcl_LINK_INT);

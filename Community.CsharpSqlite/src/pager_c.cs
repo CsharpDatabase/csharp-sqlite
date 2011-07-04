@@ -41,7 +41,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
+    **  SQLITE_SOURCE_ID: 2011-06-23 19:49:22 4374b7e83ea0a3fbc3691f9c0c936272862f32f2
     **
     *************************************************************************
     */
@@ -780,7 +780,7 @@ public int nHit;
 public Wal pWal;                       /* Write-ahead log used by "journal_mode=wal" */
 public string zWal;                    /* File name for write-ahead log */
 #else
-      public object pWal = null;             /* Having this dummy here makes C# easier */
+      public sqlite3_vfs pWal = null;             /* Having this dummy here makes C# easier */
 #endif
     };
 
@@ -790,9 +790,15 @@ public string zWal;                    /* File name for write-ahead log */
     ** a non-testing build.  These variables are not thread-safe.
     */
 #if SQLITE_TEST
-    //static int sqlite3_pager_readdb_count = 0;    /* Number of full pages read from DB */
-    //static int sqlite3_pager_writedb_count = 0;   /* Number of full pages written to DB */
-    //static int sqlite3_pager_writej_count = 0;    /* Number of pages written to journal */
+#if !TCLSH
+    static int sqlite3_pager_readdb_count = 0;    /* Number of full pages read from DB */
+    static int sqlite3_pager_writedb_count = 0;   /* Number of full pages written to DB */
+    static int sqlite3_pager_writej_count = 0;    /* Number of pages written to journal */
+#else
+    static tcl.lang.Var.SQLITE3_GETSET sqlite3_pager_readdb_count = new tcl.lang.Var.SQLITE3_GETSET( "sqlite3_pager_readdb_count" );
+    static tcl.lang.Var.SQLITE3_GETSET sqlite3_pager_writedb_count = new tcl.lang.Var.SQLITE3_GETSET( "sqlite3_pager_writedb_count" );
+    static tcl.lang.Var.SQLITE3_GETSET sqlite3_pager_writej_count = new tcl.lang.Var.SQLITE3_GETSET( "sqlite3_pager_writej_count" );
+#endif
     static void PAGER_INCR( ref int v )
     {
       v++;
@@ -873,11 +879,11 @@ const int MEMDB = 0;
     **
     ** This is so that expressions can be written as:
     **
-    **   if( isOpen(pPager->jfd) ){ ...
+    **   if( isOpen(pPager.jfd) ){ ...
     **
     ** instead of
     **
-    **   if( pPager->jfd->pMethods ){ ...
+    **   if( pPager.jfd->pMethods ){ ...
     */
     //#define isOpen(pFd) ((pFd)->pMethods)
     static bool isOpen( sqlite3_file pFd )
@@ -2817,7 +2823,7 @@ delmaster_out:
     **
     ** If the main database file is not open, or the pager is not in either
     ** DBMOD or OPEN state, this function is a no-op. Otherwise, the size 
-    ** of the file is changed to nPage pages (nPage*pPager->pageSize bytes). 
+    ** of the file is changed to nPage pages (nPage*pPager.pageSize bytes). 
     ** If the file on disk is currently larger than nPage pages, then use the VFS
     ** xTruncate() method to truncate it.
     **
@@ -3255,10 +3261,14 @@ delmaster_out:
 
 #if SQLITE_TEST
       //  PAGER_INCR(ref sqlite3_pager_readdb_count);
+#if !TCLSH
+      PAGER_INCR( ref sqlite3_pager_readdb_count );
+#else
       int iValue;
       iValue = sqlite3_pager_readdb_count.iValue;
       PAGER_INCR( ref iValue );
       sqlite3_pager_readdb_count.iValue = iValue;
+#endif
 
       PAGER_INCR( ref pPager.nRead );
 #endif
@@ -3275,7 +3285,7 @@ delmaster_out:
     **
     ** This is an unconditional update.  See also the pager_incr_changecounter()
     ** routine which only updates the change-counter if the update is actually
-    ** needed, as determined by the pPager->changeCountDone state variable.
+    ** needed, as determined by the pPager.changeCountDone state variable.
     */
     static void pager_write_changecounter( PgHdr pPg )
     {
@@ -3317,7 +3327,7 @@ sqlite3PcacheDrop(pPg);
 }else{
 rc = readDbPage(pPg);
 if( rc==SQLITE_OK ){
-pPager->xReiniter(pPg);
+pPager.xReiniter(pPg);
 }
 sqlite3PagerUnref(pPg);
 }
@@ -3331,7 +3341,7 @@ sqlite3PagerUnref(pPg);
 ** also copied into the backup databases) as part of this transaction,
 ** the backups must be restarted.
 */
-sqlite3BackupRestart(pPager->pBackup);
+sqlite3BackupRestart(pPager.pBackup);
 
 return rc;
 }
@@ -3350,9 +3360,9 @@ PgHdr *pList;                   /* List of dirty pages to revert */
 **   + Discard the cached page (if refcount==0), or
 **   + Reload page content from the database (if refcount>0).
 */
-pPager->dbSize = pPager->dbOrigSize;
-rc = sqlite3WalUndo(pPager->pWal, pagerUndoCallback, (void *)pPager);
-pList = sqlite3PcacheDirtyList(pPager->pPCache);
+pPager.dbSize = pPager.dbOrigSize;
+rc = sqlite3WalUndo(pPager.pWal, pagerUndoCallback, (void *)pPager);
+pList = sqlite3PcacheDirtyList(pPager.pPCache);
 while( pList && rc==SQLITE_OK ){
 PgHdr *pNext = pList->pDirty;
 rc = pagerUndoCallback((void *)pPager, pList->pgno);
@@ -3384,7 +3394,7 @@ int rc;                         /* Return code */
 PgHdr *p;                       /* For looping over pages */
 #endif
 
-assert( pPager->pWal );
+assert( pPager.pWal );
 #if SQLITE_DEBUG
 /* Verify that the page list is in accending order */
 for(p=pList; p && p->pDirty; p=p->pDirty){
@@ -3407,18 +3417,18 @@ assert( p->pgno < p->pDirty->pgno );
 
 
 if( pList->pgno==1 ) pager_write_changecounter(pList);
-rc = sqlite3WalFrames(pPager->pWal, 
-pPager->pageSize, pList, nTruncate, isCommit, syncFlags
+rc = sqlite3WalFrames(pPager.pWal, 
+pPager.pageSize, pList, nTruncate, isCommit, syncFlags
 );
-if( rc==SQLITE_OK && pPager->pBackup ){
+if( rc==SQLITE_OK && pPager.pBackup ){
 PgHdr *p;
 for(p=pList; p; p=p->pDirty){
-sqlite3BackupUpdate(pPager->pBackup, p->pgno, (u8 *)p->pData);
+sqlite3BackupUpdate(pPager.pBackup, p->pgno, (u8 *)p->pData);
 }
 }
 
 #if SQLITE_CHECK_PAGES
-pList = sqlite3PcacheDirtyList(pPager->pPCache);
+pList = sqlite3PcacheDirtyList(pPager.pPCache);
 for(p=pList; p; p=p->pDirty){
 pager_set_pagehash(p);
 }
@@ -3440,16 +3450,16 @@ int rc;                         /* Return code */
 int changed = 0;                /* True if cache must be reset */
 
 assert( pagerUseWal(pPager) );
-assert( pPager->eState==PAGER_OPEN || pPager->eState==PAGER_READER );
+assert( pPager.eState==PAGER_OPEN || pPager.eState==PAGER_READER );
 
 /* sqlite3WalEndReadTransaction() was not called for the previous
 ** transaction in locking_mode=EXCLUSIVE.  So call it now.  If we
 ** are in locking_mode=NORMAL and EndRead() was previously called,
 ** the duplicate call is harmless.
 */
-sqlite3WalEndReadTransaction(pPager->pWal);
+sqlite3WalEndReadTransaction(pPager.pWal);
 
-rc = sqlite3WalBeginReadTransaction(pPager->pWal, &changed);
+rc = sqlite3WalBeginReadTransaction(pPager.pWal, &changed);
 if( rc!=SQLITE_OK || changed ){
 pager_reset(pPager);
 }
@@ -3815,13 +3825,17 @@ return rc;
     }
 #endif
 
-    /*
+/*
 ** The following global variable is incremented whenever the library
 ** attempts to open a temporary file.  This information is used for
 ** testing and analysis only.
 */
 #if SQLITE_TEST
-    //static int sqlite3_opentemp_count = 0;
+#if !TCLSH
+    static int sqlite3_opentemp_count = 0;
+#else
+    static tcl.lang.Var.SQLITE3_GETSET sqlite3_opentemp_count = new tcl.lang.Var.SQLITE3_GETSET( "sqlite3_opentemp_count" );
+#endif
 #endif
 
     /*
@@ -3848,7 +3862,11 @@ return rc;
       int rc;               /* Return code */
 
 #if SQLITE_TEST
+#if !TCLSH
+      sqlite3_opentemp_count++;  /* Used for testing and analysis only */
+#else
       sqlite3_opentemp_count.iValue++;  /* Used for testing and analysis only */
+#endif
 #endif
 
       vfsFlags |= SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE |
@@ -4023,12 +4041,22 @@ return rc;
     static int saved_cnt;
     static void disable_simulated_io_errors()
     {
+#if !TCLSH
+      saved_cnt = sqlite3_io_error_pending;
+      sqlite3_io_error_pending = -1;
+#else
       saved_cnt = sqlite3_io_error_pending.iValue;
       sqlite3_io_error_pending.iValue = -1;
+#endif
     }
+
     static void enable_simulated_io_errors()
     {
+#if !TCLSH
+      sqlite3_io_error_pending = saved_cnt;
+#else
       sqlite3_io_error_pending.iValue = saved_cnt;
+#endif
     }
 #else
 //# define disable_simulated_io_errors()
@@ -4224,7 +4252,7 @@ static void assertTruncateConstraint(Pager pPager) { }
       disable_simulated_io_errors();
 #endif
       sqlite3BeginBenignMalloc();
-      /* pPager->errCode = 0; */
+      /* pPager.errCode = 0; */
       pPager.exclusiveMode = false;
 #if !SQLITE_OMIT_WAL
 sqlite3WalClose(pPager->pWal, pPager->ckptSyncFlags, pPager->pageSize, pTmp);
@@ -4570,10 +4598,14 @@ static Pgno sqlite3PagerPagenumber( DbPage pPg )    {      return pPg.pgno;    }
           PAGERID( pPager ), pgno, pager_pagehash( pList ) );
           IOTRACE( "PGOUT %p %d\n", pPager, pgno );
 #if SQLITE_TEST
+#if !TCLSH
+          PAGER_INCR( ref sqlite3_pager_writedb_count );
+#else
           int iValue;
           iValue = sqlite3_pager_writedb_count.iValue;
           PAGER_INCR( ref iValue );
           sqlite3_pager_writedb_count.iValue = iValue;
+#endif
 
           PAGER_INCR( ref pPager.nWrite );
 #endif
@@ -4850,6 +4882,8 @@ static Pgno sqlite3PagerPagenumber( DbPage pPg )    {      return pPg.pgno;    }
       bool noReadlock = ( flags & PAGER_NO_READLOCK ) != 0;  /* True to omit read-lock */
       int pcacheSize = sqlite3PcacheSize();       /* Bytes to allocate for PCache */
       u32 szPageDflt = SQLITE_DEFAULT_PAGE_SIZE;  /* Default page size */
+      string zUri = null;     /* URI args to copy */
+      int nUri = 0;           /* Number of bytes of URI args at *zUri */
 
       /* Figure out how much space is required for each journal file-handle
       ** (there are two of them, the main journal and the sub-journal). This
@@ -4880,11 +4914,12 @@ static Pgno sqlite3PagerPagenumber( DbPage pPg )    {      return pPg.pgno;    }
 #endif
 
       /* Compute and store the full pathname in an allocated buffer pointed
-** to by zPathname, length nPathname. Or, if this is a temporary file,
-** leave both nPathname and zPathname set to 0.
-*/
+      ** to by zPathname, length nPathname. Or, if this is a temporary file,
+      ** leave both nPathname and zPathname set to 0.
+      */
       if ( !String.IsNullOrEmpty( zFilename ) )
       {
+        string z;
         nPathname = pVfs.mxPathname + 1;
         zPathname = new StringBuilder( nPathname * 2 );// sqlite3Malloc( nPathname * 2 );
         if ( zPathname == null )
@@ -4895,6 +4930,13 @@ static Pgno sqlite3PagerPagenumber( DbPage pPg )    {      return pPg.pgno;    }
         rc = sqlite3OsFullPathname( pVfs, zFilename, nPathname, zPathname );
 
         nPathname = sqlite3Strlen30( zPathname );
+        z = zUri = zFilename;//.Substring(sqlite3Strlen30( zFilename ) );
+        //while ( *z )
+        //{
+        //  z += sqlite3Strlen30( z ) + 1;
+        //  z += sqlite3Strlen30( z ) + 1;
+        //}
+        nUri = zUri.Length;//        &z[1] - zUri;
         if ( rc == SQLITE_OK && nPathname + 8 > pVfs.mxPathname )
         {
           /* This branch is taken when the journal path required by
@@ -4929,7 +4971,7 @@ static Pgno sqlite3PagerPagenumber( DbPage pPg )    {      return pPg.pgno;    }
       //  ROUND8(pcacheSize)      +           /* PCache object */
       //  ROUND8(pVfs.szOsFile)   +           /* The main db file */
       //  journalFileSize * 2 +       /* The two journal files */
-      //  nPathname + 1 +             /* zFilename */
+      //  nPathname + 1 + nUri +         /* zFilename */
       //  nPathname + 8 + 1           /* zJournal */
       //#if !SQLITE_OMIT_WAL
       //    + nPathname + 4 + 1              /* zWal */
@@ -4952,16 +4994,19 @@ static Pgno sqlite3PagerPagenumber( DbPage pPg )    {      return pPg.pgno;    }
       if ( zPathname != null )
       {
         Debug.Assert( nPathname > 0 );
-        //pPager.zJournal =   (char*)(pPtr += nPathname + 1);
+        //pPager.zJournal =   (char*)(pPtr += nPathname + 1 + nUri);
         //memcpy(pPager.zFilename, zPathname, nPathname);
         pPager.zFilename = zPathname.ToString();
+        zUri = pPager.zFilename;//.Substring( nPathname + 1 );//memcpy( &pPager.zFilename[nPathname + 1], zUri, nUri );
         //memcpy(pPager.zJournal, zPathname, nPathname);
         //memcpy(&pPager.zJournal[nPathname], "-journal", 8);
         pPager.zJournal = pPager.zFilename + "-journal";
+        sqlite3FileSuffix3( pPager.zFilename, pPager.zJournal );
 #if !SQLITE_OMIT_WAL
 pPager.zWal = &pPager.zJournal[nPathname+8+1];
 memcpy(pPager.zWal, zPathname, nPathname);
 memcpy(&pPager.zWal[nPathname], "-wal", 4);
+        sqlite3FileSuffix3(pPager.zFilename, pPager.zWal);
 #endif
 
         //sqlite3_free( ref zPathname );
@@ -6092,9 +6137,13 @@ CHECK_PAGE(pPg);
             IOTRACE( "JOUT %p %d %lld %d\n", pPager, pPg.pgno,
             pPager.journalOff, pPager.pageSize );
 #if SQLITE_TEST
+#if !TCLSH
+            PAGER_INCR( ref sqlite3_pager_writej_count );
+#else
             int iValue = sqlite3_pager_writej_count.iValue;
             PAGER_INCR( ref iValue );
             sqlite3_pager_writej_count.iValue = iValue;
+#endif
 #endif
             PAGERTRACE( "JOURNAL %d page %d needSync=%d hash(%08x)\n",
             PAGERID( pPager ), pPg.pgno,
@@ -6329,7 +6378,7 @@ static bool sqlite3PagerIswriteable( DbPage pPg ) { return true; }
     ** byte offset 24 of the pager file.  The secondary change counter at
     ** 92 is also updated, as is the SQLite version number at offset 96.
     **
-    ** But this only happens if the pPager->changeCountDone flag is false.
+    ** But this only happens if the pPager.changeCountDone flag is false.
     ** To avoid excess churning of page 1, the update only happens once.
     ** See also the pager_write_changecounter() routine that does an 
     ** unconditional update of the change counters.
@@ -6569,9 +6618,10 @@ int DIRECT_MODE = isDirectMode;
             pList = pPageOne;
             pList.pDirty = null;
           }
-          Debug.Assert( pList != null || rc != SQLITE_OK );
-          if ( pList != null )
+          Debug.Assert( rc == SQLITE_OK );
+          if ( ALWAYS( pList ) )
           {
+
             rc = pagerWalFrames( pPager, pList, pPager.dbSize, 1,
             ( pPager.fullSync ? pPager.syncFlags : (byte)0 )
             );
@@ -7568,6 +7618,7 @@ return MEMDB != 0;
       if ( iLimit >= -1 )
       {
         pPager.journalSizeLimit = iLimit;
+        sqlite3WalLimit( pPager.pWal, iLimit );
       }
       return pPager.journalSizeLimit;
     }
@@ -7593,10 +7644,10 @@ return MEMDB != 0;
 */
 int sqlite3PagerCheckpoint(Pager *pPager, int eMode, int *pnLog, int *pnCkpt){
   int rc = SQLITE_OK;
-  if( pPager->pWal ){
-    rc = sqlite3WalCheckpoint(pPager->pWal, eMode,
-        pPager->xBusyHandler, pPager->pBusyHandlerArg,
-        pPager->ckptSyncFlags, pPager->pageSize, (u8 *)pPager->pTmpSpace,
+  if( pPager.pWal ){
+    rc = sqlite3WalCheckpoint(pPager.pWal, eMode,
+        pPager.xBusyHandler, pPager.pBusyHandlerArg,
+        pPager.ckptSyncFlags, pPager.pageSize, (u8 *)pPager.pTmpSpace,
         pnLog, pnCkpt
     );
   }
@@ -7604,7 +7655,7 @@ int sqlite3PagerCheckpoint(Pager *pPager, int eMode, int *pnLog, int *pnCkpt){
 }
 
     int sqlite3PagerWalCallback(Pager *pPager){
-return sqlite3WalCallback(pPager->pWal);
+return sqlite3WalCallback(pPager.pWal);
 }
 
 /*
@@ -7612,8 +7663,8 @@ return sqlite3WalCallback(pPager->pWal);
 ** primitives necessary for write-ahead logging.
 */
 int sqlite3PagerWalSupported(Pager *pPager){
-const sqlite3_io_methods *pMethods = pPager->fd->pMethods;
-return pPager->exclusiveMode || (pMethods->iVersion>=2 && pMethods->xShmMap);
+const sqlite3_io_methods *pMethods = pPager.fd->pMethods;
+return pPager.exclusiveMode || (pMethods->iVersion>=2 && pMethods->xShmMap);
 }
 
 /*
@@ -7623,7 +7674,7 @@ return pPager->exclusiveMode || (pMethods->iVersion>=2 && pMethods->xShmMap);
 static int pagerExclusiveLock(Pager *pPager){
 int rc;                         /* Return code */
 
-assert( pPager->eLock==SHARED_LOCK || pPager->eLock==EXCLUSIVE_LOCK );
+assert( pPager.eLock==SHARED_LOCK || pPager.eLock==EXCLUSIVE_LOCK );
 rc = pagerLockDb(pPager, EXCLUSIVE_LOCK);
 if( rc!=SQLITE_OK ){
 /* If the attempt to grab the exclusive lock failed, release the
@@ -7643,15 +7694,15 @@ return rc;
 static int pagerOpenWal(Pager *pPager){
 int rc = SQLITE_OK;
 
-assert( pPager->pWal==0 && pPager->tempFile==0 );
-assert( pPager->eLock==SHARED_LOCK || pPager->eLock==EXCLUSIVE_LOCK || pPager->noReadlock);
+assert( pPager.pWal==0 && pPager.tempFile==0 );
+assert( pPager.eLock==SHARED_LOCK || pPager.eLock==EXCLUSIVE_LOCK || pPager.noReadlock);
 
 /* If the pager is already in exclusive-mode, the WAL module will use 
 ** heap-memory for the wal-index instead of the VFS shared-memory 
 ** implementation. Take the exclusive lock now, before opening the WAL
 ** file, to make sure this is safe.
 */
-if( pPager->exclusiveMode ){
+if( pPager.exclusiveMode ){
 rc = pagerExclusiveLock(pPager);
 }
 
@@ -7659,8 +7710,9 @@ rc = pagerExclusiveLock(pPager);
 ** (e.g. due to malloc() failure), return an error code.
 */
 if( rc==SQLITE_OK ){
-rc = sqlite3WalOpen(pPager->pVfs, 
-pPager->fd, pPager->zWal, pPager->exclusiveMode, &pPager->pWal
+rc = sqlite3WalOpen(pPager.pVfs, 
+pPager.fd, pPager.zWal, pPager.exclusiveMode, &pPager.pWal
+        pPager.journalSizeLimit, &pPager.pWal
 );
 }
 
@@ -7690,21 +7742,21 @@ int *pbOpen                     /* OUT: Set to true if call is a no-op */
 int rc = SQLITE_OK;             /* Return code */
 
 assert( assert_pager_state(pPager) );
-assert( pPager->eState==PAGER_OPEN   || pbOpen );
-assert( pPager->eState==PAGER_READER || !pbOpen );
+assert( pPager.eState==PAGER_OPEN   || pbOpen );
+assert( pPager.eState==PAGER_READER || !pbOpen );
 assert( pbOpen==0 || *pbOpen==0 );
-assert( pbOpen!=0 || (!pPager->tempFile && !pPager->pWal) );
+assert( pbOpen!=0 || (!pPager.tempFile && !pPager.pWal) );
 
-if( !pPager->tempFile && !pPager->pWal ){
+if( !pPager.tempFile && !pPager.pWal ){
 if( !sqlite3PagerWalSupported(pPager) ) return SQLITE_CANTOPEN;
 
 /* Close any rollback journal previously open */
-sqlite3OsClose(pPager->jfd);
+sqlite3OsClose(pPager.jfd);
 
 rc = pagerOpenWal(pPager);
 if( rc==SQLITE_OK ){
-pPager->journalMode = PAGER_JOURNALMODE_WAL;
-pPager->eState = PAGER_OPEN;
+pPager.journalMode = PAGER_JOURNALMODE_WAL;
+pPager.eState = PAGER_OPEN;
 }
 }else{
 *pbOpen = 1;
@@ -7725,18 +7777,18 @@ return rc;
 int sqlite3PagerCloseWal(Pager *pPager){
 int rc = SQLITE_OK;
 
-assert( pPager->journalMode==PAGER_JOURNALMODE_WAL );
+assert( pPager.journalMode==PAGER_JOURNALMODE_WAL );
 
 /* If the log file is not already open, but does exist in the file-system,
 ** it may need to be checkpointed before the connection can switch to
 ** rollback mode. Open it now so this can happen.
 */
-if( !pPager->pWal ){
+if( !pPager.pWal ){
 int logexists = 0;
 rc = pagerLockDb(pPager, SHARED_LOCK);
 if( rc==SQLITE_OK ){
 rc = sqlite3OsAccess(
-pPager->pVfs, pPager->zWal, SQLITE_ACCESS_EXISTS, &logexists
+pPager.pVfs, pPager.zWal, SQLITE_ACCESS_EXISTS, &logexists
 );
 }
 if( rc==SQLITE_OK && logexists ){
@@ -7747,12 +7799,12 @@ rc = pagerOpenWal(pPager);
 /* Checkpoint and close the log. Because an EXCLUSIVE lock is held on
 ** the database file, the log and log-summary files will be deleted.
 */
-if( rc==SQLITE_OK && pPager->pWal ){
+if( rc==SQLITE_OK && pPager.pWal ){
 rc = pagerExclusiveLock(pPager);
 if( rc==SQLITE_OK ){
-rc = sqlite3WalClose(pPager->pWal, pPager->ckptSyncFlags,
-           pPager->pageSize, (u8*)pPager->pTmpSpace);
-pPager->pWal = 0;
+rc = sqlite3WalClose(pPager.pWal, pPager.ckptSyncFlags,
+           pPager.pageSize, (u8*)pPager.pTmpSpace);
+pPager.pWal = 0;
 }
 }
 return rc;

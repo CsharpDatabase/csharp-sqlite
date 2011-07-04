@@ -32,7 +32,7 @@ using ynVar = System.Int32;
 using yDbMask = System.Int64; 
 #else
 //  typedef unsigned int yDbMask;
-using yDbMask = System.Int32; 
+using yDbMask = System.Int32;
 #endif
 
 namespace Community.CsharpSqlite
@@ -58,7 +58,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
+    **  SQLITE_SOURCE_ID: 2011-06-23 19:49:22 4374b7e83ea0a3fbc3691f9c0c936272862f32f2
     **
     *************************************************************************
     */
@@ -486,9 +486,9 @@ static public bool SQLITE_DEFAULT_RECURSIVE_TRIGGERS = true;
 ** Provide a default value for SQLITE_TEMP_STORE in case it is not specified
 ** on the command-line
 */
-//#if !SQLITE_TEMP_STORE
+    //#if !SQLITE_TEMP_STORE
     static int SQLITE_TEMP_STORE = 1;//#define SQLITE_TEMP_STORE 1
-//#endif
+    //#endif
 
     /*
 ** GCC does not define the offsetof() macro so we'll have to do it
@@ -784,6 +784,7 @@ void *sqlite3_wsd_find(void *K, int L);
     //typedef struct TriggerStep TriggerStep;
     //typedef struct UnpackedRecord UnpackedRecord;
     //typedef struct VTable VTable;
+    //typedef struct VtabCtx VtabCtx;
     //typedef struct Walker Walker;
     //typedef struct WherePlan WherePlan;
     //typedef struct WhereInfo WhereInfo;
@@ -833,7 +834,7 @@ void *sqlite3_wsd_find(void *K, int L);
     ** A thread must be holding a mutex on the corresponding Btree in order
     ** to access Schema content.  This implies that the thread must also be
     ** holding a mutex on the sqlite3 connection pointer that owns the Btree.
-    ** For a TEMP Schema, on the connection mutex is required.
+    ** For a TEMP Schema, only the connection mutex is required.
     */
     public class Schema
     {
@@ -1003,10 +1004,11 @@ void *sqlite3_wsd_find(void *K, int L);
       public u8 autoCommit;                /* The auto-commit flag. */
       public u8 temp_store;                /* 1: file 2: memory 0: default */
       // Cannot happen under C#
-      //      public u8 mallocFailed;              /* True if we have seen a malloc failure */
+      // public u8 mallocFailed;           /* True if we have seen a malloc failure */
       public u8 dfltLockMode;              /* Default locking-mode for attached dbs */
       public int nextAutovac;              /* Autovac setting after VACUUM if >=0 */
       public u8 suppressErr;               /* Do not issue error messages if true */
+      public u8 vtabOnConflict;            /* Value to return for s3_vtab_on_conflict() */
       public int nextPagesize;             /* Pagesize after VACUUM if >0 */
       public int nTable;                   /* Number of tables in the database */
       public CollSeq pDfltColl;            /* The default collating sequence (BINARY) */
@@ -1069,7 +1071,7 @@ public object pAuthArg;               /* 1st argument to the access auth functio
 #endif
 #if !SQLITE_OMIT_VIRTUALTABLE
 public Hash aModule;                  /* populated by sqlite3_create_module() */
-public Table pVTab;                   /* vtab with active Connect/Create method */
+VtabCtx *pVtabCtx;                    /* Context for active vtab connect/create */
 public VTable aVTrans;                /* Virtual tables with open transactions */
 public int nVTrans;                   /* Allocated size of aVTrans */
 public VTable pDisconnect;            /* Disconnect these in next sqlite3_prepare() */
@@ -1179,6 +1181,7 @@ sqlite3 *pNextBlocked;        /* Next in list of all blocked connections */
     //#define SQLITE_IndexCover     0x10        /* Disable index covering table */
     //#define SQLITE_GroupByOrder   0x20        /* Disable GROUPBY cover of ORDERBY */
     //#define SQLITE_FactorOutConst 0x40        /* Disable factoring out constants */
+    //#define SQLITE_IdxRealAsInt   0x80        /* Store REAL as INT in indices */
     //#define SQLITE_OptMask        0xff        /* Mask of all disablable opts */
     const int SQLITE_QueryFlattener = 0x01;
     const int SQLITE_ColumnCache = 0x02;
@@ -1187,6 +1190,7 @@ sqlite3 *pNextBlocked;        /* Next in list of all blocked connections */
     const int SQLITE_IndexCover = 0x10;
     const int SQLITE_GroupByOrder = 0x20;
     const int SQLITE_FactorOutConst = 0x40;
+    const int SQLITE_IdxRealAsInt = 0x80;
     const int SQLITE_OptMask = 0xff;
 
     /*
@@ -1583,6 +1587,8 @@ public   u8 isHidden;     /* True if this column is 'hidden' */
       public Module pMod;             /* Pointer to module implementation */
       public sqlite3_vtab pVtab;      /* Pointer to vtab instance */
       public int nRef;                /* Number of pointers to this structure */
+      public u8 bConstraint;          /* True if constraints are supported */
+      public int iSavepoint;          /* Depth of the SAVEPOINT stack */
       public VTable pNext;            /* Next in linked list (see above) */
     };
 
@@ -2949,11 +2955,11 @@ static void ExprSetIrreducible( Expr X ) { }
     /*
     ** The yDbMask datatype for the bitmask of all attached databases.
     */
-//#if SQLITE_MAX_ATTACHED>30
-//  typedef sqlite3_uint64 yDbMask;
-//#else
-//  typedef unsigned int yDbMask;
-//#endif
+    //#if SQLITE_MAX_ATTACHED>30
+    //  typedef sqlite3_uint64 yDbMask;
+    //#else
+    //  typedef unsigned int yDbMask;
+    //#endif
 
     /*
     ** An SQL parser context.  A copy of this structure is passed through
@@ -3036,9 +3042,8 @@ public TableLock[] aTableLock; /* Required table locks for shared-cache mode */
       ** each recursion */
 
       public int nVar;                       /* Number of '?' variables seen in the SQL so far */
-      public int nVarExpr;                   /* Number of used slots in apVarExpr[] */
-      public int nVarExprAlloc;              /* Number of allocated slots in apVarExpr[] */
-      public Expr[] apVarExpr;               /* Pointers to :aaa and $aaaa wildcard expressions */
+      public int nzVar;                      /* Number of available slots in azVar[] */
+      public string[] azVar;                 /* Pointers to names of parameters */
       public Vdbe pReprepare;                /* VM being reprepared (sqlite3Reprepare()) */
       public int nAlias;                     /* Number of aliased result set columns */
       public int nAliasAlloc;                /* Number of allocated slots for aAlias[] */
@@ -3076,9 +3081,8 @@ public Table[] apVtabLock;        /* Pointer to virtual tables needing locking *
       public void ResetMembers() // Need to clear all the following variables during each recursion
       {
         nVar = 0;
-        nVarExpr = 0;
-        nVarExprAlloc = 0;
-        apVarExpr = null;
+        nzVar = 0;
+        azVar = null;
         nAlias = 0;
         nAliasAlloc = 0;
         aAlias = null;
@@ -3103,38 +3107,38 @@ apVtabLoc = null;
       public void RestoreMembers()  // Need to clear all the following variables during each recursion
       {
         if ( SaveBuf[nested] != null )
+        {
           nVar = SaveBuf[nested].nVar;
-        nVarExpr = SaveBuf[nested].nVarExpr;
-        nVarExprAlloc = SaveBuf[nested].nVarExprAlloc;
-        apVarExpr = SaveBuf[nested].apVarExpr;
-        nAlias = SaveBuf[nested].nAlias;
-        nAliasAlloc = SaveBuf[nested].nAliasAlloc;
-        aAlias = SaveBuf[nested].aAlias;
-        explain = SaveBuf[nested].explain;
-        sNameToken = SaveBuf[nested].sNameToken;
-        sLastToken = SaveBuf[nested].sLastToken;
-        zTail = SaveBuf[nested].zTail;
-        pNewTable = SaveBuf[nested].pNewTable;
-        pNewTrigger = SaveBuf[nested].pNewTrigger;
-        zAuthContext = SaveBuf[nested].zAuthContext;
+          nzVar = SaveBuf[nested].nzVar;
+          azVar = SaveBuf[nested].azVar;
+          nAlias = SaveBuf[nested].nAlias;
+          nAliasAlloc = SaveBuf[nested].nAliasAlloc;
+          aAlias = SaveBuf[nested].aAlias;
+          explain = SaveBuf[nested].explain;
+          sNameToken = SaveBuf[nested].sNameToken;
+          sLastToken = SaveBuf[nested].sLastToken;
+          zTail = SaveBuf[nested].zTail;
+          pNewTable = SaveBuf[nested].pNewTable;
+          pNewTrigger = SaveBuf[nested].pNewTrigger;
+          zAuthContext = SaveBuf[nested].zAuthContext;
 #if !SQLITE_OMIT_VIRTUALTABLE
 sArg = SaveBuf[nested].sArg              ;
 declareVtab = SaveBuf[nested].declareVtab;
 nVtabLock = SaveBuf[nested].nVtabLock;
 apVtabLock = SaveBuf[nested].apVtabLock;
 #endif
-        nHeight = SaveBuf[nested].nHeight;
-        pZombieTab = SaveBuf[nested].pZombieTab;
-        pTriggerPrg = SaveBuf[nested].pTriggerPrg;
-        SaveBuf[nested] = null;
+          nHeight = SaveBuf[nested].nHeight;
+          pZombieTab = SaveBuf[nested].pZombieTab;
+          pTriggerPrg = SaveBuf[nested].pTriggerPrg;
+          SaveBuf[nested] = null;
+        }
       }
       public void SaveMembers() // Need to clear all the following variables during each recursion
       {
         SaveBuf[nested] = new Parse();
         SaveBuf[nested].nVar = nVar;
-        SaveBuf[nested].nVarExpr = nVarExpr;
-        SaveBuf[nested].nVarExprAlloc = nVarExprAlloc;
-        SaveBuf[nested].apVarExpr = apVarExpr;
+        SaveBuf[nested].nzVar = nzVar;
+        SaveBuf[nested].azVar = azVar;
         SaveBuf[nested].nAlias = nAlias;
         SaveBuf[nested].nAliasAlloc = nAliasAlloc;
         SaveBuf[nested].aAlias = aAlias;
@@ -3402,7 +3406,8 @@ the <column-list> is stored here */
     {
       public bool bMemstat;                    /* True to enable memory status */
       public bool bCoreMutex;                  /* True to enable core mutexing */
-      public bool bFullMutex;                   /* True to enable full mutexing */
+      public bool bFullMutex;                  /* True to enable full mutexing */
+      public bool bOpenUri;                    /* True to interpret filenames as URIs */
       public int mxStrlen;                     /* Maximum string length */
       public int szLookaside;                  /* Default lookaside buffer size */
       public int nLookaside;                   /* Default lookaside buffer count */
@@ -3420,7 +3425,7 @@ the <column-list> is stored here */
       public int szPage;                       /* Size of each page in pPage[] */
       public int nPage;                        /* Number of pages in pPage[] */
       public int mxParserStack;                /* maximum depth of the parser stack */
-      public bool sharedCacheEnabled;           /* true if shared-cache mode enabled */
+      public bool sharedCacheEnabled;          /* true if shared-cache mode enabled */
       /* The above might be initialized to non-zero.  The following need to always
       ** initially be zero, however. */
       public int isInit;                       /* True after initialization has finished */
@@ -3432,14 +3437,23 @@ the <column-list> is stored here */
       public int nRefInitMutex;                /* Number of users of pInitMutex */
       public dxLog xLog; //void (*xLog)(void*,int,const char*); /* Function for logging */
       public object pLogArg;                   /* First argument to xLog() */
+      public bool bLocaltimeFault;             /* True to fail localtime() calls */
 
-      public Sqlite3Config( int bMemstat, int bCoreMutex, bool bFullMutex, int mxStrlen, int szLookaside, int nLookaside
+      public Sqlite3Config(
+        int bMemstat
+        , int bCoreMutex
+        , bool bFullMutex
+        , bool bOpenUri
+        , int mxStrlen
+        , int szLookaside
+        , int nLookaside
       , sqlite3_mem_methods m
       , sqlite3_mutex_methods mutex
       , sqlite3_pcache_methods pcache
       , byte[] pHeap
-      , int nHeap,
-      int mnReq, int mxReq
+      , int nHeap
+      , int mnReq
+      , int mxReq
       , byte[][] pScratch
       , int szScratch
       , int nScratch
@@ -3457,10 +3471,12 @@ the <column-list> is stored here */
       , int nRefInitMutex
       , dxLog xLog
       , object pLogArg
+      , bool bLocaltimeFault
       )
       {
         this.bMemstat = bMemstat != 0;
         this.bCoreMutex = bCoreMutex != 0;
+        this.bOpenUri = bOpenUri;
         this.bFullMutex = bFullMutex;
         this.mxStrlen = mxStrlen;
         this.szLookaside = szLookaside;
@@ -3489,6 +3505,7 @@ the <column-list> is stored here */
         this.nRefInitMutex = nRefInitMutex;
         this.xLog = xLog;
         this.pLogArg = pLogArg;
+        this.bLocaltimeFault = bLocaltimeFault;
       }
     };
 
@@ -3734,11 +3751,11 @@ const sqlite3_mem_methods *sqlite3MemGetMemsys5(void);
 #endif
 
 #if !SQLITE_MUTEX_OMIT
-//  sqlite3_mutex_methods const *sqlite3DefaultMutex(void);
-//  sqlite3_mutex_methods const *sqlite3NoopMutex(void);
-//  sqlite3_mutex *sqlite3MutexAlloc(int);
-//  int sqlite3MutexInit(void);
-//  int sqlite3MutexEnd(void);
+    //  sqlite3_mutex_methods const *sqlite3DefaultMutex(void);
+    //  sqlite3_mutex_methods const *sqlite3NoopMutex(void);
+    //  sqlite3_mutex *sqlite3MutexAlloc(int);
+    //  int sqlite3MutexInit(void);
+    //  int sqlite3MutexEnd(void);
 #endif
 
     //int sqlite3StatusValue(int);
@@ -3803,6 +3820,8 @@ const sqlite3_mem_methods *sqlite3MemGetMemsys5(void);
     //void sqlite3AddDefaultValue(Parse*,ExprSpan*);
     //void sqlite3AddCollateType(Parse*, Token*);
     //void sqlite3EndTable(Parse*,Token*,Token*,Select*);
+    //int sqlite3ParseUri(const char*,const char*,unsigned int*,
+    //                sqlite3_vfs**,char**,char **);
 
     //Bitvec *sqlite3BitvecCreate(u32);
     //int sqlite3BitvecTest(Bitvec*, u32);
@@ -4104,7 +4123,7 @@ int sqlite3AuthReadCol(Parse*, const char *, const char *, int);
     //int sqlite3Atoi(const char *);
     //int sqlite3Utf16ByteLen(const void pData, int nChar);
     //int sqlite3Utf8CharLen(const char pData, int nByte);
-    //int sqlite3Utf8Read(const u8*, const u8**);
+    //u32 sqlite3Utf8Read(const u8*, const u8**);
 
     /*
     ** Routines to read and write variable-length integers.  These used to
@@ -4150,6 +4169,7 @@ int sqlite3AuthReadCol(Parse*, const char *, const char *, int);
     //int sqlite3Atoi64(const char*, i64*, int, u8);
     //void sqlite3Error(sqlite3*, int, const char*,...);
     //void *sqlite3HexToBlob(sqlite3*, const char *z, int n);
+    //u8 sqlite3HexToInt(int h);
     //int sqlite3TwoPartName(Parse *, Token *, Token *, Token **);
     //const char *sqlite3ErrStr(int);
     //int sqlite3ReadSchema(Parse pParse);
@@ -4165,6 +4185,13 @@ int sqlite3AuthReadCol(Parse*, const char *, const char *, int);
     //int sqlite3SubInt64(i64*,i64);
     //int sqlite3MulInt64(i64*,i64);
     //int sqlite3AbsInt32(int);
+    #if SQLITE_ENABLE_8_3_NAMES
+    //void sqlite3FileSuffix3(const char*, char*);
+    #else
+    //# define sqlite3FileSuffix3(X,Y)
+    static void sqlite3FileSuffix3(string X, string Y){}
+    #endif
+    //u8 sqlite3GetBoolean(const char *z);
 
     //const void *sqlite3ValueText(sqlite3_value*, u8);
     //int sqlite3ValueBytes(sqlite3_value*, u8);
@@ -4306,6 +4333,11 @@ int sqlite3ParserStackPeak(void*);
     static void sqlite3VtabUnlockList( sqlite3 X )
     {
     }
+    //#  define sqlite3VtabSavepoint(X, Y, Z) SQLITE_OK
+    static int sqlite3VtabSavepoint( sqlite3 X, int Y, int Z )
+    {
+      return SQLITE_OK;
+    }
     //#  define sqlite3VtabInSync(db) ((db)->nVTrans>0 && (db)->aVTrans==0)
     static bool sqlite3VtabInSync( sqlite3 db )
     {
@@ -4316,17 +4348,17 @@ int sqlite3ParserStackPeak(void*);
     static void sqlite3VtabArgExtend( Parse P, Token T )
     {
     }
-    
+
     //#  define sqlite3VtabArgInit(P)
     static void sqlite3VtabArgInit( Parse P )
     {
     }
-    
+
     //#  define sqlite3VtabBeginParse(P, T, T1, T2);
     static void sqlite3VtabBeginParse( Parse P, Token T, Token T1, Token T2 )
     {
     }
-    
+
     //#  define sqlite3VtabFinishParse(P, T)
     static void sqlite3VtabFinishParse<T>( Parse P, T t )
     {
@@ -4344,6 +4376,7 @@ int sqlite3ParserStackPeak(void*);
 //void sqlite3VtabLock(VTable *);
 //void sqlite3VtabUnlock(VTable *);
 //void sqlite3VtabUnlockList(sqlite3*);
+//int sqlite3VtabSavepoint(sqlite3 *, int, int);
 //#  define sqlite3VtabInSync(db) ((db)->nVTrans>0 && (db)->aVTrans==0)
 static bool sqlite3VtabInSync( sqlite3 db ) { return ( db.nVTrans > 0 && db.aVTrans == 0 ); }
 #endif

@@ -658,13 +658,6 @@ namespace Community.CsharpSqlite
       return TCL.TCL_OK;
     }
 
-    static Var.SQLITE3_GETSET sqlite3_io_error_persist = new Var.SQLITE3_GETSET( "sqlite3_io_error_persist" );
-    static Var.SQLITE3_GETSET sqlite3_io_error_pending = new Var.SQLITE3_GETSET( "sqlite3_io_error_pending" );
-    static Var.SQLITE3_GETSET sqlite3_io_error_hit = new Var.SQLITE3_GETSET( "sqlite3_io_error_hit" );
-    static Var.SQLITE3_GETSET sqlite3_io_error_hardhit = new Var.SQLITE3_GETSET( "sqlite3_io_error_hardhit" );
-    static Var.SQLITE3_GETSET sqlite3_diskfull_pending = new Var.SQLITE3_GETSET( "sqlite3_diskfull_pending" );
-    static Var.SQLITE3_GETSET sqlite3_diskfull = new Var.SQLITE3_GETSET( "sqlite3_diskfull" );
-
     /*
     ** Register commands with the TCL interpreter.
     */

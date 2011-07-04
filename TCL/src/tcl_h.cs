@@ -1,6 +1,5 @@
 namespace tcl.lang
 {
-#if TCLSH
   public partial class TCL
   {
 
@@ -2374,5 +2373,4 @@ namespace tcl.lang
 
 #endif // * _TCL */
   }
-#endif
 }

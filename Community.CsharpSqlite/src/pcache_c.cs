@@ -28,7 +28,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2010-12-07 20:14:09 a586a4deeb25330037a49df295b36aaf624d0f45
+    **  SQLITE_SOURCE_ID: 2011-06-23 19:49:22 4374b7e83ea0a3fbc3691f9c0c936272862f32f2
     **
     *************************************************************************
     */
@@ -325,6 +325,13 @@ expensive_assert( pcacheCheckSynced(pCache) );
         if ( pPg != null )
         {
           int rc;
+#if SQLITE_LOG_CACHE_SPILL
+      sqlite3_log(SQLITE_FULL, 
+                  "spill page %d making room for %d - cache used: %d/%d",
+                  pPg->pgno, pgno,
+                  sqlite3GlobalConfig.pcache.xPagecount(pCache->pCache),
+                  pCache->nMax);
+#endif
           rc = pCache.xStress( pCache.pStress, pPg );
           if ( rc != SQLITE_OK && rc != SQLITE_BUSY )
           {

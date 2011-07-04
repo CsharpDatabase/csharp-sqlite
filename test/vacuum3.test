@@ -25,6 +25,10 @@ ifcapable !vacuum {
   return
 }
 
+# Do not use a codec for tests in this file, as it interferes
+# with the initial size tests
+do_not_use_codec
+
 
 #-------------------------------------------------------------------
 # Test cases vacuum3-1.* convert a simple 2-page database between a 

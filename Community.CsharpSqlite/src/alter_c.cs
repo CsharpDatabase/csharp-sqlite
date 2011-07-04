@@ -25,7 +25,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
+    **  SQLITE_SOURCE_ID: 2011-06-23 19:49:22 4374b7e83ea0a3fbc3691f9c0c936272862f32f2
     **
     *************************************************************************
     */
@@ -424,7 +424,7 @@ namespace Community.CsharpSqlite
       zWhere = sqlite3MPrintf( pParse.db, "tbl_name=%Q", zName );
       if ( zWhere == null )
         return;
-      sqlite3VdbeAddOp4( v, OP_ParseSchema, iDb, 0, 0, zWhere, P4_DYNAMIC );
+      sqlite3VdbeAddParseSchemaOp( v, iDb, zWhere );
 
 #if !SQLITE_OMIT_TRIGGER
       /* Now, if the table is not stored in the temp database, reload any temp
@@ -432,7 +432,7 @@ namespace Community.CsharpSqlite
 */
       if ( ( zWhere = whereTempTriggers( pParse, pTab ) ) != "" )
       {
-        sqlite3VdbeAddOp4( v, OP_ParseSchema, 1, 0, 0, zWhere, P4_DYNAMIC );
+        sqlite3VdbeAddParseSchemaOp( v, 1, zWhere );
       }
 #endif
     }
@@ -476,7 +476,7 @@ namespace Community.CsharpSqlite
 #if !SQLITE_OMIT_TRIGGER
       string zWhere = "";       /* Where clause to locate temp triggers */
 #endif
-      VTable pVTab = null;         /* Non-zero if this is a v-tab with an xRename() */
+      VTable pVTab = null;      /* Non-zero if this is a v-tab with an xRename() */
       int savedDbFlags;         /* Saved value of db->flags */
 
       savedDbFlags = db.flags;
@@ -567,7 +567,7 @@ if ( pVTab !=null)
 {
 int i = ++pParse.nMem;
 sqlite3VdbeAddOp4( v, OP_String8, 0, i, 0, zName, 0 );
-sqlite3VdbeAddOp4( v, OP_VRename, i, 0, 0, pVtab, P4_VTAB );
+sqlite3VdbeAddOp4( v, OP_VRename, i, 0, 0, pVTab, P4_VTAB );
 sqlite3MayAbort(pParse);
 }
 #endif

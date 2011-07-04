@@ -61,7 +61,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2010-12-07 20:14:09 a586a4deeb25330037a49df295b36aaf624d0f45
+    **  SQLITE_SOURCE_ID: 2011-06-23 19:49:22 4374b7e83ea0a3fbc3691f9c0c936272862f32f2
     **
     *************************************************************************
     */
@@ -72,25 +72,10 @@ namespace Community.CsharpSqlite
 
 #if !SQLITE_OMIT_DATETIME_FUNCS
 
-    /*
-** On recent Windows platforms, the localtime_s() function is available
-** as part of the "Secure CRT". It is essentially equivalent to
-** localtime_r() available under most POSIX platforms, except that the
-** order of the parameters is reversed.
-**
-** See http://msdn.microsoft.com/en-us/library/a442x3ye(VS.80).aspx.
-**
-** If the user has not indicated to use localtime_r() or localtime_s()
-** already, check for an MSVC build environment that provides
-** localtime_s().
-*/
-    //#if !(HAVE_LOCALTIME_R) && !(HAVE_LOCALTIME_S) &&      (_MSC_VER) && (_CRT_INSECURE_DEPRECATE)
-    //#define HAVE_LOCALTIME_S
-    //#endif
 
     /*
-** A structure for holding a single date and time.
-*/
+    ** A structure for holding a single date and time.
+    */
     //typedef struct DateTime DateTime;
     public class DateTime
     {
@@ -461,7 +446,7 @@ zulu_time:
       {
         return 0;
       }
-      else if ( zDate.Equals( "now" ,StringComparison.InvariantCultureIgnoreCase )  )
+      else if ( zDate.Equals( "now", StringComparison.InvariantCultureIgnoreCase ) )
       {
         setDateTimeToCurrent( context, p );
         return 0;
@@ -545,17 +530,87 @@ zulu_time:
       p.validTZ = 0;
     }
 
+    /*
+    ** On recent Windows platforms, the localtime_s() function is available
+    ** as part of the "Secure CRT". It is essentially equivalent to 
+    ** localtime_r() available under most POSIX platforms, except that the 
+    ** order of the parameters is reversed.
+    **
+    ** See http://msdn.microsoft.com/en-us/library/a442x3ye(VS.80).aspx.
+    **
+    ** If the user has not indicated to use localtime_r() or localtime_s()
+    ** already, check for an MSVC build environment that provides 
+    ** localtime_s().
+    */
+    //#if !defined(HAVE_LOCALTIME_R) && !defined(HAVE_LOCALTIME_S) && \
+    //     defined(_MSC_VER) && defined(_CRT_INSECURE_DEPRECATE)
+    //#define HAVE_LOCALTIME_S 1
+    //#endif
+
 #if !SQLITE_OMIT_LOCALTIME
     /*
-** Compute the difference (in milliseconds)
-** between localtime and UTC (a.k.a. GMT)
-** for the time value p where p is in UTC.
+    ** The following routine implements the rough equivalent of localtime_r()
+    ** using whatever operating-system specific localtime facility that
+    ** is available.  This routine returns 0 on success and
+    ** non-zero on any kind of error.
+    **
+    ** If the sqlite3GlobalConfig.bLocaltimeFault variable is true then this
+    ** routine will always fail.
+    */
+    static int osLocaltime( time_t t, tm pTm )
+    {
+      int rc;
+#if (!(HAVE_LOCALTIME_R) || !HAVE_LOCALTIME_R) && (!(HAVE_LOCALTIME_S) || !HAVE_LOCALTIME_S)
+      tm pX;
+      sqlite3_mutex mutex = sqlite3MutexAlloc( SQLITE_MUTEX_STATIC_MASTER );
+      sqlite3_mutex_enter( mutex );
+      pX = localtime( t );
+#if !SQLITE_OMIT_BUILTIN_TEST
+      if ( sqlite3GlobalConfig.bLocaltimeFault )
+        pX = null;
+#endif
+      if ( pX != null )
+        pTm = pX;
+      sqlite3_mutex_leave( mutex );
+      rc = pX == null ? 1 : 0;
+#else
+#if !SQLITE_OMIT_BUILTIN_TEST
+  if( sqlite3GlobalConfig.bLocaltimeFault ) return 1;
+#endif
+#if (HAVE_LOCALTIME_R) && HAVE_LOCALTIME_R
+  rc = localtime_r(t, pTm)==0;
+#else
+  rc = localtime_s(pTm, t);
+#endif //* HAVE_LOCALTIME_R */
+#endif //* HAVE_LOCALTIME_R || HAVE_LOCALTIME_S */
+      return rc;
+    }
+#endif //* SQLITE_OMIT_LOCALTIME */
+
+
+#if !SQLITE_OMIT_LOCALTIME
+    /*
+** Compute the difference (in milliseconds) between localtime and UTC
+** (a.k.a. GMT) for the time value p where p is in UTC. If no error occurs,
+** return this value and set *pRc to SQLITE_OK. 
+**
+** Or, if an error does occur, set *pRc to SQLITE_ERROR. The returned value
+** is undefined in this case.
 */
-    static int localtimeOffset( DateTime p )
+    static sqlite3_int64 localtimeOffset(
+      DateTime p,                    /* Date at which to calculate offset */
+      sqlite3_context pCtx,          /* Write error here if one occurs */
+      ref int pRc                    /* OUT: Error code. SQLITE_OK or ERROR */
+    )
     {
       DateTime x;
       DateTime y = new DateTime();
       time_t t;
+      tm sLocal = new tm();
+
+      /* Initialize the contents of sLocal to avoid a compiler warning. */
+      //memset(&sLocal, 0, sizeof(sLocal));
+
       x = p;
       computeYMD_HMS( x );
       if ( x.Y < 1971 || x.Y >= 2038 )
@@ -576,47 +631,24 @@ zulu_time:
       x.validJD = 0;
       computeJD( x );
       t = (long)( x.iJD / 1000 - 210866760000L );// (time_t)(x.iJD/1000 - 21086676*(i64)10000);
-#if  HAVE_LOCALTIME_R
-{
-struct tm sLocal;
-localtime_r(&t, sLocal);
-y.Y = sLocal.tm_year + 1900;
-y.M = sLocal.tm_mon + 1;
-y.D = sLocal.tm_mday;
-y.h = sLocal.tm_hour;
-y.m = sLocal.tm_min;
-y.s = sLocal.tm_sec;
-}
-#elif (HAVE_LOCALTIME_S) //defined(HAVE_LOCALTIME_S) && HAVE_LOCALTIME_S
-{
-struct tm sLocal;
-localtime_s(&sLocal, t);
-y.Y = sLocal.tm_year + 1900;
-y.M = sLocal.tm_mon + 1;
-y.D = sLocal.tm_mday;
-y.h = sLocal.tm_hour;
-y.m = sLocal.tm_min;
-y.s = sLocal.tm_sec;
-}
-#else
+      if ( osLocaltime( t, sLocal ) != 0 )
       {
-        tm pTm;
-        sqlite3_mutex_enter( sqlite3MutexAlloc( SQLITE_MUTEX_STATIC_MASTER ) );
-        pTm = localtime( t );
-        y.Y = pTm.tm_year;// +1900;
-        y.M = pTm.tm_mon;// +1;
-        y.D = pTm.tm_mday;
-        y.h = pTm.tm_hour;
-        y.m = pTm.tm_min;
-        y.s = pTm.tm_sec;
-        sqlite3_mutex_leave( sqlite3MutexAlloc( SQLITE_MUTEX_STATIC_MASTER ) );
+        sqlite3_result_error( pCtx, "local time unavailable", -1 );
+        pRc = SQLITE_ERROR;
+        return 0;
       }
-#endif
+      y.Y = sLocal.tm_year;// +1900;
+      y.M = sLocal.tm_mon;// +1;
+      y.D = sLocal.tm_mday;
+      y.h = sLocal.tm_hour;
+      y.m = sLocal.tm_min;
+      y.s = sLocal.tm_sec;
       y.validYMD = 1;
       y.validHMS = 1;
       y.validJD = 0;
       y.validTZ = 0;
       computeJD( y );
+      pRc = SQLITE_OK;
       return (int)( y.iJD - x.iJD );
     }
 #endif //* SQLITE_OMIT_LOCALTIME */
@@ -640,9 +672,12 @@ y.s = sLocal.tm_sec;
 **     localtime
 **     utc
 **
-** Return 0 on success and 1 if there is any kind of error.
+** Return 0 on success and 1 if there is any kind of error. If the error
+** is in a system call (i.e. localtime()), then an error message is written
+** to context pCtx. If the error is an unrecognized modifier, no error is
+** written to pCtx.
 */
-    static int parseModifier( string zMod, DateTime p )
+    static int parseModifier( sqlite3_context pCtx, string zMod, DateTime p )
     {
       int rc = 1;
       int n;
@@ -667,9 +702,8 @@ y.s = sLocal.tm_sec;
             if ( z.ToString() == "localtime" )
             {
               computeJD( p );
-              p.iJD += localtimeOffset( p );
+              p.iJD += localtimeOffset( p, pCtx, ref rc );
               clearYMD_HMS_TZ( p );
-              rc = 0;
             }
             break;
           }
@@ -691,13 +725,15 @@ y.s = sLocal.tm_sec;
 #if   !SQLITE_OMIT_LOCALTIME
             else if ( z.ToString() == "utc" )
             {
-              int c1;
+              long c1;
               computeJD( p );
-              c1 = localtimeOffset( p );
-              p.iJD -= (long)c1;
-              clearYMD_HMS_TZ( p );
-              p.iJD += (long)( c1 - localtimeOffset( p ) );
-              rc = 0;
+              c1 = localtimeOffset( p, pCtx, ref rc );
+              if ( rc == SQLITE_OK )
+              {
+                p.iJD -= c1;
+                clearYMD_HMS_TZ( p );
+                p.iJD +=  c1 - localtimeOffset( p, pCtx, ref rc ) ;
+              }
             }
 #endif
             break;
@@ -929,10 +965,9 @@ y.s = sLocal.tm_sec;
       }
       for ( i = 1; i < argc; i++ )
       {
-        if ( String.IsNullOrEmpty( z = sqlite3_value_text( argv[i] ) ) || parseModifier( z, p ) != 0 )
-        {
+        z = sqlite3_value_text( argv[i] );
+        if ( String.IsNullOrEmpty( z ) || parseModifier( context, z, p ) != 0 )
           return 1;
-        }
       }
       return 0;
     }

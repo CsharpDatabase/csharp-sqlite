@@ -39,7 +39,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
+    **  SQLITE_SOURCE_ID: 2011-06-23 19:49:22 4374b7e83ea0a3fbc3691f9c0c936272862f32f2
     **
     *************************************************************************
     */
@@ -714,14 +714,15 @@ sqlite3Dequote(ref pNew.u._zToken);
         /* Wildcard of the form "?".  Assign the next variable number */
         Debug.Assert( z[0] == '?' );
         pExpr.iColumn = (ynVar)( ++pParse.nVar );
-      }
-      else if ( z[0] == '?' )
-      {
+  }else{
+    ynVar x = 0;
+    int n = sqlite3Strlen30(z);
+    if( z[0]=='?' ){
         /* Wildcard of the form "?nnn".  Convert "nnn" to an integer and
         ** use it as the variable number */
         i64 i = 0;
-        bool bOk = 0 == sqlite3Atoi64( z.Substring( 1 ), ref i, sqlite3Strlen30( z ) - 1, SQLITE_UTF8 );
-        pExpr.iColumn = (ynVar)i;
+        bool bOk = 0 == sqlite3Atoi64( z.Substring( 1 ), ref i, n - 1, SQLITE_UTF8 );
+        pExpr.iColumn = x=(ynVar)i;
         testcase( i == 0 );
         testcase( i == 1 );
         testcase( i == db.aLimit[SQLITE_LIMIT_VARIABLE_NUMBER] - 1 );
@@ -730,6 +731,7 @@ sqlite3Dequote(ref pNew.u._zToken);
         {
           sqlite3ErrorMsg( pParse, "variable number must be between ?1 and ?%d",
           db.aLimit[SQLITE_LIMIT_VARIABLE_NUMBER] );
+          x=0;
         }
         if ( i > pParse.nVar )
         {
@@ -742,46 +744,33 @@ sqlite3Dequote(ref pNew.u._zToken);
         ** number as the prior appearance of the same name, or if the name
         ** has never appeared before, reuse the same variable number
         */
-        int i;
-        int n;
-        n = sqlite3Strlen30( z );
-        for ( i = 0; i < pParse.nVarExpr; i++ )
+      ynVar i;
+      for(i=0; i<pParse.nzVar; i++){
+        if( pParse.azVar[i] != null && z.CompareTo(pParse.azVar[i] ) == 0 ) //memcmp(pParse.azVar[i],z,n+1)==0 )
         {
-          Expr pE = pParse.apVarExpr[i];
-          Debug.Assert( pE != null );
-          if ( pE.u.zToken.Length == n && pE.u.zToken.Equals( z ) )
-          {
-            pExpr.iColumn = pE.iColumn;
-            break;
-          }
-        }
-        if ( i >= pParse.nVarExpr )
-        {
-          pExpr.iColumn = (ynVar)( ++pParse.nVar );
-          if ( pParse.nVarExpr >= pParse.nVarExprAlloc - 1 )
-          {
-            int oldLength = pParse.nVarExprAlloc;
-            pParse.nVarExprAlloc += pParse.nVarExprAlloc + 10;
-
-            Expr[] newXper = new Expr[pParse.nVarExprAlloc];
-            for ( int iter = 0; iter < newXper.Length && iter < oldLength; iter++ )
-            {
-              newXper[iter] = pParse.apVarExpr[iter];
-            }
-            pParse.apVarExpr = newXper;
-            //sqlite3DbReallocOrFree(
-            //  db,
-            //  pParse.apVarExpr,
-            //  pParse.nVarExprAlloc*sizeof(pParse.apVarExpr[0])
-            //);
-          }
-          //if ( 0 == db.mallocFailed )
-          {
-            Debug.Assert( pParse.apVarExpr != null );
-            pParse.apVarExpr[pParse.nVarExpr++] = pExpr;
-          }
+          pExpr.iColumn = x = (ynVar)( i + 1 );
+          break;
         }
       }
+      if( x==0 ) x = pExpr.iColumn = (ynVar)(++pParse.nVar);
+    }
+    if( x>0 ){
+      if( x>pParse.nzVar ){
+        //char **a;
+        //a = sqlite3DbRealloc(db, pParse.azVar, x*sizeof(a[0]));
+        //if( a==0 ) return;  /* Error reported through db.mallocFailed */
+        //pParse.azVar = a;
+        //memset(&a[pParse.nzVar], 0, (x-pParse.nzVar)*sizeof(a[0]));
+        Array.Resize( ref pParse.azVar, x );
+        pParse.nzVar = x;
+      }
+      if( z[0]!='?' || pParse.azVar[x-1]==null )
+      {
+        //sqlite3DbFree(db, pParse.azVar[x-1]);
+        pParse.azVar[x - 1] = z.Substring( 0, n );//sqlite3DbStrNDup( db, z, n );
+      }
+    }
+  }
       if ( pParse.nErr == 0 && pParse.nVar > db.aLimit[SQLITE_LIMIT_VARIABLE_NUMBER] )
       {
         sqlite3ErrorMsg( pParse, "too many SQL variables" );
@@ -2836,7 +2825,9 @@ static int usedAsColumnCache( Parse pParse, int iFrom, int iTo ){return 0;}
             sqlite3VdbeAddOp2( v, OP_Variable, pExpr.iColumn, target );
             if ( pExpr.u.zToken.Length > 1 )
             {
-              sqlite3VdbeChangeP4( v, -1, pExpr.u.zToken, P4_TRANSIENT );
+              Debug.Assert( pExpr.u.zToken[0] == '?'
+                   || pExpr.u.zToken.CompareTo(pParse.azVar[pExpr.iColumn - 1] ) == 0 );
+              sqlite3VdbeChangeP4( v, -1, pParse.azVar[pExpr.iColumn - 1], P4_STATIC );
             }
             break;
           }

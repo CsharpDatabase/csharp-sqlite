@@ -52,7 +52,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
+    **  SQLITE_SOURCE_ID: 2011-06-23 19:49:22 4374b7e83ea0a3fbc3691f9c0c936272862f32f2
     **
     *************************************************************************
     */
@@ -257,9 +257,7 @@ pParse.nVtabLock = 0;
         *  See ticket [a696379c1f08866] */
         if ( pParse.pAinc != null && pParse.nTab == 0 )
           pParse.nTab = 1;
-        sqlite3VdbeMakeReady( v, pParse.nVar, pParse.nMem,
-                         pParse.nTab, pParse.nMaxArg, pParse.explain,
-                         ( pParse.isMultiWrite != 0 && pParse.mayAbort != 0 ) ? 1 : 0 );
+        sqlite3VdbeMakeReady( v, pParse);
         pParse.rc = SQLITE_DONE;
         pParse.colNamesSet = 0;
       }
@@ -1922,8 +1920,8 @@ primary_key_exit:
 #endif
 
         /* Reparse everything to update our internal data structures */
-        sqlite3VdbeAddOp4( v, OP_ParseSchema, iDb, 0, 0,
-        sqlite3MPrintf( db, "tbl_name='%q'", p.zName ), P4_DYNAMIC );
+        sqlite3VdbeAddParseSchemaOp( v, iDb,
+                   sqlite3MPrintf( db, "tbl_name='%q'", p.zName ) );
       }
 
 
@@ -3287,7 +3285,7 @@ goto exit_create_index;
           /* A named index with an explicit CREATE INDEX statement */
           zStmt = sqlite3MPrintf( db, "CREATE%s INDEX %.*s",
           onError == OE_None ? "" : " UNIQUE",
-          pName.z.Length - pEnd.z.Length + 1,
+           (int)(pName.z.Length - pEnd.z.Length) + 1,
           pName.z );
         }
         else
@@ -3316,8 +3314,8 @@ goto exit_create_index;
         {
           sqlite3RefillIndex( pParse, pIndex, iMem );
           sqlite3ChangeCookie( pParse, iDb );
-          sqlite3VdbeAddOp4( v, OP_ParseSchema, iDb, 0, 0,
-          sqlite3MPrintf( db, "name='%q' AND type='index'", pIndex.zName ), P4_DYNAMIC );
+          sqlite3VdbeAddParseSchemaOp( v, iDb,
+            sqlite3MPrintf( db, "name='%q' AND type='index'", pIndex.zName ) );
           sqlite3VdbeAddOp1( v, OP_Expire, 0 );
         }
       }
@@ -4049,7 +4047,7 @@ Debug.Assert( !SAVEPOINT_BEGIN && SAVEPOINT_RELEASE==1 && SAVEPOINT_ROLLBACK==2 
         SQLITE_OPEN_DELETEONCLOSE |
         SQLITE_OPEN_TEMP_DB;
 
-        rc = sqlite3BtreeOpen( null, db, ref pBt, 0, flags );
+        rc = sqlite3BtreeOpen(db.pVfs, null, db, ref pBt, 0, flags );
         if ( rc != SQLITE_OK )
         {
           sqlite3ErrorMsg( pParse, "unable to open a temporary database " +

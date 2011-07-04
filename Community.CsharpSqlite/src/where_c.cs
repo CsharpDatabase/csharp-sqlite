@@ -2054,8 +2054,13 @@ sqlite3DebugPrintf( "  estimatedCost=%g\n", p.estimatedCost );
       double costTempIdx;        /* per-query cost of the transient index */
       WhereTerm pTerm;           /* A single term of the WHERE clause */
       WhereTerm pWCEnd;          /* End of pWC.a[] */
-      Table pTable;              /* Table tht might be indexed */
+      Table pTable;              /* Table that might be indexed */
 
+      if ( pParse.nQueryLoop <= (double)1 )
+      {
+        /* There is no point in building an automatic index for a single scan */
+        return;
+      }
       if ( ( pParse.db.flags & SQLITE_AutoIndex ) == 0 )
       {
         /* Automatic indices are disabled at run-time */
@@ -2293,20 +2298,20 @@ WhereCost pCost            /* Lowest cost query plan */
 ** responsibility of the caller to eventually release the structure
 ** by passing the pointer returned by this function to //sqlite3_free().
 */
-static sqlite3_index_info *allocateIndexInfo(
+static sqlite3_index_info allocateIndexInfo(
 Parse pParse,
 WhereClause pWC,
 SrcList_item pSrc,
-ExprList *pOrderBy
+ExprList pOrderBy
 ){
 int i, j;
 int nTerm;
-struct sqlite3_index_constraint *pIdxCons;
-struct sqlite3_index_orderby *pIdxOrderBy;
-struct sqlite3_index_constraint_usage *pUsage;
+sqlite3_index_constraint pIdxCons;
+sqlite3_index_orderby pIdxOrderBy;
+sqlite3_index_constraint_usage pUsage;
 WhereTerm pTerm;
 int nOrderBy;
-sqlite3_index_info *pIdxInfo;
+sqlite3_index_info pIdxInfo;
 
 #if  (SQLITE_TEST) && (SQLITE_DEBUG)
 WHERETRACE("Recomputing index info for %s...\n", pSrc.pTab.zName);
@@ -2409,8 +2414,8 @@ return pIdxInfo;
 ** caller to eventually free p.idxStr if p.needToFreeIdxStr indicates
 ** that this is required.
 */
-static int vtabBestIndex(Parse pParse, Table pTab, sqlite3_index_info *p){
-sqlite3_vtab *pVtab = sqlite3GetVTable(pParse.db, pTab).pVtab;
+static int vtabBestIndex(Parse pParse, Table pTab, sqlite3_index_info p){
+sqlite3_vtab pVtab = sqlite3GetVTable(pParse.db, pTab).pVtab;
 int i;
 int rc;
 
@@ -2468,12 +2473,12 @@ Bitmask notReady,              /* Mask of cursors not available for index */
 Bitmask notValid,              /* Cursors not valid for any purpose */
 ExprList pOrderBy,             /* The order by clause */
 WhereCost pCost,               /* Lowest cost query plan */
-sqlite3_index_info **ppIdxInfo /* Index information passed to xBestIndex */
+ref sqlite3_index_info ppIdxInfo /* Index information passed to xBestIndex */
 ){
 Table pTab = pSrc.pTab;
-sqlite3_index_info *pIdxInfo;
-struct sqlite3_index_constraint *pIdxCons;
-struct sqlite3_index_constraint_usage *pUsage;
+sqlite3_index_info pIdxInfo;
+sqlite3_index_constraint pIdxCons;
+sqlite3_index_constraint_usage pUsage;
 WhereTerm pTerm;
 int i, j;
 int nOrderBy;
@@ -2484,17 +2489,17 @@ double rCost;
 ** malloc in allocateIndexInfo() fails and this function returns leaving
 ** wsFlags in an uninitialized state, the caller may behave unpredictably.
 */
-memset(pCost, 0, sizeof(*pCost));
+pCost = new WhereCost();//memset(pCost, 0, sizeof(*pCost));
 pCost.plan.wsFlags = WHERE_VIRTUALTABLE;
 
 /* If the sqlite3_index_info structure has not been previously
 ** allocated and initialized, then allocate and initialize it now.
 */
-pIdxInfo = *ppIdxInfo;
-if( pIdxInfo==0 ){
-*ppIdxInfo = pIdxInfo = allocateIndexInfo(pParse, pWC, pSrc, pOrderBy);
+pIdxInfo = ppIdxInfo;
+if( pIdxInfo==null ){
+ppIdxInfo = pIdxInfo = allocateIndexInfo(pParse, pWC, pSrc, pOrderBy);
 }
-if( pIdxInfo==0 ){
+if( pIdxInfo==null ){
 return;
 }
 
@@ -2559,7 +2564,7 @@ if( vtabBestIndex(pParse, pTab, pIdxInfo) ){
 return;
 }
 
-pIdxCons = *(struct sqlite3_index_constraint**)&pIdxInfo.aConstraint;
+pIdxCons = (sqlite3_index_constraint)pIdxInfo.aConstraint;
 for(i=0; i<pIdxInfo.nConstraint; i++){
 if( pUsage[i].argvIndex>0 ){
 pCost.used |= pWC.a[pIdxCons[i].iTermOffset].prereqRight;
@@ -4135,11 +4140,12 @@ else
           }
         }
 #if !SQLITE_OMIT_VIRTUALTABLE
-else if( (flags & WHERE_VIRTUALTABLE)!=0 ){
-sqlite3_index_info *pVtabIdx = pLevel.plan.u.pVtabIdx;
-zMsg.Append( sqlite3MAppendf(db, null, " VIRTUAL TABLE INDEX %d:%s",
-pVtabIdx.idxNum, pVtabIdx.idxStr);
-}
+        else if ( ( flags & WHERE_VIRTUALTABLE ) != 0 )
+        {
+          sqlite3_index_info pVtabIdx = pLevel.plan.u.pVtabIdx;
+          zMsg.Append( sqlite3MAppendf( db, null, " VIRTUAL TABLE INDEX %d:%s",
+          pVtabIdx.idxNum, pVtabIdx.idxStr ) );
+        }
 #endif
         if ( ( wctrlFlags & ( WHERE_ORDERBY_MIN | WHERE_ORDERBY_MAX ) ) != 0 )
         {
@@ -4905,7 +4911,12 @@ OP_IdxLT             /* 2: (end_constraints && bRev) */
 ** overwrites the previous.  This information is used for testing and
 ** analysis only.
 */
+#if !TCLSH
     //char sqlite3_query_plan[BMS*2*40];  /* Text of the join */
+    static StringBuilder sqlite3_query_plan;
+#else
+    static tcl.lang.Var.SQLITE3_GETSET sqlite3_query_plan = new tcl.lang.Var.SQLITE3_GETSET( "sqlite3_query_plan" );
+#endif
     static int nQPlan = 0;              /* Next free slow in _query_plan[] */
 
 #endif //* SQLITE_TEST */
@@ -5538,7 +5549,11 @@ pVTab, P4_VTAB);
 ** the index is listed as "{}".  If the primary key is used the
 ** index name is '*'.
 */
+#if !TCLSH
+      sqlite3_query_plan.Length = 0;
+#else
       sqlite3_query_plan.sValue = "";
+#endif
       for ( i = 0; i < nTabList; i++ )
       {
         string z;
@@ -5591,7 +5606,11 @@ pVTab, P4_VTAB);
       //  sqlite3_query_plan[--nQPlan] = 0;
       //}
       //sqlite3_query_plan[nQPlan] = 0;
+#if !TCLSH
+      sqlite3_query_plan = new StringBuilder( sqlite3_query_plan.ToString().Trim() );
+#else
       sqlite3_query_plan.Trim();
+#endif
       nQPlan = 0;
 #endif //* SQLITE_TEST // Testing and debugging use only */
 

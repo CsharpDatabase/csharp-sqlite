@@ -205,6 +205,9 @@ namespace Community.CsharpSqlite
         return "";
       switch ( sysType )
       {
+        case "boolean":
+        case "bool":
+          return Convert.ToBoolean( ap[vaNEXT - 1] );
         case "double":
           return Convert.ToDouble( ap[vaNEXT - 1] );
         case "long":
@@ -362,7 +365,7 @@ namespace Community.CsharpSqlite
       return unixStartTime.AddSeconds( Convert.ToDouble( unixTime ) );
     }
 
-    public struct tm
+    public class tm
     {
       public int tm_sec;     /* seconds after the minute - [0,59] */
       public int tm_min;     /* minutes after the hour - [0,59] */
@@ -565,6 +568,17 @@ static void LeaveCriticalSection( Object mtx )
             return sqlite3UpperToLower[index];
           else
             return index;
+        }
+      }
+
+      public int this[u32 index]
+      {
+        get
+        {
+          if ( index < sqlite3UpperToLower.Length )
+            return sqlite3UpperToLower[index];
+          else
+            return (int)index;
         }
       }
     }

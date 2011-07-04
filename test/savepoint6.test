@@ -167,10 +167,10 @@ proc random_integers {nRes nRange} {
 proc database_op {} {
   set i [expr int(rand()*2)] 
   if {$i==0} {
-    insert_rows [random_integers 100 1000]
+    insert_rows [random_integers 10 10]
   }
   if {$i==1} {
-    delete_rows [random_integers 100 1000]
+    delete_rows [random_integers 10 10]
     set i [expr int(rand()*3)] 
     if {$i==0} {
       sql {PRAGMA incremental_vacuum}
@@ -192,7 +192,7 @@ proc savepoint_op {} {
   return ok
 }
 
-expr srand(0)
+expr srand(3)
 
 ############################################################################
 ############################################################################

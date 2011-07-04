@@ -161,8 +161,8 @@ do_execsql_test 3.6.1 {
   CREATE UNIQUE INDEX t8i2 ON t8(c);
   INSERT INTO t8 VALUES(1, 1, 1, 1, 1);
 }
-do_catchsql_test 3.6.2 {
-  UPDATE t8 SET d = 2;
+do_catchsql_test 3.6.2 { 
+  UPDATE t8 SET d = 2; 
 } {1 {foreign key constraint failed}}
 do_execsql_test 3.6.3 { UPDATE t8 SET d = 1; }
 do_execsql_test 3.6.4 { UPDATE t8 SET e = 2; }
@@ -181,6 +181,6 @@ do_catchsql_test 3.6.5 {
   INSERT INTO TestTable VALUES (1, 'parent', 1, null);
   INSERT INTO TestTable VALUES (2, 'child', 1, 1);
   UPDATE TestTable SET parent_id=1000 where id=2;
- } {1 {foreign key constraint failed}}
+} {1 {foreign key constraint failed}}
 
 finish_test

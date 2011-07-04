@@ -23,7 +23,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
+    **  SQLITE_SOURCE_ID: 2011-06-23 19:49:22 4374b7e83ea0a3fbc3691f9c0c936272862f32f2
     **
     *************************************************************************
     */
@@ -146,6 +146,24 @@ namespace Community.CsharpSqlite
         {
           goto trigger_cleanup;
         }
+      }
+      if ( null == pTableName ) //|| db.mallocFailed 
+      {
+        goto trigger_cleanup;
+      }
+
+      /* A long-standing parser bug is that this syntax was allowed:
+      **
+      **    CREATE TRIGGER attached.demo AFTER INSERT ON attached.tab ....
+      **                                                 ^^^^^^^^
+      **
+      ** To maintain backwards compatibility, ignore the database
+      ** name on pTableName if we are reparsing our of SQLITE_MASTER.
+      */
+      if ( db.init.busy != 0 && iDb != 1 )
+      {
+        //sqlite3DbFree( db, pTableName.a[0].zDatabase );
+        pTableName.a[0].zDatabase = null;
       }
 
       /* If the trigger name was unqualified, and the table is a temp table,
@@ -356,9 +374,8 @@ trigger_cleanup:
         pTrig.table, z );
         sqlite3DbFree( db, ref z );
         sqlite3ChangeCookie( pParse, iDb );
-        sqlite3VdbeAddOp4( v, OP_ParseSchema, iDb, 0, 0, sqlite3MPrintf(
-        db, "type='trigger' AND name='%q'", zName ), P4_DYNAMIC
-        );
+        sqlite3VdbeAddParseSchemaOp( v, iDb,
+            sqlite3MPrintf( db, "type='trigger' AND name='%q'", zName ) );
       }
 
       if ( db.init.busy != 0 )

@@ -38,7 +38,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
+    **  SQLITE_SOURCE_ID: 2011-06-23 19:49:22 4374b7e83ea0a3fbc3691f9c0c936272862f32f2
     **
     *************************************************************************
     */
@@ -126,7 +126,8 @@ rc = isnan(x);
         return 0;
       //while( *z2 ){ z2++; }
       //return 0x3fffffff & (int)(z2 - z);
-      return 0x3fffffff & z.Length;
+      int iLen = z.ToString().IndexOf( '\0' );
+      return 0x3fffffff & ( iLen == -1 ? z.Length : iLen );
     }
     static int sqlite3Strlen30( string z )
     {
@@ -135,7 +136,8 @@ rc = isnan(x);
         return 0;
       //while( *z2 ){ z2++; }
       //return 0x3fffffff & (int)(z2 - z);
-      return 0x3fffffff & z.Length;
+      int iLen = z.IndexOf( '\0' );
+      return 0x3fffffff & (iLen == -1 ? z.Length : iLen);
     }
 
 
@@ -1263,7 +1265,7 @@ return !sqlite3Atoi64(z, pResult, length, enc);
 
       /* The 2-byte case */
       //p++;
-      b = p[offset + 1];
+      b = ( offset + 1 ) < p.Length ? p[offset + 1] : (u32)0;
       /* b: p1 (unmasked) */
       if ( 0 == ( b & 0x80 ) )
       {
@@ -1277,7 +1279,7 @@ return !sqlite3Atoi64(z, pResult, length, enc);
       /* The 3-byte case */
       //p++;
       a = a << 14;
-      a |= p[offset + 2];
+      a |= ( offset + 2 ) < p.Length ? p[offset + 2] : (u32)0;
       /* a: p0<<14 | p2 (unmasked) */
       if ( 0 == ( a & 0x80 ) )
       {
@@ -1441,13 +1443,12 @@ return n;
 
 
 
-#if !SQLITE_OMIT_BLOB_LITERAL || SQLITE_HAS_CODEC
-    /*
+/*
 ** Translate a single byte of Hex into an integer.
 ** This routine only works if h really is a valid hexadecimal
 ** character:  0..9a..fA..F
 */
-    static int hexToInt( int h )
+    static int sqlite3HexToInt( int h )
     {
       Debug.Assert( ( h >= '0' && h <= '9' ) || ( h >= 'a' && h <= 'f' ) || ( h >= 'A' && h <= 'F' ) );
 #if SQLITE_ASCII
@@ -1458,7 +1459,6 @@ return n;
 //#endif
       return h & 0xf;
     }
-#endif // * !SQLITE_OMIT_BLOB_LITERAL || SQLITE_HAS_CODEC */
 
 #if !SQLITE_OMIT_BLOB_LITERAL || SQLITE_HAS_CODEC
     /*
@@ -1478,7 +1478,7 @@ return n;
       {
         for ( i = 0; i < n; i += 2 )
         {
-          zBlob.Append( Convert.ToChar( ( hexToInt( z[i] ) << 4 ) | hexToInt( z[i + 1] ) ) );
+          zBlob.Append( Convert.ToChar( ( sqlite3HexToInt( z[i] ) << 4 ) | sqlite3HexToInt( z[i + 1] ) ) );
         }
         //zBlob[i / 2] = '\0'; ;
       }
@@ -1646,6 +1646,32 @@ return n;
         return 0x7fffffff;
       return -x;
     }
+
+#if SQLITE_ENABLE_8_3_NAMES
+/*
+** If SQLITE_ENABLE_8_3_NAME is set at compile-time and if the database
+** filename in zBaseFilename is a URI with the "8_3_names=1" parameter and
+** if filename in z[] has a suffix (a.k.a. "extension") that is longer than
+** three characters, then shorten the suffix on z[] to be the last three
+** characters of the original suffix.
+**
+** Examples:
+**
+**     test.db-journal    =>   test.nal
+**     test.db-wal        =>   test.wal
+**     test.db-shm        =>   test.shm
+*/
+static void sqlite3FileSuffix3(string zBaseFilename, char *z){
+  string zOk;
+  zOk = sqlite3_uri_parameter(zBaseFilename, "8_3_names");
+  if( zOk != null && sqlite3GetBoolean(zOk) ){
+    int i, sz;
+    sz = sqlite3Strlen30(z);
+    for(i=sz-1; i>0 && z[i]!='/' && z[i]!='.'; i--){}
+    if( z[i]=='.' && ALWAYS(sz>i+4) ) memcpy(&z[i+1], &z[sz-3], 4);
+  }
+}
+#endif
 
   }
 }

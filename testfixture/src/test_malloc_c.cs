@@ -29,7 +29,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2011-01-28 17:03:50 ed759d5a9edb3bba5f48f243df47be29e3fe8cd7
+    **  SQLITE_SOURCE_ID: 2011-06-23 19:49:22 4374b7e83ea0a3fbc3691f9c0c936272862f32f2
     **
     *************************************************************************
     */
@@ -436,6 +436,35 @@ namespace Community.CsharpSqlite
     //  return TCL.TCL_OK;
     //}
 
+/*
+** tclcmd:     sqlite3_config_uri  BOOLEAN
+**
+** Invoke sqlite3_config() or sqlite3_db_config() with invalid
+** opcodes and verify that they return errors.
+*/
+static int test_config_uri(
+  object clientData, 
+  Tcl_Interp interp,
+  int objc,
+  Tcl_Obj[] objv
+){
+  int rc;
+  bool bOpenUri = false;
+
+  if( objc!=2 ){
+    TCL.Tcl_WrongNumArgs(interp, 1, objv, "BOOL");
+    return TCL.TCL_ERROR;
+  }
+  if ( TCL.Tcl_GetBooleanFromObj( interp, objv[1], ref bOpenUri ) )
+  {
+    return TCL.TCL_ERROR;
+  }
+
+  rc = sqlite3_config(SQLITE_CONFIG_URI, bOpenUri);
+  TCL.Tcl_SetResult( interp, sqlite3TestErrorName( rc ), TCL.TCL_VOLATILE );
+
+  return TCL.TCL_OK;
+}
 
     /*
     ** Usage:    sqlite3_free  PRIOR
@@ -1587,6 +1616,7 @@ new _aObjCmd( "install_malloc_faultsim", test_install_malloc_faultsim  ,0),
 new _aObjCmd( "sqlite3_config_memstatus",   test_config_memstatus         ,0 ),
 new _aObjCmd(  "sqlite3_config_lookaside",   test_config_lookaside         ,0 ),
 //{ "sqlite3_config_error",       test_config_error             ,0 },
+new _aObjCmd(  "sqlite3_config_uri",test_config_uri ,0 ),
 new _aObjCmd(  "sqlite3_db_config_lookaside",test_db_config_lookaside      ,0 ),
 //{ "sqlite3_dump_memsys3",       test_dump_memsys3             ,3 },
 //{ "sqlite3_dump_memsys5",       test_dump_memsys3             ,5 },

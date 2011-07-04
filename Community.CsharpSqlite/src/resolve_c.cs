@@ -894,12 +894,13 @@ return WRC_Prune;
       if ( pOrderBy == null )
         return 0;
       db = pParse.db;
-#if SQLITE_MAX_COLUMN
-if( pOrderBy.nExpr>db.aLimit[SQLITE_LIMIT_COLUMN] ){
-sqlite3ErrorMsg(pParse, "too many terms in ORDER BY clause");
-return 1;
-}
-#endif
+//#if SQLITE_MAX_COLUMN
+      if ( pOrderBy.nExpr > db.aLimit[SQLITE_LIMIT_COLUMN] )
+      {
+        sqlite3ErrorMsg( pParse, "too many terms in ORDER BY clause" );
+        return 1;
+      }
+//#endif
       for ( i = 0; i < pOrderBy.nExpr; i++ )
       {
         pOrderBy.a[i].done = 0;
@@ -1003,12 +1004,13 @@ return 1;
 
       if ( pOrderBy == null /* || pParse.db.mallocFailed != 0 */ )
         return 0;
-#if SQLITE_MAX_COLUMN
-if( pOrderBy.nExpr>db.aLimit[SQLITE_LIMIT_COLUMN] ){
-sqlite3ErrorMsg(pParse, "too many terms in %s BY clause", zType);
-return 1;
-}
-#endif
+//#if SQLITE_MAX_COLUMN
+      if ( pOrderBy.nExpr > db.aLimit[SQLITE_LIMIT_COLUMN] )
+      {
+        sqlite3ErrorMsg( pParse, "too many terms in %s BY clause", zType );
+        return 1;
+      }
+//#endif
       pEList = pSelect.pEList;
       Debug.Assert( pEList != null );  /* sqlite3SelectNew() guarantees this */
       for ( i = 0; i < pOrderBy.nExpr; i++ )//, pItem++)

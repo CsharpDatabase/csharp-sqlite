@@ -31,7 +31,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
+    **  SQLITE_SOURCE_ID: 2011-06-23 19:49:22 4374b7e83ea0a3fbc3691f9c0c936272862f32f2
     **
     *************************************************************************
     */
@@ -3910,11 +3910,12 @@ break;
         sqlite3ExprListDelete( db, ref pEList );
         p.pEList = pNew;
       }
-#if SQLITE_MAX_COLUMN
-if( p.pEList && p.pEList.nExpr>db.aLimit[SQLITE_LIMIT_COLUMN] ){
-sqlite3ErrorMsg(pParse, "too many columns in result set");
-}
-#endif
+//#if SQLITE_MAX_COLUMN
+      if ( p.pEList != null && p.pEList.nExpr > db.aLimit[SQLITE_LIMIT_COLUMN] )
+      {
+        sqlite3ErrorMsg( pParse, "too many columns in result set" );
+      }
+//#endif
       return WRC_Continue;
     }
 
@@ -4905,12 +4906,14 @@ if (sqlite3AuthCheck(pParse, SQLITE_SELECT, 0, 0, 0)) return 1;
             ** and pKeyInfo to the KeyInfo structure required to navigate the
             ** index.
             **
+            ** (2011-04-15) Do not do a full scan of an unordered index.
+            **
             ** In practice the KeyInfo structure will not be used. It is only
             ** passed to keep OP_OpenRead happy.
             */
             for ( pIdx = pTab.pIndex; pIdx != null; pIdx = pIdx.pNext )
             {
-              if ( null == pBest || pIdx.nColumn < pBest.nColumn )
+              if ( pIdx.bUnordered == 0 && ( null == pBest || pIdx.nColumn < pBest.nColumn ) )
               {
                 pBest = pIdx;
               }

@@ -11,7 +11,10 @@
 #########################################################################################
 source $testdir/permutations.test
 
-set excludeList { ^* _* *.tcl memleak.test soak.test}
+set excludeList { ^* _* *.tcl
+  all.test        async.test         quick.test  veryquick.test
+  memleak.test    permutations.test  soak.test   fts3.test
+  mallocAll.test  rtree.test }
 
 ######################################
 #Exclude Configuration Tests
@@ -26,7 +29,7 @@ append excludeList { exists.test pager1.test schema3.test tkt-5d863f876e.test tk
 ######################################
 #Exclude Mutex tests
 ######################################
-append excludeList { mutex1.test mutex2.test }
+append excludeList { mutex2.test }
 
 ######################################
 #Exclude Shared Cache
@@ -34,21 +37,25 @@ append excludeList { mutex1.test mutex2.test }
 append excludeList { tkt-f7b4edec.test }
 
 ######################################
-#Exclude for VFS tests
+#Exclude for not Unix
 ######################################
-append excludeList { incrblob3.test journal2.test pager2.test tkt-9d68c883.test tkt-f3e5abed55.test}
+append excludeList { crash.test crash2.test }
 
 ######################################
-#Exclude for some other reason
+#Exclude for VFS tests
 ######################################
-append excludeList { e_select2.test }
+append excludeList { incrblob3.test journal2.test pager2.test quota.test tkt-9d68c883.test tkt-f3e5abed55.test e_uri.test uri.test}
 
 ######################################
 #Exclude for now TODO
 ######################################
-append excludeList { fuzz3.test misc7.test sqllimits1.test trace2.test}
+append excludeList { e_select2.test savepoint6.test speed*.test}
 
-set csTests [test_set $allquicktests -exclude $excludeList]
+if { $TESTSUITE == "ALL" } { 
+set csTests [test_set $alltests -exclude $excludeList] 
+} else { 
+set csTests [test_set $allquicktests -exclude $excludeList]  
+}
 
 test_suite "C#SQLitetests" -prefix "" -description {
   Quick test suite for C#-SQLite. Runs in around 7 minutes on a workstation.

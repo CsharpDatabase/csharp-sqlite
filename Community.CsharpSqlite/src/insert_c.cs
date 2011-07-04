@@ -27,7 +27,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
+    **  SQLITE_SOURCE_ID: 2011-06-23 19:49:22 4374b7e83ea0a3fbc3691f9c0c936272862f32f2
     **
     *************************************************************************
     */
@@ -1136,6 +1136,7 @@ isView = false;
       const char *pVTab = (const char *)sqlite3GetVTable(db, pTab);
       sqlite3VtabMakeWritable(pParse, pTab);
       sqlite3VdbeAddOp4(v, OP_VUpdate, 1, pTab.nCol+2, regIns, pVTab, P4_VTAB);
+      sqlite3VdbeChangeP5(v, onError==OE_Default ? OE_Abort : onError);
       sqlite3MayAbort(pParse);
     }else
 #endif
@@ -1774,7 +1775,11 @@ insert_cleanup:
 ** purposes only - to make sure the transfer optimization really
 ** is happening when it is suppose to.
 */
-    //static int sqlite3_xferopt_count = 0;
+#if !TCLSH
+    static int sqlite3_xferopt_count = 0;
+#else
+    static tcl.lang.Var.SQLITE3_GETSET sqlite3_xferopt_count = new tcl.lang.Var.SQLITE3_GETSET( "sqlite3_xferopt_count" );
+#endif
 #endif // * SQLITE_TEST */
 
 
@@ -2030,6 +2035,19 @@ insert_cleanup:
       if ( pDest.pCheck != null && 0 != sqlite3ExprCompare( pSrc.pCheck, pDest.pCheck ) )
       {
         return 0;   /* Tables have different CHECK constraints.  Ticket #2252 */
+  }
+#endif
+#if !SQLITE_OMIT_FOREIGN_KEY
+  /* Disallow the transfer optimization if the destination table constains
+  ** any foreign key constraints.  This is more restrictive than necessary.
+  ** But the main beneficiary of the transfer optimization is the VACUUM 
+  ** command, and the VACUUM command disables foreign key constraints.  So
+  ** the extra complication to make this rule less restrictive is probably
+  ** not worth the effort.  Ticket [6284df89debdfa61db8073e062908af0c9b6118e]
+  */
+      if ( ( pParse.db.flags & SQLITE_ForeignKeys ) != 0 && pDest.pFKey != null )
+      {
+        return 0;
       }
 #endif
 
@@ -2042,7 +2060,11 @@ insert_cleanup:
       **        table is empty.
       */
 #if  SQLITE_TEST
+#if !TCLSH
+      sqlite3_xferopt_count++;
+#else
       sqlite3_xferopt_count.iValue++;
+#endif
 #endif
       iDbSrc = sqlite3SchemaToIndex( pParse.db, pSrc.pSchema );
       v = sqlite3GetVdbe( pParse );

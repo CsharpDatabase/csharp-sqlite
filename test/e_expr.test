@@ -553,8 +553,8 @@ if 0 {
 parameter_test e_expr-11.2.5 "
   SELECT :\u0e40\u0e2d\u0e28\u0e02\u0e39\u0e40\u0e2d\u0e25
 " "1 :\u0e40\u0e2d\u0e28\u0e02\u0e39\u0e40\u0e2d\u0e25" -1
-parameter_test e_expr-11.2.6 "SELECT :\u0080" "1 :\u0080" -1
 }
+parameter_test e_expr-11.2.6 "SELECT :\u0080" "1 :\u0080" -1
 
 # EVIDENCE-OF: R-49783-61279 An "at" sign works exactly like a colon,
 # except that the name of the parameter created is @AAAA.
@@ -1074,6 +1074,8 @@ sqlite3 db test.db
 #
 #   There is a regexp function if ICU is enabled though.
 #
+
+# USE C# version of REGEXP
 if 0 {
 ifcapable !icu {
   do_catchsql_test e_expr-18.1.1 { 
@@ -1092,6 +1094,7 @@ ifcapable !icu {
     SELECT 'abc' REGEXP 'def'
   } {0 1}
 }
+
 # EVIDENCE-OF: R-33693-50180 The REGEXP operator is a special syntax for
 # the regexp() user function.
 #
@@ -1616,8 +1619,8 @@ do_expr_test e_expr-31.1.2 { CAST(1.99999 AS INTEGER) } integer 1
 do_expr_test e_expr-31.1.3 { CAST(-1.99999 AS INTEGER) } integer -1
 do_expr_test e_expr-31.1.4 { CAST(-0.99999 AS INTEGER) } integer 0
 
-# EVIDENCE-OF: R-06126-36021 If an REAL is too large to be represented
-# as an INTEGER then the result of the cast is the largest negative
+# EVIDENCE-OF: R-49503-28105 If a REAL is too large to be represented as
+# an INTEGER then the result of the cast is the largest negative
 # integer: -9223372036854775808.
 #
 do_expr_test e_expr-31.2.1 { CAST(2e+50 AS INT) } integer -9223372036854775808
@@ -1863,4 +1866,3 @@ foreach {tn expr} {
 
 
 finish_test
-

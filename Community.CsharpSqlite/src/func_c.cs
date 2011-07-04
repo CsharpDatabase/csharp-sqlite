@@ -36,7 +36,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
+    **  SQLITE_SOURCE_ID: 2011-06-23 19:49:22 4374b7e83ea0a3fbc3691f9c0c936272862f32f2
     **
     *************************************************************************
     */
@@ -581,7 +581,15 @@ break;
       {
         n = 1;
       }
-      p = new char[n]; //contextMalloc( context, n );
+      if ( n > sqlite3_context_db_handle(context).aLimit[SQLITE_LIMIT_LENGTH] )
+      {
+        sqlite3_result_error_toobig( context );
+        p = null;
+      }
+      else
+      {
+        p = new char[n]; //contextMalloc( context, n );
+      }
       if ( p != null )
       {
         i64 _p = 0;
@@ -671,11 +679,11 @@ break;
     ** able to participate in upper-case-to-lower-case mappings in EBCDIC
     ** whereas only characters less than 0x80 do in ASCII.
     */
-    //#if (SQLITE_EBCDIC)
-    //# define sqlite3Utf8Read(A,C)    (*(A++))
-    //# define GlogUpperToLower(A)     A = sqlite3UpperToLower[A]
+    //#if defined(SQLITE_EBCDIC)
+    //# define sqlite3Utf8Read(A,C)  (*(A++))
+    //# define GlogUpperToLower(A)   A = sqlite3UpperToLower[A]
     //#else
-    //# define GlogUpperToLower(A)     if( A<0x80 ){ A = sqlite3UpperToLower[A]; }
+    //# define GlogUpperToLower(A)   if( !((A)&~0x7f) ){ A = sqlite3UpperToLower[A]; }
     //#endif
 
     static compareInfo globInfo = new compareInfo( '*', '?', '[', false );
@@ -718,10 +726,10 @@ break;
     string zPattern,            /* The glob pattern */
     string zString,             /* The string to compare against the glob */
     compareInfo pInfo,          /* Information about how to do the compare */
-    int esc                     /* The escape character */
+    u32 esc                     /* The escape character */
     )
     {
-      int c, c2;
+      u32 c, c2;
       int invert;
       int seen;
       int matchOne = (int)pInfo.matchOne;
@@ -770,15 +778,15 @@ break;
           {
             if ( noCase )
             {
-              if ( c2 < 0x80 )
-                c2 = sqlite3UpperToLower[c2]; //GlogUpperToLower(c2);
-              if ( c < 0x80 )
-                c = sqlite3UpperToLower[c]; //GlogUpperToLower(c);
+               if( 0==((c2)&~0x7f) )
+                c2 = (u32)sqlite3UpperToLower[c2]; //GlogUpperToLower(c2);
+               if ( 0 == ( ( c ) & ~0x7f ) )
+                 c = (u32)sqlite3UpperToLower[c]; //GlogUpperToLower(c);
               while ( c2 != 0 && c2 != c )
               {
                 c2 = sqlite3Utf8Read( zString, ref zString );
-                if ( c2 < 0x80 )
-                  c2 = sqlite3UpperToLower[c2]; //GlogUpperToLower(c2);
+                if ( 0 == ( ( c2 ) & ~0x7f ) )
+                  c2 = (u32)sqlite3UpperToLower[c2]; //GlogUpperToLower(c2);
               }
             }
             else
@@ -804,7 +812,7 @@ break;
         }
         else if ( c == matchSet )
         {
-          int prior_c = 0;
+          u32 prior_c = 0;
           Debug.Assert( esc == 0 );    /* This only occurs for GLOB, not LIKE */
           seen = 0;
           invert = 0;
@@ -857,9 +865,9 @@ break;
           if ( noCase )
           {
             if ( c < 0x80 )
-              c = sqlite3UpperToLower[c]; //GlogUpperToLower(c);
+              c = (u32)sqlite3UpperToLower[c]; //GlogUpperToLower(c);
             if ( c2 < 0x80 )
-              c2 = sqlite3UpperToLower[c2]; //GlogUpperToLower(c2);
+              c2 = (u32)sqlite3UpperToLower[c2]; //GlogUpperToLower(c2);
           }
           if ( c != c2 )
           {
@@ -877,7 +885,11 @@ break;
     ** only.
     */
 #if SQLITE_TEST
-    //static int sqlite3_like_count = 0;
+#if !TCLSH
+    static int sqlite3_like_count = 0;
+#else
+    static tcl.lang.Var.SQLITE3_GETSET sqlite3_like_count = new tcl.lang.Var.SQLITE3_GETSET( "sqlite3_like_count" );
+#endif
 #endif
 
 
@@ -900,7 +912,7 @@ break;
     )
     {
       string zA, zB;
-      int escape = 0;
+      u32 escape = 0;
       int nPat;
       sqlite3 db = sqlite3_context_db_handle( context );
 
@@ -940,7 +952,11 @@ break;
       {
         compareInfo pInfo = (compareInfo)sqlite3_user_data( context );
 #if SQLITE_TEST
+#if !TCLSH
+        sqlite3_like_count++;
+#else
         sqlite3_like_count.iValue++;
+#endif
 #endif
         sqlite3_result_int( context, patternCompare( zB, zA, pInfo, escape ) ? 1 : 0 );
       }
@@ -996,6 +1012,22 @@ break;
       /* IMP: R-24470-31136 This function is an SQL wrapper around the
       ** sqlite3_sourceid() C interface. */
       sqlite3_result_text( context, sqlite3_sourceid(), -1, SQLITE_STATIC );
+    }
+
+    /*
+    ** Implementation of the sqlite_log() function.  This is a wrapper around
+    ** sqlite3_log().  The return value is NULL.  The function exists purely for
+    ** its side-effects.
+    */
+    static void errlogFunc(
+    sqlite3_context context,
+    int argc,
+    sqlite3_value[] argv
+    )
+    {
+      UNUSED_PARAMETER( argc );
+      UNUSED_PARAMETER( context );
+      sqlite3_log( sqlite3_value_int( argv[0] ), "%s", sqlite3_value_text( argv[1] ) );
     }
 
     /*
@@ -1226,13 +1258,13 @@ break;
       string zStr;        /* The input string A */
       string zPattern;    /* The pattern string B */
       string zRep;        /* The replacement string C */
-      string zOut;              /* The output */
-      int nStr;                /* Size of zStr */
-      int nPattern;            /* Size of zPattern */
-      int nRep;                /* Size of zRep */
-      int nOut;                /* Maximum size of zOut */
-      //int loopLimit;           /* Last zStr[] that might match zPattern[] */
-      int i, j;                /* Loop counters */
+      string zOut = null; /* The output */
+      int nStr;           /* Size of zStr */
+      int nPattern;       /* Size of zPattern */
+      int nRep;           /* Size of zRep */
+      int nOut;           /* Maximum size of zOut */
+      //int loopLimit;    /* Last zStr[] that might match zPattern[] */
+      int i, j = 0;       /* Loop counters */
 
       Debug.Assert( argc == 3 );
       UNUSED_PARAMETER( argc );
@@ -1264,45 +1296,62 @@ break;
       Debug.Assert( zRep == sqlite3_value_text( argv[2] ) );
       nOut = nStr + 1;
       Debug.Assert( nOut < SQLITE_MAX_LENGTH );
-      //zOut = contextMalloc(context, (i64)nOut);
-      //if( zOut==0 ){
-      //  return;
-      //}
-      //loopLimit = nStr - nPattern;
-      //for(i=j=0; i<=loopLimit; i++){
-      //  if( zStr[i]!=zPattern[0] || memcmp(&zStr[i], zPattern, nPattern) ){
-      //    zOut[j++] = zStr[i];
-      //  }else{
-      //    u8 *zOld;
-      // sqlite3 db = sqlite3_context_db_handle( context );
-      //    nOut += nRep - nPattern;
-      //testcase( nOut-1==db->aLimit[SQLITE_LIMIT_LENGTH] );
-      //testcase( nOut-2==db->aLimit[SQLITE_LIMIT_LENGTH] );
-      //if( nOut-1>db->aLimit[SQLITE_LIMIT_LENGTH] ){
-      //      sqlite3_result_error_toobig(context);
-      //      sqlite3_free(zOut);
-      //      return;
-      //    }
-      //    zOld = zOut;
-      //    zOut = sqlite3_realloc(zOut, (int)nOut);
-      //    if( zOut==0 ){
-      //      sqlite3_result_error_nomem(context);
-      //      sqlite3_free(zOld);
-      //      return;
-      //    }
-      //    memcpy(&zOut[j], zRep, nRep);
-      //    j += nRep;
-      //    i += nPattern-1;
-      //  }
-      //}
-      //Debug.Assert( j+nStr-i+1==nOut );
-      //memcpy(&zOut[j], zStr[i], nStr-i);
-      //j += nStr - i;
-      //Debug.Assert( j<=nOut );
-      //zOut[j] = 0;
-      zOut = zStr.Replace( zPattern, zRep );
-      j = zOut.Length;
-      sqlite3_result_text( context, zOut, j, null );//sqlite3_free );
+      if ( nOut <= sqlite3_context_db_handle( context ).aLimit[SQLITE_LIMIT_LENGTH] )
+      {
+        //zOut = contextMalloc(context, (i64)nOut);
+        //if( zOut==0 ){
+        //  return;
+        //}
+        //loopLimit = nStr - nPattern;
+        //for(i=j=0; i<=loopLimit; i++){
+        //  if( zStr[i]!=zPattern[0] || memcmp(&zStr[i], zPattern, nPattern) ){
+        //    zOut[j++] = zStr[i];
+        //  }else{
+        //    u8 *zOld;
+        // sqlite3 db = sqlite3_context_db_handle( context );
+        //    nOut += nRep - nPattern;
+        //testcase( nOut-1==db->aLimit[SQLITE_LIMIT_LENGTH] );
+        //testcase( nOut-2==db->aLimit[SQLITE_LIMIT_LENGTH] );
+        //if( nOut-1>db->aLimit[SQLITE_LIMIT_LENGTH] ){
+        //      sqlite3_result_error_toobig(context);
+        //      sqlite3_free(zOut);
+        //      return;
+        //    }
+        //    zOld = zOut;
+        //    zOut = sqlite3_realloc(zOut, (int)nOut);
+        //    if( zOut==0 ){
+        //      sqlite3_result_error_nomem(context);
+        //      sqlite3_free(zOld);
+        //      return;
+        //    }
+        //    memcpy(&zOut[j], zRep, nRep);
+        //    j += nRep;
+        //    i += nPattern-1;
+        //  }
+        //}
+        //Debug.Assert( j+nStr-i+1==nOut );
+        //memcpy(&zOut[j], zStr[i], nStr-i);
+        //j += nStr - i;
+        //Debug.Assert( j<=nOut );
+        //zOut[j] = 0;
+        try
+        {
+          zOut = zStr.Replace( zPattern, zRep );
+          j = zOut.Length;
+        }
+        catch
+        {
+          j = 0;
+        }
+      }
+      if ( j == 0 || j > sqlite3_context_db_handle( context ).aLimit[SQLITE_LIMIT_LENGTH] )
+      {
+        sqlite3_result_error_toobig( context );
+      }
+      else
+      {
+        sqlite3_result_text( context, zOut, j, null );//sqlite3_free );
+      }
     }
 
     /*
@@ -2040,6 +2089,7 @@ FUNCTION("randomblob",         1, 0, 0, randomBlob       ),
 FUNCTION("nullif",             2, 0, 1, nullifFunc       ),
 FUNCTION("sqlite_version",     0, 0, 0, versionFunc      ),
 FUNCTION("sqlite_source_id",   0, 0, 0, sourceidFunc     ),
+FUNCTION("sqlite_log",         2, 0, 0, errlogFunc       ),
 #if !SQLITE_OMIT_COMPILEOPTION_DIAGS
 FUNCTION("sqlite_compileoption_used",1, 0, 0, compileoptionusedFunc  ),
 FUNCTION("sqlite_compileoption_get", 1, 0, 0, compileoptiongetFunc  ),

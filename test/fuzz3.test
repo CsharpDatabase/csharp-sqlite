@@ -18,6 +18,10 @@
 set testdir [file dirname $argv0]
 source $testdir/tester.tcl
 
+# Do not use a codec for tests in this file, as the database file is
+# manipulated directly using tcl scripts. See proc [set_file_format].
+#
+do_not_use_codec
 
 expr srand(123)
 

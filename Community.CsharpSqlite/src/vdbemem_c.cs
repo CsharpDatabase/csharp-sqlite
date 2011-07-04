@@ -1358,7 +1358,10 @@ return SQLITE_NOMEM;
         sqlite3VdbeMemExpandBlob( pVal ); // expandBlob(pVal);
       if ( ( pVal.flags & MEM_Str ) != 0 )
       {
-        sqlite3VdbeChangeEncoding( pVal, enc & ~SQLITE_UTF16_ALIGNED );
+        if ( sqlite3VdbeChangeEncoding( pVal, enc & ~SQLITE_UTF16_ALIGNED ) != SQLITE_OK )
+        {
+          return null; // Encoding Error
+        }
         if ( ( enc & SQLITE_UTF16_ALIGNED ) != 0 && 1 == ( 1 & ( pVal.z[0] ) ) )  //1==(1&SQLITE_PTR_TO_INT(pVal.z))
         {
           Debug.Assert( ( pVal.flags & ( MEM_Ephem | MEM_Static ) ) != 0 );

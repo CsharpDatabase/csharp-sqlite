@@ -29,15 +29,11 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
+    **  SQLITE_SOURCE_ID: 2011-06-23 19:49:22 4374b7e83ea0a3fbc3691f9c0c936272862f32f2
     **
     *************************************************************************
     */
     //#include "sqliteInt.h"
-
-    /* Ignore this whole file if pragmas are disabled
-    */
-#if !SQLITE_OMIT_PRAGMA
 
     /*
 ** Interpret the given string as a safety level.  Return 0 for OFF,
@@ -75,10 +71,15 @@ namespace Community.CsharpSqlite
     /*
     ** Interpret the given string as a boolean value.
     */
-    static u8 getBoolean( string z )
-    {
-      return (u8)( getSafetyLevel( z ) & 1 );
-    }
+    static u8 sqlite3GetBoolean(string z){
+  return (u8)( getSafetyLevel( z ) & 1 );//return getSafetyLevel(z)&1;
+}
+
+/* The sqlite3GetBoolean() function is used by other modules but the
+** remainder of this file is specific to PRAGMA processing.  So omit
+** the rest of the file if PRAGMAs are omitted from the build.
+*/
+#if !(SQLITE_OMIT_PRAGMA)
 
     /*
     ** Interpret the given string as a locking mode value.
@@ -286,7 +287,7 @@ new sPragmaType( "foreign_keys",             SQLITE_ForeignKeys ),
                 ** in auto-commit mode.  */
                 mask &= ~( SQLITE_ForeignKeys );
               }
-              if ( getBoolean( zRight ) != 0 )
+              if ( sqlite3GetBoolean( zRight ) != 0 )
               {
                 db.flags |= mask;
               }
@@ -569,7 +570,7 @@ new VdbeOpList( OP_ResultRow,   1, 1,        0),
             Debug.Assert( pBt != null );
             if ( zRight != null )
             {
-              b = getBoolean( zRight );
+              b = sqlite3GetBoolean( zRight );
             }
             if ( pId2.n == 0 && b >= 0 )
             {
@@ -1319,7 +1320,7 @@ else
                                                 {
                                                   if ( zRight != null )
                                                   {
-                                                    if ( getBoolean( zRight ) != 0 )
+                                                    if ( sqlite3GetBoolean( zRight ) != 0 )
                                                     {
                                                       sqlite3ParserTrace( Console.Out, "parser: " );
                                                     }
@@ -1339,7 +1340,7 @@ else
                                                   {
                                                     if ( zRight != null )
                                                     {
-                                                      sqlite3RegisterLikeFunctions( db, getBoolean( zRight ) );
+                                                      sqlite3RegisterLikeFunctions( db, sqlite3GetBoolean( zRight ) );
                                                     }
                                                   }
                                                   else

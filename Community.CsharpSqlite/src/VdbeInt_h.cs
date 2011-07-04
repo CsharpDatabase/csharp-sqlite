@@ -56,7 +56,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
+    **  SQLITE_SOURCE_ID: 2011-06-23 19:49:22 4374b7e83ea0a3fbc3691f9c0c936272862f32f2
     **
     *************************************************************************
     */
@@ -457,11 +457,11 @@ static bool memIsValid( Mem M ) { return true; }
       public Mem[] aVar;             /* Values for the OP_Variable opcode. */
       public string[] azVar;         /* Name of variables */
       public ynVar nVar;             /* Number of entries in aVar[] */
+      public ynVar nzVar;            /* Number of entries in azVar[] */
       public u32 cacheCtr;           /* VdbeCursor row cache generation counter */
       public int pc;                 /* The program counter */
       public int rc;                 /* Value to return */
       public u8 errorAction;         /* Recovery action to do in case of an error */
-      public u8 okVar;               /* True if azVar[] has been initialized */
       public int explain;            /* True if EXPLAIN present on SQL command */
       public bool changeCntOn;       /* True to update the change-counter */
       public bool expired;           /* True if the VM needs to be recompiled */
@@ -513,10 +513,10 @@ static bool memIsValid( Mem M ) { return true; }
         ct.aColName = aColName;
         ct.nCursor = nCursor;
         ct.apCsr = apCsr;
-        ct.nVar = nVar;
         ct.aVar = aVar;
         ct.azVar = azVar;
-        ct.okVar = okVar;
+        ct.nVar = nVar;
+        ct.nzVar = nzVar;
         ct.magic = magic;
         ct.nMem = nMem;
         ct.aMem = aMem;

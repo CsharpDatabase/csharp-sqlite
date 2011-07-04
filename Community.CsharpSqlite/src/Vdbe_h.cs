@@ -26,7 +26,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
+    **  SQLITE_SOURCE_ID: 2011-06-23 19:49:22 4374b7e83ea0a3fbc3691f9c0c936272862f32f2
     **
     *************************************************************************
     */
@@ -245,6 +245,7 @@ const int COLNAME_N = 1;     /* Number of COLNAME_xxx symbols */
     //int sqlite3VdbeAddOp4(Vdbe*,int,int,int,int,const char *zP4,int);
     //int sqlite3VdbeAddOp4Int(Vdbe*,int,int,int,int,int);
     //int sqlite3VdbeAddOpList(Vdbe*, int nOp, VdbeOpList const *aOp);
+    //void sqlite3VdbeAddParseSchemaOp(Vdbe*,int,char*);
     //void sqlite3VdbeChangeP1(Vdbe*, int addr, int P1);
     //void sqlite3VdbeChangeP2(Vdbe*, int addr, int P2);
     //void sqlite3VdbeChangeP3(Vdbe*, int addr, int P3);
@@ -258,17 +259,16 @@ const int COLNAME_N = 1;     /* Number of COLNAME_xxx symbols */
     //void sqlite3VdbeRunOnlyOnce(Vdbe*);
     //void sqlite3VdbeDelete(Vdbe*);
     //void sqlite3VdbeDeleteObject(sqlite3*,Vdbe*);
-    //void sqlite3VdbeMakeReady(Vdbe*,int,int,int,int,int,int);
+    //void sqlite3VdbeMakeReady(Vdbe*,Parse*);
     //int sqlite3VdbeFinalize(Vdbe*);
     //void sqlite3VdbeResolveLabel(Vdbe*, int);
     //int sqlite3VdbeCurrentAddr(Vdbe*);
-#if SQLITE_DEBUG
-    //int sqlite3VdbeAssertMayAbort(Vdbe *, int);
-    //void sqlite3VdbeTrace(Vdbe*,FILE*);
-#else
-    static int sqlite3VdbeAssertMayAbort( Vdbe v, int i ) { return 1; }
-#endif
+    //#ifdef SQLITE_DEBUG
+    //  int sqlite3VdbeAssertMayAbort(Vdbe *, int);
+    //  void sqlite3VdbeTrace(Vdbe*,FILE*);
+    //#endif
     //void sqlite3VdbeResetStepResult(Vdbe*);
+    //void sqlite3VdbeRewind(Vdbe*);
     //int sqlite3VdbeReset(Vdbe*);
     //void sqlite3VdbeSetNumCols(Vdbe*,int);
     //int sqlite3VdbeSetColName(Vdbe*, int, int, const char *, void(*)(void*));
@@ -279,19 +279,17 @@ const int COLNAME_N = 1;     /* Number of COLNAME_xxx symbols */
     //VdbeOp *sqlite3VdbeTakeOpArray(Vdbe*, int*, int*);
     //sqlite3_value *sqlite3VdbeGetValue(Vdbe*, int, u8);
     //void sqlite3VdbeSetVarmask(Vdbe*, int);
-#if !SQLITE_OMIT_TRACE
-    //char *sqlite3VdbeExpandSql(Vdbe*, const char*);
-#else
-    static string sqlite3VdbeExpandSql(Vdbe P, string S) {return null;}
-#endif
+    //#ifndef SQLITE_OMIT_TRACE
+    //  char *sqlite3VdbeExpandSql(Vdbe*, const char*);
+    //#endif
+
     //UnpackedRecord *sqlite3VdbeRecordUnpack(KeyInfo*,int,const void*,char*,int);
     //void sqlite3VdbeDeleteUnpackedRecord(UnpackedRecord*);
     //int sqlite3VdbeRecordCompare(int,const void*,UnpackedRecord*);
 
-#if !SQLITE_OMIT_TRIGGER
+    //#ifndef SQLITE_OMIT_TRIGGER
     //void sqlite3VdbeLinkSubProgram(Vdbe *, SubProgram *);
-#endif
-
+    //#endif
 #if !NDEBUG
     //void sqlite3VdbeComment(Vdbe*, const char*, ...);
     static void VdbeComment( Vdbe v, string zFormat, params object[] ap )

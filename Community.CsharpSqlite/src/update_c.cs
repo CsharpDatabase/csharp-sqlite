@@ -27,7 +27,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
+    **  SQLITE_SOURCE_ID: 2011-06-23 19:49:22 4374b7e83ea0a3fbc3691f9c0c936272862f32f2
     **
     *************************************************************************
     */
@@ -42,7 +42,8 @@ namespace Community.CsharpSqlite
 //ExprList pChanges,  /* The columns to change in the UPDATE statement */
 //Expr pRowidExpr,    /* Expression used to recompute the rowid */
 //int aXRef,          /* Mapping from columns of pTab to entries in pChanges */
-//Expr pWhere         /* WHERE clause of the UPDATE statement */
+//Expr *pWhere,        /* WHERE clause of the UPDATE statement */
+//int onError          /* ON CONFLICT strategy */
 //);
 #endif // * SQLITE_OMIT_VIRTUALTABLE */
 
@@ -319,7 +320,8 @@ aXRef[j] = -1;
 /* Virtual tables must be handled separately */
 if ( IsVirtual( pTab ) )
 {
-updateVirtualTable( pParse, pTabList, pTab, pChanges, pRowidExpr, aXRef, pWhere );
+    updateVirtualTable(pParse, pTabList, pTab, pChanges, pRowidExpr, aXRef,
+                       pWhere, onError);
 pWhere = null;
 pTabList = null;
 goto update_cleanup;
@@ -700,7 +702,8 @@ Table pTab,         /* The virtual table */
 ExprList pChanges,  /* The columns to change in the UPDATE statement */
 Expr pRowid,        /* Expression used to recompute the rowid */
 int aXRef,          /* Mapping from columns of pTab to entries in pChanges */
-Expr pWhere         /* WHERE clause of the UPDATE statement */
+Expr pWhere,        /* WHERE clause of the UPDATE statement */
+int onError         /* ON CONFLICT strategy */
 )
 {
 Vdbe v = pParse.pVdbe;  /* Virtual machine under construction */
@@ -759,6 +762,7 @@ sqlite3VdbeAddOp3(v, OP_Column, ephemTab, i+1+(pRowid!=0), iReg+2+i);
 }
 sqlite3VtabMakeWritable(pParse, pTab);
 sqlite3VdbeAddOp4(v, OP_VUpdate, 0, pTab.nCol+2, iReg, pVTab, P4_VTAB);
+sqlite3VdbeChangeP5(v, onError==OE_Default ? OE_Abort : onError);
 sqlite3MayAbort(pParse);
 sqlite3VdbeAddOp2(v, OP_Next, ephemTab, addr+1);
 sqlite3VdbeJumpHere(v, addr);

@@ -35,7 +35,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: Normal	incomplete	2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
+    **  SQLITE_SOURCE_ID: 2011-06-23 19:49:22 4374b7e83ea0a3fbc3691f9c0c936272862f32f2
     **
     *************************************************************************
     */
@@ -146,7 +146,7 @@ return ( p == null || p.expired ) ? 1 : 0;
         Vdbe v = (Vdbe)pStmt;
         sqlite3_mutex_enter( v.db.mutex );
         rc = sqlite3VdbeReset( v );
-        sqlite3VdbeMakeReady( v, -1, 0, 0, 0, 0, 0 );
+        sqlite3VdbeRewind( v );
         Debug.Assert( ( rc & ( v.db.errMask ) ) == rc );
         rc = sqlite3ApiExit( v.db, rc );
         sqlite3_mutex_leave( v.db.mutex );
@@ -618,6 +618,15 @@ end_of_step:
       return ( rc & db.errMask );
     }
 
+/*
+** The maximum number of times that a statement will try to reparse
+** itself before giving up and returning SQLITE_SCHEMA.
+*/
+#if !SQLITE_MAX_SCHEMA_RETRY
+//# define SQLITE_MAX_SCHEMA_RETRY 5
+    public const int SQLITE_MAX_SCHEMA_RETRY = 5;
+#endif
+
     /*
     ** This is the top-level implementation of sqlite3_step().  Call
     ** sqlite3Step() to do most of the work.  If a schema error occurs,
@@ -638,7 +647,7 @@ end_of_step:
       db = v.db;
       sqlite3_mutex_enter( db.mutex );
       while ( ( rc = sqlite3Step( v ) ) == SQLITE_SCHEMA
-      && cnt++ < 5
+      && cnt++ < SQLITE_MAX_SCHEMA_RETRY
       && ( rc2 = rc = sqlite3Reprepare( v ) ) == SQLITE_OK )
       {
         sqlite3_reset( pStmt );
@@ -1475,40 +1484,6 @@ return bindText(pStmt, i, zData, nData, xDel, SQLITE_UTF16NATIVE);
     }
 
     /*
-    ** Create a mapping from variable numbers to variable names
-    ** in the Vdbe.azVar[] array, if such a mapping does not already
-    ** exist.
-    */
-    public static void createVarMap( Vdbe p )
-    {
-      if ( 0 == p.okVar )
-      {
-        int j;
-        Op pOp;
-        sqlite3_mutex_enter( p.db.mutex );
-        /* The race condition here is harmless.  If two threads call this
-        ** routine on the same Vdbe at the same time, they both might end
-        ** up initializing the Vdbe.azVar[] array.  That is a little extra
-        ** work but it results in the same answer.
-        */
-        p.azVar = new string[p.nOp];
-        for ( j = 0; j < p.nOp; j++ )//, pOp++ )
-        {
-          pOp = p.aOp[j];
-          if ( pOp.opcode == OP_Variable )
-          {
-            Debug.Assert( pOp.p1 > 0 && pOp.p1 <= p.nVar );
-            if ( pOp.p1 > p.azVar.Length )
-              Array.Resize( ref p.azVar, pOp.p1 );
-            p.azVar[pOp.p1 - 1] = pOp.p4.z != null ? pOp.p4.z : "";
-          }
-        }
-        p.okVar = 1;
-        sqlite3_mutex_leave( p.db.mutex );
-      }
-    }
-
-    /*
     ** Return the name of a wildcard parameter.  Return NULL if the index
     ** is out of range or if the wildcard is unnamed.
     **
@@ -1517,11 +1492,10 @@ return bindText(pStmt, i, zData, nData, xDel, SQLITE_UTF16NATIVE);
     public static string sqlite3_bind_parameter_name( sqlite3_stmt pStmt, int i )
     {
       Vdbe p = (Vdbe)pStmt;
-      if ( p == null || i < 1 || i > p.nVar )
+      if ( p == null || i < 1 || i > p.nzVar )
       {
         return "";
       }
-      createVarMap( p );
       return p.azVar[i - 1];
     }
 
@@ -1537,10 +1511,9 @@ return bindText(pStmt, i, zData, nData, xDel, SQLITE_UTF16NATIVE);
       {
         return 0;
       }
-      createVarMap( p );
       if ( zName != null && zName != "" )
       {
-        for ( i = 0; i < p.nVar; i++ )
+        for ( i = 0; i < p.nzVar; i++ )
         {
           string z = p.azVar[i];
           if ( z != null && z == zName )//&& memcmp(z,zName,nName)==0 && z[nName]==0)

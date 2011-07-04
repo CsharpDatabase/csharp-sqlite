@@ -140,6 +140,9 @@ namespace Community.CsharpSqlite
     public delegate int smdxRollback( sqlite3_vtab pVTab );
     public delegate int smdxFindFunction( sqlite3_vtab pVtab, int nArg, string zName, object pxFunc, ref sqlite3_value[] ppArg );
     public delegate int smdxRename( sqlite3_vtab pVtab, string zNew );
+    public delegate int smdxSavepoint (sqlite3_vtab pVTab, int nArg );
+    public delegate int smdxRelease (sqlite3_vtab pVTab, int nArg );
+    public delegate int smdxRollbackTo (sqlite3_vtab pVTab, int nArg );
 
     //AutoExtention
     public delegate int dxInit( sqlite3 db, ref string zMessage, sqlite3_api_routines sar );

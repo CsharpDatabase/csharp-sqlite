@@ -957,8 +957,13 @@ id.lastErrno  = 1;
 ** Count the number of fullsyncs and normal syncs.  This is used to test
 ** that syncs and fullsyncs are occuring at the right times.
 */
+#if !TCLSH
     static int sqlite3_sync_count = 0;
     static int sqlite3_fullsync_count = 0;
+#else
+    static tcl.lang.Var.SQLITE3_GETSET sqlite3_sync_count = new tcl.lang.Var.SQLITE3_GETSET( "sqlite3_sync_count" );
+    static tcl.lang.Var.SQLITE3_GETSET sqlite3_fullsync_count = new tcl.lang.Var.SQLITE3_GETSET( "sqlite_fullsync_count" );
+#endif
 #endif
 
     /*
@@ -983,9 +988,15 @@ UNUSED_PARAMETER(flags);
 #else
       if ( ( flags & SQLITE_SYNC_FULL ) != 0 )
       {
+#if !TCLSH
         sqlite3_fullsync_count++;
       }
       sqlite3_sync_count++;
+#else
+        sqlite3_fullsync_count.iValue++;
+      }
+      sqlite3_sync_count.iValue++;
+#endif
 #endif
 
 
@@ -2484,6 +2495,8 @@ int isTemp = 0;
 
       // /* Convert the filename to the system encoding. */
       zConverted = zUtf8Name;// convertUtf8Filename( zUtf8Name );
+      if ( zConverted.StartsWith( "/" ) && !zConverted.StartsWith( "//" ) )
+        zConverted = zConverted.Substring( 1 );
       if ( String.IsNullOrEmpty( zConverted ) )
       {
         return SQLITE_NOMEM;
@@ -2963,7 +2976,7 @@ return SQLITE_OK;
           zOut = Path.GetFullPath( zRelative ); // was unicodeToUtf8(zTemp);
 #endif
         }
-        catch ( IOException e )
+        catch ( Exception  e )
         {
           zOut = zRelative;
         }
@@ -3260,7 +3273,11 @@ n += sizeof( long );
     ** sqlite3OsCurrentTime() during testing.
     */
 #if SQLITE_TEST
-    //    static int sqlite3_current_time = 0;//  /* Fake system time in seconds since 1970. */
+#if !TCLSH
+    static int sqlite3_current_time = 0;//  /* Fake system time in seconds since 1970. */
+#else
+    static tcl.lang.Var.SQLITE3_GETSET sqlite3_current_time = new tcl.lang.Var.SQLITE3_GETSET( "sqlite3_current_time" );
+#endif
 #endif
 
     /*
@@ -3304,12 +3321,19 @@ n += sizeof( long );
       //   (sqlite3_int64)ft.dwLowDateTime)/(sqlite3_int64)10000;
       piNow = winFiletimeEpoch + System.DateTime.UtcNow.ToFileTimeUtc() / (sqlite3_int64)10000;
 #if SQLITE_TEST
+#if !TCLSH
+      if ( ( sqlite3_current_time) != 0 )
+      {
+        piNow = 1000 * (sqlite3_int64)sqlite3_current_time + unixEpoch;
+      }
+#else
       if ( ( sqlite3_current_time.iValue ) != 0 )
       {
         piNow = 1000 * (sqlite3_int64)sqlite3_current_time.iValue + unixEpoch;
       }
 #endif
-      UNUSED_PARAMETER( pVfs );
+#endif
+        UNUSED_PARAMETER( pVfs );
       return 0;
     }
 

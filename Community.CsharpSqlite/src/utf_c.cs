@@ -45,7 +45,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
+    **  SQLITE_SOURCE_ID: 2011-06-23 19:49:22 4374b7e83ea0a3fbc3691f9c0c936272862f32f2
     **
     *************************************************************************
     */
@@ -179,7 +179,7 @@ namespace Community.CsharpSqlite
     //        || (c&0xFFFFF800)==0xD800                          \
     //        || (c&0xFFFFFFFE)==0xFFFE ){  c = 0xFFFD; }        \
     //  }
-    static int sqlite3Utf8Read(
+    static u32 sqlite3Utf8Read(
     string zIn,          /* First byte of UTF-8 character */
     ref string pzNext   /* Write first byte past UTF-8 char here */
     )
@@ -204,7 +204,7 @@ namespace Community.CsharpSqlite
       //}
       //*pzNext = zIn;
       int zIndex = 0;
-      int c = zIn[zIndex++];
+      u32 c = zIn[zIndex++];
       if ( c >= 0xc0 )
       {
         //if ( c > 0xff ) c = 0;
@@ -213,7 +213,7 @@ namespace Community.CsharpSqlite
           //c = sqlite3Utf8Trans1[c - 0xc0];
           while ( zIndex != zIn.Length && ( zIn[zIndex] & 0xc0 ) == 0x80 )
           {
-            c = ( c << 6 ) + ( 0x3f & zIn[zIndex++] );
+            c = (u32)( ( c << 6 ) + ( 0x3f & zIn[zIndex++] ) );
           }
           if ( c < 0x80
           || ( c & 0xFFFFF800 ) == 0xD800

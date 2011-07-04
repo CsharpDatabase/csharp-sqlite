@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Text;
 
 using u8 = System.Byte;
+using u32 = System.UInt32;
 
 namespace Community.CsharpSqlite
 {
@@ -26,7 +27,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
+    **  SQLITE_SOURCE_ID: 2011-06-23 19:49:22 4374b7e83ea0a3fbc3691f9c0c936272862f32f2
     **
     *************************************************************************
     */
@@ -95,8 +96,13 @@ namespace Community.CsharpSqlite
       sqlite3 db = sqlite3_context_db_handle( context );
       string zName;
       string zFile;
+      string zPath = "";
+      string zErr = "";
+      int flags;
+
       Db aNew = null;
       string zErrDyn = "";
+      sqlite3_vfs pVfs = null;
 
       UNUSED_PARAMETER( NotUsed );
 
@@ -159,8 +165,21 @@ namespace Community.CsharpSqlite
       ** it to obtain the database schema. At this point the schema may
       ** or may not be initialised.
       */
-      rc = sqlite3BtreeOpen( zFile, db, ref aNew.pBt, 0,
-                        db.openFlags | SQLITE_OPEN_MAIN_DB );
+      flags = (int)db.openFlags;
+      rc = sqlite3ParseUri( db.pVfs.zName, zFile, ref flags, ref pVfs, ref zPath, ref zErr );
+      if ( rc != SQLITE_OK )
+      {
+        //if ( rc == SQLITE_NOMEM )
+        //db.mallocFailed = 1;
+        sqlite3_result_error( context, zErr, -1 );
+        //sqlite3_free( zErr );
+        return;
+      }
+      Debug.Assert( pVfs != null);
+      flags |= SQLITE_OPEN_MAIN_DB;
+      rc = sqlite3BtreeOpen( pVfs, zPath, db, ref aNew.pBt, 0, (int)flags );
+      //sqlite3_free( zPath );
+
       db.nDb++;
       if ( rc == SQLITE_CONSTRAINT )
       {

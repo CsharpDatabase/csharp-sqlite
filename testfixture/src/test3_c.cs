@@ -31,7 +31,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2010-12-07 20:14:09 a586a4deeb25330037a49df295b36aaf624d0f45
+    **  SQLITE_SOURCE_ID: 2011-06-23 19:49:22 4374b7e83ea0a3fbc3691f9c0c936272862f32f2
     **
     *************************************************************************
     */
@@ -139,7 +139,7 @@ namespace Community.CsharpSqlite
         sDb.mutex = sqlite3MutexAlloc( SQLITE_MUTEX_RECURSIVE );
         sqlite3_mutex_enter( sDb.mutex );
       }
-      rc = sqlite3BtreeOpen( argv[1].ToString(), sDb, ref pBt, 0,
+      rc = sqlite3BtreeOpen( sDb.pVfs, argv[1].ToString(), sDb, ref pBt, 0,
       SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_MAIN_DB );
       if ( rc != SQLITE_OK )
       {

@@ -85,16 +85,30 @@ static sqlite_u3264 g_elapsed;
 */
 #if SQLITE_TEST
 
-    //static int sqlite3_io_error_hit = 0;            /* Total number of I/O Errors */
-    //static int sqlite3_io_error_hardhit = 0;        /* Number of non-benign errors */
-    //static int sqlite3_io_error_pending = 0;        /* Count down to first I/O error */
-    //static int sqlite3_io_error_persist = 0;        /* True if I/O errors persist */
+#if !TCLSH
+    static int sqlite3_io_error_hit = 0;            /* Total number of I/O Errors */
+    static int sqlite3_io_error_hardhit = 0;        /* Number of non-benign errors */
+    static int sqlite3_io_error_pending = 0;        /* Count down to first I/O error */
+    static int sqlite3_io_error_persist = 0;        /* True if I/O errors persist */
     static int sqlite3_io_error_benign = 0;         /* True if errors are benign */
-    //static int sqlite3_diskfull_pending = 0;
-    //static int sqlite3_diskfull = 0;
+    static int sqlite3_diskfull_pending = 0;
+    static int sqlite3_diskfull = 0;
+#else
+    static tcl.lang.Var.SQLITE3_GETSET sqlite3_io_error_hit = new tcl.lang.Var.SQLITE3_GETSET( "sqlite_io_error_hit" );
+    static tcl.lang.Var.SQLITE3_GETSET sqlite3_io_error_hardhit = new tcl.lang.Var.SQLITE3_GETSET( "sqlite_io_error_hardhit" );
+    static tcl.lang.Var.SQLITE3_GETSET sqlite3_io_error_pending = new tcl.lang.Var.SQLITE3_GETSET( "sqlite_io_error_pending" );
+    static tcl.lang.Var.SQLITE3_GETSET sqlite3_io_error_persist = new tcl.lang.Var.SQLITE3_GETSET( "sqlite_io_error_persist" );
+    static tcl.lang.Var.SQLITE3_GETSET sqlite3_io_error_benign = new tcl.lang.Var.SQLITE3_GETSET( "sqlite_io_error_benign" );
+    static tcl.lang.Var.SQLITE3_GETSET sqlite3_diskfull_pending = new tcl.lang.Var.SQLITE3_GETSET( "sqlite_diskfull_pending" );
+    static tcl.lang.Var.SQLITE3_GETSET sqlite3_diskfull = new tcl.lang.Var.SQLITE3_GETSET( "sqlite_diskfull" );
+#endif
     static void SimulateIOErrorBenign( int X )
     {
+#if !TCLSH
       sqlite3_io_error_benign = ( X );
+#else
+      sqlite3_io_error_benign.iValue = ( X );
+#endif
     }
     //#define SimulateIOError(CODE)  \
     //  if( (sqlite3_io_error_persist && sqlite3_io_error_hit) \
@@ -102,8 +116,13 @@ static sqlite_u3264 g_elapsed;
     //              { local_ioerr(); CODE; }
     static bool SimulateIOError()
     {
+#if !TCLSH
+      if ( ( sqlite3_io_error_persist != 0 && sqlite3_io_error_hit != 0 )
+      || sqlite3_io_error_pending-- == 1 )
+#else
       if ( ( sqlite3_io_error_persist.iValue != 0 && sqlite3_io_error_hit.iValue != 0 )
       || sqlite3_io_error_pending.iValue-- == 1 )
+#endif
       {
         local_ioerr();
         return true;
@@ -116,9 +135,15 @@ static sqlite_u3264 g_elapsed;
 #if TRACE
       IOTRACE( "IOERR\n" );
 #endif
-      sqlite3_io_error_hit.iValue++;
+#if !TCLSH
+      sqlite3_io_error_hit++;
       if ( sqlite3_io_error_benign == 0 )
+        sqlite3_io_error_hardhit++;
+#else
+      sqlite3_io_error_hit.iValue++;
+      if ( sqlite3_io_error_benign.iValue == 0 )
         sqlite3_io_error_hardhit.iValue++;
+#endif
     }
     //#define SimulateDiskfullError(CODE) \
     //   if( sqlite3_diskfull_pending ){ \
@@ -133,18 +158,34 @@ static sqlite_u3264 g_elapsed;
     //   }
     static bool SimulateDiskfullError()
     {
+#if !TCLSH
+      if ( sqlite3_diskfull_pending != 0 )
+      {
+        if ( sqlite3_diskfull_pending == 1 )
+        {
+#else
       if ( sqlite3_diskfull_pending.iValue != 0 )
       {
         if ( sqlite3_diskfull_pending.iValue == 1 )
         {
+#endif
           local_ioerr();
+#if !TCLSH
+          sqlite3_diskfull = 1;
+          sqlite3_io_error_hit = 1;
+#else
           sqlite3_diskfull.iValue = 1;
           sqlite3_io_error_hit.iValue = 1;
+#endif
           return true;
         }
         else
         {
+#if !TCLSH
+          sqlite3_diskfull_pending--;
+#else
           sqlite3_diskfull_pending.iValue--;
+#endif
         }
       }
       return false;
@@ -162,10 +203,19 @@ static sqlite_u3264 g_elapsed;
 ** When testing, keep a count of the number of open files.
 */
 #if SQLITE_TEST
-    //int sqlite3_open_file_count = 0;
+#if !TCLSH
+    static int sqlite3_open_file_count = 0;
+#else
+    static tcl.lang.Var.SQLITE3_GETSET sqlite3_open_file_count = new tcl.lang.Var.SQLITE3_GETSET( "sqlite3_open_file_count" );
+#endif
+
     static void OpenCounter( int X )
     {
+#if !TCLSH
+      sqlite3_open_file_count += ( X );
+#else
       sqlite3_open_file_count.iValue += ( X );
+#endif
     }
 #else
 //#define OpenCounter(X)

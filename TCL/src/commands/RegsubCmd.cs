@@ -74,7 +74,8 @@ opts_brk:
 
         string subSpec = argv[i++].ToString();
 
-        string varName = argv[i++].ToString();
+        string varName = null;
+        if (i != argv.Length) varName = argv[i++].ToString();
         if ( i != argv.Length )
         {
           throw new System.IndexOutOfRangeException();
@@ -112,19 +113,23 @@ opts_brk:
         }
 
         TclObject obj = TclString.newInstance( result );
-        try
-        {
-          interp.setVar( varName, obj, 0 );
+        if ( varName == null )
+          interp.setResult( result );
+        else {
+          try
+          {
+            interp.setVar( varName, obj, 0 );
+          }
+          catch ( TclException e )
+          {
+            throw new TclException( interp, "couldn't set variable \"" + varName + "\"" );
+          }
+          interp.setResult( count );
         }
-        catch ( TclException e )
-        {
-          throw new TclException( interp, "couldn't set variable \"" + varName + "\"" );
-        }
-        interp.setResult( count );
       }
       catch ( System.IndexOutOfRangeException e )
       {
-        throw new TclNumArgsException( interp, 1, argv, "?switches? exp string subSpec varName" );
+        throw new TclNumArgsException( interp, 1, argv, "?switches? exp string subSpec ?varName?" );
       }
       return TCL.CompletionCode.RETURN;
     }

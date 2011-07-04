@@ -3,6 +3,7 @@ using System.IO;
 using System.Text;
 
 using FILE = System.IO.TextWriter;
+using i16 = System.Int16;
 using i32 = System.Int32;
 using i64 = System.Int64;
 using u8 = System.Byte;
@@ -57,7 +58,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
+    **  SQLITE_SOURCE_ID: 2011-06-23 19:49:22 4374b7e83ea0a3fbc3691f9c0c936272862f32f2
     **
     *************************************************************************
     */
@@ -222,15 +223,6 @@ if( 0==isPrepareV2 ) return;
       pOp.p3 = p3;
       pOp.p4.p = null;
       pOp.p4type = P4_NOTUSED;
-      p.expired = false;
-      if ( op == OP_ParseSchema )
-      {
-        /* Any program that uses the OP_ParseSchema opcode needs to lock
-        ** all btrees. */
-        int j;
-        for ( j = 0; j < p.db.nDb; j++ )
-          sqlite3VdbeUsesBtree( p, j );
-      }
 #if  SQLITE_DEBUG
       pOp.zComment = null;
       if ( sqlite3VdbeAddopTrace )
@@ -390,6 +382,22 @@ pOp.cnt = 0;
     //    sqlite3VdbeChangeP4(p, addr, _p4, p4type);
     //    return addr;
     //  }
+
+    /*
+    ** Add an OP_ParseSchema opcode.  This routine is broken out from
+    ** sqlite3VdbeAddOp4() since it needs to also local all btrees.
+    **
+    ** The zWhere string must have been obtained from sqlite3_malloc().
+    ** This routine will take ownership of the allocated memory.
+    */
+    static void sqlite3VdbeAddParseSchemaOp( Vdbe p, int iDb, string zWhere )
+    {
+      int j;
+      int addr = sqlite3VdbeAddOp3( p, OP_ParseSchema, iDb, 0, 0 );
+      sqlite3VdbeChangeP4( p, addr, zWhere, P4_DYNAMIC );
+      for ( j = 0; j < p.db.nDb; j++ )
+        sqlite3VdbeUsesBtree( p, j );
+    }
 
     /*
     ** Add an opcode that includes the p4 value as an integer.
@@ -642,7 +650,7 @@ pOp.cnt = 0;
           p.readOnly = false;
 #if ! SQLITE_OMIT_VIRTUALTABLE
 }else if( opcode==OP_VUpdate ){
-if( pOp->p2>nMaxArgs ) nMaxArgs = pOp->p2;
+if( pOp.p2>nMaxArgs ) nMaxArgs = pOp.p2;
 }else if( opcode==OP_VFilter ){
 int n;
 Debug.Assert( i < p.nOp - 3 );
@@ -1951,44 +1959,87 @@ sqlite3IoTrace( "SQL %s\n", z.Trim() );
     //}
 
     /*
-    ** Prepare a virtual machine for execution.  This involves things such
-    ** as allocating stack space and initializing the program counter.
-    ** After the VDBE has be prepped, it can be executed by one or more
-    ** calls to sqlite3VdbeExec().
-    **
-    ** This is the only way to move a VDBE from VDBE_MAGIC_INIT to
-    ** VDBE_MAGIC_RUN.
-    **
-    ** This function may be called more than once on a single virtual machine.
-    ** The first call is made while compiling the SQL statement. Subsequent
-    ** calls are made as part of the process of resetting a statement to be
-    ** re-executed (from a call to sqlite3_reset()). The nVar, nMem, nCursor
-    ** and isExplain parameters are only passed correct values the first time
-    ** the function is called. On subsequent calls, from sqlite3_reset(), nVar
-    ** is passed -1 and nMem, nCursor and isExplain are all passed zero.
+    ** Rewind the VDBE back to the beginning in preparation for
+    ** running it.
     */
-    static void sqlite3VdbeMakeReady(
-    Vdbe p,                        /* The VDBE */
-    int nVar,                      /* Number of '?' see in the SQL statement */
-    int nMem,                      /* Number of memory cells to allocate */
-    int nCursor,                   /* Number of cursors to allocate */
-    int nArg,                      /* Maximum number of args in SubPrograms */
-    int isExplain,                 /* True if the EXPLAIN keywords is present */
-    int usesStmtJournal            /* True to set Vdbe.usesStmtJournal */
-    )
-    {
-      int n;
-      sqlite3 db = p.db;
-
-      Debug.Assert( p != null );
-      Debug.Assert( p.magic == VDBE_MAGIC_INIT );
+    static void sqlite3VdbeRewind(Vdbe p){
+    #if (SQLITE_DEBUG) || (VDBE_PROFILE)
+      int i;
+    #endif
+      Debug.Assert( p!=null );
+      Debug.Assert( p.magic==VDBE_MAGIC_INIT );
 
       /* There should be at least one opcode.
       */
-      Debug.Assert( p.nOp > 0 );
+      Debug.Assert( p.nOp>0 );
 
       /* Set the magic to VDBE_MAGIC_RUN sooner rather than later. */
       p.magic = VDBE_MAGIC_RUN;
+
+    #if  SQLITE_DEBUG
+      for(i=1; i<p.nMem; i++){
+        Debug.Assert( p.aMem[i].db==p.db );
+      }
+    #endif
+      p.pc = -1;
+      p.rc = SQLITE_OK;
+      p.errorAction = OE_Abort;
+      p.magic = VDBE_MAGIC_RUN;
+      p.nChange = 0;
+      p.cacheCtr = 1;
+      p.minWriteFileFormat = 255;
+      p.iStatement = 0;
+      p.nFkConstraint = 0;
+    #if  VDBE_PROFILE
+      for(i=0; i<p.nOp; i++){
+        p.aOp[i].cnt = 0;
+        p.aOp[i].cycles = 0;
+      }
+    #endif
+    }
+
+    /*
+    ** Prepare a virtual machine for execution for the first time after
+    ** creating the virtual machine.  This involves things such
+    ** as allocating stack space and initializing the program counter.
+    ** After the VDBE has be prepped, it can be executed by one or more
+    ** calls to sqlite3VdbeExec().  
+    **
+    ** This function may be called exact once on a each virtual machine.
+    ** After this routine is called the VM has been "packaged" and is ready
+    ** to run.  After this routine is called, futher calls to 
+    ** sqlite3VdbeAddOp() functions are prohibited.  This routine disconnects
+    ** the Vdbe from the Parse object that helped generate it so that the
+    ** the Vdbe becomes an independent entity and the Parse object can be
+    ** destroyed.
+    **
+    ** Use the sqlite3VdbeRewind() procedure to restore a virtual machine back
+    ** to its initial state after it has been run.
+    */
+    static void sqlite3VdbeMakeReady(
+    Vdbe p,                        /* The VDBE */
+    Parse pParse                   /* Parsing context */
+    )
+    {
+      sqlite3 db;                    /* The database connection */
+      int nVar;                      /* Number of parameters */
+      int nMem;                      /* Number of VM memory registers */
+      int nCursor;                   /* Number of cursors required */
+      int nArg;                      /* Number of arguments in subprograms */
+      int n;                         /* Loop counter */
+      //u8 zCsr;                     /* Memory available for allocation */
+      //u8 zEnd;                     /* First byte past allocated memory */
+      int nByte;                     /* How much extra memory is needed */
+
+      Debug.Assert( p != null );
+      Debug.Assert( pParse != null );
+      Debug.Assert( p.magic == VDBE_MAGIC_INIT );
+      db = p.db;
+      //Debug.Assert( db.mallocFailed == 0 );
+      nVar = pParse.nVar;
+      nMem = pParse.nMem;
+      nCursor = pParse.nTab;
+      nArg = pParse.nMaxArg;
 
       /* For each cursor required, also allocate a memory cell. Memory
       ** cells (nMem+1-nCursor)..nMem, inclusive, will never be used by
@@ -2001,25 +2052,22 @@ sqlite3IoTrace( "SQL %s\n", z.Trim() );
       */
       nMem += nCursor;
 
-      /* Allocate space for memory registers, SQL variables, VDBE cursors and
-      ** an array to marshal SQL function arguments in. This is only done the
-      ** first time this function is called for a given VDBE, not when it is
-      ** being called from sqlite3_reset() to reset the virtual machine.
+      /* Allocate space for memory registers, SQL variables, VDBE cursors and 
+      ** an array to marshal SQL function arguments in.
       */
-      if ( nVar >= 0 /* &&  ALWAYS(db->mallocFailed==0) */ )
-      {
-        //u8* zCsr = (u8*)&p->aOp[p->nOp];       /* Memory avaliable for alloation */
-        //u8* zEnd = (u8*)&p->aOp[p->nOpAlloc];  /* First byte past available mem */
-        int nByte;                               /* How much extra memory needed */
+      //zCsr = (u8*)&p->aOp[p->nOp];       /* Memory avaliable for allocation */
+      //zEnd = (u8*)&p->aOp[p->nOpAlloc];  /* First byte past end of zCsr[] */
         resolveP2Values( p, ref nArg );
-        p.usesStmtJournal = usesStmtJournal != 0;
-        if ( isExplain != 0 && nMem < 10 )
-        {
+        p.usesStmtJournal =  (pParse.isMultiWrite !=0 && pParse.mayAbort !=0 );
+        if( pParse.explain !=0 && nMem<10 ){
           nMem = 10;
         }
+
         //memset(zCsr, 0, zEnd-zCsr);
         //zCsr += ( zCsr - (u8*)0 ) & 7;
         //assert( EIGHT_BYTE_ALIGNMENT( zCsr ) );
+        p.expired = false;
+
         //
         // C# -- Replace allocation with individual Dims
         //
@@ -2036,20 +2084,40 @@ sqlite3IoTrace( "SQL %s\n", z.Trim() );
         //do
         //{
         //  nByte = 0;
-        //  p->aMem = allocSpace(p->aMem, nMem * sizeof(Mem), &zCsr, zEnd, &nByte);
-        //  p->aVar = allocSpace(p->aVar, nVar * sizeof(Mem), &zCsr, zEnd, &nByte);
-        //  p->apArg = allocSpace(p->apArg, nArg * sizeof(Mem*), &zCsr, zEnd, &nByte);
-        //  p->azVar = allocSpace(p->azVar, nVar * sizeof(char*), &zCsr, zEnd, &nByte);
-        //  p->apCsr = allocSpace(p->apCsr, nCursor * sizeof(VdbeCursor*),
-        //                        &zCsr, zEnd, &nByte);
-        //  if (nByte)
+        //  p->aMem = allocSpace( p->aMem, nMem * sizeof( Mem ), &zCsr, zEnd, &nByte );
+        //  p->aVar = allocSpace( p->aVar, nVar * sizeof( Mem ), &zCsr, zEnd, &nByte );
+        //  p->apArg = allocSpace( p->apArg, nArg * sizeof( Mem* ), &zCsr, zEnd, &nByte );
+        //  p->azVar = allocSpace( p->azVar, nVar * sizeof( char* ), &zCsr, zEnd, &nByte );
+        //  p->apCsr = allocSpace( p->apCsr, nCursor * sizeof( VdbeCursor* ),
+        //                        &zCsr, zEnd, &nByte );
+        //  if ( nByte )
         //  {
-        //    p->pFree = sqlite3DbMallocZero(db, nByte);
+        //    p->pFree = sqlite3DbMallocZero( db, nByte );
         //  }
         //  zCsr = p->pFree;
         //  zEnd = &zCsr[nByte];
-        //} while (nByte && !db->mallocFailed);
+        //} while ( nByte && !db->mallocFailed );
 
+        //p->nCursor = (u16)nCursor;
+        //if( p->aVar ){
+        //  p->nVar = (ynVar)nVar;
+        //  for(n=0; n<nVar; n++){
+        //    p->aVar[n].flags = MEM_Null;
+        //    p->aVar[n].db = db;
+        //  }
+        //}
+        //if( p->azVar ){
+        //  p->nzVar = pParse->nzVar;
+        //  memcpy(p->azVar, pParse->azVar, p->nzVar*sizeof(p->azVar[0]));
+        //  memset(pParse->azVar, 0, pParse->nzVar*sizeof(pParse->azVar[0]));
+        //}
+        p.nzVar = (i16)pParse.nzVar;
+        p.azVar = new string[p.nzVar == 0 ? 1 : p.nzVar]; //p.azVar = (char**)p.apArg[nArg];
+        for ( n = 0; n < p.nzVar; n++ )
+        {
+          p.azVar[n] = pParse.azVar[n];
+        }
+        //
 
         // C# -- Replace allocation with individual Dims
         // aMem is 1 based, so allocate 1 extra cell under C#
@@ -2068,17 +2136,10 @@ sqlite3IoTrace( "SQL %s\n", z.Trim() );
           p.aVar[n] = sqlite3Malloc( p.aVar[n] );
         }
         p.nVar = (ynVar)nVar;
-        p.okVar = 0;
         //
         p.apArg = new Mem[nArg == 0 ? 1 : nArg];//p.apArg = (Mem**)p.aVar[nVar];
         //
 
-        p.azVar = new string[nArg == 0 ? 1 : nArg]; //p.azVar = (char**)p.apArg[nArg];
-        for ( n = 0; n < nArg; n++ )
-        {
-          p.azVar[n] = "";
-        }
-        //
         p.apCsr = new VdbeCursor[nCursor == 0 ? 1 : nCursor];//p.apCsr = (VdbeCursor**)p.azVar[nVar];
         p.apCsr[0] = new VdbeCursor();
         p.nCursor = (u16)nCursor;
@@ -2105,35 +2166,8 @@ sqlite3IoTrace( "SQL %s\n", z.Trim() );
             p.aMem[n].db = db;
           }
         }
-      }
-
-#if  SQLITE_DEBUG
-      for ( n = 1; n < p.nMem; n++ )
-      {
-        Debug.Assert( p.aMem[n].db == db );
-      }
-#endif
-
-      p.pc = -1;
-      p.rc = SQLITE_OK;
-      p.errorAction = OE_Abort;
-      p.explain |= isExplain;
-      p.magic = VDBE_MAGIC_RUN;
-      p.nChange = 0;
-      p.cacheCtr = 1;
-      p.minWriteFileFormat = 255;
-      p.iStatement = 0;
-      p.nFkConstraint = 0;
-#if  VDBE_PROFILE
-{
-int i;
-for ( i = 0 ; i < p.nOp ; i++ )
-{
-p.aOp[i].cnt = 0;
-p.aOp[i].cycles = 0;
-}
-}
-#endif
+        p.explain = pParse.explain;
+        sqlite3VdbeRewind( p );
     }
 
     /*
@@ -2442,6 +2476,7 @@ p.inVtabMethod = 0;
           //{
           //  return SQLITE_NOMEM;
           //}
+          sqlite3FileSuffix3( zMainFile, zMaster );
           rc = sqlite3OsAccess( pVfs, zMaster, SQLITE_ACCESS_EXISTS, ref res );
         } while ( rc == SQLITE_OK && res == 1 );
         if ( rc == SQLITE_OK )
@@ -2686,6 +2721,18 @@ static void checkActiveVdbeCnt( sqlite3 db ){}
         db.nStatement--;
         p.iStatement = 0;
 
+        if ( rc == SQLITE_OK )
+        {
+          if ( eOp == SAVEPOINT_ROLLBACK )
+          {
+            rc = sqlite3VtabSavepoint( db, SAVEPOINT_ROLLBACK, iSavepoint );
+          }
+          if ( rc == SQLITE_OK )
+          {
+            rc = sqlite3VtabSavepoint( db, SAVEPOINT_RELEASE, iSavepoint );
+          }
+        }
+
         /* If the statement transaction is being rolled back, also restore the 
         ** database handles deferred constraint counter to the value it had when 
         ** the statement transaction was opened.  */
@@ -2897,19 +2944,13 @@ static void checkActiveVdbeCnt( sqlite3 db ){}
         ** do so. If this operation returns an error, and the current statement
         ** error code is SQLITE_OK or SQLITE_CONSTRAINT, then promote the
         ** current statement error code.
-        **
-        ** Note that sqlite3VdbeCloseStatement() can only fail if eStatementOp
-        ** is SAVEPOINT_ROLLBACK.  But if p->rc==SQLITE_OK then eStatementOp
-        ** must be SAVEPOINT_RELEASE.  Hence the NEVER(p->rc==SQLITE_OK) in 
-        ** the following code.
         */
         if ( eStatementOp != 0 )
         {
           rc = sqlite3VdbeCloseStatement( p, eStatementOp );
           if ( rc != 0 )
           {
-            Debug.Assert( eStatementOp == SAVEPOINT_ROLLBACK );
-            if ( NEVER( p.rc == SQLITE_OK ) || p.rc == SQLITE_CONSTRAINT )
+            if ( p.rc == SQLITE_OK  || p.rc == SQLITE_CONSTRAINT )
             {
               p.rc = rc;
               sqlite3DbFree( db, ref p.zErrMsg );
@@ -3129,6 +3170,7 @@ fclose(out);
     static void sqlite3VdbeDeleteObject( sqlite3 db, Vdbe p )
     {
       SubProgram pSub, pNext;
+      int i;
       Debug.Assert( p.db == null || p.db == db );
       releaseMemArray( p.aVar, p.nVar );
       releaseMemArray( p.aColName, p.nResColumn, COLNAME_N );
@@ -3138,6 +3180,8 @@ fclose(out);
         vdbeFreeOpArray( db, ref pSub.aOp, pSub.nOp );
         sqlite3DbFree( db, ref pSub );
       }
+      //for ( i = p->nzVar - 1; i >= 0; i-- )
+      //  sqlite3DbFree( db, p.azVar[i] );
       vdbeFreeOpArray( db, ref p.aOp, p.nOp );
       sqlite3DbFree( db, ref p.aLabel );
       sqlite3DbFree( db, ref p.aColName );
@@ -3205,7 +3249,11 @@ fclose(out);
           return SQLITE_CORRUPT_BKPT();
         p.rowidIsValid = true;
 #if  SQLITE_TEST
+#if !TCLSH
+        sqlite3_search_count++;
+#else
         sqlite3_search_count.iValue++;
+#endif
 #endif
         p.deferredMoveto = false;
         p.cacheStatus = CACHE_STALE;
@@ -3606,8 +3654,16 @@ swapMixedEndianFloat(x);
             if ( ( serial_type & 0x01 ) != 0 )
             {
               pMem.flags = MEM_Str | MEM_Ephem;
-              pMem.z = Encoding.UTF8.GetString( buf, offset, (int)len );//memcpy( buf, pMem.z, len );
-              pMem.n = pMem.z.Length;
+              if ( len <= buf.Length  -  offset )
+              {
+                pMem.z = Encoding.UTF8.GetString( buf, offset, (int)len );//memcpy( buf, pMem.z, len );
+                pMem.n = pMem.z.Length;
+              }
+              else
+              {
+                pMem.z = ""; // Corrupted Data
+                pMem.n = 0;
+              }
               pMem.zBLOB = null;
             }
             else
@@ -3615,7 +3671,14 @@ swapMixedEndianFloat(x);
               pMem.z = null;
               pMem.zBLOB = sqlite3Malloc( (int)len );
               pMem.flags = MEM_Blob | MEM_Ephem;
-              Buffer.BlockCopy( buf, offset, pMem.zBLOB, 0, (int)len );//memcpy( buf, pMem.z, len );
+              if ( len <= buf.Length - offset  )
+              {
+                Buffer.BlockCopy( buf, offset, pMem.zBLOB, 0, (int)len );//memcpy( buf, pMem.z, len );
+              }
+              else
+              {
+                Buffer.BlockCopy( buf, offset, pMem.zBLOB, 0, buf.Length - offset - 1 );
+              }                
             }
             return len;
           }
@@ -3814,7 +3877,7 @@ swapMixedEndianFloat(x);
         idx += (u32)getVarint32( aKey, idx, ref serial_type );// GetVarint( aKey + idx, serial_type );
         pMem.enc = pKeyInfo.enc;
         pMem.db = pKeyInfo.db;
-        pMem.flags = 0;
+        /* pMem->flags = 0; // sqlite3VdbeSerialGet() will set this for us */
         //pMem.zMalloc = null;
         d += (int)sqlite3VdbeSerialGet( aKey, d, serial_type, pMem );
         //pMem++;
@@ -3830,6 +3893,7 @@ swapMixedEndianFloat(x);
     */
     static void sqlite3VdbeDeleteUnpackedRecord( UnpackedRecord p )
     {
+#if SQLITE_DEBUG
       int i;
       Mem pMem;
       Debug.Assert( p != null );
@@ -3843,6 +3907,7 @@ swapMixedEndianFloat(x);
       //  */
       //  if ( NEVER( pMem->zMalloc ) ) sqlite3VdbeMemRelease( pMem );
       //}
+#endif
       if ( ( p.flags & UNPACKED_NEED_FREE ) != 0 )
       {
         sqlite3DbFree( p.pKeyInfo.db, ref p.aMem );
@@ -3912,7 +3977,7 @@ swapMixedEndianFloat(x);
 
       /* Compilers may complain that mem1.u.i is potentially uninitialized.
       ** We could initialize it, as shown here, to silence those complaints.
-      ** But in fact, mem1.u.i will never actually be used initialized, and doing 
+      ** But in fact, mem1.u.i will never actually be used uninitialized, and doing 
       ** the unnecessary initialization has a measurable negative performance
       ** impact, since this routine is a very high runner.  And so, we choose
       ** to ignore the compiler warnings and leave this variable uninitialized.
@@ -3932,7 +3997,7 @@ swapMixedEndianFloat(x);
 
         /* Read the serial types for the next element in each key. */
         idx1 += (u32)( ( serial_type1 = pKey1[offset + idx1] ) <= 0x7f ? 1 : getVarint32( pKey1, (uint)( offset + idx1 ), ref serial_type1 ) ); //GetVarint( aKey1 + idx1, serial_type1 );
-        if ( d1 >= nKey1 && sqlite3VdbeSerialTypeLen( serial_type1 ) > 0 )
+        if ( d1 <= 0 || d1 >= nKey1 && sqlite3VdbeSerialTypeLen( serial_type1 ) > 0 )
           break;
 
         /* Extract the values to be compared.

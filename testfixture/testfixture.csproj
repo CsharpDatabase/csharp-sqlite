@@ -76,7 +76,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\x86\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRUE _MSC_VER WIN32 NET_35 SQLITE_ASCII SQLITE_DEBUG SQLITE_DISABLE_LFS  SQLITE_ENABLE_COLUMN_METADATA SQLITE_HAS_CODEC SQLITE_MUTEX_W32 SQLITE_OMIT_AUTHORIZATION SQLITE_OMIT_DEPRECATED SQLITE_OMIT_GET_TABLE SQLITE_OMIT_INCRBLOB SQLITE_OMIT_LOOKASIDE SQLITE_OMIT_SHARED_CACHE SQLITE_OMIT_UTF16 SQLITE_OMIT_VIRTUALTABLE SQLITE_OMIT_WAL SQLITE_OS_WIN SQLITE_THREADSAFE SQLITE_TEST VDBE_PROFILE_OFF  SQLITE_POOL_MEM SQLITE_ENABLE_OVERSIZE_CELL_CHECK SQLITE_ENABLE_STAT2 TCLSH</DefineConstants>
+    <DefineConstants>DEBUG;TRUE _MSC_VER WIN32 NET_35 SQLITE_ASCII SQLITE_DEBUG SQLITE_DISABLE_LFS  SQLITE_ENABLE_COLUMN_METADATA SQLITE_HAS_CODEC SQLITE_MUTEX_W32 SQLITE_OMIT_AUTHORIZATION SQLITE_OMIT_DEPRECATED SQLITE_OMIT_GET_TABLE SQLITE_OMIT_INCRBLOB SQLITE_OMIT_LOOKASIDE SQLITE_OMIT_SHARED_CACHE SQLITE_OMIT_UTF16 SQLITE_OMIT_VIRTUALTABLE SQLITE_OMIT_WAL SQLITE_OS_WIN SQLITE_THREADSAFE SQLITE_TEST SQLITE_USE_URI SQLITE_POOL_MEM SQLITE_ENABLE_OVERSIZE_CELL_CHECK SQLITE_ENABLE_STAT2 VDBE_PROFILE_OFF  TCLSH</DefineConstants>
     <NoWarn>0168 ; 0169; 0414; 0618; 0649</NoWarn>
     <DebugType>full</DebugType>
     <PlatformTarget>x86</PlatformTarget>
@@ -815,6 +815,9 @@
     <Compile Include="src\test_mutex_c.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\test\8_3_names.test">
+      <Link>test\8_3_names.test</Link>
+    </None>
     <None Include="..\test\aggerror.test">
       <Link>test\aggerror.test</Link>
     </None>
@@ -1211,6 +1214,9 @@
     <None Include="..\test\e_update.test">
       <Link>test\e_update.test</Link>
     </None>
+    <None Include="..\test\e_uri.test">
+      <Link>test\e_uri.test</Link>
+    </None>
     <None Include="..\test\e_vacuum.test">
       <Link>test\e_vacuum.test</Link>
     </None>
@@ -1531,6 +1537,9 @@
     </None>
     <None Include="..\test\ptrchng.test">
       <Link>test\ptrchng.test</Link>
+    </None>
+    <None Include="..\test\quota.test">
+      <Link>test\quota.test</Link>
     </None>
     <None Include="..\test\quote.test">
       <Link>test\quote.test</Link>
@@ -2146,6 +2155,9 @@
     </None>
     <None Include="..\test\update.test">
       <Link>test\update.test</Link>
+    </None>
+    <None Include="..\test\uri.test">
+      <Link>test\uri.test</Link>
     </None>
     <None Include="..\test\utf16align.test">
       <Link>test\utf16align.test</Link>

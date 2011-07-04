@@ -26,7 +26,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e
+    **  SQLITE_SOURCE_ID: 2011-06-23 19:49:22 4374b7e83ea0a3fbc3691f9c0c936272862f32f2
     **
     *************************************************************************
     */
@@ -458,6 +458,7 @@ if( IsVirtual(pTab) ){
 const char *pVTab = (const char *)sqlite3GetVTable(db, pTab);
 sqlite3VtabMakeWritable(pParse, pTab);
 sqlite3VdbeAddOp4(v, OP_VUpdate, 0, 1, iRowid, pVTab, P4_VTAB);
+sqlite3VdbeChangeP5(v, OE_Abort);
 sqlite3MayAbort(pParse);
 }else
 #endif
@@ -726,8 +727,17 @@ sqlite3AuthContextPop(sContext);
       }
       if ( doMakeRec )
       {
+        string zAff;
+        if ( pTab.pSelect != null|| ( pParse.db.flags & SQLITE_IdxRealAsInt ) != 0 )
+        {
+          zAff = "";
+        }
+        else
+        {
+          zAff = sqlite3IndexAffinityStr( v, pIdx );
+        }
         sqlite3VdbeAddOp3( v, OP_MakeRecord, regBase, nCol + 1, regOut );
-        sqlite3VdbeChangeP4( v, -1, sqlite3IndexAffinityStr( v, pIdx ), P4_TRANSIENT );
+        sqlite3VdbeChangeP4( v, -1, zAff, P4_TRANSIENT );
       }
       sqlite3ReleaseTempRange( pParse, regBase, nCol + 1 );
       return regBase;

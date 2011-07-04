@@ -26,7 +26,7 @@ namespace Community.CsharpSqlite
     **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
     **  C#-SQLite is an independent reimplementation of the SQLite software library
     **
-    **  SQLITE_SOURCE_ID: 2010-08-23 18:52:01 42537b60566f288167f1b5864a5435986838e3a3
+    **  SQLITE_SOURCE_ID: 2011-06-23 19:49:22 4374b7e83ea0a3fbc3691f9c0c936272862f32f2
     **
     *************************************************************************
     */
@@ -498,16 +498,18 @@ namespace Community.CsharpSqlite
             if ( z.Length > iOffset + 1 && z[iOffset + 1] == '\'' )
             {
               tokenType = TK_BLOB;
-              for ( i = 2; z.Length > iOffset + i && ( c = (byte)z[iOffset + i] ) != 0 && c != '\''; i++ )
-              {
-                if ( !sqlite3Isxdigit( c ) )
+                for ( i = 2; z.Length > iOffset + i && sqlite3Isxdigit( z[iOffset + i] ); i++ )
                 {
-                  tokenType = TK_ILLEGAL;
+                }
+                if ( iOffset + i == z.Length || z[iOffset + i] != '\'' || i % 2 != 0 )
+              {
+                tokenType = TK_ILLEGAL;
+                while ( z.Length > iOffset + i && z[iOffset + i] != '\'' )
+                {
+                  i++;
                 }
               }
-              if ( i % 2 != 0 || z.Length == iOffset + i && c != '\'' )
-                tokenType = TK_ILLEGAL;
-              if ( c != 0 )
+              if ( z.Length > iOffset + i )
                 i++;
               return i;
             }
@@ -569,9 +571,8 @@ namespace Community.CsharpSqlite
       Debug.Assert( pParse.pNewTable == null );
       Debug.Assert( pParse.pNewTrigger == null );
       Debug.Assert( pParse.nVar == 0 );
-      Debug.Assert( pParse.nVarExpr == 0 );
-      Debug.Assert( pParse.nVarExprAlloc == 0 );
-      Debug.Assert( pParse.apVarExpr == null );
+      Debug.Assert( pParse.nzVar == 0 );
+      Debug.Assert( pParse.azVar == null );
       enableLookaside = db.lookaside.bEnabled;
       if ( db.lookaside.pStart != 0 )
         db.lookaside.bEnabled = 1;
@@ -686,7 +687,9 @@ sqlite3_free(pParse.apVtabLock);
 #if !SQLITE_OMIT_TRIGGER
       sqlite3DeleteTrigger( db, ref pParse.pNewTrigger );
 #endif
-      sqlite3DbFree( db, ref pParse.apVarExpr );
+      //for ( i = pParse.nzVar - 1; i >= 0; i-- )
+      //  sqlite3DbFree( db, pParse.azVar[i] );
+      sqlite3DbFree( db, ref pParse.azVar );
       sqlite3DbFree( db, ref pParse.aAlias );
       while ( pParse.pAinc != null )
       {
