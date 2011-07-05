@@ -29,7 +29,7 @@ append excludeList { exists.test pager1.test schema3.test tkt-5d863f876e.test tk
 ######################################
 #Exclude Mutex tests
 ######################################
-append excludeList { mutex2.test }
+append excludeList { mutex1.test mutex2.test }
 
 ######################################
 #Exclude Shared Cache

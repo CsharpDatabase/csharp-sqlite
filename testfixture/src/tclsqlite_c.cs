@@ -2626,7 +2626,7 @@ return TCL.TCL_ERROR;
               Tcl_Obj pRet = TCL.Tcl_NewObj();
               TCL.Tcl_IncrRefCount( pRet );
               dbEvalInit( sEval, pDb, objv[2], null );
-              Console.WriteLine( objv[2].ToString() );
+              //Console.WriteLine( objv[2].ToString() );
               while ( TCL.TCL_OK == ( rc = dbEvalStep( sEval ) ) )
               {
                 int i;

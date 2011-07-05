@@ -187,7 +187,10 @@ p.zName, P4_STATIC );
       */
       v = sqlite3GetVdbe( pParse );
       Debug.Assert( 0 == pParse.isMultiWrite
-     || sqlite3VdbeAssertMayAbort( v, pParse.mayAbort ) != 0 );
+#if SQLITE_DEBUG 
+        || sqlite3VdbeAssertMayAbort( v, pParse.mayAbort ) != 0
+#endif
+        );
       if ( v != null )
       {
         sqlite3VdbeAddOp0( v, OP_Halt );

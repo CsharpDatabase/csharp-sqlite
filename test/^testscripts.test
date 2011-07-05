@@ -20,7 +20,14 @@ do_test SIMPLE_SQLITE_VERSION {
 ##########################################################################################
 #puts -nonewline "Press RETURN to exit..."; gets stdin; exit 0
 
-set TESTSUITE "ALL"
+if [info exists argv] { 
+  set TESTSUITE $argv
+  puts "Running tests ($argv)"
+} else { 
+  set TESTSUITE "QUICK" 
+  puts "running allquicktests"
+}
+
 set filter ""
 if [string compare $filter "skip"] {
 if ![string compare $filter ""] {puts -nonewline "Enter test name prefix:"; set filter [gets stdin]}

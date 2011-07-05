@@ -536,8 +536,14 @@ static void LeaveCriticalSection( Object mtx )
 #endif
 
     // Miscellaneous Windows Constants
+    //#define ERROR_FILE_NOT_FOUND             2L
     //#define ERROR_HANDLE_DISK_FULL           39L
+    //#define ERROR_NOT_SUPPORTED              50L
+    //#define ERROR_DISK_FULL                  112L
+    const long ERROR_FILE_NOT_FOUND = 2L;
     const long ERROR_HANDLE_DISK_FULL = 39L;
+    const long ERROR_NOT_SUPPORTED = 50L;
+    const long ERROR_DISK_FULL = 112L;
 
     private class SQLite3UpperToLower
     {

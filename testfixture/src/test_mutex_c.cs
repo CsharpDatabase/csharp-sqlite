@@ -62,7 +62,14 @@ namespace Community.CsharpSqlite
       public sqlite3_mutex_methods m = new sqlite3_mutex_methods(); /* Interface to "real" mutex system */
       public int[] aCounter = new int[8];                           /* Number of grabs of each type of mutex */
       public sqlite3_mutex[] aStatic = new sqlite3_mutex[6];        /* The six static mutexes */
+
+      public test_mutex_globals()
+      {
+        for ( int i = 0; i < aStatic.Length; i++ )
+          aStatic[i] = new sqlite3_mutex();
+      }
     }
+
     static test_mutex_globals g = new test_mutex_globals();
 
     /* Return true if the countable mutex is currently held */
