@@ -448,7 +448,7 @@ static int winLogErrorAtLine(
   int i;                          /* Loop counter */
   DWORD iErrno;// = GetLastError();  /* Error code */
 #if SQLITE_SILVERLIGHT
-      iErrno = ERROR_NOT_SUPPORTED;
+      iErrno = (int)ERROR_NOT_SUPPORTED;
 #else
   iErrno = (u32)Marshal.GetLastWin32Error();
 #endif
@@ -2857,7 +2857,7 @@ pFile.zDeleteOnClose = zConverted;
         return rc;
 
 #if SQLITE_SILVERLIGHT
-      error = ERROR_NOT_SUPPORTED;
+      error = (int)ERROR_NOT_SUPPORTED;
 #else
       error = Marshal.GetLastWin32Error();
 #endif
