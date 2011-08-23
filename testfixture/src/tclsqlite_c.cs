@@ -196,14 +196,14 @@ public IncrblobChannel pPrev;   /* Linked list of all open incrblob channels */
 */
     static int strlen30( StringBuilder z )
     {
-      //const char *z2 = z;
+      //string z2 = z;
       //while( *z2 ){ z2++; }
       return 0x3fffffff & z.Length;
     }
 
     static int strlen30( string z )
     {
-      //const char *z2 = z;
+      //string z2 = z;
       //while( *z2 ){ z2++; }
       return 0x3fffffff & z.Length;
     }
@@ -235,7 +235,7 @@ TCL.Tcl_UnregisterChannel( pDb.interp, p.channel );
 ** Close an incremental blob channel.
 */
 //static int incrblobClose(object instanceData, Tcl_Interp interp){
-//  IncrblobChannel p = (IncrblobChannel *)instanceData;
+//  IncrblobChannel p = (IncrblobChannel )instanceData;
 //  int rc = sqlite3_blob_close(p.pBlob);
 //  sqlite3 db = p.pDb.db;
 
@@ -251,10 +251,10 @@ TCL.Tcl_UnregisterChannel( pDb.interp, p.channel );
 //  }
 
 //  /* Free the IncrblobChannel structure */
-//  TCL.Tcl_Free((char *)p);
+//  TCL.Tcl_Free((char )p);
 
 //  if( rc!=SQLITE_OK ){
-//    TCL.Tcl_SetResult(interp, (char *)sqlite3_errmsg(db), TCL.Tcl_VOLATILE);
+//    TCL.Tcl_SetResult(interp, (char )sqlite3_errmsg(db), TCL.Tcl_VOLATILE);
 //    return TCL.TCL_ERROR;
 //  }
 //  return TCL.TCL_OK;
@@ -269,7 +269,7 @@ TCL.Tcl_UnregisterChannel( pDb.interp, p.channel );
 //  int bufSize,
 //  int *errorCodePtr
 //){
-//  IncrblobChannel p = (IncrblobChannel *)instanceData;
+//  IncrblobChannel p = (IncrblobChannel )instanceData;
 //  int nRead = bufSize;         /* Number of bytes to read */
 //  int nBlob;                   /* Total size of the blob */
 //  int rc;                      /* sqlite error code */
@@ -282,7 +282,7 @@ TCL.Tcl_UnregisterChannel( pDb.interp, p.channel );
 //    return 0;
 //  }
 
-//  rc = sqlite3_blob_read(p.pBlob, (void *)buf, nRead, p.iSeek);
+//  rc = sqlite3_blob_read(p.pBlob, (void )buf, nRead, p.iSeek);
 //  if( rc!=SQLITE_OK ){
 //    *errorCodePtr = rc;
 //    return -1;
@@ -297,11 +297,11 @@ TCL.Tcl_UnregisterChannel( pDb.interp, p.channel );
 */
 //static int incrblobOutput(
 //  object instanceData,
-//  CONST char *buf,
+//  string buf,
 //  int toWrite,
 //  int *errorCodePtr
 //){
-//  IncrblobChannel p = (IncrblobChannel *)instanceData;
+//  IncrblobChannel p = (IncrblobChannel )instanceData;
 //  int nWrite = toWrite;        /* Number of bytes to write */
 //  int nBlob;                   /* Total size of the blob */
 //  int rc;                      /* sqlite error code */
@@ -315,7 +315,7 @@ TCL.Tcl_UnregisterChannel( pDb.interp, p.channel );
 //    return 0;
 //  }
 
-//  rc = sqlite3_blob_write(p.pBlob, (void *)buf, nWrite, p.iSeek);
+//  rc = sqlite3_blob_write(p.pBlob, (void )buf, nWrite, p.iSeek);
 //  if( rc!=SQLITE_OK ){
 //    *errorCodePtr = EIO;
 //    return -1;
@@ -334,7 +334,7 @@ TCL.Tcl_UnregisterChannel( pDb.interp, p.channel );
 //  int seekMode,
 //  int *errorCodePtr
 //){
-//  IncrblobChannel p = (IncrblobChannel *)instanceData;
+//  IncrblobChannel p = (IncrblobChannel )instanceData;
 
 //  switch( seekMode ){
 //    case SEEK_SET:
@@ -408,7 +408,7 @@ TCL.Tcl_SetResult(interp, sqlite3_errmsg(pDb.db), TCL.Tcl_VOLATILE);
 return TCL.TCL_ERROR;
 }
 
-p = new IncrblobChannel();//(IncrblobChannel *)Tcl_Alloc(sizeof(IncrblobChannel));
+p = new IncrblobChannel();//(IncrblobChannel )Tcl_Alloc(sizeof(IncrblobChannel));
 p.iSeek = 0;
 p.pBlob = pBlob;
 
@@ -455,7 +455,7 @@ return TCL.TCL_OK;
       */
       string z;
       int n = 0;
-      z = TCL.Tcl_GetStringFromObj( pCmd, ref n );
+      z = TCL.Tcl_GetStringFromObj( pCmd, out n );
       while ( n-- > 0 )
       {
         int c = z[n];// *( z++ );
@@ -475,7 +475,7 @@ return TCL.TCL_OK;
       SqlFunc p, pNew;
       int i;
       pNew = new SqlFunc();//(SqlFunc)Tcl_Alloc( sizeof(*pNew) + strlen30(zName) + 1 );
-      //pNew.zName = (char*)&pNew[1];
+      //pNew.zName = (char)&pNew[1];
       //for(i=0; zName[i]; i++){ pNew.zName[i] = tolower(zName[i]); }
       //pNew.zName[i] = 0;
       pNew.zName = zName.ToLower();
@@ -483,7 +483,7 @@ return TCL.TCL_OK;
       {
         if ( p.zName == pNew.zName )
         {
-          //Tcl_Free((char*)pNew);
+          //Tcl_Free((char)pNew);
           return p;
         }
       }
@@ -622,11 +622,11 @@ return TCL.TCL_OK;
       SqliteDb pDb = (SqliteDb)cd;
       TclObject str = null;
 
-      TCL.Tcl_DStringInit( ref str );
+      TCL.Tcl_DStringInit( out str );
       TCL.Tcl_DStringAppendElement( str, pDb.zTrace );
       TCL.Tcl_DStringAppendElement( str, " {" + zSql + "}" );
       TCL.Tcl_EvalObjEx( pDb.interp, str, 0 );// TCL.Tcl_Eval( pDb.interp, TCL.Tcl_DStringValue( ref str ) );
-      TCL.Tcl_DStringFree( ref  str );
+      TCL.Tcl_DStringFree( ref str );
       TCL.Tcl_ResetResult( pDb.interp );
     }
 #endif
@@ -643,7 +643,7 @@ return TCL.TCL_OK;
       StringBuilder zTm = new StringBuilder( 100 );//char zTm[100];
 
       sqlite3_snprintf( 100, zTm, "%lld", tm );
-      TCL.Tcl_DStringInit( ref str );
+      TCL.Tcl_DStringInit( out str );
       TCL.Tcl_DStringAppendElement( str, pDb.zProfile );
       TCL.Tcl_DStringAppendElement( str, " {" + zSql + "}" );
       TCL.Tcl_DStringAppendElement( str, " {" + zTm.ToString() + "}" );
@@ -703,7 +703,7 @@ return TCL.TCL_OK;
       TCL.Tcl_ListObjAppendElement( interp, p, TCL.Tcl_NewStringObj( zDb, -1 ) );
       TCL.Tcl_ListObjAppendElement( interp, p, TCL.Tcl_NewIntObj( nEntry ) );
       if ( TCL.TCL_OK != TCL.Tcl_EvalObjEx( interp, p, 0 )
-      || TCL.TCL_OK != TCL.Tcl_GetIntFromObj( interp, TCL.Tcl_GetObjResult( interp ), ref ret )
+      || TCL.TCL_OK != TCL.Tcl_GetIntFromObj( interp, TCL.Tcl_GetObjResult( interp ), out ret )
       )
       {
         TCL.Tcl_BackgroundError( interp );
@@ -714,7 +714,7 @@ return TCL.TCL_OK;
     }
 
 #if (SQLITE_TEST) && (SQLITE_ENABLE_UNLOCK_NOTIFY)
-static void setTestUnlockNotifyVars(Tcl_Interp *interp, int iArg, int nArg){
+static void setTestUnlockNotifyVars(Tcl_Interp interp, int iArg, int nArg){
 char zBuf[64];
 sprintf(zBuf, "%d", iArg);
 Tcl_SetVar(interp, "sqlite_unlock_notify_arg", zBuf, TCL_GLOBAL_ONLY);
@@ -730,7 +730,7 @@ static void DbUnlockNotify(void **apArg, int nArg){
 int i;
 for(i=0; i<nArg; i++){
 const int flags = (TCL_EVAL_GLOBAL|TCL_EVAL_DIRECT);
-SqliteDb *pDb = (SqliteDb *)apArg[i];
+SqliteDb *pDb = (SqliteDb )apArg[i];
 setTestUnlockNotifyVars(pDb.interp, i, nArg);
 Debug.Assert( pDb.pUnlockNotify);
 Tcl_EvalObjEx(pDb.interp, pDb.pUnlockNotify, flags);
@@ -839,7 +839,7 @@ pDb.pUnlockNotify = 0;
         */
         Tcl_Obj[] aArg = null;
         int nArg = 0;
-        if ( TCL.Tcl_ListObjGetElements( p.interp, p.pScript, ref nArg, ref aArg ) )
+        if ( TCL.Tcl_ListObjGetElements( p.interp, p.pScript, out nArg, out aArg ) )
         {
           sqlite3_result_error( context, TCL.Tcl_GetStringResult( p.interp ), -1 );
           return;
@@ -921,28 +921,28 @@ pDb.pUnlockNotify = 0;
         string data = "";
         Tcl_WideInt v = 0;
         double r = 0;
-        string zType = pVar.typePtr;//const char *zType = (pVar.typePtr ? pVar.typePtr.name : "");
+        string zType = pVar.typePtr;//string zType = (pVar.typePtr ? pVar.typePtr.name : "");
         if ( zType == "bytearray" )
         { //&& pVar.bytes==0 ){
           /* Only return a BLOB type if the Tcl variable is a bytearray and
           ** has no string representation. */
-          data = Encoding.UTF8.GetString( TCL.Tcl_GetByteArrayFromObj( pVar, ref n ) );
+          data = Encoding.UTF8.GetString( TCL.Tcl_GetByteArrayFromObj( pVar, out n ) );
           sqlite3_result_blob( context, data, n, null );
         }
         else if ( zType == "boolean" )
         {
-          TCL.Tcl_GetIntFromObj( null, pVar, ref n );
+          TCL.Tcl_GetIntFromObj( null, pVar, out n );
           sqlite3_result_int( context, n );
         }
         else if ( zType == "wideint" ||
         zType == "int" || Int64.TryParse( pVar.ToString(), out v ) )
         {
-          TCL.Tcl_GetWideIntFromObj( null, pVar, ref v );
+          TCL.Tcl_GetWideIntFromObj( null, pVar, out v );
           sqlite3_result_int64( context, v );
         }
         else if ( zType == "double" || Double.TryParse( pVar.ToString(), out r ) )
         {
-          TCL.Tcl_GetDoubleFromObj( null, pVar, ref r );
+          TCL.Tcl_GetDoubleFromObj( null, pVar, out r );
           sqlite3_result_double( context, r );
         }
         else
@@ -962,7 +962,7 @@ pDb.pUnlockNotify = 0;
 ** authentication fails or succeeds.
 */
 static int auth_callback(
-void pArg,
+object pArg,
 int code,
 const string zArg1,
 const string zArg2,
@@ -973,7 +973,7 @@ string zCode;
 TCL.Tcl_DString str;
 int rc;
 const string zReply;
-SqliteDb pDb = (SqliteDb*)pArg;
+SqliteDb pDb = (SqliteDb)pArg;
 if( pdb.disableAuth ) return SQLITE_OK;
 
 switch( code ){
@@ -1190,6 +1190,7 @@ else pVal = TCL.Tcl_NewStringObj( zText, -1 );
       int i;
       Tcl_Interp interp = pDb.interp;
 
+      pzOut = null;
       ppPreStmt = null;
 
       /* Trim spaces from the start of zSql and calculate the remaining length. */
@@ -1250,7 +1251,7 @@ else pVal = TCL.Tcl_NewStringObj( zText, -1 );
         if ( SQLITE_OK != sqlite3_prepare_v2( pDb.db, zSql, -1, ref pStmt, ref pzOut ) )
         {
           TCL.Tcl_SetObjResult( interp, dbTextToObj( sqlite3_errmsg( pDb.db ) ) );
-          pPreStmt = new SqlPreparedStmt();// (SqlPreparedStmt*)Tcl_Alloc( nByte );
+          pPreStmt = new SqlPreparedStmt();// (SqlPreparedStmt)Tcl_Alloc( nByte );
           return TCL.TCL_ERROR;
         }
         if ( pStmt == null )
@@ -1272,8 +1273,8 @@ else pVal = TCL.Tcl_NewStringObj( zText, -1 );
 
         Debug.Assert( pPreStmt == null );
         nVar = sqlite3_bind_parameter_count( pStmt );
-        //nByte = sizeof(SqlPreparedStmt) + nVar*sizeof(Tcl_Obj *);
-        pPreStmt = new SqlPreparedStmt();// (SqlPreparedStmt*)Tcl_Alloc( nByte );
+        //nByte = sizeof(SqlPreparedStmt) + nVar*sizeof(Tcl_Obj );
+        pPreStmt = new SqlPreparedStmt();// (SqlPreparedStmt)Tcl_Alloc( nByte );
         //memset(pPreStmt, 0, nByte);
 
         pPreStmt.pStmt = pStmt;
@@ -1305,33 +1306,33 @@ else pVal = TCL.Tcl_NewStringObj( zText, -1 );
               ** it has no string representation or the host
               ** parameter name begins with "@". */
               if ( zVar[0] == '@' || pVar.stringRep == null )
-                sqlite3_bind_blob( pStmt, i, TCL.Tcl_GetByteArrayFromObj( pVar, ref n ), n, SQLITE_STATIC );
+                sqlite3_bind_blob( pStmt, i, TCL.Tcl_GetByteArrayFromObj( pVar, out n ), n, SQLITE_STATIC );
               else
-                sqlite3_bind_text( pStmt, i, TCL.Tcl_GetStringFromObj( pVar, ref n ), n, SQLITE_STATIC );
+                sqlite3_bind_text( pStmt, i, TCL.Tcl_GetStringFromObj( pVar, out n ), n, SQLITE_STATIC );
               TCL.Tcl_IncrRefCount( pVar );
               pPreStmt.apParm[iParm++] = pVar;
             }
             else if ( zType == "boolean" )
             {
-              TCL.Tcl_GetIntFromObj( interp, pVar, ref n );
+              TCL.Tcl_GetIntFromObj( interp, pVar, out n );
               sqlite3_bind_int( pStmt, i, n );
             }
             else if ( zType == "double" )
             {
               double r = 0;
-              TCL.Tcl_GetDoubleFromObj( interp, pVar, ref r );
+              TCL.Tcl_GetDoubleFromObj( interp, pVar, out r );
               sqlite3_bind_double( pStmt, i, r );
             }
             else if ( zType == "wideint" ||
              zType == "int" )
             {
               Tcl_WideInt v = 0;
-              TCL.Tcl_GetWideIntFromObj( interp, pVar, ref v );
+              TCL.Tcl_GetWideIntFromObj( interp, pVar, out v );
               sqlite3_bind_int64( pStmt, i, v );
             }
             else
             {
-              data = TCL.Tcl_GetStringFromObj( pVar, ref n );
+              data = TCL.Tcl_GetStringFromObj( pVar, out n );
               sqlite3_bind_text( pStmt, i, data, n, SQLITE_STATIC );
               TCL.Tcl_IncrRefCount( pVar );
               pPreStmt.apParm[iParm++] = pVar;
@@ -1481,13 +1482,13 @@ else pVal = TCL.Tcl_NewStringObj( zText, -1 );
     ** of the returned columns are a, b and c, it does the equivalent of the 
     ** tcl command:
     **
-    **     set ${pArray}(*) {a b c}
+    **     set ${pArray}() {a b c}
     */
     static void dbEvalInit(
     DbEvalContext p,               /* Pointer to structure to initialize */
     SqliteDb pDb,                  /* Database handle */
     Tcl_Obj pSql,                  /* Object containing SQL script */
-    Tcl_Obj pArray                 /* Name of Tcl array to set (*) element of */
+    Tcl_Obj pArray                 /* Name of Tcl array to set () element of */
     )
     {
       if ( p != null )
@@ -1509,8 +1510,8 @@ else pVal = TCL.Tcl_NewStringObj( zText, -1 );
     */
     static void dbEvalRowInfo(
     DbEvalContext p,               /* Evaluation context */
-    ref int pnCol,                 /* OUT: Number of column names */
-    ref Tcl_Obj[] papColName       /* OUT: Array of column names */
+    out int pnCol,                 /* OUT: Number of column names */
+    out Tcl_Obj[] papColName       /* OUT: Array of column names */
     )
     {
       /* Compute column names */
@@ -1524,7 +1525,7 @@ else pVal = TCL.Tcl_NewStringObj( zText, -1 );
         p.nCol = nCol = sqlite3_column_count( pStmt );
         if ( nCol > 0 )// && ( papColName != null || p.pArray != null ) )
         {
-          apColName = new TclObject[nCol];// (Tcl_Obj**)Tcl_Alloc( sizeof( Tcl_Obj* ) * nCol );
+          apColName = new TclObject[nCol];// (Tcl_Obj*)Tcl_Alloc( sizeof( Tcl_Obj* ) * nCol );
           for ( i = 0; i < nCol; i++ )
           {
             apColName[i] = dbTextToObj( sqlite3_column_name( pStmt, i ) );
@@ -1534,7 +1535,7 @@ else pVal = TCL.Tcl_NewStringObj( zText, -1 );
         }
 
         /* If results are being stored in an array variable, then create
-        ** the array(*) entry for that array
+        ** the array() entry for that array
         */
         if ( p.pArray != null )
         {
@@ -1598,9 +1599,9 @@ else pVal = TCL.Tcl_NewStringObj( zText, -1 );
           }
           if ( p.pArray != null )
           {
-            TclObject[] pDummy = null;
-            int iDummy = 0;
-            dbEvalRowInfo( p, ref iDummy, ref pDummy );
+            TclObject[] pDummy;
+            int iDummy;
+            dbEvalRowInfo( p, out iDummy, out pDummy );
           }
           rcs = sqlite3_reset( pStmt );
 
@@ -1734,7 +1735,7 @@ return( (major==8 && minor>=6) || major>8 );
 **   $db eval SQL ?ARRAYNAME? SCRIPT
 */
     static int DbEvalNextCmd(
-    object[] data,                   /* data[0] is the (DbEvalContext*) */
+    object[] data,                   /* data[0] is the (DbEvalContext) */
     Tcl_Interp interp,           /* Tcl interpreter */
     int result                       /* Result so far */
     )
@@ -1752,9 +1753,9 @@ return( (major==8 && minor>=6) || major>8 );
       while ( ( rc == TCL.TCL_OK || rc == TCL.TCL_CONTINUE ) && TCL.TCL_OK == ( rc = dbEvalStep( p ) ) )
       {
         int i;
-        int nCol = 0;
-        Tcl_Obj[] apColName = null;
-        dbEvalRowInfo( p, ref nCol, ref apColName );
+        int nCol;
+        Tcl_Obj[] apColName;
+        dbEvalRowInfo( p, out nCol, out apColName );
         for ( i = 0; i < nCol; i++ )
         {
           Tcl_Obj pVal = dbEvalColumnValue( p, i );
@@ -1780,7 +1781,7 @@ return( (major==8 && minor>=6) || major>8 );
         if ( DbUseNre() )
         {
           Debugger.Break();
-          //TCL.Tcl_NRAddCallback(interp, DbEvalNextCmd, (void*)p, (void*)pScript, 0, 0);
+          //TCL.Tcl_NRAddCallback(interp, DbEvalNextCmd, (void)p, (void)pScript, 0, 0);
           //return TCL.Tcl_NREvalObj(interp, pScript, 0);
         }
         else
@@ -1886,7 +1887,7 @@ return( (major==8 && minor>=6) || major>8 );
         TCL.Tcl_WrongNumArgs( interp, 1, objv, "SUBCOMMAND ..." );
         return TCL.TCL_ERROR;
       }
-      if ( TCL.Tcl_GetIndexFromObj( interp, objv[1], DB_strs, "option", 0, ref choice ) )
+      if ( TCL.Tcl_GetIndexFromObj( interp, objv[1], DB_strs, "option", 0, out choice ) )
       {
         return TCL.TCL_ERROR;
       }
@@ -1977,7 +1978,7 @@ break;
               TCL.Tcl_WrongNumArgs( interp, 2, objv, "?DATABASE? FILENAME" );
               return TCL.TCL_ERROR;
             }
-            rc = sqlite3_open( zDestFile, ref pDest );
+            rc = sqlite3_open( zDestFile, out pDest );
             if ( rc != SQLITE_OK )
             {
               TCL.Tcl_AppendResult( interp, "cannot open target database: ",
@@ -2047,7 +2048,7 @@ break;
               {
                 TCL.Tcl_Free( ref pDb.zBusy );
               }
-              zBusy = TCL.Tcl_GetStringFromObj( objv[2], ref len );
+              zBusy = TCL.Tcl_GetStringFromObj( objv[2], out len );
               if ( zBusy != null && len > 0 )
               {
                 //pDb.zBusy = TCL.Tcl_Alloc( len + 1 );
@@ -2108,7 +2109,7 @@ break;
               }
               else
               {
-                if ( TCL.TCL_ERROR == ( TCL.Tcl_GetIntFromObj( interp, objv[3], ref n ) != TCL.TCL_OK ? TCL.TCL_ERROR : TCL.TCL_OK ) )
+                if ( TCL.TCL_ERROR == ( TCL.Tcl_GetIntFromObj( interp, objv[3], out n ) != TCL.TCL_OK ? TCL.TCL_ERROR : TCL.TCL_OK ) )
                 {
                   TCL.Tcl_AppendResult( interp, "cannot convert \"",
                    TCL.Tcl_GetStringFromObj( objv[3], 0 ), "\" to integer", 0 );
@@ -2186,7 +2187,7 @@ break;
             }
             zName = TCL.Tcl_GetStringFromObj( objv[2], 0 );
             zScript = TCL.Tcl_GetStringFromObj( objv[3], nScript );
-            pCollate = new SqlCollate();//(SqlCollate*)Tcl_Alloc( sizeof(*pCollate) + nScript + 1 );
+            pCollate = new SqlCollate();//(SqlCollate)Tcl_Alloc( sizeof(*pCollate) + nScript + 1 );
             //if ( pCollate == null ) return TCL.TCL_ERROR;
             pCollate.interp = interp;
             pCollate.pNext = pDb.pCollate;
@@ -2254,7 +2255,7 @@ break;
               {
                 TCL.Tcl_Free( ref pDb.zCommit );
               }
-              zCommit = TCL.Tcl_GetStringFromObj( objv[2], ref  len );
+              zCommit = TCL.Tcl_GetStringFromObj( objv[2], out len );
               if ( zCommit != null && len > 0 )
               {
                 pDb.zCommit = zCommit;// TCL.Tcl_Alloc( len + 1 );
@@ -2389,8 +2390,7 @@ break;
               return TCL.TCL_ERROR;
             }
             nByte = strlen30( zSql );
-            string Dummy = null;
-            rc = sqlite3_prepare( pDb.db, zSql.ToString(), -1, ref pStmt, ref Dummy );
+            rc = sqlite3_prepare( pDb.db, zSql.ToString(), -1, ref pStmt, 0 );
             sqlite3DbFree( null, ref zSql );
             if ( rc != 0 )
             {
@@ -2423,7 +2423,7 @@ break;
             //zSql[j++] = ')';
             //zSql[j] = "";
             zSql.Append( ")" );
-            rc = sqlite3_prepare( pDb.db, zSql.ToString(), -1, ref pStmt, ref Dummy );
+            rc = sqlite3_prepare( pDb.db, zSql.ToString(), -1, ref pStmt, 0 );
             //free(zSql);
             if ( rc != 0 )
             {
@@ -2539,7 +2539,7 @@ break;
               TCL.Tcl_WrongNumArgs( interp, 2, objv, "BOOLEAN" );
               return TCL.TCL_ERROR;
             }
-            if ( TCL.Tcl_GetBooleanFromObj( interp, objv[2], ref onoff ) )
+            if ( TCL.Tcl_GetBooleanFromObj( interp, objv[2], out onoff ) )
             {
               return TCL.TCL_ERROR;
             }
@@ -2630,9 +2630,9 @@ return TCL.TCL_ERROR;
               while ( TCL.TCL_OK == ( rc = dbEvalStep( sEval ) ) )
               {
                 int i;
-                int nCol = 0;
-                TclObject[] pDummy = null;
-                dbEvalRowInfo( sEval, ref nCol, ref pDummy );
+                int nCol;
+                TclObject[] pDummy;
+                dbEvalRowInfo( sEval, out nCol, out pDummy );
                 for ( i = 0; i < nCol; i++ )
                 {
                   TCL.Tcl_ListObjAppendElement( interp, pRet, dbEvalColumnValue( sEval, i ) );
@@ -2660,7 +2660,7 @@ return TCL.TCL_ERROR;
               pScript = objv[objc - 1];
               TCL.Tcl_IncrRefCount( pScript );
 
-              p = new DbEvalContext();// (DbEvalContext*)Tcl_Alloc( sizeof( DbEvalContext ) );
+              p = new DbEvalContext();// (DbEvalContext)Tcl_Alloc( sizeof( DbEvalContext ) );
               dbEvalInit( p, pDb, objv[2], pArray );
 
               ( (object[])cd )[0] = p;
@@ -2688,7 +2688,7 @@ return TCL.TCL_ERROR;
               int n = strlen30( z );
               if ( n > 2 && z.StartsWith( "-argcount" ) )//strncmp( z, "-argcount", n ) == 0 )
               {
-                if ( TCL.TCL_OK != TCL.Tcl_GetIntFromObj( interp, objv[4], ref nArg ) )
+                if ( TCL.TCL_OK != TCL.Tcl_GetIntFromObj( interp, objv[4], out nArg ) )
                   return TCL.TCL_ERROR;
                 if ( nArg < 0 )
                 {
@@ -2761,7 +2761,7 @@ zDb =  TCL.Tcl_GetString( objv[2] )  ;
 }
 zTable = TCL.Tcl_GetString( objv[objc - 3] );
 zColumn =  TCL.Tcl_GetString( objv[objc - 2] )  ;
-rc = TCL.Tcl_GetWideIntFromObj( interp, objv[objc - 1], ref iRow ) ? 1 : 0;
+rc = TCL.Tcl_GetWideIntFromObj( interp, objv[objc - 1], out iRow ) ? 1 : 0;
 
 if ( rc == TCL.TCL_OK )
 {
@@ -2802,7 +2802,7 @@ break;
             if ( objc == 3 )
             {
               int len = 0;
-              string zNull = TCL.Tcl_GetStringFromObj( objv[2], ref   len );
+              string zNull = TCL.Tcl_GetStringFromObj( objv[2], out len );
               if ( pDb.zNull != null )
               {
                 TCL.Tcl_Free( ref pDb.zNull );
@@ -2866,7 +2866,7 @@ break;
               string zProgress;
               int len = 0;
               int N = 0;
-              if ( TCL.TCL_OK != TCL.Tcl_GetIntFromObj( interp, objv[2], ref N ) )
+              if ( TCL.TCL_OK != TCL.Tcl_GetIntFromObj( interp, objv[2], out N ) )
               {
                 return TCL.TCL_ERROR;
               };
@@ -2933,7 +2933,7 @@ break;
               {
                 TCL.Tcl_Free( ref pDb.zProfile );
               }
-              zProfile = TCL.Tcl_GetStringFromObj( objv[2], ref len );
+              zProfile = TCL.Tcl_GetStringFromObj( objv[2], out len );
               if ( !String.IsNullOrEmpty( zProfile ) && len > 0 )
               {
                 //pDb.zProfile = TCL.Tcl_Alloc( len + 1 );
@@ -2973,7 +2973,7 @@ break;
               TCL.Tcl_WrongNumArgs( interp, 2, objv, "KEY" );
               return TCL.TCL_ERROR;
             }
-            pKey = TCL.Tcl_GetStringFromObj( objv[2], ref nKey );
+            pKey = TCL.Tcl_GetStringFromObj( objv[2], out nKey );
 #if SQLITE_HAS_CODEC
             rc = sqlite3_rekey( pDb.db, pKey, nKey );
             if ( rc != 0 )
@@ -3013,7 +3013,7 @@ break;
               TCL.Tcl_WrongNumArgs( interp, 2, objv, "?DATABASE? FILENAME" );
               return TCL.TCL_ERROR;
             }
-            rc = sqlite3_open_v2( zSrcFile, ref pSrc, SQLITE_OPEN_READONLY, null );
+            rc = sqlite3_open_v2( zSrcFile, out pSrc, SQLITE_OPEN_READONLY, null );
             if ( rc != SQLITE_OK )
             {
               TCL.Tcl_AppendResult( interp, "cannot open source database: ",
@@ -3127,7 +3127,7 @@ break;
               TCL.Tcl_WrongNumArgs( interp, 2, objv, "MILLISECONDS" );
               return TCL.TCL_ERROR;
             }
-            if ( TCL.TCL_OK != TCL.Tcl_GetIntFromObj( interp, objv[2], ref ms ) )
+            if ( TCL.TCL_OK != TCL.Tcl_GetIntFromObj( interp, objv[2], out ms ) )
               return TCL.TCL_ERROR;
             sqlite3_busy_timeout( pDb.db, ms );
             break;
@@ -3180,7 +3180,7 @@ break;
               {
                 TCL.Tcl_Free( ref pDb.zTrace );
               }
-              zTrace = TCL.Tcl_GetStringFromObj( objv[2], ref len );
+              zTrace = TCL.Tcl_GetStringFromObj( objv[2], out len );
               if ( zTrace != null && len > 0 )
               {
                 //pDb.zTrace = TCL.Tcl_Alloc( len + 1 );
@@ -3231,7 +3231,7 @@ break;
 
               int ttype = 0;
               if ( TCL.Tcl_GetIndexFromObj( interp, objv[2], TTYPE_strs, "transaction type",
-                        0, ref ttype ) )
+                        0, out ttype ) )
               {
                 return TCL.TCL_ERROR;
               }
@@ -3289,7 +3289,7 @@ break;
 #else
 if( objc!=2 && objc!=3 ){
 Tcl_WrongNumArgs(interp, 2, objv, "?SCRIPT?");
-rc = TCL_ERROR;
+rc = TCL.Tcl_ERROR;
 }else{
 void (*xNotify)(void **, int) = 0;
 void *pNotifyArg = 0;
@@ -3301,14 +3301,14 @@ pDb.pUnlockNotify = 0;
 
 if( objc==3 ){
 xNotify = DbUnlockNotify;
-pNotifyArg = (void *)pDb;
+pNotifyArg = (void )pDb;
 pDb.pUnlockNotify = objv[2];
 Tcl_IncrRefCount(pDb.pUnlockNotify);
 }
 
 if( sqlite3_unlock_notify(pDb.db, xNotify, pNotifyArg) ){
 Tcl_AppendResult(interp, sqlite3_errmsg(pDb.db), 0);
-rc = TCL_ERROR;
+rc = TCL.Tcl_ERROR;
 }
 }
 #endif
@@ -3403,11 +3403,11 @@ rc = TCL_ERROR;
 */
 static int DbObjCmdAdaptor(
 void *cd,
-Tcl_Interp *interp,
+Tcl_Interp interp,
 int objc,
 Tcl_Obj *const*objv
 ){
-return Tcl_NRCallObjProc(interp, DbObjCmd, cd, objc, objv);
+return TCL.TCL_NRCallObjProc(interp, DbObjCmd, cd, objc, objv);
 }
 #endif //* SQLITE_TCL_NRE */
     /*
@@ -3476,7 +3476,7 @@ TCL.Tcl_AppendResult( interp, "0", null );
         zArg = TCL.Tcl_GetString( objv[i] );
         if ( zArg == "-key" )
         {
-          pKey = TCL.Tcl_GetStringFromObj( objv[i + 1], ref nKey );
+          pKey = TCL.Tcl_GetStringFromObj( objv[i + 1], out nKey );
         }
         else if ( zArg == "-vfs" )
         {
@@ -3485,7 +3485,7 @@ TCL.Tcl_AppendResult( interp, "0", null );
         else if ( zArg == "-readonly" )
         {
           bool b = false;
-          if ( TCL.Tcl_GetBooleanFromObj( interp, objv[i + 1], ref b ) )
+          if ( TCL.Tcl_GetBooleanFromObj( interp, objv[i + 1], out b ) )
             return TCL.TCL_ERROR;
           if ( b )
           {
@@ -3501,7 +3501,7 @@ TCL.Tcl_AppendResult( interp, "0", null );
         else if ( zArg == "-create" )
         {
           bool b = false;
-          if ( TCL.Tcl_GetBooleanFromObj( interp, objv[i + 1], ref b ) )
+          if ( TCL.Tcl_GetBooleanFromObj( interp, objv[i + 1], out b ) )
             return TCL.TCL_ERROR;
           if ( b && ( flags & SQLITE_OPEN_READONLY ) == 0 )
           {
@@ -3515,7 +3515,7 @@ TCL.Tcl_AppendResult( interp, "0", null );
         else if ( zArg == "-nomutex" )
         {
           bool b = false;
-          if ( TCL.Tcl_GetBooleanFromObj( interp, objv[i + 1], ref b ) )
+          if ( TCL.Tcl_GetBooleanFromObj( interp, objv[i + 1], out b ) )
             return TCL.TCL_ERROR;
           if ( b )
           {
@@ -3530,7 +3530,7 @@ TCL.Tcl_AppendResult( interp, "0", null );
         else if ( zArg == "-fullmutex" )//strcmp( zArg, "-fullmutex" ) == 0 )
         {
           bool b = false;
-          if ( TCL.Tcl_GetBooleanFromObj( interp, objv[i + 1], ref b ) )
+          if ( TCL.Tcl_GetBooleanFromObj( interp, objv[i + 1], out b ) )
             return TCL.TCL_ERROR;
           if ( b )
           {
@@ -3559,7 +3559,7 @@ TCL.Tcl_AppendResult( interp, "0", null );
         return TCL.TCL_ERROR;
       }
       zErrMsg = "";
-      p = new SqliteDb();//(SqliteDb*)Tcl_Alloc( sizeof(*p) );
+      p = new SqliteDb();//(SqliteDb)Tcl_Alloc( sizeof(*p) );
       if ( p == null )
       {
         TCL.Tcl_SetResult( interp, "malloc failed", TCL.TCL_STATIC );
@@ -3568,7 +3568,7 @@ TCL.Tcl_AppendResult( interp, "0", null );
       //memset(p, 0, sizeof(*p));
       zFile = TCL.Tcl_GetStringFromObj( objv[2], 0 );
       //zFile = TCL.Tcl_TranslateFileName( interp, zFile, ref translatedFilename );
-      sqlite3_open_v2( zFile, ref p.db, flags, zVfs );
+      sqlite3_open_v2( zFile, out p.db, flags, zVfs );
       //Tcl_DStringFree( ref translatedFilename );
       if ( SQLITE_OK != sqlite3_errcode( p.db ) )
       {
@@ -3657,10 +3657,10 @@ TCL.Tcl_AppendResult( interp, "0", null );
     //int Tclsqlite3_Init(Tcl_Interp interp){ return Sqlite3_Init(interp); }
     //int Sqlite3_SafeInit(Tcl_Interp interp){ return TCL.TCL_OK; }
     //int Tclsqlite3_SafeInit(Tcl_Interp interp){ return TCL.TCL_OK; }
-    //int Sqlite3_Unload(Tcl_Interp *interp, int flags){ return TCL.TCL_OK; }
-    //int Tclsqlite3_Unload(Tcl_Interp *interp, int flags){ return TCL.TCL_OK; }
-    //int Sqlite3_SafeUnload(Tcl_Interp *interp, int flags){ return TCL.TCL_OK; }
-    //int Tclsqlite3_SafeUnload(Tcl_Interp *interp, int flags){ return TCL.TCL_OK;}
+    //int Sqlite3_Unload(Tcl_Interp interp, int flags){ return TCL.TCL_OK; }
+    //int Tclsqlite3_Unload(Tcl_Interp interp, int flags){ return TCL.TCL_OK; }
+    //int Sqlite3_SafeUnload(Tcl_Interp interp, int flags){ return TCL.TCL_OK; }
+    //int Tclsqlite3_SafeUnload(Tcl_Interp interp, int flags){ return TCL.TCL_OK;}
 
 
 #if !SQLITE_3_SUFFIX_ONLY
@@ -3668,10 +3668,10 @@ TCL.Tcl_AppendResult( interp, "0", null );
     //int Tclsqlite_Init(Tcl_Interp interp){ return Sqlite3_Init(interp); }
     //int Sqlite_SafeInit(Tcl_Interp interp){ return TCL.TCL_OK; }
     //int Tclsqlite_SafeInit(Tcl_Interp interp){ return TCL.TCL_OK; }
-    //int Sqlite_Unload(Tcl_Interp *interp, int flags){ return TCL.TCL_OK; }
-    //int Tclsqlite_Unload(Tcl_Interp *interp, int flags){ return TCL.TCL_OK; }
-    //int Sqlite_SafeUnload(Tcl_Interp *interp, int flags){ return TCL.TCL_OK; }
-    //int Tclsqlite_SafeUnload(Tcl_Interp *interp, int flags){ return TCL.TCL_OK;}
+    //int Sqlite_Unload(Tcl_Interp interp, int flags){ return TCL.TCL_OK; }
+    //int Tclsqlite_Unload(Tcl_Interp interp, int flags){ return TCL.TCL_OK; }
+    //int Sqlite_SafeUnload(Tcl_Interp interp, int flags){ return TCL.TCL_OK; }
+    //int Tclsqlite_SafeUnload(Tcl_Interp interp, int flags){ return TCL.TCL_OK;}
 #endif
 
 #if TCLSH
@@ -3737,7 +3737,7 @@ TCL.Tcl_AppendResult( interp, "0", null );
     //        do {
     //                t = (uint32)((unsigned)buf[3]<<8 | buf[2]) << 16 |
     //                            ((unsigned)buf[1]<<8 | buf[0]);
-    //                *(uint32 *)buf = t;
+    //                *(uint32 )buf = t;
     //                buf += 4;
     //        } while (--longs);
     //}
@@ -4100,12 +4100,12 @@ TCL.Tcl_AppendResult( interp, "0", null );
     static public int Md5_Init( Tcl_Interp interp )
     {
       TCL.Tcl_CreateCommand( interp, "md5", md5_cmd, null, null );
-      //Tcl_CreateCommand(interp, "md5-10x8", (Tcl_CmdProc*)md5_cmd,
+      //Tcl_CreateCommand(interp, "md5-10x8", (Tcl_CmdProc)md5_cmd,
       //                  MD5DigestToBase10x8, 0);
 
       TCL.Tcl_CreateCommand( interp, "md5file", md5file_cmd, null, null );
 
-      //Tcl_CreateCommand(interp, "md5file-10x8", (Tcl_CmdProc*)md5file_cmd,
+      //Tcl_CreateCommand(interp, "md5file-10x8", (Tcl_CmdProc)md5file_cmd,
       //                  MD5DigestToBase10x8, 0);
       return TCL.TCL_OK;
     }
@@ -4209,7 +4209,7 @@ TCL.Tcl_AppendResult( interp, "0", null );
     //#endif
     //#define TCLSH_MAIN main   /* Needed to fake out mktclapp */
 #if SQLITE_TEST
-    //static void init_all(Tcl_Interp *);
+    //static void init_all(Tcl_Interp );
     static int init_all_cmd(
     ClientData cd,
     Tcl_Interp interp,
@@ -4255,47 +4255,47 @@ TCL.Tcl_AppendResult( interp, "0", null );
 #endif
 #if SQLITE_TEST
       //{
-      //extern int Sqliteconfig_Init(Tcl_Interp*);
-      //extern int Sqlitetest1_Init(Tcl_Interp*);
-      //extern int Sqlitetest2_Init(Tcl_Interp*);
-      //extern int Sqlitetest3_Init(Tcl_Interp*);
-      //extern int Sqlitetest4_Init(Tcl_Interp*);
-      //extern int Sqlitetest5_Init(Tcl_Interp*);
-      //extern int Sqlitetest6_Init(Tcl_Interp*);
-      //extern int Sqlitetest7_Init(Tcl_Interp*);
-      //extern int Sqlitetest8_Init(Tcl_Interp*);
-      //extern int Sqlitetest9_Init(Tcl_Interp*);
-      //extern int Sqlitetestasync_Init(Tcl_Interp*);
-      //extern int Sqlitetest_autoext_Init(Tcl_Interp*);
-      //extern int Sqlitetest_demovfs_Init(Tcl_Interp *);
-      //extern int Sqlitetest_func_Init(Tcl_Interp*);
-      //extern int Sqlitetest_hexio_Init(Tcl_Interp*);
-      //extern int Sqlitetest_malloc_Init(Tcl_Interp*);
-      //extern int Sqlitetest_mutex_Init(Tcl_Interp*);
-      //extern int Sqlitetestschema_Init(Tcl_Interp*);
-      //extern int Sqlitetestsse_Init(Tcl_Interp*);
-      //extern int Sqlitetesttclvar_Init(Tcl_Interp*);
-      //extern int SqlitetestThread_Init(Tcl_Interp*);
+      //extern int Sqliteconfig_Init(Tcl_Interp);
+      //extern int Sqlitetest1_Init(Tcl_Interp);
+      //extern int Sqlitetest2_Init(Tcl_Interp);
+      //extern int Sqlitetest3_Init(Tcl_Interp);
+      //extern int Sqlitetest4_Init(Tcl_Interp);
+      //extern int Sqlitetest5_Init(Tcl_Interp);
+      //extern int Sqlitetest6_Init(Tcl_Interp);
+      //extern int Sqlitetest7_Init(Tcl_Interp);
+      //extern int Sqlitetest8_Init(Tcl_Interp);
+      //extern int Sqlitetest9_Init(Tcl_Interp);
+      //extern int Sqlitetestasync_Init(Tcl_Interp);
+      //extern int Sqlitetest_autoext_Init(Tcl_Interp);
+      //extern int Sqlitetest_demovfs_Init(Tcl_Interp );
+      //extern int Sqlitetest_func_Init(Tcl_Interp);
+      //extern int Sqlitetest_hexio_Init(Tcl_Interp);
+      //extern int Sqlitetest_malloc_Init(Tcl_Interp);
+      //extern int Sqlitetest_mutex_Init(Tcl_Interp);
+      //extern int Sqlitetestschema_Init(Tcl_Interp);
+      //extern int Sqlitetestsse_Init(Tcl_Interp);
+      //extern int Sqlitetesttclvar_Init(Tcl_Interp);
+      //extern int SqlitetestThread_Init(Tcl_Interp);
       //extern int SqlitetestOnefile_Init();
-      //extern int SqlitetestOsinst_Init(Tcl_Interp*);
-      //extern int Sqlitetestbackup_Init(Tcl_Interp*);
-      //extern int Sqlitetestintarray_Init(Tcl_Interp*);
-      //extern int Sqlitetestvfs_Init(Tcl_Interp *);
-      //extern int SqlitetestStat_Init(Tcl_Interp*);
-      //extern int Sqlitetestrtree_Init(Tcl_Interp*);
-      //extern int Sqlitequota_Init(Tcl_Interp*);
-      //extern int Sqlitemultiplex_Init(Tcl_Interp*);
-      //extern int SqliteSuperlock_Init(Tcl_Interp*);
-      //extern int SqlitetestSyscall_Init(Tcl_Interp*);
-      //extern int Sqlitetestfuzzer_Init(Tcl_Interp*);
-      //extern int Sqlitetestwholenumber_Init(Tcl_Interp*);
+      //extern int SqlitetestOsinst_Init(Tcl_Interp);
+      //extern int Sqlitetestbackup_Init(Tcl_Interp);
+      //extern int Sqlitetestintarray_Init(Tcl_Interp);
+      //extern int Sqlitetestvfs_Init(Tcl_Interp );
+      //extern int SqlitetestStat_Init(Tcl_Interp);
+      //extern int Sqlitetestrtree_Init(Tcl_Interp);
+      //extern int Sqlitequota_Init(Tcl_Interp);
+      //extern int Sqlitemultiplex_Init(Tcl_Interp);
+      //extern int SqliteSuperlock_Init(Tcl_Interp);
+      //extern int SqlitetestSyscall_Init(Tcl_Interp);
+      //extern int Sqlitetestfuzzer_Init(Tcl_Interp);
+      //extern int Sqlitetestwholenumber_Init(Tcl_Interp);
 
 #if (SQLITE_ENABLE_FTS3) || (SQLITE_ENABLE_FTS4)
-    //extern int Sqlitetestfts3_Init(Tcl_Interp *interp);
+    //extern int Sqlitetestfts3_Init(Tcl_Interp interp);
 #endif
 
 #if SQLITE_ENABLE_ZIPVFS
-//    extern int Zipvfs_Init(Tcl_Interp*);
+//    extern int Zipvfs_Init(Tcl_Interp);
 //    Zipvfs_Init(interp);
 #endif
 
@@ -4365,7 +4365,7 @@ TCL.Tcl_AppendResult( interp, "0", null );
       //Sqlitemultiplex_Init( interp );
       //SqliteSuperlock_Init( interp );
       //SqlitetestSyscall_Init( interp );
-      //Sqlitetestfuzzer_Init( interp );
+      Sqlitetestfuzzer_Init( interp );
       //Sqlitetestwholenumber_Init( interp );
 
 #if (SQLITE_ENABLE_FTS3) || (SQLITE_ENABLE_FTS4)
@@ -4383,7 +4383,7 @@ Sqlitetestsse_Init(interp);
 #if FALSE
 //#define TCLSH_MAIN main   /* Needed to fake out mktclapp */
 int TCLSH_MAIN(int argc, char **argv){
-Tcl_Interp *interp;
+Tcl_Interp interp;
 
 /* Call sqlite3_shutdown() once before doing anything else. This is to
 ** test that sqlite3_shutdown() can be safely called by a process before
@@ -4395,7 +4395,7 @@ sqlite3_config(SQLITE_CONFIG_SINGLETHREAD);
 #endif
 Tcl_FindExecutable(argv[0]);
 
-interp = Tcl_CreateInterp();
+interp = TCL.Tcl_CreateInterp();
 init_all(interp);
 if( argc>=2 ){
 int i;
@@ -4409,8 +4409,8 @@ Tcl_SetVar(interp, "argv", argv[i],
 TCL_GLOBAL_ONLY | TCL_LIST_ELEMENT | TCL_APPEND_VALUE);
 }
 if( TCLSH==1 && Tcl_EvalFile(interp, argv[1])!=TCL_OK ){
-const char *zInfo = Tcl_GetVar(interp, "errorInfo", TCL_GLOBAL_ONLY);
-if( zInfo==0 ) zInfo = Tcl_GetStringResult(interp);
+string zInfo = TCL.Tcl_GetVar(interp, "errorInfo", TCL_GLOBAL_ONLY);
+if( zInfo==0 ) zInfo = TCL.Tcl_GetStringResult(interp);
 fprintf(stderr,"%s: %s\n", *argv, zInfo);
 return 1;
 }

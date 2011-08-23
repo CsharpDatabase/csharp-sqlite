@@ -1489,7 +1489,7 @@ yyGrowStack(pParser);
         case 226: /* case_exprlist */
           {
             //#line 1103 "parse.y"
-            sqlite3ExprListDelete( pParse.db, ref  ( yypminor.yy322 ) );
+            sqlite3ExprListDelete( pParse.db, ref ( yypminor.yy322 ) );
             //#line 1425 "parse.c"
           }
           break;
@@ -1499,7 +1499,7 @@ yyGrowStack(pParser);
         case 207: /* stl_prefix */
           {
             //#line 534 "parse.y"
-            sqlite3SrcListDelete( pParse.db, ref  ( yypminor.yy259 ) );
+            sqlite3SrcListDelete( pParse.db, ref ( yypminor.yy259 ) );
             //#line 1435 "parse.c"
           }
           break;
@@ -3945,7 +3945,7 @@ new _yyRuleInfo( 251, 2 ),
         case 316: /* cmd ::= create_vtab */
           //#line 1356 "parse.y"
           {
-            sqlite3VtabFinishParse( pParse, 0 );
+            sqlite3VtabFinishParse( pParse, (Token)null );
           }
           //#line 3529 "parse.c"
           break;

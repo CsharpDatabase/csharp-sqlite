@@ -59,7 +59,7 @@ namespace Community.CsharpSqlite
               zObj =encnames[(ENC(db))].zName;
 #endif
           }
-          sqlite3SetString( ref  pData.pzErrMsg, db,
+          sqlite3SetString( ref pData.pzErrMsg, db,
           "malformed database schema (%s)", zObj );
           if ( !String.IsNullOrEmpty( zExtra ) )
           {
@@ -126,11 +126,10 @@ namespace Community.CsharpSqlite
         db.init.newTnum = sqlite3Atoi( argv[1] );
         db.init.orphanTrigger = 0;
         //TESTONLY(rcp = ) sqlite3_prepare(db, argv[2], -1, &pStmt, 0);
-        string sDummy = null;
 #if !NDEBUG || SQLITE_COVERAGE_TEST
-        rcp = sqlite3_prepare( db, argv[2], -1, ref pStmt, ref sDummy );
+        rcp = sqlite3_prepare( db, argv[2], -1, ref pStmt, 0 );
 #else
-sqlite3_prepare(db, argv[2], -1, ref pStmt, ref sDummy);
+sqlite3_prepare(db, argv[2], -1, ref pStmt, 0);
 #endif
         rc = db.errCode;
 #if !NDEBUG || SQLITE_COVERAGE_TEST
@@ -146,11 +145,12 @@ sqlite3_prepare(db, argv[2], -1, ref pStmt, ref sDummy);
           else
           {
             pData.rc = rc;
-            if ( rc == SQLITE_NOMEM )
-            {
-              //        db.mallocFailed = 1;
-            }
-            else if ( rc != SQLITE_INTERRUPT && ( rc & 0xFF ) != SQLITE_LOCKED )
+            //if ( rc == SQLITE_NOMEM )
+            //{
+            //  //        db.mallocFailed = 1;
+            //}
+            //else 
+            if ( rc != SQLITE_INTERRUPT && ( rc & 0xFF ) != SQLITE_LOCKED )
             {
               corruptSchema( pData, argv[0], sqlite3_errmsg( db ) );
             }
@@ -417,7 +417,7 @@ sqlite3_prepare(db, argv[2], -1, ref pStmt, ref sDummy);
         zSql = sqlite3MPrintf( db,
         "SELECT name, rootpage, sql FROM '%q'.%s ORDER BY rowid",
         db.aDb[iDb].zName, zMasterName );
-#if ! SQLITE_OMIT_AUTHORIZATION
+#if !SQLITE_OMIT_AUTHORIZATION
 {
 int (*xAuth)(void*,int,const char*,const char*,const char*,const char*);
 xAuth = db.xAuth;
@@ -425,7 +425,7 @@ db.xAuth = 0;
 #endif
         rc = sqlite3_exec( db, zSql, (dxCallback)sqlite3InitCallback, initData, 0 );
         pzErrMsg = initData.pzErrMsg;
-#if ! SQLITE_OMIT_AUTHORIZATION
+#if !SQLITE_OMIT_AUTHORIZATION
 db.xAuth = xAuth;
 }
 #endif
@@ -661,17 +661,20 @@ error_out:
       int rc = SQLITE_OK;       /* Result code */
       int i;                    /* Loop counter */
 
+      ppStmt = null;
+      pzTail = null;
+
       /* Allocate the parsing context */
       pParse = new Parse();//sqlite3StackAllocZero(db, sizeof(*pParse));
-      if ( pParse == null )
-      {
-        rc = SQLITE_NOMEM;
-        goto end_prepare;
-      }
+      //if ( pParse == null )
+      //{
+      //  rc = SQLITE_NOMEM;
+      //  goto end_prepare;
+      //}
       pParse.pReprepare = pReprepare;
       pParse.sLastToken.z = "";
 
-      Debug.Assert( ppStmt == null );//  assert( ppStmt && *ppStmt==0 );
+      //  assert( ppStmt && *ppStmt==0 );
       //Debug.Assert( 0 == db.mallocFailed );
       Debug.Assert( sqlite3_mutex_held( db.mutex ) );
 
@@ -804,8 +807,8 @@ error_out:
       }
       if ( pParse.pVdbe != null && ( rc != SQLITE_OK /*|| db.mallocFailed != 0 */ ) )
       {
-        sqlite3VdbeFinalize( pParse.pVdbe );
-        Debug.Assert( ppStmt == null );
+        sqlite3VdbeFinalize( ref pParse.pVdbe );
+        //Debug.Assert( ppStmt == null );
       }
       else
       {
@@ -838,6 +841,21 @@ end_prepare:
       return rc;
     }
 
+    //C# Version w/o End of Parsed String
+    static int sqlite3LockAndPrepare(
+    sqlite3 db,               /* Database handle. */
+    string zSql,              /* UTF-8 encoded SQL statement. */
+    int nBytes,               /* Length of zSql in bytes. */
+    int saveSqlFlag,          /* True to copy SQL text into the sqlite3_stmt */
+    Vdbe pOld,                /* VM being reprepared */
+    ref sqlite3_stmt ppStmt,  /* OUT: A pointer to the prepared statement */
+    int dummy                 /* OUT: End of parsed string */
+    )
+    {
+      string sOut = null;
+      return sqlite3LockAndPrepare( db, zSql, nBytes, saveSqlFlag, pOld, ref ppStmt, ref sOut );
+    }
+
     static int sqlite3LockAndPrepare(
     sqlite3 db,               /* Database handle. */
     string zSql,              /* UTF-8 encoded SQL statement. */
@@ -850,9 +868,10 @@ end_prepare:
     {
       int rc;
       //  assert( ppStmt!=0 );
-      ppStmt = null;
       if ( !sqlite3SafetyCheckOk( db ) )
       {
+        ppStmt = null;
+        pzTail = null;
         return SQLITE_MISUSE_BKPT();
       }
       sqlite3_mutex_enter( db.mutex );
@@ -861,7 +880,7 @@ end_prepare:
       if ( rc == SQLITE_SCHEMA )
       {
         sqlite3_finalize( ppStmt );
-        rc = sqlite3Prepare( db, zSql, nBytes, saveSqlFlag, pOld, ref ppStmt, ref  pzTail );
+        rc = sqlite3Prepare( db, zSql, nBytes, saveSqlFlag, pOld, ref ppStmt, ref pzTail );
       }
       sqlite3BtreeLeaveAll( db );
       sqlite3_mutex_leave( db.mutex );
@@ -888,8 +907,7 @@ end_prepare:
       Debug.Assert( zSql != null );  /* Reprepare only called for prepare_v2() statements */
       db = sqlite3VdbeDb( p );
       Debug.Assert( sqlite3_mutex_held( db.mutex ) );
-      string dummy = "";
-      rc = sqlite3LockAndPrepare( db, zSql, -1, 0, p, ref pNew, ref dummy );
+      rc = sqlite3LockAndPrepare( db, zSql, -1, 0, p, ref pNew, 0 );
       if ( rc != 0 )
       {
         if ( rc == SQLITE_NOMEM )
@@ -906,11 +924,23 @@ end_prepare:
       sqlite3VdbeSwap( (Vdbe)pNew, p );
       sqlite3TransferBindings( pNew, (sqlite3_stmt)p );
       sqlite3VdbeResetStepResult( (Vdbe)pNew );
-      sqlite3VdbeFinalize( (Vdbe)pNew );
+      sqlite3VdbeFinalize( ref pNew );
       return SQLITE_OK;
     }
 
 
+    //C# Overload for ignore error out
+    static public int sqlite3_prepare(
+    sqlite3 db,           /* Database handle. */
+    string zSql,          /* UTF-8 encoded SQL statement. */
+    int nBytes,           /* Length of zSql in bytes. */
+    ref sqlite3_stmt ppStmt,  /* OUT: A pointer to the prepared statement */
+    int dummy             /* OUT: End of parsed string */
+    )
+    {
+      string sOut = null;
+      return sqlite3_prepare( db, zSql, nBytes, ref ppStmt, ref sOut );
+    }
     /*
     ** Two versions of the official API.  Legacy and new use.  In the legacy
     ** version, the original SQL text is not saved in the prepared statement
@@ -919,7 +949,7 @@ end_prepare:
     ** and the statement is automatically recompiled if an schema change
     ** occurs.
     */
-    static public int sqlite3_prepare(
+      static public int sqlite3_prepare(
     sqlite3 db,           /* Database handle. */
     string zSql,          /* UTF-8 encoded SQL statement. */
     int nBytes,           /* Length of zSql in bytes. */
@@ -928,7 +958,7 @@ end_prepare:
     )
     {
       int rc;
-      rc = sqlite3LockAndPrepare( db, zSql, nBytes, 0, null, ref  ppStmt, ref pzTail );
+      rc = sqlite3LockAndPrepare( db, zSql, nBytes, 0, null, ref ppStmt, ref pzTail );
       Debug.Assert( rc == SQLITE_OK || ppStmt == null );  /* VERIFY: F13021 */
       return rc;
     }
@@ -943,7 +973,7 @@ end_prepare:
     {
       string pzTail = null;
       int rc;
-      rc = sqlite3LockAndPrepare( db, zSql, nBytes, 1, null, ref  ppStmt, ref pzTail );
+      rc = sqlite3LockAndPrepare( db, zSql, nBytes, 1, null, ref ppStmt, ref pzTail );
       Debug.Assert( rc == SQLITE_OK || ppStmt == null );  /* VERIFY: F13021 */
       return rc;
     }
@@ -957,13 +987,13 @@ end_prepare:
     )
     {
       int rc;
-      rc = sqlite3LockAndPrepare( db, zSql, nBytes, 1, null, ref  ppStmt, ref pzTail );
+      rc = sqlite3LockAndPrepare( db, zSql, nBytes, 1, null, ref ppStmt, ref pzTail );
       Debug.Assert( rc == SQLITE_OK || ppStmt == null );  /* VERIFY: F13021 */
       return rc;
     }
 
 
-#if ! SQLITE_OMIT_UTF16
+#if !SQLITE_OMIT_UTF16
 
 /*
 ** Compile the UTF-16 encoded SQL statement zSql into a statement handle.
@@ -973,8 +1003,8 @@ sqlite3 db,              /* Database handle. */
 string zSql,             /* UTF-15 encoded SQL statement. */
 int nBytes,              /* Length of zSql in bytes. */
 bool saveSqlFlag,         /* True to save SQL text into the sqlite3_stmt */
-ref sqlite3_stmt ppStmt, /* OUT: A pointer to the prepared statement */
-ref string pzTail        /* OUT: End of parsed string */
+out sqlite3_stmt ppStmt, /* OUT: A pointer to the prepared statement */
+out string pzTail        /* OUT: End of parsed string */
 ){
 /* This function currently works by first transforming the UTF-16
 ** encoded string to UTF-8, then invoking sqlite3_prepare(). The
@@ -1023,8 +1053,8 @@ public static int sqlite3_prepare16(
 sqlite3 db,               /* Database handle. */
 string zSql,              /* UTF-16 encoded SQL statement. */
 int nBytes,               /* Length of zSql in bytes. */
-ref sqlite3_stmt ppStmt,  /* OUT: A pointer to the prepared statement */
-ref string pzTail         /* OUT: End of parsed string */
+out sqlite3_stmt ppStmt,  /* OUT: A pointer to the prepared statement */
+out string pzTail         /* OUT: End of parsed string */
 ){
 int rc;
 rc = sqlite3Prepare16(db,zSql,nBytes,false,ref ppStmt,ref pzTail);
@@ -1035,8 +1065,8 @@ public static int sqlite3_prepare16_v2(
 sqlite3 db,               /* Database handle. */
 string zSql,              /* UTF-16 encoded SQL statement. */
 int nBytes,               /* Length of zSql in bytes. */
-ref sqlite3_stmt ppStmt,  /* OUT: A pointer to the prepared statement */
-ref string pzTail         /* OUT: End of parsed string */
+out sqlite3_stmt ppStmt,  /* OUT: A pointer to the prepared statement */
+out string pzTail         /* OUT: End of parsed string */
 )
 {
 int rc;

@@ -1365,7 +1365,7 @@ namespace tcl.lang
         throw new TclRuntimeError( "unexpected TclException: " + e.Message, e );
       }
 
-      return ( ( cmd == null ) ? null : ( cmd.objProc == null && cmd.clientData == null ) ? null : cmd );
+      return ( ( cmd == null ) ? null : cmd );
     }
     public static bool commandComplete( string inString )
     // The string to check.

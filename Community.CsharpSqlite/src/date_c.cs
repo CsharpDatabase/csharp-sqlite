@@ -126,19 +126,19 @@ namespace Community.CsharpSqlite
     */
     static int getDigits( string zDate, int N0, int min0, int max0, char nextC0, ref int pVal0, int N1, int min1, int max1, char nextC1, ref int pVal1 )
     {
-      int c0 = getDigits( zDate + '\0', N0, min0, max0, nextC0, ref  pVal0 );
-      return c0 == 0 ? 0 : c0 + getDigits( zDate.Substring( zDate.IndexOf( nextC0 ) + 1 ) + '\0', N1, min1, max1, nextC1, ref  pVal1 );
+      int c0 = getDigits( zDate + '\0', N0, min0, max0, nextC0, ref pVal0 );
+      return c0 == 0 ? 0 : c0 + getDigits( zDate.Substring( zDate.IndexOf( nextC0 ) + 1 ) + '\0', N1, min1, max1, nextC1, ref pVal1 );
     }
     static int getDigits( string zDate, int N0, int min0, int max0, char nextC0, ref int pVal0, int N1, int min1, int max1, char nextC1, ref int pVal1, int N2, int min2, int max2, char nextC2, ref int pVal2 )
     {
-      int c0 = getDigits( zDate + '\0', N0, min0, max0, nextC0, ref  pVal0 );
+      int c0 = getDigits( zDate + '\0', N0, min0, max0, nextC0, ref pVal0 );
       if ( c0 == 0 )
         return 0;
       string zDate1 = zDate.Substring( zDate.IndexOf( nextC0 ) + 1 );
-      int c1 = getDigits( zDate1 + '\0', N1, min1, max1, nextC1, ref  pVal1 );
+      int c1 = getDigits( zDate1 + '\0', N1, min1, max1, nextC1, ref pVal1 );
       if ( c1 == 0 )
         return c0;
-      return c0 + c1 + getDigits( zDate1.Substring( zDate1.IndexOf( nextC1 ) + 1 ) + '\0', N2, min2, max2, nextC2, ref  pVal2 );
+      return c0 + c1 + getDigits( zDate1.Substring( zDate1.IndexOf( nextC1 ) + 1 ) + '\0', N2, min2, max2, nextC2, ref pVal2 );
     }
     static int getDigits( string zDate, int N, int min, int max, char nextC, ref int pVal )
     {
@@ -154,11 +154,11 @@ namespace Community.CsharpSqlite
       int zIndex = 0;
       //do
       //{
-      //N = (int)va_arg( ap, "int" );
-      //min = (int)va_arg( ap, "int" );
-      //max = (int)va_arg( ap, "int" );
+      //N = va_arg( ap, ( Int32 ) 0 );
+      //min = va_arg( ap, ( Int32 ) 0 );
+      //max = va_arg( ap, ( Int32 ) 0 );
       //nextC = (char)va_arg( ap, "char" );
-      //pVal = (int)va_arg( ap, "int" );
+      //pVal = va_arg( ap, ( Int32 ) 0 );
       val = 0;
       while ( N-- != 0 )
       {
@@ -205,7 +205,7 @@ end_getDigits:
       int nHr = 0;
       int nMn = 0;
       char c;
-      zDate = zDate.Trim();// while ( sqlite3Isspace( *(u8*)zDate ) ) { zDate++; }
+      zDate = zDate.Trim();// while ( sqlite3Isspace( *(u8)zDate ) ) { zDate++; }
       p.tz = 0;
       c = zDate.Length == 0 ? '\0' : zDate[0];
       if ( c == '-' )
@@ -235,7 +235,7 @@ end_getDigits:
       if ( zDate.Length == 6 )
         zDate = "";
       else if ( zDate.Length > 6 )
-        zDate = zDate.Substring( 6 ).Trim();// while ( sqlite3Isspace( *(u8*)zDate ) ) { zDate++; }
+        zDate = zDate.Substring( 6 ).Trim();// while ( sqlite3Isspace( *(u8)zDate ) ) { zDate++; }
 zulu_time:
       return zDate != "" ? 1 : 0;
     }
@@ -253,7 +253,7 @@ zulu_time:
       int m = 0;
       int s = 0;
       double ms = 0.0;
-      if ( getDigits( zDate, 2, 0, 24, ':', ref  h, 2, 0, 59, '\0', ref  m ) != 2 )
+      if ( getDigits( zDate, 2, 0, 24, ':', ref h, 2, 0, 59, '\0', ref m ) != 2 )
       {
         return 1;
       }
@@ -600,7 +600,7 @@ zulu_time:
     static sqlite3_int64 localtimeOffset(
       DateTime p,                    /* Date at which to calculate offset */
       sqlite3_context pCtx,          /* Write error here if one occurs */
-      ref int pRc                    /* OUT: Error code. SQLITE_OK or ERROR */
+      out int pRc                    /* OUT: Error code. SQLITE_OK or ERROR */
     )
     {
       DateTime x;
@@ -702,7 +702,7 @@ zulu_time:
             if ( z.ToString() == "localtime" )
             {
               computeJD( p );
-              p.iJD += localtimeOffset( p, pCtx, ref rc );
+              p.iJD += localtimeOffset( p, pCtx, out rc );
               clearYMD_HMS_TZ( p );
             }
             break;
@@ -727,12 +727,12 @@ zulu_time:
             {
               long c1;
               computeJD( p );
-              c1 = localtimeOffset( p, pCtx, ref rc );
+              c1 = localtimeOffset( p, pCtx, out rc );
               if ( rc == SQLITE_OK )
               {
                 p.iJD -= c1;
                 clearYMD_HMS_TZ( p );
-                p.iJD +=  c1 - localtimeOffset( p, pCtx, ref rc ) ;
+                p.iJD += c1 - localtimeOffset( p, pCtx, out rc );
               }
             }
 #endif
@@ -938,7 +938,7 @@ zulu_time:
     sqlite3_context context,
     int argc,
     sqlite3_value[] argv,
-    ref  DateTime p
+    ref DateTime p
     )
     {
       int i;
@@ -1340,7 +1340,7 @@ zulu_time:
 //  sqlite3_value[] argv
 //){
 time_t t;
-char *zFormat = (char *)sqlite3_user_data(context);
+string zFormat = (char )sqlite3_user_data(context);
 sqlite3 db;
 sqlite3_int64 rT;
 char zdtBuf[20];

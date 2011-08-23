@@ -157,7 +157,7 @@ namespace Community.CsharpSqlite
 ** compiled with the default page-size limit will not be able to rollback 
 ** the aborted transaction. This could lead to database corruption.
 */
-    //#ifdef SQLITE_MAX_PAGE_SIZE
+    //#if SQLITE_MAX_PAGE_SIZE
     //# undef SQLITE_MAX_PAGE_SIZE
     //#endif
     //#define SQLITE_MAX_PAGE_SIZE 65536

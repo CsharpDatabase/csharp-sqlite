@@ -49,11 +49,11 @@ namespace Community.CsharpSqlite
 #if !SQLITE_OMIT_SHARED_CACHE
 extern BtShared *sqlite3SharedCacheList;
 BtShared *pBt;
-Tcl_Obj *pRet = Tcl_NewObj();
+Tcl_Obj *pRet = TCL.Tcl_NewObj();
 for(pBt=GLOBAL(BtShared*,sqlite3SharedCacheList); pBt; pBt=pBt->pNext){
-const char *zFile = sqlite3PagerFilename(pBt->pPager);
-Tcl_ListObjAppendElement(interp, pRet, Tcl_NewStringObj(zFile, -1));
-Tcl_ListObjAppendElement(interp, pRet, Tcl_NewIntObj(pBt->nRef));
+string zFile = sqlite3PagerFilename(pBt->pPager);
+Tcl_ListObjAppendElement(interp, pRet, TCL.TCL_NewStringObj(zFile, -1));
+Tcl_ListObjAppendElement(interp, pRet, TCL.TCL_NewIntObj(pBt->nRef));
 }
 Tcl_SetObjResult(interp, pRet);
 #endif

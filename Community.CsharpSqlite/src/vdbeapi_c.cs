@@ -119,7 +119,7 @@ return ( p == null || p.expired ) ? 1 : 0;
         mutex = v.db.mutex;
 #endif
         sqlite3_mutex_enter( mutex );
-        rc = sqlite3VdbeFinalize( v );
+        rc = sqlite3VdbeFinalize( ref v );
         rc = sqlite3ApiExit( db, rc );
         sqlite3_mutex_leave( mutex );
       }
@@ -274,7 +274,7 @@ return sqlite3ValueText(pVal, SQLITE_UTF16LE);
     int o,                  /* offset into string */
     int n,                  /* Bytes in string, or negative */
     u8 enc,                 /* Encoding of z.  0 for BLOBs */
-    dxDel xDel //void (*xDel)(void*)     /* Destructor function */
+    dxDel xDel //void (*xDel)(void)     /* Destructor function */
     )
     {
       if ( sqlite3VdbeMemSetStr( pCtx.s, z, o, n, enc, xDel ) == SQLITE_TOOBIG )
@@ -287,7 +287,7 @@ return sqlite3ValueText(pVal, SQLITE_UTF16LE);
     string z,               /* String pointer */
     int n,                  /* Bytes in string, or negative */
     u8 enc,                 /* Encoding of z.  0 for BLOBs */
-    dxDel xDel //void (*xDel)(void*)     /* Destructor function */
+    dxDel xDel //void (*xDel)(void)     /* Destructor function */
     )
     {
       if ( sqlite3VdbeMemSetStr( pCtx.s, z, n, enc, xDel ) == SQLITE_TOOBIG )
@@ -322,7 +322,7 @@ return sqlite3ValueText(pVal, SQLITE_UTF16LE);
     }
 
 #if  !SQLITE_OMIT_UTF16
-//void sqlite3_result_error16(sqlite3_context pCtx, const void *z, int n){
+//void sqlite3_result_error16(sqlite3_context pCtx, string z, int n){
 //  Debug.Assert( sqlite3_mutex_held(pCtx.s.db.mutex) );
 //  pCtx.isError = SQLITE_ERROR;
 //  sqlite3VdbeMemSetStr(pCtx.s, z, n, SQLITE_UTF16NATIVE, SQLITE_TRANSIENT);
@@ -793,7 +793,7 @@ end_of_step:
     sqlite3_context pCtx,
     int iArg,
     object pAux
-    //void (*xDelete)(void*)
+    //void (*xDelete)(void)
     )
     {
       AuxData pAuxData;
@@ -902,9 +902,9 @@ return p.pMem.n;
         ** of type i64, on certain architecture (x86) with certain compiler
         ** switches (-Os), gcc may align this Mem object on a 4-byte boundary
         ** instead of an 8-byte one. This all works fine, except that when
-        ** running with SQLITE_DEBUG defined the SQLite code sometimes assert()s
+        ** running with SQLITE_DEBUG defined the SQLite code sometimes Debug.Assert()s
         ** that a Mem structure is located on an 8-byte boundary. To prevent
-        ** this assert() from failing, when building with SQLITE_DEBUG defined
+        ** this Debug.Assert() from failing, when building with SQLITE_DEBUG defined
         ** using gcc, force nullMem to be 8-byte aligned using the magical
         ** __attribute__((aligned(8))) macro.  */
         //    static const Mem nullMem 
@@ -912,7 +912,7 @@ return p.pMem.n;
         //      __attribute__((aligned(8))) 
         //#endif
         //      = {0, "", (double)0, {0}, 0, MEM_Null, SQLITE_NULL, 0,
-        //#ifdef SQLITE_DEBUG
+        //#if SQLITE_DEBUG
         //         0, 0,  /* pScopyFrom, pFiller */
         //#endif
         //         0, 0 };
@@ -1145,7 +1145,7 @@ pStmt, N,  sqlite3_value_text16, COLNAME_NAME);
 #if  !SQLITE_OMIT_UTF16
 //const void *sqlite3_column_decltype16(sqlite3_stmt pStmt, int N){
 //  return columnName(
-//      pStmt, N, (const void*(*)(Mem*))sqlite3_value_text16, COLNAME_DECLTYPE);
+//      pStmt, N, (const void*()(Mem))sqlite3_value_text16, COLNAME_DECLTYPE);
 //}
 #endif // * SQLITE_OMIT_UTF16 */
 #endif // * SQLITE_OMIT_DECLTYPE */
@@ -1165,7 +1165,7 @@ pStmt, N,  sqlite3_value_text16, COLNAME_NAME);
 #if !SQLITE_OMIT_UTF16
 const void *sqlite3_column_database_name16(sqlite3_stmt pStmt, int N){
 return columnName(
-pStmt, N, (const void*(*)(Mem*))sqlite3_value_text16, COLNAME_DATABASE);
+pStmt, N, (const void*()(Mem))sqlite3_value_text16, COLNAME_DATABASE);
 }
 #endif //* SQLITE_OMIT_UTF16 */
 
@@ -1182,7 +1182,7 @@ pStmt, N, (const void*(*)(Mem*))sqlite3_value_text16, COLNAME_DATABASE);
 #if !SQLITE_OMIT_UTF16
 const void *sqlite3_column_table_name16(sqlite3_stmt pStmt, int N){
 return columnName(
-pStmt, N, (const void*(*)(Mem*))sqlite3_value_text16, COLNAME_TABLE);
+pStmt, N, (const void*()(Mem))sqlite3_value_text16, COLNAME_TABLE);
 }
 #endif //* SQLITE_OMIT_UTF16 */
 
@@ -1199,7 +1199,7 @@ pStmt, N, (const void*(*)(Mem*))sqlite3_value_text16, COLNAME_TABLE);
 #if !SQLITE_OMIT_UTF16
 const void *sqlite3_column_origin_name16(sqlite3_stmt pStmt, int N){
 return columnName(
-pStmt, N, (const void*(*)(Mem*))sqlite3_value_text16, COLNAME_COLUMN);
+pStmt, N, (const void*()(Mem))sqlite3_value_text16, COLNAME_COLUMN);
 }
 #endif ///* SQLITE_OMIT_UTF16 */
 #endif // * SQLITE_ENABLE_COLUMN_METADATA */

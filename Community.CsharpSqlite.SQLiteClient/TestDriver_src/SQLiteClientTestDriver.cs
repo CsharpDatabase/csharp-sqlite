@@ -713,7 +713,7 @@ namespace SQLiteClientTests
               File.Delete( dbFilename );
             Console.WriteLine( "Using Database {0}", dbFilename );
             Sqlite3.sqlite3 db = null;
-            Sqlite3.sqlite3_open_v2( dbFilename, ref db, flags, null );
+            Sqlite3.sqlite3_open_v2( dbFilename, out db, flags, null );
             var command = string.Format( "create table [t{0}] (id, name, amount)", Thread.CurrentThread.ManagedThreadId );
             ExecuteCommand( db, command );
             Sqlite3.sqlite3_close( db );

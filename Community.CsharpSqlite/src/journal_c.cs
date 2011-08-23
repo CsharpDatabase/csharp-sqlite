@@ -45,12 +45,12 @@ namespace Community.CsharpSqlite
 struct JournalFile {
 sqlite3_io_methods pMethod;    /* I/O methods on journal files */
 int nBuf;                       /* Size of zBuf[] in bytes */
-char *zBuf;                     /* Space to buffer journal writes */
+string zBuf;                     /* Space to buffer journal writes */
 int iSize;                      /* Amount of zBuf[] currently used */
 int flags;                      /* xOpen flags */
 sqlite3_vfs pVfs;              /* The "real" underlying VFS */
 sqlite3_file pReal;            /* The "real" underlying file descriptor */
-const char *zJournal;           /* Name of the journal file */
+string zJournal;           /* Name of the journal file */
 };
 typedef struct JournalFile JournalFile;
 
@@ -61,7 +61,7 @@ typedef struct JournalFile JournalFile;
 static int createFile(JournalFile p){
 int rc = SQLITE_OK;
 if( null==p.pReal ){
-sqlite3_file pReal = (sqlite3_file *)&p[1];
+sqlite3_file pReal = (sqlite3_file )&p[1];
 rc = sqlite3OsOpen(p.pVfs, p.zJournal, pReal, p.flags, 0);
 if( rc==SQLITE_OK ){
 p.pReal = pReal;
@@ -78,7 +78,7 @@ return rc;
 ** Close the file.
 */
 static int jrnlClose(sqlite3_file pJfd){
-JournalFile p = (JournalFile *)pJfd;
+JournalFile p = (JournalFile )pJfd;
 if( p.pReal ){
 sqlite3OsClose(p.pReal);
 }
@@ -96,7 +96,7 @@ int iAmt,              /* Number of bytes to read */
 sqlite_int64 iOfst     /* Begin reading at this offset */
 ){
 int rc = SQLITE_OK;
-JournalFile *p = (JournalFile *)pJfd;
+JournalFile *p = (JournalFile )pJfd;
 if( p->pReal ){
 rc = sqlite3OsRead(p->pReal, zBuf, iAmt, iOfst);
 }else if( (iAmt+iOfst)>p->iSize ){
@@ -112,12 +112,12 @@ return rc;
 */
 static int jrnlWrite(
 sqlite3_file pJfd,    /* The journal file into which to write */
-const void *zBuf,      /* Take data to be written from here */
+string zBuf,      /* Take data to be written from here */
 int iAmt,              /* Number of bytes to write */
 sqlite_int64 iOfst     /* Begin writing at this offset into the file */
 ){
 int rc = SQLITE_OK;
-JournalFile p = (JournalFile *)pJfd;
+JournalFile p = (JournalFile )pJfd;
 if( null==p.pReal && (iOfst+iAmt)>p.nBuf ){
 rc = createFile(p);
 }
@@ -139,7 +139,7 @@ return rc;
 */
 static int jrnlTruncate(sqlite3_file pJfd, sqlite_int64 size){
 int rc = SQLITE_OK;
-JournalFile p = (JournalFile *)pJfd;
+JournalFile p = (JournalFile )pJfd;
 if( p.pReal ){
 rc = sqlite3OsTruncate(p.pReal, size);
 }else if( size<p.iSize ){
@@ -153,7 +153,7 @@ return rc;
 */
 static int jrnlSync(sqlite3_file pJfd, int flags){
 int rc;
-JournalFile p = (JournalFile *)pJfd;
+JournalFile p = (JournalFile )pJfd;
 if( p.pReal ){
 rc = sqlite3OsSync(p.pReal, flags);
 }else{
@@ -167,7 +167,7 @@ return rc;
 */
 static int jrnlFileSize(sqlite3_file pJfd, sqlite_int64 pSize){
 int rc = SQLITE_OK;
-JournalFile p = (JournalFile *)pJfd;
+JournalFile p = (JournalFile )pJfd;
 if( p.pReal ){
 rc = sqlite3OsFileSize(p.pReal, pSize);
 }else{
@@ -204,12 +204,12 @@ jrnlFileSize,  /* xFileSize */
 */
 int sqlite3JournalOpen(
 sqlite3_vfs pVfs,         /* The VFS to use for actual file I/O */
-const char *zName,         /* Name of the journal file */
+string zName,         /* Name of the journal file */
 sqlite3_file pJfd,        /* Preallocated, blank file handle */
 int flags,                 /* Opening flags */
 int nBuf                   /* Bytes buffered before opening the file */
 ){
-JournalFile p = (JournalFile *)pJfd;
+JournalFile p = (JournalFile )pJfd;
 memset(p, 0, sqlite3JournalSize(pVfs));
 if( nBuf>0 ){
 p.zBuf = sqlite3MallocZero(nBuf);
@@ -219,7 +219,7 @@ return SQLITE_NOMEM;
 }else{
 return sqlite3OsOpen(pVfs, zName, pJfd, flags, 0);
 }
-p.pMethod = &JournalFileMethods;
+p.pMethod = JournalFileMethods;
 p.nBuf = nBuf;
 p.flags = flags;
 p.zJournal = zName;
@@ -235,7 +235,7 @@ int sqlite3JournalCreate(sqlite3_file p){
 if( p.pMethods!=&JournalFileMethods ){
 return SQLITE_OK;
 }
-return createFile((JournalFile *)p);
+return createFile((JournalFile )p);
 }
 
 /*

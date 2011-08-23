@@ -41,7 +41,7 @@ namespace Community.CsharpSqlite
     {
       public PgHdr pDirty, pDirtyTail;           /* List of dirty pages in LRU order */
       public PgHdr pSynced;                      /* Last synced page in dirty page list */
-      public int nRef;                           /* Number of referenced pages */
+      public int _nRef;                           /* Number of referenced pages */
       public int nMax;                           /* Configured cache size */
       public int szPage;                         /* Size of every page in this cache */
       public int szExtra;                        /* Size of extra space for each page */
@@ -50,6 +50,18 @@ namespace Community.CsharpSqlite
       public object pStress;                     /* Argument to xStress */
       public sqlite3_pcache pCache;              /* Pluggable cache module */
       public PgHdr pPage1;                       /* Reference to page 1 */
+
+      public int nRef                            /* Number of referenced pages */
+      {
+        get
+        {
+          return _nRef;
+        }
+        set
+        {
+          _nRef = value;
+        }
+      }
 
       public void Clear()
       {
@@ -284,10 +296,10 @@ expensive_assert( pcacheCheckSynced(p) );
         int nByte;
         nByte = pCache.szPage + pCache.szExtra + 0;// sizeof( PgHdr );
         p = sqlite3GlobalConfig.pcache.xCreate( nByte, pCache.bPurgeable );
-        if ( null == p )
-        {
-          return SQLITE_NOMEM;
-        }
+        //if ( null == p )
+        //{
+        //  return SQLITE_NOMEM;
+        //}
         sqlite3GlobalConfig.pcache.xCachesize( p, pCache.nMax );
         pCache.pCache = p;
       }

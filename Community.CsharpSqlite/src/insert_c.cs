@@ -90,7 +90,7 @@ namespace Community.CsharpSqlite
         int n;
         Table pTab = pIdx.pTable;
         sqlite3 db = sqlite3VdbeDb( v );
-        StringBuilder pIdx_zColAff = new StringBuilder( pIdx.nColumn + 2 );// (char *)sqlite3DbMallocRaw(0, pIdx->nColumn+2);
+        StringBuilder pIdx_zColAff = new StringBuilder( pIdx.nColumn + 2 );// (char )sqlite3DbMallocRaw(0, pIdx->nColumn+2);
         //      if ( pIdx_zColAff == null )
         //      {
         //        db.mallocFailed = 1;
@@ -136,7 +136,7 @@ namespace Community.CsharpSqlite
         int i;
         sqlite3 db = sqlite3VdbeDb( v );
 
-        zColAff = new StringBuilder( pTab.nCol + 1 );// (char*)sqlite3DbMallocRaw(0, pTab->nCol+1);
+        zColAff = new StringBuilder( pTab.nCol + 1 );// (char)sqlite3DbMallocRaw(0, pTab->nCol+1);
         if ( zColAff == null )
         {
           ////        db.mallocFailed = 1;
@@ -168,7 +168,7 @@ namespace Community.CsharpSqlite
       int i;
       int iEnd = sqlite3VdbeCurrentAddr( v );
 #if !SQLITE_OMIT_VIRTUALTABLE
-  VTable pVTab = IsVirtual(pTab) ? sqlite3GetVTable(p,db, pTab) : null;
+      VTable pVTab = IsVirtual( pTab ) ? sqlite3GetVTable( p.db, pTab ) : null;
 #endif
 
       for ( i = iStartAddr; i < iEnd; i++ )
@@ -192,11 +192,12 @@ namespace Community.CsharpSqlite
           }
         }
 #if !SQLITE_OMIT_VIRTUALTABLE
-if( pOp.opcode==OP_VOpen && pOp.p4.pVtab==pVTab){
-Debug.Assert( pOp.p4.pVtab!=0 );
-Debug.Assert( pOp.p4type==P4_VTAB );
-return true;
-}
+        if ( pOp.opcode == OP_VOpen && pOp.p4.pVtab == pVTab )
+        {
+          Debug.Assert( pOp.p4.pVtab != null );
+          Debug.Assert( pOp.p4type == P4_VTAB );
+          return true;
+        }
 #endif
       }
       return false;
@@ -572,7 +573,7 @@ goto insert_cleanup;
 ** inserted into is a view
 */
 #if !SQLITE_OMIT_TRIGGER
-      pTrigger = sqlite3TriggersExist( pParse, pTab, TK_INSERT, null, ref tmask );
+      pTrigger = sqlite3TriggersExist( pParse, pTab, TK_INSERT, null, out tmask );
       isView = pTab.pSelect != null;
 #else
       Trigger pTrigger = null;  //# define pTrigger 0
@@ -1132,18 +1133,20 @@ isView = false;
         ** do the insertion.
         */
 #if !SQLITE_OMIT_VIRTUALTABLE
-    if( IsVirtual(pTab) ){
-      const char *pVTab = (const char *)sqlite3GetVTable(db, pTab);
-      sqlite3VtabMakeWritable(pParse, pTab);
-      sqlite3VdbeAddOp4(v, OP_VUpdate, 1, pTab.nCol+2, regIns, pVTab, P4_VTAB);
-      sqlite3VdbeChangeP5(v, onError==OE_Default ? OE_Abort : onError);
-      sqlite3MayAbort(pParse);
-    }else
+        if ( IsVirtual( pTab ) )
+        {
+          VTable pVTab = sqlite3GetVTable( db, pTab );
+          sqlite3VtabMakeWritable( pParse, pTab );
+          sqlite3VdbeAddOp4( v, OP_VUpdate, 1, pTab.nCol + 2, regIns, pVTab, P4_VTAB );
+          sqlite3VdbeChangeP5( v, (byte)( onError == OE_Default ? OE_Abort : onError ) );
+          sqlite3MayAbort( pParse );
+        }
+        else
 #endif
         {
           int isReplace = 0;    /* Set to true if constraints may cause a replace */
           sqlite3GenerateConstraintChecks( pParse, pTab, baseCur, regIns, aRegIdx,
-            keyColumn >= 0 ? 1 : 0, false, onError, endOfLoop, ref isReplace
+            keyColumn >= 0 ? 1 : 0, false, onError, endOfLoop, out isReplace
           );
           sqlite3FkCheck( pParse, pTab, 0, regIns );
           sqlite3CompleteInsertion(
@@ -1227,13 +1230,13 @@ insert_cleanup:
     /* Make sure "isView" and other macros defined above are undefined. Otherwise
     ** thely may interfere with compilation of other functions in this file
     ** (or in another file, if this file becomes part of the amalgamation).  */
-    //#ifdef isView
+    //#if isView
     // #undef isView
     //#endif
-    //#ifdef pTrigger
+    //#if pTrigger
     // #undef pTrigger
     //#endif
-    //#ifdef tmask
+    //#if tmask
     // #undef tmask
     //#endif
 
@@ -1322,7 +1325,7 @@ insert_cleanup:
     bool isUpdate,      /* True for UPDATE, False for INSERT */
     int overrideError,  /* Override onError to this if not OE_Default */
     int ignoreDest,     /* Jump to this label on an OE_Ignore resolution */
-    ref int pbMayReplace   /* OUT: Set to true if constraint may cause a replace */
+    out int pbMayReplace   /* OUT: Set to true if constraint may cause a replace */
     )
     {
 
@@ -1491,8 +1494,8 @@ insert_cleanup:
               Trigger pTrigger = null;
               if ( ( pParse.db.flags & SQLITE_RecTriggers ) != 0 )
               {
-                int iDummy = 0;
-                pTrigger = sqlite3TriggersExist( pParse, pTab, TK_DELETE, null, ref iDummy );
+                int iDummy;
+                pTrigger = sqlite3TriggersExist( pParse, pTab, TK_DELETE, null, out iDummy );
               }
               if ( pTrigger != null || sqlite3FkRequired( pParse, pTab, null, 0 ) != 0 )
               {
@@ -1632,8 +1635,8 @@ insert_cleanup:
               sqlite3MultiWrite( pParse );
               if ( ( pParse.db.flags & SQLITE_RecTriggers ) != 0 )
               {
-                int iDummy = 0;
-                pTrigger = sqlite3TriggersExist( pParse, pTab, TK_DELETE, null, ref iDummy );
+                int iDummy;
+                pTrigger = sqlite3TriggersExist( pParse, pTab, TK_DELETE, null, out iDummy );
               }
               sqlite3GenerateRowDelete(
                   pParse, pTab, baseCur, regR, 0, pTrigger, OE_Replace

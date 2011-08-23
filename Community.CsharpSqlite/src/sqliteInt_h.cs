@@ -144,21 +144,21 @@ namespace Community.CsharpSqlite
     ** that vary from one machine to the next.
     **
     ** Ticket #3860:  The llvm-gcc-4.2 compiler from Apple chokes on
-    ** the ((void*)&((char*)0)[X]) construct.  But MSVC chokes on ((void*)(X)).
+    ** the ((void)&((char)0)[X]) construct.  But MSVC chokes on ((void)(X)).
     ** So we have to define the macros in different ways depending on the
     ** compiler.
     */
     //#if (__PTRDIFF_TYPE__)  /* This case should work for GCC */
-    //# define SQLITE_INT_TO_PTR(X)  ((void*)(__PTRDIFF_TYPE__)(X))
+    //# define SQLITE_INT_TO_PTR(X)  ((void)(__PTRDIFF_TYPE__)(X))
     //# define SQLITE_PTR_TO_INT(X)  ((int)(__PTRDIFF_TYPE__)(X))
     //#elif !defined(__GNUC__)       /* Works for compilers other than LLVM */
-    //# define SQLITE_INT_TO_PTR(X)  ((void*)&((char*)0)[X])
-    //# define SQLITE_PTR_TO_INT(X)  ((int)(((char*)X)-(char*)0))
+    //# define SQLITE_INT_TO_PTR(X)  ((void)&((char)0)[X])
+    //# define SQLITE_PTR_TO_INT(X)  ((int)(((char)X)-(char)0))
     //#elif defined(HAVE_STDINT_H)   /* Use this case if we have ANSI headers */
-    //# define SQLITE_INT_TO_PTR(X)  ((void*)(intptr_t)(X))
+    //# define SQLITE_INT_TO_PTR(X)  ((void)(intptr_t)(X))
     //# define SQLITE_PTR_TO_INT(X)  ((int)(intptr_t)(X))
     //#else                          /* Generates a warning - but it always works */
-    //# define SQLITE_INT_TO_PTR(X)  ((void*)(X))
+    //# define SQLITE_INT_TO_PTR(X)  ((void)(X))
     //# define SQLITE_PTR_TO_INT(X)  ((int)(X))
     //#endif
 
@@ -285,7 +285,7 @@ void sqlite3Coverage(int);
     /*
 ** The TESTONLY macro is used to enclose variable declarations or
 ** other bits of code that are needed to support the arguments
-** within testcase() and assert() macros.
+** within testcase() and Debug.Assert() macros.
 */
 #if !NDEBUG || SQLITE_COVERAGE_TEST
     //# define TESTONLY(X)  X
@@ -296,8 +296,8 @@ void sqlite3Coverage(int);
 
     /*
 ** Sometimes we need a small amount of code such as a variable initialization
-** to setup for a later assert() statement.  We do not want this code to
-** appear when assert() is disabled.  The following macro is therefore
+** to setup for a later Debug.Assert() statement.  We do not want this code to
+** appear when Debug.Assert() is disabled.  The following macro is therefore
 ** used to contain that setup code.  The "VVA" acronym stands for
 ** "Verification, Validation, and Accreditation".  In other words, the
 ** code within VVA_ONLY() will only run during verification processes.
@@ -327,7 +327,7 @@ void sqlite3Coverage(int);
 //# define ALWAYS(X)      (1)
 //# define NEVER(X)       (0)
 #elif !NDEBUG
-    //# define ALWAYS(X)      ((X)?1:(assert(0),0))
+    //# define ALWAYS(X)      ((X)?1:(Debug.Assert(0),0))
     static bool ALWAYS( bool X )
     {
       if ( X != true )
@@ -347,7 +347,7 @@ void sqlite3Coverage(int);
       return true;
     }
 
-    //# define NEVER(X)       ((X)?(assert(0),1):0)
+    //# define NEVER(X)       ((X)?(Debug.Assert(0),1):0)
     static bool NEVER( bool X )
     {
       if ( X == true )
@@ -495,7 +495,7 @@ static public bool SQLITE_DEFAULT_RECURSIVE_TRIGGERS = true;
 ** ourselves.
 */
 #if !offsetof
-    //#define offsetof(STRUCTURE,FIELD) ((int)((char*)&((STRUCTURE*)0)->FIELD))
+    //#define offsetof(STRUCTURE,FIELD) ((int)((char)&((STRUCTURE)0)->FIELD))
 #endif
 
     /*
@@ -585,8 +585,8 @@ const int ;//#define SQLITE_BIGENDIAN    0
 const int ;//#define SQLITE_LITTLEENDIAN 1
 const int ;//#define SQLITE_UTF16NATIVE  SQLITE_UTF16LE
 #else
-    static u8 SQLITE_BIGENDIAN = 0;//#define SQLITE_BIGENDIAN    (*(char *)(&sqlite3one)==0)
-    static u8 SQLITE_LITTLEENDIAN = 1;//#define SQLITE_LITTLEENDIAN (*(char *)(&sqlite3one)==1)
+    static u8 SQLITE_BIGENDIAN = 0;//#define SQLITE_BIGENDIAN    (*(char )(&sqlite3one)==0)
+    static u8 SQLITE_LITTLEENDIAN = 1;//#define SQLITE_LITTLEENDIAN (*(char )(&sqlite3one)==1)
     static u8 SQLITE_UTF16NATIVE = ( SQLITE_BIGENDIAN != 0 ? SQLITE_UTF16BE : SQLITE_UTF16LE );//#define SQLITE_UTF16NATIVE (SQLITE_BIGENDIAN?SQLITE_UTF16BE:SQLITE_UTF16LE)
 #endif
 
@@ -621,17 +621,17 @@ const int ;//#define SQLITE_UTF16NATIVE  SQLITE_UTF16LE
 
     /*
     ** Assert that the pointer X is aligned to an 8-byte boundary.  This
-    ** macro is used only within assert() to verify that the code gets
+    ** macro is used only within Debug.Assert() to verify that the code gets
     ** all alignment restrictions correct.
     **
     ** Except, if SQLITE_4_BYTE_ALIGNED_MALLOC is defined, then the
     ** underlying malloc() implemention might return us 4-byte aligned
     ** pointers.  In that case, only verify 4-byte alignment.
     */
-    //#ifdef SQLITE_4_BYTE_ALIGNED_MALLOC
-    //# define EIGHT_BYTE_ALIGNMENT(X)   ((((char*)(X) - (char*)0)&3)==0)
+    //#if SQLITE_4_BYTE_ALIGNED_MALLOC
+    //# define EIGHT_BYTE_ALIGNMENT(X)   ((((char)(X) - (char)0)&3)==0)
     //#else
-    //# define EIGHT_BYTE_ALIGNMENT(X)   ((((char*)(X) - (char*)0)&7)==0)
+    //# define EIGHT_BYTE_ALIGNMENT(X)   ((((char)(X) - (char)0)&7)==0)
     //#endif
 
     /*
@@ -705,7 +705,7 @@ const int ;//#define SQLITE_UTF16NATIVE  SQLITE_UTF16LE
     */
 #if SQLITE_OMIT_WSD
 //#define SQLITE_WSD const
-//#define GLOBAL(t,v) (*(t*)sqlite3_wsd_find((void*)&(v), sizeof(v)))
+//#define GLOBAL(t,v) (*(t)sqlite3_wsd_find((void)&(v), sizeof(v)))
 //#define sqlite3GlobalConfig GLOBAL(struct Sqlite3Config, sqlite3Config)
 int sqlite3_wsd_init(int N, int J);
 void *sqlite3_wsd_find(void *K, int L);
@@ -729,7 +729,7 @@ void *sqlite3_wsd_find(void *K, int L);
 ** it is generally named "NotUsed" or "NotUsed2" to make things even clearer.
 ** However, these macros may also be used to suppress warnings related to
 ** parameters that may or may not be used depending on compilation options.
-** For example those parameters only used in assert() statements. In these
+** For example those parameters only used in Debug.Assert() statements. In these
 ** cases the parameters are named as per the usual conventions.
 */
     //#define UNUSED_PARAMETER(x) (void)(x)
@@ -999,7 +999,7 @@ void *sqlite3_wsd_find(void *K, int L);
       public Db[] aDb = new Db[SQLITE_MAX_ATTACHED];         /* All backends */
       public int flags;                    /* Miscellaneous flags. See below */
       public int openFlags;                /* Flags passed to sqlite3_vfs.xOpen() */
-      public int errCode;                  /* Most recent error code (SQLITE_*) */
+      public int errCode;                  /* Most recent error code (SQLITE_) */
       public int errMask;                  /* & result codes with this before returning */
       public u8 autoCommit;                /* The auto-commit flag. */
       public u8 temp_store;                /* 1: file 2: memory 0: default */
@@ -1032,22 +1032,22 @@ void *sqlite3_wsd_find(void *K, int L);
       public int activeVdbeCnt;            /* Number of VDBEs currently executing */
       public int writeVdbeCnt;             /* Number of active VDBEs that are writing */
       public int vdbeExecCnt;              /* Number of nested calls to VdbeExec() */
-      public dxTrace xTrace;//)(void*,const char*);        /* Trace function */
+      public dxTrace xTrace;//)(void*,const char);        /* Trace function */
       public object pTraceArg;                          /* Argument to the trace function */
       public dxProfile xProfile;//)(void*,const char*,u64);  /* Profiling function */
       public object pProfileArg;                        /* Argument to profile function */
       public object pCommitArg;                 /* Argument to xCommitCallback() */
-      public dxCommitCallback xCommitCallback;//)(void*);    /* Invoked at every commit. */
+      public dxCommitCallback xCommitCallback;//)(void);    /* Invoked at every commit. */
       public object pRollbackArg;               /* Argument to xRollbackCallback() */
-      public dxRollbackCallback xRollbackCallback;//)(void*); /* Invoked at every commit. */
+      public dxRollbackCallback xRollbackCallback;//)(void); /* Invoked at every commit. */
       public object pUpdateArg;
       public dxUpdateCallback xUpdateCallback;//)(void*,int, const char*,const char*,sqlite_int64);
 #if !SQLITE_OMIT_WAL
-//int (*xWalCallback)(void *, sqlite3 *, const char *, int);
+//int (*xWalCallback)(void *, sqlite3 *, string , int);
 //void *pWalArg;
 #endif
-      public dxCollNeeded xCollNeeded;//)(void*,sqlite3*,int eTextRep,const char*);
-      public dxCollNeeded xCollNeeded16;//)(void*,sqlite3*,int eTextRep,const void*);
+      public dxCollNeeded xCollNeeded;//)(void*,sqlite3*,int eTextRep,const char);
+      public dxCollNeeded xCollNeeded16;//)(void*,sqlite3*,int eTextRep,const void);
       public object pCollNeededArg;
       public sqlite3_value pErr;            /* Most recent error message */
       public string zErrMsg;                /* Most recent error message (UTF-8 encoded) */
@@ -1060,21 +1060,21 @@ void *sqlite3_wsd_find(void *K, int L);
       public _u1 u1;
       public Lookaside lookaside = new Lookaside();          /* Lookaside malloc configuration */
 #if !SQLITE_OMIT_AUTHORIZATION
-public dxAuth xAuth;//)(void*,int,const char*,const char*,const char*,const char*);
+public dxAuth xAuth;//)(void*,int,const char*,const char*,const char*,const char);
 /* Access authorization function */
 public object pAuthArg;               /* 1st argument to the access auth function */
 #endif
 #if !SQLITE_OMIT_PROGRESS_CALLBACK
-      public dxProgress xProgress;//)(void *);  /* The progress callback */
+      public dxProgress xProgress;//)(void );  /* The progress callback */
       public object pProgressArg;               /* Argument to the progress callback */
       public int nProgressOps;                  /* Number of opcodes for progress callback */
 #endif
 #if !SQLITE_OMIT_VIRTUALTABLE
-public Hash aModule;                  /* populated by sqlite3_create_module() */
-VtabCtx *pVtabCtx;                    /* Context for active vtab connect/create */
-public VTable aVTrans;                /* Virtual tables with open transactions */
-public int nVTrans;                   /* Allocated size of aVTrans */
-public VTable pDisconnect;            /* Disconnect these in next sqlite3_prepare() */
+      public Hash aModule;                  /* populated by sqlite3_create_module() */
+      public VtabCtx pVtabCtx;              /* Context for active vtab connect/create */
+      public VTable[] aVTrans;              /* Virtual tables with open transactions */
+      public int nVTrans;                   /* Allocated size of aVTrans */
+      public VTable pDisconnect;            /* Disconnect these in next sqlite3_prepare() */
 #endif
       public FuncDefHash aFunc = new FuncDefHash();       /* Hash table of connection functions */
       public Hash aCollSeq = new Hash();                  /* All collating sequences */
@@ -1217,9 +1217,9 @@ sqlite3 *pNextBlocked;        /* Next in list of all blocked connections */
       public u8 flags;           /* Some combination of SQLITE_FUNC_* */
       public object pUserData;   /* User data parameter */
       public FuncDef pNext;      /* Next function with same name */
-      public dxFunc xFunc;//)(sqlite3_context*,int,sqlite3_value**); /* Regular function */
-      public dxStep xStep;//)(sqlite3_context*,int,sqlite3_value**); /* Aggregate step */
-      public dxFinal xFinalize;//)(sqlite3_context*);                /* Aggregate finalizer */
+      public dxFunc xFunc;//)(sqlite3_context*,int,sqlite3_value*); /* Regular function */
+      public dxStep xStep;//)(sqlite3_context*,int,sqlite3_value*); /* Aggregate step */
+      public dxFinal xFinalize;//)(sqlite3_context);                /* Aggregate finalizer */
       public string zName;       /* SQL name of the function. */
       public FuncDef pHash;      /* Next with a different name but the same hash */
       public FuncDestructor pDestructor;   /* Reference counted destructor function */
@@ -1281,6 +1281,22 @@ sqlite3 *pNextBlocked;        /* Next in list of all blocked connections */
         this.zName = zName;
       }
 
+      public FuncDef Copy()
+      {
+        FuncDef c = new FuncDef();
+        c.nArg = nArg;
+        c.iPrefEnc = iPrefEnc;
+        c.flags = flags;
+        c.pUserData = pUserData;
+        c.pNext = pNext;
+        c.xFunc = xFunc;
+        c.xStep = xStep;
+        c.xFinalize = xFinalize;
+        c.zName = zName;
+        c.pHash = pHash;
+        c.pDestructor = pDestructor;
+        return c;
+      }
     };
 
     /*
@@ -1299,13 +1315,13 @@ sqlite3 *pNextBlocked;        /* Next in list of all blocked connections */
     */
     //struct FuncDestructor {
     //  int nRef;
-    //  void (*xDestroy)(void *);
+    //  void (*xDestroy)(void );
     //  void *pUserData;
     //};
     public class FuncDestructor
     {
       public int nRef;
-      public dxFDestroy xDestroy;// (*xDestroy)(void *);
+      public dxFDestroy xDestroy;// (*xDestroy)(void );
       public object pUserData;
     };
 
@@ -1318,14 +1334,14 @@ sqlite3 *pNextBlocked;        /* Next in list of all blocked connections */
     //#define SQLITE_FUNC_EPHEM    0x04  /* Ephemeral.  Delete with VDBE */
     //#define SQLITE_FUNC_NEEDCOLL 0x08 /* sqlite3GetFuncCollSeq() might be called */
     //#define SQLITE_FUNC_PRIVATE  0x10 /* Allowed for internal use only */
-    //#define SQLITE_FUNC_COUNT    0x20 /* Built-in count(*) aggregate */
+    //#define SQLITE_FUNC_COUNT    0x20 /* Built-in count() aggregate */
     //#define SQLITE_FUNC_COALESCE 0x40 /* Built-in coalesce() or ifnull() function */
     const int SQLITE_FUNC_LIKE = 0x01;    /* Candidate for the LIKE optimization */
     const int SQLITE_FUNC_CASE = 0x02;    /* Case-sensitive LIKE-type function */
     const int SQLITE_FUNC_EPHEM = 0x04;   /* Ephermeral.  Delete with VDBE */
     const int SQLITE_FUNC_NEEDCOLL = 0x08;/* sqlite3GetFuncCollSeq() might be called */
     const int SQLITE_FUNC_PRIVATE = 0x10; /* Allowed for internal use only */
-    const int SQLITE_FUNC_COUNT = 0x20;   /* Built-in count(*) aggregate */
+    const int SQLITE_FUNC_COUNT = 0x20;   /* Built-in count() aggregate */
     const int SQLITE_FUNC_COALESCE = 0x40;/* Built-in coalesce() or ifnull() function */
 
 
@@ -1336,7 +1352,7 @@ sqlite3 *pNextBlocked;        /* Next in list of all blocked connections */
     **   FUNCTION(zName, nArg, iArg, bNC, xFunc)
     **     Used to create a scalar function definition of a function zName
     **     implemented by C function xFunc that accepts nArg arguments. The
-    **     value passed as iArg is cast to a (void*) and made available
+    **     value passed as iArg is cast to a (void) and made available
     **     as the user-data (sqlite3_user_data()) for the function. If
     **     argument bNC is true, then the SQLITE_FUNC_NEEDCOLL flag is set.
     **
@@ -1349,7 +1365,7 @@ sqlite3 *pNextBlocked;        /* Next in list of all blocked connections */
     **   LIKEFUNC(zName, nArg, pArg, flags)
     **     Used to create a scalar function definition of a function zName
     **     that accepts nArg arguments and is implemented by a call to C
-    **     function likeFunc. Argument pArg is cast to a (void *) and made
+    **     function likeFunc. Argument pArg is cast to a (void ) and made
     **     available as the function user-data (sqlite3_user_data()). The
     **     FuncDef.flags variable is set to the value passed as the flags
     **     parameter.
@@ -1368,7 +1384,7 @@ sqlite3 *pNextBlocked;        /* Next in list of all blocked connections */
     //pArg, 0, xFunc, 0, 0, #zName, 0, 0}
 
     //#define LIKEFUNC(zName, nArg, arg, flags) \
-    //  {nArg, SQLITE_UTF8, flags, (void *)arg, 0, likeFunc, 0, 0, #zName, 0, 0}
+    //  {nArg, SQLITE_UTF8, flags, (void )arg, 0, likeFunc, 0, 0, #zName, 0, 0}
     static FuncDef LIKEFUNC( string zName, i16 nArg, object arg, u8 flags )
     {
       return new FuncDef( zName, SQLITE_UTF8, nArg, arg, likeFunc, flags );
@@ -1390,7 +1406,7 @@ sqlite3 *pNextBlocked;        /* Next in list of all blocked connections */
     ** OP_Savepoint instruction.
     */
     //struct Savepoint {
-    //  char *zName;                        /* Savepoint name (nul-terminated) */
+    //  string zName;                        /* Savepoint name (nul-terminated) */
     //  i64 nDeferredCons;                  /* Number of deferred fk violations */
     //  Savepoint *pNext;                   /* Parent savepoint (if any) */
     //};
@@ -1415,10 +1431,10 @@ sqlite3 *pNextBlocked;        /* Next in list of all blocked connections */
     */
     public class Module
     {
-      public sqlite3_module pModule;          /* Callback pointers */
-      public string zName;                    /* Name passed to create_module() */
-      public object pAux;                     /* pAux passed to create_module() */
-      public dxDestroy xDestroy;//)(void *);  /* Module destructor function */
+      public sqlite3_module pModule;         /* Callback pointers */
+      public string zName;                   /* Name passed to create_module() */
+      public object pAux;                    /* pAux passed to create_module() */
+      public smdxDestroy xDestroy;//)(void );/* Module destructor function */
     };
 
     /*
@@ -1474,8 +1490,8 @@ public   u8 isHidden;     /* True if this column is 'hidden' */
       public u8 enc;                /* Text encoding handled by xCmp() */
       public u8 type;               /* One of the SQLITE_COLL_... values below */
       public object pUser;          /* First argument to xCmp() */
-      public dxCompare xCmp;//)(void*,int, const void*, int, const void*);
-      public dxDelCollSeq xDel;//)(void*);  /* Destructor for pUser */
+      public dxCompare xCmp;//)(void*,int, const void*, int, const void);
+      public dxDelCollSeq xDel;//)(void);  /* Destructor for pUser */
 
       public CollSeq Copy()
       {
@@ -1544,7 +1560,7 @@ public   u8 isHidden;     /* True if this column is 'hidden' */
     ** the database schema. 
     **
     ** If the database schema is shared, then there is one instance of this
-    ** structure for each database connection (sqlite3*) that uses the shared
+    ** structure for each database connection (sqlite3) that uses the shared
     ** schema. This is because each database connection requires its own unique
     ** instance of the sqlite3_vtab* handle used to access the virtual table 
     ** implementation. sqlite3_vtab* handles can not be shared between 
@@ -1644,9 +1660,9 @@ public   u8 isHidden;     /* True if this column is 'hidden' */
       public int addColOffset;  /* Offset in CREATE TABLE stmt to add a new column */
 #endif
 #if !SQLITE_OMIT_VIRTUALTABLE
-public VTable pVTable;      /* List of VTable objects. */
-public int nModuleArg;      /* Number of arguments to the module */
-public string[] azModuleArg;/* Text of all module args. [0] is module name */
+      public VTable pVTable;      /* List of VTable objects. */
+      public int nModuleArg;      /* Number of arguments to the module */
+      public string[] azModuleArg;/* Text of all module args. [0] is module name */
 #endif
       public Trigger pTrigger;  /* List of SQL triggers on this table */
       public Schema pSchema;    /* Schema that contains this table */
@@ -1670,10 +1686,6 @@ public string[] azModuleArg;/* Text of all module args. [0] is module name */
 #if !SQLITE_OMIT_CHECK
           // Don't Clone Checks, only copy reference via Memberwise Clone above --
           //if ( pCheck != null ) cp.pCheck = pCheck.Copy();
-#endif
-#if !SQLITE_OMIT_VIRTUALTABLE
-if ( pMod != null ) cp.pMod =pMod.Copy();
-if ( pVtab != null ) cp.pVtab =pVtab.Copy();
 #endif
           // Don't Clone Schema, only copy reference via Memberwise Clone above --
           // if ( pSchema != null ) cp.pSchema=pSchema.Copy();
@@ -1710,9 +1722,15 @@ if ( pVtab != null ) cp.pVtab =pVtab.Copy();
     */
 #if !SQLITE_OMIT_VIRTUALTABLE
 //#  define IsVirtual(X)      (((X)->tabFlags & TF_Virtual)!=0)
-static bool IsVirtual( Table X) { return (X.tabFlags & TF_Virtual)!=0;}
-//#  define IsHiddenColumn(X) ((X)->isHidden)
-static bool IsVirtual( Column X) { return X.isHidden!=0;}
+    static bool IsVirtual( Table X )
+    {
+      return ( X.tabFlags & TF_Virtual ) != 0;
+    }
+    //#  define IsHiddenColumn(X) ((X)->isHidden)
+static bool IsHiddenColumn( Column X )
+{
+  return X.isHidden != 0;
+}
 #else
     //#  define IsVirtual(X)      0
     static bool IsVirtual( Table T )
@@ -2635,7 +2653,7 @@ static void ExprSetIrreducible( Expr X ) { }
     }
     public class WhereLevel
     {
-      public WherePlan plan;       /* query plan for this element of the FROM clause */
+      public WherePlan plan = new WherePlan();       /* query plan for this element of the FROM clause */
       public int iLeftJoin;        /* Memory cell used to implement LEFT OUTER JOIN */
       public int iTabCur;          /* The VDBE cursor used to access the table */
       public int iIdxCur;          /* The VDBE cursor used to access pIdx */
@@ -3000,7 +3018,7 @@ static void ExprSetIrreducible( Expr X ) { }
       public u8 parseError;       /* True after a parsing error.  Ticket #1794 */
       public u8 nTempReg;         /* Number of temporary registers in aTempReg[] */
       public u8 nTempInUse;       /* Number of aTempReg[] currently checked out */
-      public int[] aTempReg = new int[8];     /* Holding area for temporary registers */
+      public int[] aTempReg;      /* Holding area for temporary registers */
       public int nRangeReg;       /* Size of the temporary register block */
       public int iRangeReg;       /* First register in temporary register block */
       public int nErr;            /* Number of errors seen */
@@ -3012,13 +3030,13 @@ static void ExprSetIrreducible( Expr X ) { }
       public int iCacheCnt;       /* Counter used to generate aColCache[].lru values */
       public u8 nColCache;        /* Number of entries in the column cache */
       public u8 iColCache;        /* Next entry of the cache to replace */
-      public yColCache[] aColCache = new yColCache[SQLITE_N_COLCACHE];     /* One for each valid column cache entry */
+      public yColCache[] aColCache;/* One for each valid column cache entry */
       public yDbMask writeMask;   /* Start a write transaction on these databases */
       public yDbMask cookieMask;  /* Bitmask of schema verified databases */
       public u8 isMultiWrite;     /* True if statement may affect/insert multiple rows */
       public u8 mayAbort;         /* True if statement may throw an ABORT exception */
       public int cookieGoto;      /* Address of OP_Goto to cookie verifier subroutine */
-      public int[] cookieValue = new int[SQLITE_MAX_ATTACHED + 2];  /* Values of cookies to verify */
+      public int[] cookieValue;   /* Values of cookies to verify */
 #if !SQLITE_OMIT_SHARED_CACHE
 public int nTableLock;         /* Number of locks in aTableLock */
 public TableLock[] aTableLock; /* Required table locks for shared-cache mode */
@@ -3050,16 +3068,16 @@ public TableLock[] aTableLock; /* Required table locks for shared-cache mode */
       public int[] aAlias;                   /* Register used to hold aliased result */
       public u8 explain;                     /* True if the EXPLAIN flag is found on the query */
       public Token sNameToken;               /* Token with unqualified schema object name */
-      public Token sLastToken = new Token(); /* The last token parsed */
+      public Token sLastToken;               /* The last token parsed */
       public StringBuilder zTail;            /* All SQL text past the last semicolon parsed */
       public Table pNewTable;                /* A table being constructed by CREATE TABLE */
       public Trigger pNewTrigger;            /* Trigger under construct by a CREATE TRIGGER */
       public string zAuthContext;            /* The 6th parameter to db.xAuth callbacks */
 #if !SQLITE_OMIT_VIRTUALTABLE
-public Token sArg;                /* Complete text of a module argument */
-public u8 declareVtab;            /* True if inside sqlite3_declare_vtab() */
-public int nVtabLock;             /* Number of virtual tables to lock */
-public Table[] apVtabLock;        /* Pointer to virtual tables needing locking */
+      public Token sArg;                /* Complete text of a module argument */
+      public u8 declareVtab;            /* True if inside sqlite3_declare_vtab() */
+      public int nVtabLock;             /* Number of virtual tables to lock */
+      public Table[] apVtabLock;        /* Pointer to virtual tables needing locking */
 #endif
       public int nHeight;                    /* Expression tree height of current sub-select */
       public Table pZombieTab;               /* List of Table objects to delete after code gen */
@@ -3072,10 +3090,21 @@ public Table[] apVtabLock;        /* Pointer to virtual tables needing locking *
       // We need to create instances of the col cache
       public Parse()
       {
+        aTempReg = new int[8];     /* Holding area for temporary registers */
+
+        aColCache = new yColCache[SQLITE_N_COLCACHE];     /* One for each valid column cache entry */
         for ( int i = 0; i < this.aColCache.Length; i++ )
         {
           this.aColCache[i] = new yColCache();
         }
+
+        cookieValue = new int[SQLITE_MAX_ATTACHED + 2];  /* Values of cookies to verify */
+
+      sLastToken = new Token(); /* The last token parsed */
+
+#if !SQLITE_OMIT_VIRTUALTABLE
+      sArg = new Token();
+#endif
       }
 
       public void ResetMembers() // Need to clear all the following variables during each recursion
@@ -3094,10 +3123,10 @@ public Table[] apVtabLock;        /* Pointer to virtual tables needing locking *
         pNewTrigger = null;
         zAuthContext = null;
 #if !SQLITE_OMIT_VIRTUALTABLE
-sArg = new Token();
-declareVtab = 0;
-nVtabLock = 0;
-apVtabLoc = null;
+        sArg = new Token();
+        declareVtab = 0;
+        nVtabLock = 0;
+        apVtabLock = null;
 #endif
         nHeight = 0;
         pZombieTab = null;
@@ -3122,10 +3151,10 @@ apVtabLoc = null;
           pNewTrigger = SaveBuf[nested].pNewTrigger;
           zAuthContext = SaveBuf[nested].zAuthContext;
 #if !SQLITE_OMIT_VIRTUALTABLE
-sArg = SaveBuf[nested].sArg              ;
-declareVtab = SaveBuf[nested].declareVtab;
-nVtabLock = SaveBuf[nested].nVtabLock;
-apVtabLock = SaveBuf[nested].apVtabLock;
+          sArg = SaveBuf[nested].sArg;
+          declareVtab = SaveBuf[nested].declareVtab;
+          nVtabLock = SaveBuf[nested].nVtabLock;
+          apVtabLock = SaveBuf[nested].apVtabLock;
 #endif
           nHeight = SaveBuf[nested].nHeight;
           pZombieTab = SaveBuf[nested].pZombieTab;
@@ -3150,10 +3179,10 @@ apVtabLock = SaveBuf[nested].apVtabLock;
         SaveBuf[nested].pNewTrigger = pNewTrigger;
         SaveBuf[nested].zAuthContext = zAuthContext;
 #if !SQLITE_OMIT_VIRTUALTABLE
-SaveBuf[nested].sArg = sArg             ;
-SaveBuf[nested].declareVtab = declareVtab;
-SaveBuf[nested].nVtabLock = nVtabLock   ;
-SaveBuf[nested].apVtabLock = apVtabLock ;
+        SaveBuf[nested].sArg = sArg;
+        SaveBuf[nested].declareVtab = declareVtab;
+        SaveBuf[nested].nVtabLock = nVtabLock;
+        SaveBuf[nested].apVtabLock = apVtabLock;
 #endif
         SaveBuf[nested].nHeight = nHeight;
         SaveBuf[nested].pZombieTab = pZombieTab;
@@ -3162,9 +3191,17 @@ SaveBuf[nested].apVtabLock = apVtabLock ;
     };
 
 #if SQLITE_OMIT_VIRTUALTABLE
-    static bool IN_DECLARE_VTAB = false;//#define IN_DECLARE_VTAB 0
+//#define IN_DECLARE_VTAB 0
+    static bool IN_DECLARE_VTAB( Parse pParse )
+    {
+      return false;
+    }
 #else
     //#define IN_DECLARE_VTAB (pParse.declareVtab)
+    static bool IN_DECLARE_VTAB( Parse pParse )
+    {
+      return pParse.declareVtab != 0;
+    }
 #endif
 
     /*
@@ -3435,7 +3472,7 @@ the <column-list> is stored here */
       public int isPCacheInit;                 /* True after malloc is initialized */
       public sqlite3_mutex pInitMutex;         /* Mutex used by sqlite3_initialize() */
       public int nRefInitMutex;                /* Number of users of pInitMutex */
-      public dxLog xLog; //void (*xLog)(void*,int,const char*); /* Function for logging */
+      public dxLog xLog; //void (*xLog)(void*,int,const char); /* Function for logging */
       public object pLogArg;                   /* First argument to xLog() */
       public bool bLocaltimeFault;             /* True to fail localtime() calls */
 
@@ -3514,8 +3551,8 @@ the <column-list> is stored here */
     */
     public class Walker
     {
-      public dxExprCallback xExprCallback; //)(Walker*, Expr*);     /* Callback for expressions */
-      public dxSelectCallback xSelectCallback; //)(Walker*,Select*);  /* Callback for SELECTs */
+      public dxExprCallback xExprCallback; //)(Walker*, Expr);     /* Callback for expressions */
+      public dxSelectCallback xSelectCallback; //)(Walker*,Select);  /* Callback for SELECTs */
       public Parse pParse;                            /* Parser context.  */
       public struct uw
       {                              /* Extra data for callback */
@@ -3526,11 +3563,11 @@ the <column-list> is stored here */
     };
 
     /* Forward declarations */
-    //int sqlite3WalkExpr(Walker*, Expr*);
-    //int sqlite3WalkExprList(Walker*, ExprList*);
-    //int sqlite3WalkSelect(Walker*, Select*);
-    //int sqlite3WalkSelectExpr(Walker*, Select*);
-    //int sqlite3WalkSelectFrom(Walker*, Select*);
+    //int sqlite3WalkExpr(Walker*, Expr);
+    //int sqlite3WalkExprList(Walker*, ExprList);
+    //int sqlite3WalkSelect(Walker*, Select);
+    //int sqlite3WalkSelectExpr(Walker*, Select);
+    //int sqlite3WalkSelectFrom(Walker*, Select);
 
     /*
     ** Return code from the parse-tree walking primitives and their
@@ -3588,6 +3625,7 @@ the <column-list> is stored here */
     //int sqlite3MisuseError(int);
     //int sqlite3CantopenError(int);
 #if DEBUG
+  
     //#define SQLITE_CORRUPT_BKPT sqlite3CorruptError(__LINE__)
     static int SQLITE_CORRUPT_BKPT()
     {
@@ -3694,8 +3732,8 @@ static int SQLITE_CANTOPEN_BKPT() {return SQLITE_CANTOPEN;}
     /*
 ** Internal function prototypes
 */
-    //int sqlite3StrICmp(const char *, const char *);
-    //int sqlite3Strlen30(const char*);
+    //int sqlite3StrICmp(string , string );
+    //int sqlite3Strlen30(const char);
     //#define sqlite3StrNICmp sqlite3_strnicmp
 
     //int sqlite3MallocInit(void);
@@ -3704,20 +3742,20 @@ static int SQLITE_CANTOPEN_BKPT() {return SQLITE_CANTOPEN;}
     //void *sqlite3MallocZero(int);
     //void *sqlite3DbMallocZero(sqlite3*, int);
     //void *sqlite3DbMallocRaw(sqlite3*, int);
-    //char *sqlite3DbStrDup(sqlite3*,const char*);
+    //char *sqlite3DbStrDup(sqlite3*,const char);
     //char *sqlite3DbStrNDup(sqlite3*,const char*, int);
     //void *sqlite3Realloc(void*, int);
-    //void *sqlite3DbReallocOrFree(sqlite3 *, void *, int);
-    //void *sqlite3DbRealloc(sqlite3 *, void *, int);
-    //void sqlite3DbFree(sqlite3*, void*);
-    //int sqlite3MallocSize(void*);
-    //int sqlite3DbMallocSize(sqlite3*, void*);
+    //void *sqlite3DbReallocOrFree(sqlite3 *, object  *, int);
+    //void *sqlite3DbRealloc(sqlite3 *, object  *, int);
+    //void sqlite3DbFree(sqlite3*, void);
+    //int sqlite3MallocSize(void);
+    //int sqlite3DbMallocSize(sqlite3*, void);
     //void *sqlite3ScratchMalloc(int);
-    //void //sqlite3ScratchFree(void*);
+    //void //sqlite3ScratchFree(void);
     //void *sqlite3PageMalloc(int);
-    //void sqlite3PageFree(void*);
+    //void sqlite3PageFree(void);
     //void sqlite3MemSetDefault(void);
-    //void sqlite3BenignMallocHooks(void (*)(void), void (*)(void));
+    //void sqlite3BenignMallocHooks(void ()(void), object  ()(void));
     //int sqlite3HeapNearlyFull(void);
 
     /*
@@ -3762,7 +3800,7 @@ const sqlite3_mem_methods *sqlite3MemGetMemsys5(void);
     //void sqlite3StatusAdd(int, int);
     //void sqlite3StatusSet(int, int);
 
-    //#ifndef SQLITE_OMIT_FLOATING_POINT
+    //#if !SQLITE_OMIT_FLOATING_POINT
     //  int sqlite3IsNaN(double);
     //#else
     //# define sqlite3IsNaN(X)  0
@@ -3779,68 +3817,68 @@ const sqlite3_mem_methods *sqlite3MemGetMemsys5(void);
     //  void sqlite3DebugPrintf(const char*, ...);
 #endif
 #if SQLITE_TEST
-    //  void *sqlite3TestTextToPtr(const char*);
+    //  void *sqlite3TestTextToPtr(const char);
 #endif
     //void sqlite3SetString(char **, sqlite3*, const char*, ...);
     //void sqlite3ErrorMsg(Parse*, const char*, ...);
-    //int sqlite3Dequote(char*);
+    //int sqlite3Dequote(char);
     //int sqlite3KeywordCode(const unsigned char*, int);
-    //int sqlite3RunParser(Parse*, const char*, char **);
-    //void sqlite3FinishCoding(Parse*);
-    //int sqlite3GetTempReg(Parse*);
+    //int sqlite3RunParser(Parse*, const char*, char *);
+    //void sqlite3FinishCoding(Parse);
+    //int sqlite3GetTempReg(Parse);
     //void sqlite3ReleaseTempReg(Parse*,int);
     //int sqlite3GetTempRange(Parse*,int);
     //void sqlite3ReleaseTempRange(Parse*,int,int);
     //Expr *sqlite3ExprAlloc(sqlite3*,int,const Token*,int);
-    //Expr *sqlite3Expr(sqlite3*,int,const char*);
-    //void sqlite3ExprAttachSubtrees(sqlite3*,Expr*,Expr*,Expr*);
-    //Expr *sqlite3PExpr(Parse*, int, Expr*, Expr*, const Token*);
-    //Expr *sqlite3ExprAnd(sqlite3*,Expr*, Expr*);
-    //Expr *sqlite3ExprFunction(Parse*,ExprList*, Token*);
-    //void sqlite3ExprAssignVarNumber(Parse*, Expr*);
-    //void sqlite3ExprDelete(sqlite3*, Expr*);
-    //ExprList *sqlite3ExprListAppend(Parse*,ExprList*,Expr*);
+    //Expr *sqlite3Expr(sqlite3*,int,const char);
+    //void sqlite3ExprAttachSubtrees(sqlite3*,Expr*,Expr*,Expr);
+    //Expr *sqlite3PExpr(Parse*, int, Expr*, Expr*, const Token);
+    //Expr *sqlite3ExprAnd(sqlite3*,Expr*, Expr);
+    //Expr *sqlite3ExprFunction(Parse*,ExprList*, Token);
+    //void sqlite3ExprAssignVarNumber(Parse*, Expr);
+    //void sqlite3ExprDelete(sqlite3*, Expr);
+    //ExprList *sqlite3ExprListAppend(Parse*,ExprList*,Expr);
     //void sqlite3ExprListSetName(Parse*,ExprList*,Token*,int);
-    //void sqlite3ExprListSetSpan(Parse*,ExprList*,ExprSpan*);
-    //void sqlite3ExprListDelete(sqlite3*, ExprList*);
-    //int sqlite3Init(sqlite3*, char**);
-    //int sqlite3InitCallback(void*, int, char**, char**);
+    //void sqlite3ExprListSetSpan(Parse*,ExprList*,ExprSpan);
+    //void sqlite3ExprListDelete(sqlite3*, ExprList);
+    //int sqlite3Init(sqlite3*, char*);
+    //int sqlite3InitCallback(void*, int, char**, char*);
     //void sqlite3Pragma(Parse*,Token*,Token*,Token*,int);
     //void sqlite3ResetInternalSchema(sqlite3*, int);
     //void sqlite3BeginParse(Parse*,int);
-    //void sqlite3CommitInternalChanges(sqlite3*);
-    //Table *sqlite3ResultSetOfSelect(Parse*,Select*);
+    //void sqlite3CommitInternalChanges(sqlite3);
+    //Table *sqlite3ResultSetOfSelect(Parse*,Select);
     //void sqlite3OpenMasterTable(Parse *, int);
     //void sqlite3StartTable(Parse*,Token*,Token*,int,int,int,int);
-    //void sqlite3AddColumn(Parse*,Token*);
+    //void sqlite3AddColumn(Parse*,Token);
     //void sqlite3AddNotNull(Parse*, int);
     //void sqlite3AddPrimaryKey(Parse*, ExprList*, int, int, int);
-    //void sqlite3AddCheckConstraint(Parse*, Expr*);
-    //void sqlite3AddColumnType(Parse*,Token*);
-    //void sqlite3AddDefaultValue(Parse*,ExprSpan*);
-    //void sqlite3AddCollateType(Parse*, Token*);
-    //void sqlite3EndTable(Parse*,Token*,Token*,Select*);
+    //void sqlite3AddCheckConstraint(Parse*, Expr);
+    //void sqlite3AddColumnType(Parse*,Token);
+    //void sqlite3AddDefaultValue(Parse*,ExprSpan);
+    //void sqlite3AddCollateType(Parse*, Token);
+    //void sqlite3EndTable(Parse*,Token*,Token*,Select);
     //int sqlite3ParseUri(const char*,const char*,unsigned int*,
-    //                sqlite3_vfs**,char**,char **);
+    //                sqlite3_vfs**,char**,char *);
 
     //Bitvec *sqlite3BitvecCreate(u32);
     //int sqlite3BitvecTest(Bitvec*, u32);
     //int sqlite3BitvecSet(Bitvec*, u32);
-    //void sqlite3BitvecClear(Bitvec*, u32, void*);
-    //void sqlite3BitvecDestroy(Bitvec*);
-    //u32 sqlite3BitvecSize(Bitvec*);
-    //int sqlite3BitvecBuiltinTest(int,int*);
+    //void sqlite3BitvecClear(Bitvec*, u32, void);
+    //void sqlite3BitvecDestroy(Bitvec);
+    //u32 sqlite3BitvecSize(Bitvec);
+    //int sqlite3BitvecBuiltinTest(int,int);
 
     //RowSet *sqlite3RowSetInit(sqlite3*, void*, unsigned int);
-    //void sqlite3RowSetClear(RowSet*);
+    //void sqlite3RowSetClear(RowSet);
     //void sqlite3RowSetInsert(RowSet*, i64);
     //int sqlite3RowSetTest(RowSet*, u8 iBatch, i64);
-    //int sqlite3RowSetNext(RowSet*, i64*);
+    //int sqlite3RowSetNext(RowSet*, i64);
 
     //void sqlite3CreateView(Parse*,Token*,Token*,Token*,Select*,int,int);
 
 #if !SQLITE_OMIT_VIEW || !SQLITE_OMIT_VIRTUALTABLE
-    //int sqlite3ViewGetColumnNames(Parse*,Table*);
+    //int sqlite3ViewGetColumnNames(Parse*,Table);
 #else
     //# define sqlite3ViewGetColumnNames(A,B) 0
     static int sqlite3ViewGetColumnNames( Parse A, Table B )
@@ -3850,8 +3888,8 @@ const sqlite3_mem_methods *sqlite3MemGetMemsys5(void);
 #endif
 
     //void sqlite3DropTable(Parse*, SrcList*, int, int);
-    //void sqlite3DeleteTable(sqlite3*, Table*);
-    //#if ! SQLITE_OMIT_AUTOINCREMENT
+    //void sqlite3DeleteTable(sqlite3*, Table);
+    //#if !SQLITE_OMIT_AUTOINCREMENT
     //  void sqlite3AutoincrementBegin(Parse *pParse);
     //  void sqlite3AutoincrementEnd(Parse *pParse);
     //#else
@@ -3859,109 +3897,109 @@ const sqlite3_mem_methods *sqlite3MemGetMemsys5(void);
     //# define sqlite3AutoincrementEnd(X)
     //#endif
     //void sqlite3Insert(Parse*, SrcList*, ExprList*, Select*, IdList*, int);
-    //void *sqlite3ArrayAllocate(sqlite3*,void*,int,int,int*,int*,int*);
-    //IdList *sqlite3IdListAppend(sqlite3*, IdList*, Token*);
-    //int sqlite3IdListIndex(IdList*,const char*);
+    //void *sqlite3ArrayAllocate(sqlite3*,void*,int,int,int*,int*,int);
+    //IdList *sqlite3IdListAppend(sqlite3*, IdList*, Token);
+    //int sqlite3IdListIndex(IdList*,const char);
     //SrcList *sqlite3SrcListEnlarge(sqlite3*, SrcList*, int, int);
-    //SrcList *sqlite3SrcListAppend(sqlite3*, SrcList*, Token*, Token*);
+    //SrcList *sqlite3SrcListAppend(sqlite3*, SrcList*, Token*, Token);
     //SrcList *sqlite3SrcListAppendFromTerm(Parse*, SrcList*, Token*, Token*,
-    //                                      Token*, Select*, Expr*, IdList*);
-    //void sqlite3SrcListIndexedBy(Parse *, SrcList *, Token *);
-    //int sqlite3IndexedByLookup(Parse *, struct SrcList_item *);
-    //void sqlite3SrcListShiftJoinType(SrcList*);
-    //void sqlite3SrcListAssignCursors(Parse*, SrcList*);
-    //void sqlite3IdListDelete(sqlite3*, IdList*);
-    //void sqlite3SrcListDelete(sqlite3*, SrcList*);
+    //                                      Token*, Select*, Expr*, IdList);
+    //void sqlite3SrcListIndexedBy(Parse *, SrcList *, Token );
+    //int sqlite3IndexedByLookup(Parse *, struct SrcList_item );
+    //void sqlite3SrcListShiftJoinType(SrcList);
+    //void sqlite3SrcListAssignCursors(Parse*, SrcList);
+    //void sqlite3IdListDelete(sqlite3*, IdList);
+    //void sqlite3SrcListDelete(sqlite3*, SrcList);
     //Index *sqlite3CreateIndex(Parse*,Token*,Token*,SrcList*,ExprList*,int,Token*,
     //                        Token*, int, int);
     //void sqlite3DropIndex(Parse*, SrcList*, int);
-    //int sqlite3Select(Parse*, Select*, SelectDest*);
+    //int sqlite3Select(Parse*, Select*, SelectDest);
     //Select *sqlite3SelectNew(Parse*,ExprList*,SrcList*,Expr*,ExprList*,
-    //                         Expr*,ExprList*,int,Expr*,Expr*);
-    //void sqlite3SelectDelete(sqlite3*, Select*);
-    //Table *sqlite3SrcListLookup(Parse*, SrcList*);
+    //                         Expr*,ExprList*,int,Expr*,Expr);
+    //void sqlite3SelectDelete(sqlite3*, Select);
+    //Table *sqlite3SrcListLookup(Parse*, SrcList);
     //int sqlite3IsReadOnly(Parse*, Table*, int);
     //void sqlite3OpenTable(Parse*, int iCur, int iDb, Table*, int);
 #if (SQLITE_ENABLE_UPDATE_DELETE_LIMIT) && !(SQLITE_OMIT_SUBQUERY)
-//Expr *sqlite3LimitWhere(Parse *, SrcList *, Expr *, ExprList *, Expr *, Expr *, char *);
+//Expr *sqlite3LimitWhere(Parse *, SrcList *, Expr *, ExprList *, Expr *, Expr *, char );
 #endif
-    //void sqlite3DeleteFrom(Parse*, SrcList*, Expr*);
+    //void sqlite3DeleteFrom(Parse*, SrcList*, Expr);
     //void sqlite3Update(Parse*, SrcList*, ExprList*, Expr*, int);
     //WhereInfo *sqlite3WhereBegin(Parse*, SrcList*, Expr*, ExprList**, u16);
-    //void sqlite3WhereEnd(WhereInfo*);
+    //void sqlite3WhereEnd(WhereInfo);
     //int sqlite3ExprCodeGetColumn(Parse*, Table*, int, int, int);
     //void sqlite3ExprCodeGetColumnOfTable(Vdbe*, Table*, int, int, int);
     //void sqlite3ExprCodeMove(Parse*, int, int, int);
     //void sqlite3ExprCodeCopy(Parse*, int, int, int);
     //void sqlite3ExprCacheStore(Parse*, int, int, int);
-    //void sqlite3ExprCachePush(Parse*);
+    //void sqlite3ExprCachePush(Parse);
     //void sqlite3ExprCachePop(Parse*, int);
     //void sqlite3ExprCacheRemove(Parse*, int, int);
-    //void sqlite3ExprCacheClear(Parse*);
+    //void sqlite3ExprCacheClear(Parse);
     //void sqlite3ExprCacheAffinityChange(Parse*, int, int);
     //int sqlite3ExprCode(Parse*, Expr*, int);
-    //int sqlite3ExprCodeTemp(Parse*, Expr*, int*);
+    //int sqlite3ExprCodeTemp(Parse*, Expr*, int);
     //int sqlite3ExprCodeTarget(Parse*, Expr*, int);
     //int sqlite3ExprCodeAndCache(Parse*, Expr*, int);
-    //void sqlite3ExprCodeConstants(Parse*, Expr*);
+    //void sqlite3ExprCodeConstants(Parse*, Expr);
     //int sqlite3ExprCodeExprList(Parse*, ExprList*, int, int);
     //void sqlite3ExprIfTrue(Parse*, Expr*, int, int);
     //void sqlite3ExprIfFalse(Parse*, Expr*, int, int);
-    //Table *sqlite3FindTable(sqlite3*,const char*, const char*);
-    //Table *sqlite3LocateTable(Parse*,int isView,const char*, const char*);
-    //Index *sqlite3FindIndex(sqlite3*,const char*, const char*);
-    //void sqlite3UnlinkAndDeleteTable(sqlite3*,int,const char*);
-    //void sqlite3UnlinkAndDeleteIndex(sqlite3*,int,const char*);
-    //void sqlite3Vacuum(Parse*);
-    //int sqlite3RunVacuum(char**, sqlite3*);
-    //char *sqlite3NameFromToken(sqlite3*, Token*);
-    //int sqlite3ExprCompare(Expr*, Expr*);
-    //int sqlite3ExprListCompare(ExprList*, ExprList*);
-    //void sqlite3ExprAnalyzeAggregates(NameContext*, Expr*);
-    //void sqlite3ExprAnalyzeAggList(NameContext*,ExprList*);
-    //Vdbe *sqlite3GetVdbe(Parse*);
+    //Table *sqlite3FindTable(sqlite3*,const char*, const char);
+    //Table *sqlite3LocateTable(Parse*,int isView,const char*, const char);
+    //Index *sqlite3FindIndex(sqlite3*,const char*, const char);
+    //void sqlite3UnlinkAndDeleteTable(sqlite3*,int,const char);
+    //void sqlite3UnlinkAndDeleteIndex(sqlite3*,int,const char);
+    //void sqlite3Vacuum(Parse);
+    //int sqlite3RunVacuum(char**, sqlite3);
+    //char *sqlite3NameFromToken(sqlite3*, Token);
+    //int sqlite3ExprCompare(Expr*, Expr);
+    //int sqlite3ExprListCompare(ExprList*, ExprList);
+    //void sqlite3ExprAnalyzeAggregates(NameContext*, Expr);
+    //void sqlite3ExprAnalyzeAggList(NameContext*,ExprList);
+    //Vdbe *sqlite3GetVdbe(Parse);
     //void sqlite3PrngSaveState(void);
     //void sqlite3PrngRestoreState(void);
     //void sqlite3PrngResetState(void);
-    //void sqlite3RollbackAll(sqlite3*);
+    //void sqlite3RollbackAll(sqlite3);
     //void sqlite3CodeVerifySchema(Parse*, int);
-    //void sqlite3CodeVerifyNamedSchema(Parse*, const char *zDb);
+    //void sqlite3CodeVerifyNamedSchema(Parse*, string zDb);
     //void sqlite3BeginTransaction(Parse*, int);
-    //void sqlite3CommitTransaction(Parse*);
-    //void sqlite3RollbackTransaction(Parse*);
-    //void sqlite3Savepoint(Parse*, int, Token*);
-    //void sqlite3CloseSavepoints(sqlite3 *);
-    //int sqlite3ExprIsConstant(Expr*);
-    //int sqlite3ExprIsConstantNotJoin(Expr*);
-    //int sqlite3ExprIsConstantOrFunction(Expr*);
-    //int sqlite3ExprIsInteger(Expr*, int*);
-    //int sqlite3ExprCanBeNull(const Expr*);
+    //void sqlite3CommitTransaction(Parse);
+    //void sqlite3RollbackTransaction(Parse);
+    //void sqlite3Savepoint(Parse*, int, Token);
+    //void sqlite3CloseSavepoints(sqlite3 );
+    //int sqlite3ExprIsConstant(Expr);
+    //int sqlite3ExprIsConstantNotJoin(Expr);
+    //int sqlite3ExprIsConstantOrFunction(Expr);
+    //int sqlite3ExprIsInteger(Expr*, int);
+    //int sqlite3ExprCanBeNull(const Expr);
     //void sqlite3ExprCodeIsNullJump(Vdbe*, const Expr*, int, int);
     //int sqlite3ExprNeedsNoAffinityChange(const Expr*, char);
-    //int sqlite3IsRowid(const char*);
+    //int sqlite3IsRowid(const char);
     //void sqlite3GenerateRowDelete(Parse*, Table*, int, int, int, Trigger *, int);
-    //void sqlite3GenerateRowIndexDelete(Parse*, Table*, int, int*);
+    //void sqlite3GenerateRowIndexDelete(Parse*, Table*, int, int);
     //int sqlite3GenerateIndexKey(Parse*, Index*, int, int, int);
     //void sqlite3GenerateConstraintChecks(Parse*,Table*,int,int,
-    //                                     int*,int,int,int,int,int*);
+    //                                     int*,int,int,int,int,int);
     //void sqlite3CompleteInsertion(Parse*, Table*, int, int, int*, int, int, int);
     //int sqlite3OpenTableAndIndices(Parse*, Table*, int, int);
     //void sqlite3BeginWriteOperation(Parse*, int, int);
-    //void sqlite3MultiWrite(Parse*);
-    //void sqlite3MayAbort(Parse *);
+    //void sqlite3MultiWrite(Parse);
+    //void sqlite3MayAbort(Parse );
     //void sqlite3HaltConstraint(Parse*, int, char*, int);
     //Expr *sqlite3ExprDup(sqlite3*,Expr*,int);
     //ExprList *sqlite3ExprListDup(sqlite3*,ExprList*,int);
     //SrcList *sqlite3SrcListDup(sqlite3*,SrcList*,int);
-    //IdList *sqlite3IdListDup(sqlite3*,IdList*);
+    //IdList *sqlite3IdListDup(sqlite3*,IdList);
     //Select *sqlite3SelectDup(sqlite3*,Select*,int);
-    //void sqlite3FuncDefInsert(FuncDefHash*, FuncDef*);
+    //void sqlite3FuncDefInsert(FuncDefHash*, FuncDef);
     //FuncDef *sqlite3FindFunction(sqlite3*,const char*,int,int,u8,int);
-    //void sqlite3RegisterBuiltinFunctions(sqlite3*);
+    //void sqlite3RegisterBuiltinFunctions(sqlite3);
     //void sqlite3RegisterDateTimeFunctions(void);
     //void sqlite3RegisterGlobalFunctions(void);
-    //int sqlite3SafetyCheckOk(sqlite3*);
-    //int sqlite3SafetyCheckSickOrOk(sqlite3*);
+    //int sqlite3SafetyCheckOk(sqlite3);
+    //int sqlite3SafetyCheckSickOrOk(sqlite3);
     //void sqlite3ChangeCookie(Parse*, int);
 #if !(SQLITE_OMIT_VIEW) && !(SQLITE_OMIT_TRIGGER)
     //void sqlite3MaterializeView(Parse*, Table*, Expr*, int);
@@ -3970,21 +4008,21 @@ const sqlite3_mem_methods *sqlite3MemGetMemsys5(void);
 #if !SQLITE_OMIT_TRIGGER
     //void sqlite3BeginTrigger(Parse*, Token*,Token*,int,int,IdList*,SrcList*,
     //                         Expr*,int, int);
-    //void sqlite3FinishTrigger(Parse*, TriggerStep*, Token*);
+    //void sqlite3FinishTrigger(Parse*, TriggerStep*, Token);
     //void sqlite3DropTrigger(Parse*, SrcList*, int);
     //Trigger *sqlite3TriggersExist(Parse *, Table*, int, ExprList*, int *pMask);
-    //Trigger *sqlite3TriggerList(Parse *, Table *);
+    //Trigger *sqlite3TriggerList(Parse *, Table );
     //  void sqlite3CodeRowTrigger(Parse*, Trigger *, int, ExprList*, int, Table *,
     //                        int, int, int);
-    //void sqliteViewTriggers(Parse*, Table*, Expr*, int, ExprList*);
-    //void sqlite3DeleteTriggerStep(sqlite3*, TriggerStep*);
-    //TriggerStep *sqlite3TriggerSelectStep(sqlite3*,Select*);
+    //void sqliteViewTriggers(Parse*, Table*, Expr*, int, ExprList);
+    //void sqlite3DeleteTriggerStep(sqlite3*, TriggerStep);
+    //TriggerStep *sqlite3TriggerSelectStep(sqlite3*,Select);
     //TriggerStep *sqlite3TriggerInsertStep(sqlite3*,Token*, IdList*,
     //                                      ExprList*,Select*,u8);
     //TriggerStep *sqlite3TriggerUpdateStep(sqlite3*,Token*,ExprList*, Expr*, u8);
-    //TriggerStep *sqlite3TriggerDeleteStep(sqlite3*,Token*, Expr*);
-    //void sqlite3DeleteTrigger(sqlite3*, Trigger*);
-    //void sqlite3UnlinkAndDeleteTrigger(sqlite3*,int,const char*);
+    //TriggerStep *sqlite3TriggerDeleteStep(sqlite3*,Token*, Expr);
+    //void sqlite3DeleteTrigger(sqlite3*, Trigger);
+    //void sqlite3UnlinkAndDeleteTrigger(sqlite3*,int,const char);
     //  u32  sqlite3TriggerColmask(Parse*,Trigger*,ExprList*,int,int,Table*,int);
     //# define sqlite3ParseToplevel(p) ((p)->pToplevel ? (p)->pToplevel : (p))
     static Parse sqlite3ParseToplevel( Parse p )
@@ -4078,15 +4116,15 @@ const sqlite3_mem_methods *sqlite3MemGetMemsys5(void);
     }
 #endif
 
-    //int sqlite3JoinType(Parse*, Token*, Token*, Token*);
+    //int sqlite3JoinType(Parse*, Token*, Token*, Token);
     //void sqlite3CreateForeignKey(Parse*, ExprList*, Token*, ExprList*, int);
     //void sqlite3DeferForeignKey(Parse*, int);
 #if !SQLITE_OMIT_AUTHORIZATION
-void sqlite3AuthRead(Parse*,Expr*,Schema*,SrcList*);
-int sqlite3AuthCheck(Parse*,int, const char*, const char*, const char*);
-void sqlite3AuthContextPush(Parse*, AuthContext*, const char*);
-void sqlite3AuthContextPop(AuthContext*);
-int sqlite3AuthReadCol(Parse*, const char *, const char *, int);
+void sqlite3AuthRead(Parse*,Expr*,Schema*,SrcList);
+int sqlite3AuthCheck(Parse*,int, const char*, const char*, const char);
+void sqlite3AuthContextPush(Parse*, AuthContext*, const char);
+void sqlite3AuthContextPop(AuthContext);
+int sqlite3AuthReadCol(Parse*, string , string , int);
 #else
     //# define sqlite3AuthRead(a,b,c,d)
     static void sqlite3AuthRead( Parse a, Expr b, Schema c, SrcList d )
@@ -4110,20 +4148,20 @@ int sqlite3AuthReadCol(Parse*, const char *, const char *, int);
       return a;
     }
 #endif
-    //void sqlite3Attach(Parse*, Expr*, Expr*, Expr*);
-    //void sqlite3Detach(Parse*, Expr*);
-    //int sqlite3FixInit(DbFixer*, Parse*, int, const char*, const Token*);
-    //int sqlite3FixSrcList(DbFixer*, SrcList*);
-    //int sqlite3FixSelect(DbFixer*, Select*);
-    //int sqlite3FixExpr(DbFixer*, Expr*);
-    //int sqlite3FixExprList(DbFixer*, ExprList*);
-    //int sqlite3FixTriggerStep(DbFixer*, TriggerStep*);
-    //sqlite3AtoF(const char *z, double*, int, u8)
-    //int sqlite3GetInt32(const char *, int*);
-    //int sqlite3Atoi(const char *);
+    //void sqlite3Attach(Parse*, Expr*, Expr*, Expr);
+    //void sqlite3Detach(Parse*, Expr);
+    //int sqlite3FixInit(DbFixer*, Parse*, int, const char*, const Token);
+    //int sqlite3FixSrcList(DbFixer*, SrcList);
+    //int sqlite3FixSelect(DbFixer*, Select);
+    //int sqlite3FixExpr(DbFixer*, Expr);
+    //int sqlite3FixExprList(DbFixer*, ExprList);
+    //int sqlite3FixTriggerStep(DbFixer*, TriggerStep);
+    //sqlite3AtoF(string z, double*, int, u8)
+    //int sqlite3GetInt32(string , int);
+    //int sqlite3Atoi(string );
     //int sqlite3Utf16ByteLen(const void pData, int nChar);
     //int sqlite3Utf8CharLen(const char pData, int nByte);
-    //u32 sqlite3Utf8Read(const u8*, const u8**);
+    //u32 sqlite3Utf8Read(const u8*, const u8*);
 
     /*
     ** Routines to read and write variable-length integers.  These used to
@@ -4134,8 +4172,8 @@ int sqlite3AuthReadCol(Parse*, const char *, const char *, int);
     */
     //int sqlite3PutVarint(unsigned char*, u64);
     //int putVarint32(unsigned char*, u32);
-    //u8 sqlite3GetVarint(const unsigned char *, u64 *);
-    //u8 sqlite3GetVarint32(const unsigned char *, u32 *);
+    //u8 sqlite3GetVarint(const unsigned char *, u64 );
+    //u8 sqlite3GetVarint32(const unsigned char *, u32 );
     //int sqlite3VarintLen(u64 v);
 
     /*
@@ -4155,55 +4193,55 @@ int sqlite3AuthReadCol(Parse*, const char *, const char *, int);
     **     x = putVarint32( A, B );
     **
     */
-    //#define getVarint32(A,B)  (u8)((*(A)<(u8)0x80) ? ((B) = (u32)*(A)),1 : sqlite3GetVarint32((A), (u32 *)&(B)))
+    //#define getVarint32(A,B)  (u8)((*(A)<(u8)0x80) ? ((B) = (u32)*(A)),1 : sqlite3GetVarint32((A), (u32 )&(B)))
     //#define putVarint32(A,B)  (u8)(((u32)(B)<(u32)0x80) ? (*(A) = (unsigned char)(B)),1 : sqlite3PutVarint32((A), (B)))
     //#define getVarint    sqlite3GetVarint
     //#define putVarint    sqlite3PutVarint
 
 
-    //const char *sqlite3IndexAffinityStr(Vdbe *, Index *);
-    //void sqlite3TableAffinityStr(Vdbe *, Table *);
+    //string sqlite3IndexAffinityStr(Vdbe *, Index );
+    //void sqlite3TableAffinityStr(Vdbe *, Table );
     //char sqlite3CompareAffinity(Expr pExpr, char aff2);
     //int sqlite3IndexAffinityOk(Expr pExpr, char idx_affinity);
     //char sqlite3ExprAffinity(Expr pExpr);
     //int sqlite3Atoi64(const char*, i64*, int, u8);
     //void sqlite3Error(sqlite3*, int, const char*,...);
-    //void *sqlite3HexToBlob(sqlite3*, const char *z, int n);
+    //void *sqlite3HexToBlob(sqlite3*, string z, int n);
     //u8 sqlite3HexToInt(int h);
-    //int sqlite3TwoPartName(Parse *, Token *, Token *, Token **);
-    //const char *sqlite3ErrStr(int);
+    //int sqlite3TwoPartName(Parse *, Token *, Token *, Token *);
+    //string sqlite3ErrStr(int);
     //int sqlite3ReadSchema(Parse pParse);
     //CollSeq *sqlite3FindCollSeq(sqlite3*,u8 enc, const char*,int);
     //CollSeq *sqlite3LocateCollSeq(Parse *pParse, const char*zName);
     //CollSeq *sqlite3ExprCollSeq(Parse pParse, Expr pExpr);
-    //Expr *sqlite3ExprSetColl(Expr*, CollSeq*);
-    //Expr *sqlite3ExprSetCollByToken(Parse *pParse, Expr*, Token*);
-    //int sqlite3CheckCollSeq(Parse *, CollSeq *);
-    //int sqlite3CheckObjectName(Parse *, const char *);
+    //Expr *sqlite3ExprSetColl(Expr*, CollSeq);
+    //Expr *sqlite3ExprSetCollByToken(Parse *pParse, Expr*, Token);
+    //int sqlite3CheckCollSeq(Parse *, CollSeq );
+    //int sqlite3CheckObjectName(Parse *, string );
     //void sqlite3VdbeSetChanges(sqlite3 *, int);
     //int sqlite3AddInt64(i64*,i64);
     //int sqlite3SubInt64(i64*,i64);
     //int sqlite3MulInt64(i64*,i64);
     //int sqlite3AbsInt32(int);
     #if SQLITE_ENABLE_8_3_NAMES
-    //void sqlite3FileSuffix3(const char*, char*);
+    //void sqlite3FileSuffix3(const char*, char);
     #else
     //# define sqlite3FileSuffix3(X,Y)
     static void sqlite3FileSuffix3(string X, string Y){}
     #endif
-    //u8 sqlite3GetBoolean(const char *z);
+    //u8 sqlite3GetBoolean(string z);
 
     //const void *sqlite3ValueText(sqlite3_value*, u8);
     //int sqlite3ValueBytes(sqlite3_value*, u8);
     //void sqlite3ValueSetStr(sqlite3_value*, int, const void *,u8,
-    //                      //  void(*)(void*));
-    //void sqlite3ValueFree(sqlite3_value*);
-    //sqlite3_value *sqlite3ValueNew(sqlite3 *);
+    //                      //  void()(void));
+    //void sqlite3ValueFree(sqlite3_value);
+    //sqlite3_value *sqlite3ValueNew(sqlite3 );
     //char *sqlite3Utf16to8(sqlite3 *, const void*, int, u8);
-    //#ifdef SQLITE_ENABLE_STAT2
-    //char *sqlite3Utf8to16(sqlite3 *, u8, char *, int, int *);
+    //#if SQLITE_ENABLE_STAT2
+    //char *sqlite3Utf8to16(sqlite3 *, u8, char *, int, int );
     //#endif
-    //int sqlite3ValueFromExpr(sqlite3 *, Expr *, u8, u8, sqlite3_value **);
+    //int sqlite3ValueFromExpr(sqlite3 *, Expr *, u8, u8, sqlite3_value *);
     //void sqlite3ValueApplyAffinity(sqlite3_value *, u8, u8);
     //#if !SQLITE_AMALGAMATION
     //extern const unsigned char sqlite3OpcodeProperty[];
@@ -4212,77 +4250,77 @@ int sqlite3AuthReadCol(Parse*, const char *, const char *, int);
     //extern const Token sqlite3IntTokens[];
     //extern SQLITE_WSD struct Sqlite3Config sqlite3Config;
     //extern SQLITE_WSD FuncDefHash sqlite3GlobalFunctions;
-    //#ifndef SQLITE_OMIT_WSD
+    //#if !SQLITE_OMIT_WSD
     //extern int sqlite3PendingByte;
     //#endif
     //#endif
     //void sqlite3RootPageMoved(sqlite3*, int, int, int);
-    //void sqlite3Reindex(Parse*, Token*, Token*);
+    //void sqlite3Reindex(Parse*, Token*, Token);
     //void sqlite3AlterFunctions(void);
-    //void sqlite3AlterRenameTable(Parse*, SrcList*, Token*);
-    //int sqlite3GetToken(const unsigned char *, int *);
+    //void sqlite3AlterRenameTable(Parse*, SrcList*, Token);
+    //int sqlite3GetToken(const unsigned char *, int );
     //void sqlite3NestedParse(Parse*, const char*, ...);
-    //void sqlite3ExpirePreparedStatements(sqlite3*);
+    //void sqlite3ExpirePreparedStatements(sqlite3);
     //int sqlite3CodeSubselect(Parse *, Expr *, int, int);
-    //void sqlite3SelectPrep(Parse*, Select*, NameContext*);
-    //int sqlite3ResolveExprNames(NameContext*, Expr*);
-    //void sqlite3ResolveSelectNames(Parse*, Select*, NameContext*);
-    //int sqlite3ResolveOrderGroupBy(Parse*, Select*, ExprList*, const char*);
+    //void sqlite3SelectPrep(Parse*, Select*, NameContext);
+    //int sqlite3ResolveExprNames(NameContext*, Expr);
+    //void sqlite3ResolveSelectNames(Parse*, Select*, NameContext);
+    //int sqlite3ResolveOrderGroupBy(Parse*, Select*, ExprList*, const char);
     //void sqlite3ColumnDefault(Vdbe *, Table *, int, int);
-    //void sqlite3AlterFinishAddColumn(Parse *, Token *);
-    //void sqlite3AlterBeginAddColumn(Parse *, SrcList *);
-    //CollSeq *sqlite3GetCollSeq(sqlite3*, u8, CollSeq *, const char*);
-    //char sqlite3AffinityType(const char*);
-    //void sqlite3Analyze(Parse*, Token*, Token*);
-    //int sqlite3InvokeBusyHandler(BusyHandler*);
-    //int sqlite3FindDb(sqlite3*, Token*);
-    //int sqlite3FindDbName(sqlite3 *, const char *);
+    //void sqlite3AlterFinishAddColumn(Parse *, Token );
+    //void sqlite3AlterBeginAddColumn(Parse *, SrcList );
+    //CollSeq *sqlite3GetCollSeq(sqlite3*, u8, CollSeq *, const char);
+    //char sqlite3AffinityType(const char);
+    //void sqlite3Analyze(Parse*, Token*, Token);
+    //int sqlite3InvokeBusyHandler(BusyHandler);
+    //int sqlite3FindDb(sqlite3*, Token);
+    //int sqlite3FindDbName(sqlite3 *, string );
     //int sqlite3AnalysisLoad(sqlite3*,int iDB);
-    //void sqlite3DeleteIndexSamples(sqlite3*,Index*);
-    //void sqlite3DefaultRowEst(Index*);
+    //void sqlite3DeleteIndexSamples(sqlite3*,Index);
+    //void sqlite3DefaultRowEst(Index);
     //void sqlite3RegisterLikeFunctions(sqlite3*, int);
-    //int sqlite3IsLikeFunction(sqlite3*,Expr*,int*,char*);
+    //int sqlite3IsLikeFunction(sqlite3*,Expr*,int*,char);
     //void sqlite3MinimumFileFormat(Parse*, int, int);
-    //void sqlite3SchemaClear(void *);
-    //Schema *sqlite3SchemaGet(sqlite3 *, Btree *);
-    //int sqlite3SchemaToIndex(sqlite3 db, Schema *);
-    //KeyInfo *sqlite3IndexKeyinfo(Parse *, Index *);
-    //int sqlite3CreateFunc(sqlite3 *, const char *, int, int, void *, 
-    //  void (*)(sqlite3_context*,int,sqlite3_value **),
-    //  void (*)(sqlite3_context*,int,sqlite3_value **), void (*)(sqlite3_context*),
+    //void sqlite3SchemaClear(void );
+    //Schema *sqlite3SchemaGet(sqlite3 *, Btree );
+    //int sqlite3SchemaToIndex(sqlite3 db, Schema );
+    //KeyInfo *sqlite3IndexKeyinfo(Parse *, Index );
+    //int sqlite3CreateFunc(sqlite3 *, string , int, int, object  *, 
+    //  void ()(sqlite3_context*,int,sqlite3_value *),
+    //  void ()(sqlite3_context*,int,sqlite3_value *), object  ()(sqlite3_context),
     //  FuncDestructor *pDestructor
     //);
     //int sqlite3ApiExit(sqlite3 db, int);
-    //int sqlite3OpenTempDatabase(Parse *);
+    //int sqlite3OpenTempDatabase(Parse );
 
     //void sqlite3StrAccumAppend(StrAccum*,const char*,int);
-    //char *sqlite3StrAccumFinish(StrAccum*);
-    //void sqlite3StrAccumReset(StrAccum*);
+    //char *sqlite3StrAccumFinish(StrAccum);
+    //void sqlite3StrAccumReset(StrAccum);
     //void sqlite3SelectDestInit(SelectDest*,int,int);
     //Expr *sqlite3CreateColumnExpr(sqlite3 *, SrcList *, int, int);
 
-    //void sqlite3BackupRestart(sqlite3_backup *);
-    //void sqlite3BackupUpdate(sqlite3_backup *, Pgno, const u8 *);
+    //void sqlite3BackupRestart(sqlite3_backup );
+    //void sqlite3BackupUpdate(sqlite3_backup *, Pgno, const u8 );
 
     /*
     ** The interface to the LEMON-generated parser
     */
-    //void *sqlite3ParserAlloc(void*(*)(size_t));
-    //void sqlite3ParserFree(void*, void(*)(void*));
-    //void sqlite3Parser(void*, int, Token, Parse*);
+    //void *sqlite3ParserAlloc(void*()(size_t));
+    //void sqlite3ParserFree(void*, void()(void));
+    //void sqlite3Parser(void*, int, Token, Parse);
 #if YYTRACKMAXSTACKDEPTH
-int sqlite3ParserStackPeak(void*);
+int sqlite3ParserStackPeak(void);
 #endif
 
-    //void sqlite3AutoLoadExtensions(sqlite3*);
+    //void sqlite3AutoLoadExtensions(sqlite3);
 #if !SQLITE_OMIT_LOAD_EXTENSION
-    //void sqlite3CloseExtensions(sqlite3*);
+    //void sqlite3CloseExtensions(sqlite3);
 #else
 //# define sqlite3CloseExtensions(X)
 #endif
 
 #if !SQLITE_OMIT_SHARED_CACHE
-//void sqlite3TableLock(Parse *, int, int, u8, const char *);
+//void sqlite3TableLock(Parse *, int, int, u8, string );
 #else
     //#define sqlite3TableLock(v,w,x,y,z)
     static void sqlite3TableLock( Parse p, int p1, int p2, u8 p3, byte[] p4 )
@@ -4294,7 +4332,7 @@ int sqlite3ParserStackPeak(void*);
 #endif
 
 #if SQLITE_TEST
-    ///int sqlite3Utf8To8(unsigned char*);
+    ///int sqlite3Utf8To8(unsigned char);
 #endif
 
 #if SQLITE_OMIT_VIRTUALTABLE
@@ -4304,7 +4342,7 @@ int sqlite3ParserStackPeak(void*);
     }
 
     //#  define sqlite3VtabSync(X,Y) SQLITE_OK
-    static int sqlite3VtabSync( sqlite3 X, string Y )
+    static int sqlite3VtabSync( sqlite3 X, ref string Y )
     {
       return SQLITE_OK;
     }
@@ -4369,37 +4407,40 @@ int sqlite3ParserStackPeak(void*);
       return null;
     }
 #else
-//void sqlite3VtabClear(sqlite3 *db, Table*);
+//void sqlite3VtabClear(sqlite3 db, Table);
 //int sqlite3VtabSync(sqlite3 db, int rc);
 //int sqlite3VtabRollback(sqlite3 db);
 //int sqlite3VtabCommit(sqlite3 db);
-//void sqlite3VtabLock(VTable *);
-//void sqlite3VtabUnlock(VTable *);
-//void sqlite3VtabUnlockList(sqlite3*);
+//void sqlite3VtabLock(VTable );
+//void sqlite3VtabUnlock(VTable );
+//void sqlite3VtabUnlockList(sqlite3);
 //int sqlite3VtabSavepoint(sqlite3 *, int, int);
 //#  define sqlite3VtabInSync(db) ((db)->nVTrans>0 && (db)->aVTrans==0)
-static bool sqlite3VtabInSync( sqlite3 db ) { return ( db.nVTrans > 0 && db.aVTrans == 0 ); }
+    static bool sqlite3VtabInSync( sqlite3 db )
+    {
+      return ( db.nVTrans > 0 && db.aVTrans == null );
+    }
 #endif
-    //void sqlite3VtabMakeWritable(Parse*,Table*);
-    //void sqlite3VtabBeginParse(Parse*, Token*, Token*, Token*);
-    //void sqlite3VtabFinishParse(Parse*, Token*);
-    //void sqlite3VtabArgInit(Parse*);
-    //void sqlite3VtabArgExtend(Parse*, Token*);
-    //int sqlite3VtabCallCreate(sqlite3*, int, const char *, char **);
-    //int sqlite3VtabCallConnect(Parse*, Table*);
-    //int sqlite3VtabCallDestroy(sqlite3*, int, const char *);
-    //int sqlite3VtabBegin(sqlite3 *, VTable *);
-    //FuncDef *sqlite3VtabOverloadFunction(sqlite3 *,FuncDef*, int nArg, Expr*);
-    //void sqlite3InvalidFunction(sqlite3_context*,int,sqlite3_value**);
+    //void sqlite3VtabMakeWritable(Parse*,Table);
+    //void sqlite3VtabBeginParse(Parse*, Token*, Token*, Token);
+    //void sqlite3VtabFinishParse(Parse*, Token);
+    //void sqlite3VtabArgInit(Parse);
+    //void sqlite3VtabArgExtend(Parse*, Token);
+    //int sqlite3VtabCallCreate(sqlite3*, int, string , char *);
+    //int sqlite3VtabCallConnect(Parse*, Table);
+    //int sqlite3VtabCallDestroy(sqlite3*, int, string );
+    //int sqlite3VtabBegin(sqlite3 *, VTable );
+    //FuncDef *sqlite3VtabOverloadFunction(sqlite3 *,FuncDef*, int nArg, Expr);
+    //void sqlite3InvalidFunction(sqlite3_context*,int,sqlite3_value*);
     //int sqlite3VdbeParameterIndex(Vdbe*, const char*, int);
-    //int sqlite3TransferBindings(sqlite3_stmt *, sqlite3_stmt *);
-    //int sqlite3Reprepare(Vdbe*);
-    //void sqlite3ExprListCheckLength(Parse*, ExprList*, const char*);
-    //CollSeq *sqlite3BinaryCompareCollSeq(Parse *, Expr *, Expr *);
-    //int sqlite3TempInMemory(const sqlite3*);
-    //VTable *sqlite3GetVTable(sqlite3*, Table*);
-    //const char *sqlite3JournalModename(int);
-    //int sqlite3Checkpoint(sqlite3*, int, int, int*, int*);
+    //int sqlite3TransferBindings(sqlite3_stmt *, sqlite3_stmt );
+    //int sqlite3Reprepare(Vdbe);
+    //void sqlite3ExprListCheckLength(Parse*, ExprList*, const char);
+    //CollSeq *sqlite3BinaryCompareCollSeq(Parse *, Expr *, Expr );
+    //int sqlite3TempInMemory(const sqlite3);
+    //VTable *sqlite3GetVTable(sqlite3*, Table);
+    //string sqlite3JournalModename(int);
+    //int sqlite3Checkpoint(sqlite3*, int, int, int*, int);
     //int sqlite3WalDefaultHook(void*,sqlite3*,const char*,int);
 
     /* Declarations for functions in fkey.c. All of these are replaced by
@@ -4411,11 +4452,11 @@ static bool sqlite3VtabInSync( sqlite3 db ) { return ( db.nVTrans > 0 && db.aVTr
     */
 #if !(SQLITE_OMIT_FOREIGN_KEY) && !(SQLITE_OMIT_TRIGGER)
     //void sqlite3FkCheck(Parse*, Table*, int, int);
-    //void sqlite3FkDropTable(Parse*, SrcList *, Table*);
+    //void sqlite3FkDropTable(Parse*, SrcList *, Table);
     //void sqlite3FkActions(Parse*, Table*, ExprList*, int);
     //int sqlite3FkRequired(Parse*, Table*, int*, int);
-    //u32 sqlite3FkOldmask(Parse*, Table*);
-    //FKey *sqlite3FkReferences(Table *);
+    //u32 sqlite3FkOldmask(Parse*, Table);
+    //FKey *sqlite3FkReferences(vtable );
 #else
 //#define sqlite3FkActions(a,b,c,d)
 static void sqlite3FkActions( Parse a, Table b, ExprList c, int d ) { }
@@ -4433,7 +4474,7 @@ static u32 sqlite3FkOldmask( Parse a, Table b ) { return 0; }
 static int sqlite3FkRequired( Parse a, Table b, int[] c, int d ) { return 0; }
 #endif
 #if !SQLITE_OMIT_FOREIGN_KEY
-    //void sqlite3FkDelete(sqlite3 *, Table*);
+    //void sqlite3FkDelete(sqlite3 *, Table);
 #else
 //#define sqlite3FkDelete(a, b)
 static void sqlite3FkDelete(sqlite3 a, Table b) {}                 
@@ -4461,12 +4502,12 @@ static void sqlite3FkDelete(sqlite3 a, Table b) {}
     const int IN_INDEX_ROWID = 1;//#define IN_INDEX_ROWID           1
     const int IN_INDEX_EPH = 2;//#define IN_INDEX_EPH             2
     const int IN_INDEX_INDEX = 3;//#define IN_INDEX_INDEX           3
-    //int sqlite3FindInIndex(Parse *, Expr *, int*);
+    //int sqlite3FindInIndex(Parse *, Expr *, int);
 
 #if SQLITE_ENABLE_ATOMIC_WRITE
-//  int sqlite3JournalOpen(sqlite3_vfs *, const char *, sqlite3_file *, int, int);
-//  int sqlite3JournalSize(sqlite3_vfs *);
-//  int sqlite3JournalCreate(sqlite3_file *);
+//  int sqlite3JournalOpen(sqlite3_vfs *, string , sqlite3_file *, int, int);
+//  int sqlite3JournalSize(sqlite3_vfs );
+//  int sqlite3JournalCreate(sqlite3_file );
 #else
     //#define sqlite3JournalSize(pVfs) ((pVfs)->szOsFile)
     static int sqlite3JournalSize( sqlite3_vfs pVfs )
@@ -4475,13 +4516,13 @@ static void sqlite3FkDelete(sqlite3 a, Table b) {}
     }
 #endif
 
-    //void sqlite3MemJournalOpen(sqlite3_file *);
+    //void sqlite3MemJournalOpen(sqlite3_file );
     //int sqlite3MemJournalSize(void);
-    //int sqlite3IsMemJournal(sqlite3_file *);
+    //int sqlite3IsMemJournal(sqlite3_file );
 
 #if SQLITE_MAX_EXPR_DEPTH//>0
     //  void sqlite3ExprSetHeight(Parse pParse, Expr p);
-    //  int sqlite3SelectExprHeight(Select *);
+    //  int sqlite3SelectExprHeight(Select );
     //int sqlite3ExprCheckHeight(Parse*, int);
 #else
 //#define sqlite3ExprSetHeight(x,y)
@@ -4489,13 +4530,13 @@ static void sqlite3FkDelete(sqlite3 a, Table b) {}
 //#define sqlite3ExprCheckHeight(x,y)
 #endif
 
-    //u32 sqlite3Get4byte(const u8*);
+    //u32 sqlite3Get4byte(const u8);
     //void sqlite3sqlite3Put4byte(u8*, u32);
 
 #if SQLITE_ENABLE_UNLOCK_NOTIFY
-void sqlite3ConnectionBlocked(sqlite3 *, sqlite3 *);
-void sqlite3ConnectionUnlocked(sqlite3 *db);
-void sqlite3ConnectionClosed(sqlite3 *db);
+void sqlite3ConnectionBlocked(sqlite3 *, sqlite3 );
+void sqlite3ConnectionUnlocked(sqlite3 db);
+void sqlite3ConnectionClosed(sqlite3 db);
 #else
     static void sqlite3ConnectionBlocked( sqlite3 x, sqlite3 y )
     {
@@ -4509,7 +4550,7 @@ void sqlite3ConnectionClosed(sqlite3 *db);
 #endif
 
 #if SQLITE_DEBUG
-    //  void sqlite3ParserTrace(FILE*, char *);
+    //  void sqlite3ParserTrace(FILE*, char );
 #endif
 
     /*
@@ -4546,7 +4587,7 @@ static void IOTRACE( string X, params object[] ap ) { if ( SQLite3IoTrace ) { pr
 **
 ** sqlite3MemdebugHasType() returns true if any of the bits in its second
 ** argument match the type set by the previous sqlite3MemdebugSetType().
-** sqlite3MemdebugHasType() is intended for use inside assert() statements.
+** sqlite3MemdebugHasType() is intended for use inside Debug.Assert() statements.
 **
 ** sqlite3MemdebugNoType() returns true if none of the bits in its second
 ** argument match the type set by the previous sqlite3MemdebugSetType().

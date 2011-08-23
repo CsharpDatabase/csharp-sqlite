@@ -213,7 +213,7 @@ namespace Community.CsharpSqlite
 "OMIT_CHECK",
 #endif
 /* // redundant
-** #ifdef SQLITE_OMIT_COMPILEOPTION_DIAGS
+** #if SQLITE_OMIT_COMPILEOPTION_DIAGS
 **   "OMIT_COMPILEOPTION_DIAGS",
 ** #endif
 */

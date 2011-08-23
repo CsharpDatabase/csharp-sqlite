@@ -2,11 +2,6 @@
 *************************************************************************
 **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
 **  C#-SQLite is an independent reimplementation of the SQLite software library
-**
-**  Repository path : $HeadURL: https://sqlitecs.googlecode.com/svn/trunk/C%23SQLite/src/Delegates.cs $
-**  Revision        : $Revision$
-**  Last Change Date: $LastChangedDate: 2009-08-04 13:34:52 -0700 (Tue, 04 Aug 2009) $
-**  Last Changed By : $LastChangedBy: noah.hart $
 *************************************************************************
 */
 
@@ -76,22 +71,22 @@ namespace Community.CsharpSqlite
     public delegate int dxTruncate( sqlite3_file File_ID, sqlite3_int64 size );
     public delegate int dxUnlock( sqlite3_file File_ID, int locktype );
     public delegate int dxWrite( sqlite3_file File_ID, byte[] buffer, int amount, sqlite3_int64 offset );
-    public delegate int dxShmMap( sqlite3_file File_ID, int iPg, int pgsz, int pInt, ref object pvolatile );
+    public delegate int dxShmMap( sqlite3_file File_ID, int iPg, int pgsz, int pInt, out object pvolatile );
     public delegate int dxShmLock( sqlite3_file File_ID, int offset, int n, int flags );
     public delegate void dxShmBarrier( sqlite3_file File_ID );
     public delegate int dxShmUnmap( sqlite3_file File_ID, int deleteFlag );
     /*
          sqlite_vfs Delegates
      */
-    public delegate int dxOpen( sqlite3_vfs vfs, string zName, sqlite3_file db, int flags, ref int pOutFlags );
+    public delegate int dxOpen( sqlite3_vfs vfs, string zName, sqlite3_file db, int flags, out int pOutFlags );
     public delegate int dxDelete( sqlite3_vfs vfs, string zName, int syncDir );
-    public delegate int dxAccess( sqlite3_vfs vfs, string zName, int flags, ref int pResOut );
+    public delegate int dxAccess( sqlite3_vfs vfs, string zName, int flags, out int pResOut );
     public delegate int dxFullPathname( sqlite3_vfs vfs, string zName, int nOut, StringBuilder zOut );
     public delegate HANDLE dxDlOpen( sqlite3_vfs vfs, string zFilename );
     public delegate int dxDlError( sqlite3_vfs vfs, int nByte, string zErrMsg );
     public delegate HANDLE dxDlSym( sqlite3_vfs vfs, HANDLE data, string zSymbol );
     public delegate int dxDlClose( sqlite3_vfs vfs, HANDLE data );
-    public delegate int dxRandomness( sqlite3_vfs vfs, int nByte, ref byte[] buffer );
+    public delegate int dxRandomness( sqlite3_vfs vfs, int nByte, byte[] buffer );
     public delegate int dxSleep( sqlite3_vfs vfs, int microseconds );
     public delegate int dxCurrentTime( sqlite3_vfs vfs, ref double currenttime );
     public delegate int dxGetLastError( sqlite3_vfs pVfs, int nBuf, ref string zBuf );
@@ -113,7 +108,7 @@ namespace Community.CsharpSqlite
 #if SQLITE_HAS_CODEC
     public delegate byte[] dxCodec( codec_ctx pCodec, byte[] D, uint pageNumber, int X ); //void *(*xCodec)(void*,void*,Pgno,int); /* Routine for en/decoding data */
     public delegate void dxCodecSizeChng( codec_ctx pCodec, int pageSize, i16 nReserve ); //void (*xCodecSizeChng)(void*,int,int); /* Notify of page size changes */
-    public delegate void dxCodecFree( ref codec_ctx pCodec ); //void (*xCodecFree)(void*); /* Destructor for the codec */
+    public delegate void dxCodecFree( ref codec_ctx pCodec ); //void (*xCodecFree)(void); /* Destructor for the codec */
 #endif
 
     //Module
@@ -121,35 +116,29 @@ namespace Community.CsharpSqlite
     public delegate int dxStress( object obj, PgHdr pPhHdr );
 
     //sqlite3_module
-    public delegate int smdxCreate( sqlite3 db, object pAux, int argc, string constargv, ref sqlite3_vtab ppVTab, ref string pError );
-    public delegate int smdxConnect( sqlite3 db, object pAux, int argc, string constargv, ref sqlite3_vtab ppVTab, ref string pError );
+    public delegate int smdxCreateConnect( sqlite3 db, object pAux, int argc, string[] constargv, out sqlite3_vtab ppVTab, out string pError );
     public delegate int smdxBestIndex( sqlite3_vtab pVTab, ref sqlite3_index_info pIndex );
-    public delegate int smdxDisconnect( sqlite3_vtab pVTab );
-    public delegate int smdxDestroy( sqlite3_vtab pVTab );
-    public delegate int smdxOpen( sqlite3_vtab pVTab, ref sqlite3_vtab_cursor ppCursor );
-    public delegate int smdxClose( sqlite3_vtab_cursor pCursor );
+    public delegate int smdxDisconnect( ref object pVTab );
+    public delegate int smdxDestroy(ref object pVTab );
+    public delegate int smdxOpen( sqlite3_vtab pVTab, out sqlite3_vtab_cursor ppCursor );
+    public delegate int smdxClose( ref sqlite3_vtab_cursor pCursor );
     public delegate int smdxFilter( sqlite3_vtab_cursor pCursor, int idxNum, string idxStr, int argc, sqlite3_value[] argv );
     public delegate int smdxNext( sqlite3_vtab_cursor pCursor );
     public delegate int smdxEof( sqlite3_vtab_cursor pCursor );
     public delegate int smdxColumn( sqlite3_vtab_cursor pCursor, sqlite3_context p2, int p3 );
-    public delegate int smdxRowid( sqlite3_vtab_cursor pCursor, sqlite3_int64 pRowid );
-    public delegate int smdxUpdate( sqlite3_vtab pVTab, int p1, sqlite3_value[] p2, sqlite3_int64 p3 );
-    public delegate int smdxBegin( sqlite3_vtab pVTab );
-    public delegate int smdxSync( sqlite3_vtab pVTab );
-    public delegate int smdxCommit( sqlite3_vtab pVTab );
-    public delegate int smdxRollback( sqlite3_vtab pVTab );
-    public delegate int smdxFindFunction( sqlite3_vtab pVtab, int nArg, string zName, object pxFunc, ref sqlite3_value[] ppArg );
+    public delegate int smdxRowid( sqlite3_vtab_cursor pCursor, out sqlite3_int64 pRowid );
+    public delegate int smdxUpdate( sqlite3_vtab pVTab, int p1, sqlite3_value[] p2, out sqlite3_int64 p3 );
+    public delegate int smdxFunction ( sqlite3_vtab pVTab );
+    public delegate int smdxFindFunction( sqlite3_vtab pVtab, int nArg, string zName, ref dxFunc pxFunc, ref object ppArg );
     public delegate int smdxRename( sqlite3_vtab pVtab, string zNew );
-    public delegate int smdxSavepoint (sqlite3_vtab pVTab, int nArg );
-    public delegate int smdxRelease (sqlite3_vtab pVTab, int nArg );
-    public delegate int smdxRollbackTo (sqlite3_vtab pVTab, int nArg );
+    public delegate int smdxFunctionArg (sqlite3_vtab pVTab, int nArg );
 
     //AutoExtention
     public delegate int dxInit( sqlite3 db, ref string zMessage, sqlite3_api_routines sar );
 #if !SQLITE_OMIT_VIRTUALTABLE
     public delegate int dmxCreate(sqlite3 db, object pAux, int argc, string p4, object argv, sqlite3_vtab ppVTab, char p7);
     public delegate int dmxConnect(sqlite3 db, object pAux, int argc, string p4, object argv, sqlite3_vtab ppVTab, char p7);
-    public delegate int dmxBestIndex(sqlite3_vtab pVTab, sqlite3_index_info pIndexInfo);
+    public delegate int dmxBestIndex(sqlite3_vtab pVTab, ref sqlite3_index_info pIndexInfo);
     public delegate int dmxDisconnect(sqlite3_vtab pVTab);
     public delegate int dmxDestroy(sqlite3_vtab pVTab);
     public delegate int dmxOpen(sqlite3_vtab pVTab, sqlite3_vtab_cursor ppCursor);
@@ -267,7 +256,7 @@ namespace Community.CsharpSqlite
     public static Func<sqlite3_stmt, Int32, sqlite3_value, Int32> BindValue = sqlite3_bind_value;
     public static Func<sqlite3_stmt, Int32, Int32, Int32> BindZeroblob = sqlite3_bind_zeroblob;
 
-    public delegate Int32 OpenDelegate( string zFilename, ref sqlite3 ppDb );
+    public delegate Int32 OpenDelegate( string zFilename, out sqlite3 ppDb );
     public static Func<sqlite3, Int32> Close = sqlite3_close;
     public static Func<sqlite3_stmt, sqlite3> DbHandle = sqlite3_db_handle;
     public static Func<sqlite3, String> Errmsg = sqlite3_errmsg;

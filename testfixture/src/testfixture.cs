@@ -6,6 +6,7 @@ using ClientData = System.Object;
 using Tcl_Interp = tcl.lang.Interp;
 using Tcl_Obj = tcl.lang.TclObject;
 using System.IO;
+using System.Diagnostics;
 
 
 class Testing
@@ -172,7 +173,7 @@ class Testing
     }
   }
 #if SQLITE_TEST
-  //static void init_all(Tcl_Interp *);
+  //static void init_all(Tcl_Interp );
   static int init_all_cmd(
   ClientData cd,
   Tcl_Interp interp,
@@ -202,15 +203,22 @@ class Testing
   {
     Sqlite3.Sqlite3_Init( interp );
     Sqlite3.Sqlitetestbackup_Init( interp );
+    Sqlite3.Sqlitetestfuzzer_Init( interp );
     Sqlite3.Sqliteconfig_Init( interp );
     Sqlite3.Sqlitetest_autoext_Init( interp );
     Sqlite3.Sqlitetest_func_Init( interp );
     Sqlite3.Sqlitetest_hexio_Init( interp );
     Sqlite3.Sqlitetest_malloc_Init( interp );
     Sqlite3.Sqlitetest_mutex_Init( interp );
+    Sqlite3.Sqlitetestintarray_Init( interp );
+    Sqlite3.Sqlitetestschema_Init( interp );
+    Sqlite3.SqlitetestStat_Init( interp );
+    Sqlite3.Sqlitetesttclvar_Init( interp );
+    Sqlite3.Sqlitetestwholenumber_Init( interp );
     Sqlite3.Sqlitetest1_Init( interp );
     Sqlite3.Sqlitetest2_Init( interp );
     Sqlite3.Sqlitetest3_Init( interp );
+    Sqlite3.Sqlitetest8_Init( interp );
     Sqlite3.Sqlitetest9_Init( interp );
     Sqlite3.Md5_Init( interp );
   }
@@ -423,8 +431,9 @@ namespace tcl.lang
       interp = i;
       sbuf = new StringBuilder( 100 );
 
-      out_Renamed = TclIO.getStdChannel( StdChannel.STDOUT );
-      err = TclIO.getStdChannel( StdChannel.STDERR );
+      Debugger.Break();//TODO
+      //out_Renamed = Tcl_IO.getStdChannel( StdChannel.STDOUT );
+      //err = TCL.TclIO.getStdChannel( StdChannel.STDERR );
     }
     override public void Run()
     {

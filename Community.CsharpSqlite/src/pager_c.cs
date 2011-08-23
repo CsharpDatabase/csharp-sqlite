@@ -1199,6 +1199,8 @@ return (pPager->pWal!=0);
       {
         pRes = sqlite3Get4byte( ac );
       }
+      else
+        pRes = 0;
       return rc;
     }
 
@@ -1704,8 +1706,8 @@ assert( (pPg->flags&PGHDR_DIRTY) || pPg->pageHash==pager_pagehash(pPg) );
     Pager pPager,               /* Pager object */
     int isHot,
     i64 journalSize,            /* Size of the open journal file in bytes */
-    ref u32 pNRec,              /* OUT: Value read from the nRec field */
-    ref u32 pDbSize             /* OUT: Value of original database size field */
+    out u32 pNRec,              /* OUT: Value read from the nRec field */
+    out u32 pDbSize             /* OUT: Value of original database size field */
     )
     {
       int rc;                      /* Return code */
@@ -1713,6 +1715,9 @@ assert( (pPg->flags&PGHDR_DIRTY) || pPg->pageHash==pager_pagehash(pPg) );
       i64 iHdrOff;                 /* Offset of journal header being read */
 
       Debug.Assert( isOpen( pPager.jfd ) );      /* Journal file must be open. */
+
+      pNRec = 0;
+      pDbSize = 0;
 
       /* Advance Pager.journalOff to the start of the next sector. If the
       ** journal file is too small for there to be a header stored at this
@@ -2723,15 +2728,15 @@ static void pagerReportSize(Pager X){}
       */
       pMaster = new sqlite3_file();// (sqlite3_file*)sqlite3MallocZero( pVfs.szOsFile * 2 );
       pJournal = new sqlite3_file();// (sqlite3_file*)( ( (u8*)pMaster ) + pVfs.szOsFile );
-      if ( null == pMaster )
-      {
-        rc = SQLITE_NOMEM;
-      }
-      else
+      //if ( null == pMaster )
+      //{
+      //  rc = SQLITE_NOMEM;
+      //}
+      //else
       {
         const int flags = ( SQLITE_OPEN_READONLY | SQLITE_OPEN_MASTER_JOURNAL );
         int iDummy = 0;
-        rc = sqlite3OsOpen( pVfs, zMaster, pMaster, flags, ref  iDummy );
+        rc = sqlite3OsOpen( pVfs, zMaster, pMaster, flags, ref iDummy );
       }
       if ( rc != SQLITE_OK )
         goto delmaster_out;
@@ -2809,7 +2814,7 @@ delmaster_out:
       {
         sqlite3OsClose( pMaster );
         Debug.Assert( !isOpen( pJournal ) );
-        //sqlite3_free( ref  pMaster );
+        //sqlite3_free( ref pMaster );
       }
       return rc;
     }
@@ -3026,7 +3031,7 @@ delmaster_out:
         ** it is corrupted, then a process must have failed while writing it.
         ** This indicates nothing more needs to be rolled back.
         */
-        rc = readJournalHdr( pPager, isHot, szJ, ref nRec, ref mxPg );
+        rc = readJournalHdr( pPager, isHot, szJ, out nRec, out mxPg );
         if ( rc != SQLITE_OK )
         {
           if ( rc == SQLITE_DONE )
@@ -3632,10 +3637,10 @@ return rc;
       if ( pSavepoint != null )
       {
         pDone = sqlite3BitvecCreate( pSavepoint.nOrig );
-        if ( null == pDone )
-        {
-          return SQLITE_NOMEM;
-        }
+        //if ( null == pDone )
+        //{
+        //  return SQLITE_NOMEM;
+        //}
       }
 
       /* Set the database size back to the value it was before the savepoint
@@ -3687,9 +3692,9 @@ return rc;
       while ( rc == SQLITE_OK && pPager.journalOff < szJ )
       {
         u32 ii;            /* Loop counter */
-        u32 nJRec = 0;     /* Number of Journal Records */
-        u32 dummy = 0;
-        rc = readJournalHdr( pPager, 0, (int)szJ, ref nJRec, ref dummy );
+        u32 nJRec;         /* Number of Journal Records */
+        u32 dummy;
+        rc = readJournalHdr( pPager, 0, (int)szJ, out nJRec, out dummy );
         Debug.Assert( rc != SQLITE_DONE );
 
         /*
@@ -3978,7 +3983,7 @@ return rc;
           pager_reset( pPager );
           pPager.dbSize = (Pgno)( nByte / pageSize );
           pPager.pageSize = (int)pageSize;
-          sqlite3PageFree( ref  pPager.pTmpSpace );
+          sqlite3PageFree( ref pPager.pTmpSpace );
 
           pPager.pTmpSpace = sqlite3Malloc( pageSize );// pNew;
           sqlite3PcacheSetPageSize( pPager.pPCache, (int)pageSize );
@@ -4108,7 +4113,7 @@ return rc;
     ** However, if the file is between 1 and <page-size> bytes in size, then 
     ** this is considered a 1 page file.
     */
-    static void sqlite3PagerPagecount( Pager pPager, ref Pgno pnPage )
+    static void sqlite3PagerPagecount( Pager pPager, out Pgno pnPage )
     {
       Debug.Assert( pPager.eState >= PAGER_READER );
       Debug.Assert( pPager.eState != PAGER_WRITER_FINISHED );
@@ -4297,7 +4302,7 @@ pPager.pWal = 0;
       IOTRACE( "CLOSE %p\n", pPager );
       sqlite3OsClose( pPager.jfd );
       sqlite3OsClose( pPager.fd );
-      //sqlite3_free( ref  pTmp );
+      //sqlite3_free( ref pTmp );
       sqlite3PcacheClose( pPager.pPCache );
 
 #if SQLITE_HAS_CODEC
@@ -4307,7 +4312,7 @@ pPager.pWal = 0;
       Debug.Assert( null == pPager.aSavepoint && !pPager.pInJournal );
       Debug.Assert( !isOpen( pPager.jfd ) && !isOpen( pPager.sjfd ) );
 
-      //sqlite3_free( ref  pPager );
+      //sqlite3_free( ref pPager );
       return SQLITE_OK;
     }
 
@@ -4538,7 +4543,7 @@ static Pgno sqlite3PagerPagenumber( DbPage pPg )    {      return pPg.pgno;    }
       if ( !isOpen( pPager.fd ) )
       {
         Debug.Assert( pPager.tempFile && rc == SQLITE_OK );
-        rc = pagerOpentemp( pPager, ref  pPager.fd, (int)pPager.vfsFlags );
+        rc = pagerOpentemp( pPager, ref pPager.fd, (int)pPager.vfsFlags );
       }
 
       /* Before the first write, give the VFS a hint of what the final
@@ -4861,7 +4866,7 @@ static Pgno sqlite3PagerPagenumber( DbPage pPg )    {      return pPg.pgno;    }
     */
     static int sqlite3PagerOpen(
     sqlite3_vfs pVfs,        /* The virtual file system to use */
-    ref Pager ppPager,       /* OUT: Return the Pager structure here */
+    out Pager ppPager,       /* OUT: Return the Pager structure here */
     string zFilename,        /* Name of the database file to open */
     int nExtra,              /* Extra bytes append to each in-memory page */
     int flags,               /* flags controlling this file */
@@ -4922,10 +4927,10 @@ static Pgno sqlite3PagerPagenumber( DbPage pPg )    {      return pPg.pgno;    }
         string z;
         nPathname = pVfs.mxPathname + 1;
         zPathname = new StringBuilder( nPathname * 2 );// sqlite3Malloc( nPathname * 2 );
-        if ( zPathname == null )
-        {
-          return SQLITE_NOMEM;
-        }
+        //if ( zPathname == null )
+        //{
+        //  return SQLITE_NOMEM;
+        //}
         //zPathname[0] = 0; /* Make sure initialized even if FullPathname() fails */
         rc = sqlite3OsFullPathname( pVfs, zFilename, nPathname, zPathname );
 
@@ -5685,7 +5690,7 @@ failed:
       }
       else
       {
-        rc = sqlite3PcacheFetch( pPager.pPCache, pgno, 1, ref  ppPage );
+        rc = sqlite3PcacheFetch( pPager.pPCache, pgno, 1, ref ppPage );
       }
 
       if ( rc != SQLITE_OK )
@@ -7055,10 +7060,10 @@ return MEMDB != 0;
           }
           aNew[ii].iSubRec = pPager.nSubRec;
           aNew[ii].pInSavepoint = sqlite3BitvecCreate( pPager.dbSize );
-          if ( null == aNew[ii].pInSavepoint )
-          {
-            return SQLITE_NOMEM;
-          }
+          //if ( null == aNew[ii].pInSavepoint )
+          //{
+          //  return SQLITE_NOMEM;
+          //}
           if ( pagerUseWal( pPager ) )
           {
             sqlite3WalSavepoint( pPager.pWal, aNew[ii].aWalData );

@@ -32,7 +32,7 @@ namespace Community.CsharpSqlite
     *************************************************************************
     */
 
-    //#ifndef _WAL_H_
+    //#if !_WAL_H_
     //#define _WAL_H_
 
     //#include "sqliteInt.h"
@@ -116,7 +116,7 @@ namespace Community.CsharpSqlite
     }
 
     //# define sqlite3WalCheckpoint(r,s,t,u,v,w,x,y,z)         0
-    static int sqlite3WalCheckpoint( Wal r, int s, int t, u8[] u, int v, int w, u8[]x, out int y, out int z )//r,s,t,u,v,w,x,y,z
+    static int sqlite3WalCheckpoint( Wal r, int s, int t, u8[] u, int v, int w, u8[]x, ref int y, ref int z )//r,s,t,u,v,w,x,y,z
     {
       y = 0;
       z = 0;
@@ -152,8 +152,8 @@ const int WAL_SAVEPOINT_NDATA = 4;
 typedef struct Wal Wal;
 
 /* Open and close a connection to a write-ahead log. */
-int sqlite3WalOpen(sqlite3_vfs*, sqlite3_file*, const char *, int, i64, Wal**);
-int sqlite3WalClose(Wal *pWal, int sync_flags, int, u8 *);
+int sqlite3WalOpen(sqlite3_vfs*, sqlite3_file*, string , int, i64, Wal*);
+int sqlite3WalClose(Wal *pWal, int sync_flags, int, u8 );
 
 /* Set the limiting size of a WAL file. */
 void sqlite3WalLimit(Wal*, i64);
@@ -165,7 +165,7 @@ void sqlite3WalLimit(Wal*, i64);
 ** write to or checkpoint the WAL.  sqlite3WalCloseSnapshot() closes the
 ** transaction and releases the lock.
 */
-int sqlite3WalBeginReadTransaction(Wal *pWal, int *);
+int sqlite3WalBeginReadTransaction(Wal *pWal, int );
 void sqlite3WalEndReadTransaction(Wal *pWal);
 
 /* Read a page from the write-ahead log, if it is present. */
@@ -179,7 +179,7 @@ int sqlite3WalBeginWriteTransaction(Wal *pWal);
 int sqlite3WalEndWriteTransaction(Wal *pWal);
 
 /* Undo any frames written (but not committed) to the log */
-int sqlite3WalUndo(Wal *pWal, int (*xUndo)(void *, Pgno), void *pUndoCtx);
+int sqlite3WalUndo(Wal *pWal, int (*xUndo)(void *, Pgno), object  *pUndoCtx);
 
 /* Return an integer that records the current (uncommitted) write
 ** position in the WAL */
@@ -196,7 +196,7 @@ int sqlite3WalFrames(Wal *pWal, int, PgHdr *, Pgno, int, int);
 int sqlite3WalCheckpoint(
   Wal *pWal,                      /* Write-ahead log connection */
   int eMode,                      /* One of PASSIVE, FULL and RESTART */
-  int (*xBusy)(void*),            /* Function to call when busy */
+  int (*xBusy)(void),            /* Function to call when busy */
   void *pBusyArg,                 /* Context argument for xBusyHandler */
   int sync_flags,                 /* Flags to sync db file with (or 0) */
   int nBuf,                       /* Size of buffer nBuf */

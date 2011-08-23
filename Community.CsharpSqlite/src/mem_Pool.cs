@@ -157,7 +157,7 @@ namespace Community.CsharpSqlite
     {
       x = null;
     }
-    static void sqlite3MemFree( ref  string x )
+    static void sqlite3MemFree( ref string x )
     {
       x = null;
     }

@@ -34,17 +34,17 @@ namespace Community.CsharpSqlite
     //#include "sqliteInt.h"
 
 #if !SQLITE_OMIT_VIRTUALTABLE
-/* Forward declaration */
-//static void updateVirtualTable(
-//Parse pParse,       /* The parsing context */
-//SrcList pSrc,       /* The virtual table to be modified */
-//Table pTab,         /* The virtual table */
-//ExprList pChanges,  /* The columns to change in the UPDATE statement */
-//Expr pRowidExpr,    /* Expression used to recompute the rowid */
-//int aXRef,          /* Mapping from columns of pTab to entries in pChanges */
-//Expr *pWhere,        /* WHERE clause of the UPDATE statement */
-//int onError          /* ON CONFLICT strategy */
-//);
+    /* Forward declaration */
+    //static void updateVirtualTable(
+    //Parse pParse,       /* The parsing context */
+    //SrcList pSrc,       /* The virtual table to be modified */
+    //Table pTab,         /* The virtual table */
+    //ExprList pChanges,  /* The columns to change in the UPDATE statement */
+    //Expr pRowidExpr,    /* Expression used to recompute the rowid */
+    //int aXRef,          /* Mapping from columns of pTab to entries in pChanges */
+    //Expr *pWhere,        /* WHERE clause of the UPDATE statement */
+    //int onError          /* ON CONFLICT strategy */
+    //);
 #endif // * SQLITE_OMIT_VIRTUALTABLE */
 
     /*
@@ -175,7 +175,7 @@ namespace Community.CsharpSqlite
       ** updated is a view.
       */
 #if !SQLITE_OMIT_TRIGGER
-      pTrigger = sqlite3TriggersExist( pParse, pTab, TK_UPDATE, pChanges, ref tmask );
+      pTrigger = sqlite3TriggersExist( pParse, pTab, TK_UPDATE, pChanges, out tmask );
       isView = pTab.pSelect != null;
       Debug.Assert( pTrigger != null || tmask == 0 );
 #else
@@ -231,7 +231,7 @@ namespace Community.CsharpSqlite
         }
         for ( j = 0; j < pTab.nCol; j++ )
         {
-          if ( pTab.aCol[j].zName.Equals( pChanges.a[i].zName ,StringComparison.InvariantCultureIgnoreCase )  )
+          if ( pTab.aCol[j].zName.Equals( pChanges.a[i].zName, StringComparison.InvariantCultureIgnoreCase ) )
           {
             if ( j == pTab.iPKey )
             {
@@ -317,15 +317,15 @@ aXRef[j] = -1;
       sqlite3BeginWriteOperation( pParse, 1, iDb );
 
 #if !SQLITE_OMIT_VIRTUALTABLE
-/* Virtual tables must be handled separately */
-if ( IsVirtual( pTab ) )
-{
-    updateVirtualTable(pParse, pTabList, pTab, pChanges, pRowidExpr, aXRef,
-                       pWhere, onError);
-pWhere = null;
-pTabList = null;
-goto update_cleanup;
-}
+      /* Virtual tables must be handled separately */
+      if ( IsVirtual( pTab ) )
+      {
+        updateVirtualTable( pParse, pTabList, pTab, pChanges, pRowidExpr, aXRef,
+                           pWhere, onError );
+        pWhere = null;
+        pTabList = null;
+        goto update_cleanup;
+      }
 #endif
 
       /* Allocate required registers. */
@@ -569,9 +569,9 @@ goto update_cleanup;
         int j1;                       /* Address of jump instruction */
 
         /* Do constraint checks. */
-        int iDummy = 0;
+        int iDummy;
         sqlite3GenerateConstraintChecks( pParse, pTab, iCur, regNewRowid,
-              aRegIdx, ( chngRowid ? regOldRowid : 0 ), true, onError, addr, ref iDummy );
+              aRegIdx, ( chngRowid ? regOldRowid : 0 ), true, onError, addr, out iDummy );
 
         /* Do FK constraint checks. */
         if ( hasFK )
@@ -658,8 +658,8 @@ update_cleanup:
 #if !SQLITE_OMIT_AUTHORIZATION
 sqlite3AuthContextPop(sContext);
 #endif
-      sqlite3DbFree( db, ref  aRegIdx );
-      sqlite3DbFree( db, ref  aXRef );
+      sqlite3DbFree( db, ref aRegIdx );
+      sqlite3DbFree( db, ref aXRef );
       sqlite3SrcListDelete( db, ref pTabList );
       sqlite3ExprListDelete( db, ref pChanges );
       sqlite3ExprDelete( db, ref pWhere );
@@ -668,15 +668,15 @@ sqlite3AuthContextPop(sContext);
     /* Make sure "isView" and other macros defined above are undefined. Otherwise
     ** thely may interfere with compilation of other functions in this file
     ** (or in another file, if this file becomes part of the amalgamation).  */
-    //#ifdef isView
+    //#if isView
     // #undef isView
     //#endif
-    //#ifdef pTrigger
+    //#if pTrigger
     // #undef pTrigger
     //#endif
 
 #if !SQLITE_OMIT_VIRTUALTABLE
-/*
+    /*
 ** Generate code for an UPDATE of a virtual table.
 **
 ** The strategy is that we create an ephemerial table that contains
@@ -695,82 +695,87 @@ sqlite3AuthContextPop(sContext);
 ** as (B) we only store (A), then duplicate (A) when pulling
 ** it out of the ephemeral table before calling VUpdate.
 */
-static void updateVirtualTable(
-Parse pParse,       /* The parsing context */
-SrcList pSrc,       /* The virtual table to be modified */
-Table pTab,         /* The virtual table */
-ExprList pChanges,  /* The columns to change in the UPDATE statement */
-Expr pRowid,        /* Expression used to recompute the rowid */
-int aXRef,          /* Mapping from columns of pTab to entries in pChanges */
-Expr pWhere,        /* WHERE clause of the UPDATE statement */
-int onError         /* ON CONFLICT strategy */
-)
-{
-Vdbe v = pParse.pVdbe;  /* Virtual machine under construction */
-ExprList pEList = 0;     /* The result set of the SELECT statement */
-Select pSelect = 0;      /* The SELECT statement */
-Expr pExpr;              /* Temporary expression */
-int ephemTab;             /* Table holding the result of the SELECT */
-int i;                    /* Loop counter */
-int addr;                 /* Address of top of loop */
-int iReg;                 /* First register in set passed to OP_VUpdate */
-sqlite3 db = pParse.db; /* Database connection */
-const char *pVTab = (const char*)sqlite3GetVTable(db, pTab);
-SelectDest dest;
+    static void updateVirtualTable(
+    Parse pParse,       /* The parsing context */
+    SrcList pSrc,       /* The virtual table to be modified */
+    Table pTab,         /* The virtual table */
+    ExprList pChanges,  /* The columns to change in the UPDATE statement */
+    Expr pRowid,        /* Expression used to recompute the rowid */
+    int[] aXRef,        /* Mapping from columns of pTab to entries in pChanges */
+    Expr pWhere,        /* WHERE clause of the UPDATE statement */
+    int onError         /* ON CONFLICT strategy */
+    )
+    {
+      Vdbe v = pParse.pVdbe;  /* Virtual machine under construction */
+      ExprList pEList = null;     /* The result set of the SELECT statement */
+      Select pSelect = null;      /* The SELECT statement */
+      Expr pExpr;              /* Temporary expression */
+      int ephemTab;             /* Table holding the result of the SELECT */
+      int i;                    /* Loop counter */
+      int addr;                 /* Address of top of loop */
+      int iReg;                 /* First register in set passed to OP_VUpdate */
+      sqlite3 db = pParse.db; /* Database connection */
+      VTable pVTab = sqlite3GetVTable( db, pTab );
+      SelectDest dest = new SelectDest();
 
-/* Construct the SELECT statement that will find the new values for
-** all updated rows.
-*/
-  pEList = sqlite3ExprListAppend(pParse, 0, sqlite3Expr(db, TK_ID, "_rowid_"));
-if( pRowid ){
-pEList = sqlite3ExprListAppend(pParse, pEList,
-sqlite3ExprDup(db, pRowid,0), 0);
-}
-Debug.Assert( pTab.iPKey<0 );
-for(i=0; i<pTab.nCol; i++){
-if( aXRef[i]>=0 ){
-pExpr = sqlite3ExprDup(db, pChanges.a[aXRef[i]].pExpr,0);
-}else{
-      pExpr = sqlite3Expr(db, TK_ID, pTab.aCol[i].zName);
-}
-pEList = sqlite3ExprListAppend(pParse, pEList, pExpr);
-}
-pSelect = sqlite3SelectNew(pParse, pEList, pSrc, pWhere, 0, 0, 0, 0, 0, 0);
+      /* Construct the SELECT statement that will find the new values for
+      ** all updated rows.
+      */
+      pEList = sqlite3ExprListAppend( pParse, 0, sqlite3Expr( db, TK_ID, "_rowid_" ) );
+      if ( pRowid != null)
+      {
+        pEList = sqlite3ExprListAppend( pParse, pEList,
+        sqlite3ExprDup( db, pRowid, 0 ) );
+      }
+      Debug.Assert( pTab.iPKey < 0 );
+      for ( i = 0; i < pTab.nCol; i++ )
+      {
+        if ( aXRef[i] >= 0 )
+        {
+          pExpr = sqlite3ExprDup( db, pChanges.a[aXRef[i]].pExpr, 0 );
+        }
+        else
+        {
+          pExpr = sqlite3Expr( db, TK_ID, pTab.aCol[i].zName );
+        }
+        pEList = sqlite3ExprListAppend( pParse, pEList, pExpr );
+      }
+      pSelect = sqlite3SelectNew( pParse, pEList, pSrc, pWhere, null, null, null, 0, null, null );
 
-/* Create the ephemeral table into which the update results will
-** be stored.
-*/
-Debug.Assert( v );
-ephemTab = pParse.nTab++;
-sqlite3VdbeAddOp2(v, OP_OpenEphemeral, ephemTab, pTab.nCol+1+(pRowid!=0));
-sqlite3VdbeChangeP5(v, BTREE_UNORDERED);
+      /* Create the ephemeral table into which the update results will
+      ** be stored.
+      */
+      Debug.Assert( v != null);
+      ephemTab = pParse.nTab++;
+      sqlite3VdbeAddOp2( v, OP_OpenEphemeral, ephemTab, pTab.nCol + 1 + ( ( pRowid != null ) ? 1 : 0 ) );
+      sqlite3VdbeChangeP5( v, BTREE_UNORDERED );
 
-/* fill the ephemeral table
-*/
-sqlite3SelectDestInit(dest, SRT_Table, ephemTab);
-sqlite3Select(pParse, pSelect, ref dest);
+      /* fill the ephemeral table
+      */
+      sqlite3SelectDestInit( dest, SRT_Table, ephemTab );
+      sqlite3Select( pParse, pSelect, ref dest );
 
-/* Generate code to scan the ephemeral table and call VUpdate. */
-iReg = ++pParse.nMem;
-pParse.nMem += pTab.nCol+1;
-addr = sqlite3VdbeAddOp2(v, OP_Rewind, ephemTab, 0);
-sqlite3VdbeAddOp3(v, OP_Column,  ephemTab, 0, iReg);
-sqlite3VdbeAddOp3(v, OP_Column, ephemTab, (pRowid
-1:0), iReg+1);
-for(i=0; i<pTab.nCol; i++){
-sqlite3VdbeAddOp3(v, OP_Column, ephemTab, i+1+(pRowid!=0), iReg+2+i);
-}
-sqlite3VtabMakeWritable(pParse, pTab);
-sqlite3VdbeAddOp4(v, OP_VUpdate, 0, pTab.nCol+2, iReg, pVTab, P4_VTAB);
-sqlite3VdbeChangeP5(v, onError==OE_Default ? OE_Abort : onError);
-sqlite3MayAbort(pParse);
-sqlite3VdbeAddOp2(v, OP_Next, ephemTab, addr+1);
-sqlite3VdbeJumpHere(v, addr);
-sqlite3VdbeAddOp2(v, OP_Close, ephemTab, 0);
+      /* Generate code to scan the ephemeral table and call VUpdate. */
+      iReg = ++pParse.nMem;
+      pParse.nMem += pTab.nCol + 1;
+      addr = sqlite3VdbeAddOp2( v, OP_Rewind, ephemTab, 0 );
+      sqlite3VdbeAddOp3( v, OP_Column, ephemTab, 0, iReg );
+      sqlite3VdbeAddOp3( v, OP_Column, ephemTab, ( pRowid != null ? 1 : 0 ), iReg + 1 );
+      for ( i = 0; i < pTab.nCol; i++ )
+      {
+        sqlite3VdbeAddOp3( v, OP_Column, ephemTab, i + 1 + ( ( pRowid != null ) ? 1 : 0 ), iReg + 2 + i );
+      }
+      sqlite3VtabMakeWritable( pParse, pTab );
+      sqlite3VdbeAddOp4( v, OP_VUpdate, 0, pTab.nCol + 2, iReg, pVTab, P4_VTAB );
+      sqlite3VdbeChangeP5( v, (byte)( onError == OE_Default ? OE_Abort : onError ) );
+      sqlite3MayAbort( pParse );
+      sqlite3VdbeAddOp2( v, OP_Next, ephemTab, addr + 1 );
+      sqlite3VdbeJumpHere( v, addr );
+      sqlite3VdbeAddOp2( v, OP_Close, ephemTab, 0 );
 
-/* Cleanup */
-sqlite3SelectDelete(pSelect);
-}
+      /* Cleanup */
+      sqlite3SelectDelete( db, ref pSelect );
+    }
 #endif // * SQLITE_OMIT_VIRTUALTABLE */
   }
 }

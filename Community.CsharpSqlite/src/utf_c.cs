@@ -235,7 +235,7 @@ namespace Community.CsharpSqlite
     */
     /* #define TRANSLATE_TRACE 1 */
 
-#if ! SQLITE_OMIT_UTF16
+#if !SQLITE_OMIT_UTF16
 
 /*
 ** This routine transforms the internal text encoding used by pMem to
@@ -531,7 +531,7 @@ Mem m = Pool.Allocate_Mem();
 ** flag set.
 */
 #if SQLITE_ENABLE_STAT2
-char *sqlite3Utf8to16(sqlite3 *db, u8 enc, char *z, int n, int *pnOut){
+char *sqlite3Utf8to16(sqlite3 db, u8 enc, char *z, int n, int *pnOut){
   Mem m;
   memset(&m, 0, sizeof(m));
   m.db = db;

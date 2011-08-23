@@ -386,7 +386,7 @@ const int SQLITE_PRINT_BUF_SIZE = 50;
         width = 0;
         if ( c == '*' )
         {
-          width = (int)va_arg( ap, "int" );
+          width = va_arg( ap, (Int32)0 );
           if ( width < 0 )
           {
             flag_leftjustify = true;
@@ -413,7 +413,7 @@ const int SQLITE_PRINT_BUF_SIZE = 50;
           c = fmt[++_fmt];
           if ( c == '*' )
           {
-            precision = (int)va_arg( ap, "int" );
+            precision = va_arg( ap, (Int32)0 );
             if ( precision < 0 )
               precision = -precision;
             c = fmt[++_fmt];
@@ -512,15 +512,15 @@ const int SQLITE_PRINT_BUF_SIZE = 50;
               i64 v;
               if ( flag_longlong )
               {
-                v = (long)va_arg( ap, "i64" );
+                v = (Int64)va_arg( ap, (Int64)0 );
               }
               else if ( flag_long )
               {
-                v = (long)va_arg( ap, "long int" );
+                v = (Int64)va_arg( ap, (Int64)0 );
               }
               else
               {
-                v = (int)va_arg( ap, "int" );
+                v = (Int32)va_arg( ap, (Int32)0 );
               }
               if ( v < 0 )
               {
@@ -549,15 +549,15 @@ const int SQLITE_PRINT_BUF_SIZE = 50;
             {
               if ( flag_longlong )
               {
-                longvalue = (i64)va_arg( ap, "longlong int" );
+                longvalue = va_arg( ap, (Int64)0 );
               }
               else if ( flag_long )
               {
-                longvalue = (i64)va_arg( ap, "long int" );
+                longvalue = va_arg( ap, (Int64)0 );
               }
               else
               {
-                longvalue = (i64)va_arg( ap, "long" );
+                longvalue = va_arg( ap, (Int64)0 );
               }
               prefix = '\0';
             }
@@ -639,7 +639,7 @@ const int SQLITE_PRINT_BUF_SIZE = 50;
           case etFLOAT:
           case etEXP:
           case etGENERIC:
-            realvalue = (double)va_arg( ap, "double" );
+            realvalue = va_arg( ap, (Double)0 );
 #if SQLITE_OMIT_FLOATING_POINT
 length = 0;
 #else
@@ -890,7 +890,7 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
 #endif //* !defined(SQLITE_OMIT_FLOATING_POINT) */
             break;
           case etSIZE:
-            ap[0] = pAccum.nChar; // *(va_arg(ap,int*)) = pAccum.nChar;
+            ap[0] = pAccum.nChar; // *(va_arg(ap,int)) = pAccum.nChar;
             length = width = 0;
             break;
           case etPERCENT:
@@ -899,7 +899,7 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
             length = 1;
             break;
           case etCHARX:
-            c = (char)va_arg( ap, "char" );
+            c = va_arg( ap, (Char) 0);
             buf[0] = (char)c;
             if ( precision >= 0 )
             {
@@ -1002,7 +1002,15 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
             }
           case etTOKEN:
             {
-              Token pToken = (Token)va_arg( ap, "Token" );
+              Token pToken;
+              if ( ap[vaNEXT] is String )
+              {
+                pToken = new Token();
+                pToken.z = va_arg( ap, ( String ) null);
+                pToken.n = pToken.z.Length;
+              }
+              else
+                pToken = va_arg( ap, (Token) null );
               if ( pToken != null )
               {
                 sqlite3StrAccumAppend( pAccum, pToken.z.ToString(), (int)pToken.n );
@@ -1012,8 +1020,8 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
             }
           case etSRCLIST:
             {
-              SrcList pSrc = (SrcList)va_arg( ap, "SrcList" );
-              int k = (int)va_arg( ap, "int" );
+              SrcList pSrc = va_arg( ap, ( SrcList )null );
+              int k = va_arg( ap, ( Int32 ) 0 );
               SrcList_item pItem = pSrc.a[k];
               Debug.Assert( k >= 0 && k < pSrc.nSrc );
               if ( pItem.zDatabase != null )
@@ -1086,15 +1094,15 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
         return;
       }
       //if( p->nChar+N >= p->nAlloc ){
-      //  char *zNew;
-      //  if( !p->useMalloc ){
+      //  string zNew;
+      //  if( null==p->useMalloc ){
       //    p->tooBig = 1;
       //    N = p->nAlloc - p->nChar - 1;
       //    if( N<=0 ){
       //      return;
       //    }
       //  }else{
-      //    char *zOld = (p->zText==p->zBase ? 0 : p->zText);
+      //    string zOld = (p->zText==p->zBase ? 0 : p->zText);
       //    i64 szNew = p->nChar;
       //    szNew += N + 1;
       //    if( szNew > p->mxAlloc ){
@@ -1391,7 +1399,7 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
         {
           va_start( ap, zFormat );
           renderLogMsg( iErrCode, zFormat, ap );
-          va_end( ref  ap );
+          va_end( ref ap );
         }
       }
     }

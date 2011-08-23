@@ -1149,10 +1149,10 @@ int sqlite3PcacheReleaseMemory(int nReq){
 ** of the global cache.
 */
     static void sqlite3PcacheStats(
-      ref int pnCurrent,      /* OUT: Total number of pages cached */
-      ref int pnMax,          /* OUT: Global maximum cache size */
-      ref int pnMin,          /* OUT: Sum of PCache1.nMin for purgeable caches */
-      ref int pnRecyclable    /* OUT: Total number of pages available for recycling */
+      out int pnCurrent,      /* OUT: Total number of pages cached */
+      out int pnMax,          /* OUT: Global maximum cache size */
+      out int pnMin,          /* OUT: Sum of PCache1.nMin for purgeable caches */
+      out int pnRecyclable    /* OUT: Total number of pages available for recycling */
     )
     {
       PgHdr1 p;

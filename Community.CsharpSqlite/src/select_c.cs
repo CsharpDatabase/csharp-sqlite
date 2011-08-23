@@ -303,7 +303,7 @@ namespace Community.CsharpSqlite
     ** WHERE clause expression of a SELECT statement. The new term, which
     ** is ANDed with the existing WHERE clause, is of the form:
     **
-    **    (tab1.col1 = tab2.col2)
+    **    (vtab1.col1 = tab2.col2)
     **
     ** where tab1 is the iSrc'th table in SrcList pSrc and tab2 is the 
     ** (iSrc+1)'th. Column col1 is column iColLeft of tab1, and col2 is
@@ -979,7 +979,7 @@ namespace Community.CsharpSqlite
 ** is provided when SQLITE_OMIT_EXPLAIN is defined. This allows the code
 ** in sqlite3Select() to assign values to structure member variables that
 ** only exist if SQLITE_OMIT_EXPLAIN is not defined without polluting the
-** code with #ifndef directives.
+** code with #if !directives.
 */
 //# define explainSetInteger(a, b) a = b
     static void explainSetInteger( ref int a, int b )
@@ -1482,8 +1482,8 @@ static void explainComposite(Parse v, int w,int x,int y,bool z) {}
 
       pnCol = nCol = pEList.nExpr;
       aCol = paCol = new Column[nCol];//sqlite3DbMallocZero(db, sizeof(aCol[0])*nCol);
-      if ( aCol == null )
-        return SQLITE_NOMEM;
+      //if ( aCol == null )
+      //  return SQLITE_NOMEM;
       for ( i = 0; i < nCol; i++ )//, pCol++)
       {
         if ( aCol[i] == null )
@@ -2021,7 +2021,7 @@ static void explainComposite(Parse v, int w,int x,int y,bool z) {}
             p.pOffset = null;
             uniondest.eDest = op;
             explainSetInteger( ref iSub2, pParse.iNextSelectId );
-            rc = sqlite3Select( pParse, p, ref  uniondest );
+            rc = sqlite3Select( pParse, p, ref uniondest );
             testcase( rc != SQLITE_OK );
             /* Query flattening in sqlite3Select() might refill p.pOrderBy.
             ** Be sure to delete p.pOrderBy, therefore, to avoid a memory leak. */
@@ -2093,7 +2093,7 @@ static void explainComposite(Parse v, int w,int x,int y,bool z) {}
             /* Code the SELECTs to our left into temporary table "tab1".
             */
             sqlite3SelectDestInit( intersectdest, SRT_Union, tab1 );
-            explainSetInteger( ref  iSub1, pParse.iNextSelectId );
+            explainSetInteger( ref iSub1, pParse.iNextSelectId );
             rc = sqlite3Select( pParse, pPrior, ref intersectdest );
             if ( rc != 0 )
             {
@@ -2174,11 +2174,11 @@ static void explainComposite(Parse v, int w,int x,int y,bool z) {}
         nCol = p.pEList.nExpr;
         pKeyInfo = new KeyInfo();           //sqlite3DbMallocZero(db,
         pKeyInfo.aColl = new CollSeq[nCol]; //sizeof(*pKeyInfo)+nCol*(CollSeq*.Length + 1));
-        if ( pKeyInfo == null )
-        {
-          rc = SQLITE_NOMEM;
-          goto multi_select_end;
-        }
+        //if ( pKeyInfo == null )
+        //{
+        //  rc = SQLITE_NOMEM;
+        //  goto multi_select_end;
+        //}
 
         pKeyInfo.enc = db.aDbStatic[0].pSchema.enc;// ENC( pParse.db );
         pKeyInfo.nField = (u16)nCol;
@@ -2557,8 +2557,8 @@ break;
           if ( j == nOrderBy )
           {
             Expr pNew = sqlite3Expr( db, TK_INTEGER, null );
-            if ( pNew == null )
-              return SQLITE_NOMEM;
+            //if ( pNew == null )
+            //  return SQLITE_NOMEM;
             pNew.flags |= EP_IntValue;
             pNew.u.iValue = i;
             pOrderBy = sqlite3ExprListAppend( pParse, pOrderBy, pNew );
@@ -2584,11 +2584,11 @@ break;
           Debug.Assert( pItem.iCol > 0 && pItem.iCol <= p.pEList.nExpr );
           aPermute[i] = pItem.iCol - 1;
         }
-        pKeyMerge = new KeyInfo();//      sqlite3DbMallocRaw(db, sizeof(*pKeyMerge)+nOrderBy*(sizeof(CollSeq*)+1));
+        pKeyMerge = new KeyInfo();//      sqlite3DbMallocRaw(db, sizeof(*pKeyMerge)+nOrderBy*(sizeof(CollSeq)+1));
         if ( pKeyMerge != null )
         {
           pKeyMerge.aColl = new CollSeq[nOrderBy];
-          pKeyMerge.aSortOrder = new byte[nOrderBy];//(u8*)&pKeyMerge.aColl[nOrderBy];
+          pKeyMerge.aSortOrder = new byte[nOrderBy];//(u8)&pKeyMerge.aColl[nOrderBy];
           pKeyMerge.nField = (u16)nOrderBy;
           pKeyMerge.enc = ENC( db );
           for ( i = 0; i < nOrderBy; i++ )
@@ -2635,11 +2635,11 @@ break;
         regPrev = sqlite3GetTempRange( pParse, nExpr + 1 );
         sqlite3VdbeAddOp2( v, OP_Integer, 0, regPrev );
         pKeyDup = new KeyInfo();//sqlite3DbMallocZero(db,
-        //sizeof(*pKeyDup) + nExpr*(sizeof(CollSeq*)+1) );
+        //sizeof(*pKeyDup) + nExpr*(sizeof(CollSeq)+1) );
         if ( pKeyDup != null )
         {
           pKeyDup.aColl = new CollSeq[nExpr];
-          pKeyDup.aSortOrder = new byte[nExpr];//(u8*)&pKeyDup.aColl[nExpr];
+          pKeyDup.aSortOrder = new byte[nExpr];//(u8)&pKeyDup.aColl[nExpr];
           pKeyDup.nField = (u16)nExpr;
           pKeyDup.enc = ENC( db );
           for ( i = 0; i < nExpr; i++ )
@@ -2871,8 +2871,8 @@ break;
 #endif
 #if !(SQLITE_OMIT_SUBQUERY) || !(SQLITE_OMIT_VIEW)
     /* Forward Declarations */
-    //static void substExprList(sqlite3*, ExprList*, int, ExprList*);
-    //static void substSelect(sqlite3*, Select *, int, ExprList *);
+    //static void substExprList(sqlite3*, ExprList*, int, ExprList);
+    //static void substSelect(sqlite3*, Select *, int, ExprList );
 
     /*
     ** Scan through the expression pExpr.  Replace every reference to
@@ -3018,7 +3018,7 @@ break;
 **
 **   (4)  The subquery is not DISTINCT.
 **
-**  (**)  At one point restrictions (4) and (5) defined a subset of DISTINCT
+**  (*)  At one point restrictions (4) and (5) defined a subset of DISTINCT
 **        sub-queries that were excluded from this optimization. Restriction 
 **        (4) has since been expanded to exclude all DISTINCT subqueries.
 **
@@ -3037,7 +3037,7 @@ break;
 **
 **  (11)  The subquery and the outer query do not both have ORDER BY clauses.
 **
-**  (**)  Not implemented.  Subsumed into restriction (3).  Was previously
+**  (*)  Not implemented.  Subsumed into restriction (3).  Was previously
 **        a separate restriction deriving from ticket #350.
 **
 **  (13)  The subquery and outer query do not both use LIMIT.
@@ -3563,7 +3563,7 @@ break;
     ** The second argment is the associated aggregate-info object. This
     ** function tests if the SELECT is of the form:
     **
-    **   SELECT count(*) FROM <tbl>
+    **   SELECT count() FROM <tbl>
     **
     ** where table is a database table, not a sub-select or view. If the query
     ** does match this pattern, then a pointer to the Table object representing
@@ -4208,7 +4208,7 @@ break;
 
     /*
     ** Add a single OP_Explain instruction to the VDBE to explain a simple
-    ** count(*) query ("SELECT count(*) FROM pTab").
+    ** count() query ("SELECT count() FROM pTab").
     */
 #if !SQLITE_OMIT_EXPLAIN
     static void explainSimpleCount(
@@ -4301,7 +4301,7 @@ break;
       int i, j;               /* Loop counters */
       WhereInfo pWInfo;       /* Return from sqlite3WhereBegin() */
       Vdbe v;                 /* The virtual machine under construction */
-      bool isAgg;             /* True for select lists like "count(*)" */
+      bool isAgg;             /* True for select lists like "count()" */
       ExprList pEList = new ExprList();      /* List of columns to extract. */
       SrcList pTabList = new SrcList();     /* List of tables to select from */
       Expr pWhere;            /* The WHERE clause.  May be NULL */
@@ -4416,7 +4416,7 @@ if (sqlite3AuthCheck(pParse, SQLITE_SELECT, 0, 0, 0)) return 1;
         //}
         pParse.nHeight -= sqlite3SelectExprHeight( p );
         pTabList = p.pSrc;
-        if ( !( pDest.eDest <= SRT_Discard ) )//        if( !IgnorableOrderby(pDest) )
+        if ( !( pDest.eDest <= SRT_Discard ) )//        if( null==IgnorableOrderby(pDest) )
         {
           pOrderBy = p.pOrderBy;
         }
@@ -4878,7 +4878,7 @@ if (sqlite3AuthCheck(pParse, SQLITE_SELECT, 0, 0, 0)) return 1;
             /* If isSimpleCount() returns a pointer to a Table structure, then
             ** the SQL statement is of the form:
             **
-            **   SELECT count(*) FROM <tbl>
+            **   SELECT count() FROM <tbl>
             **
             ** where the Table structure returned represents table <tbl>.
             **
@@ -5129,7 +5129,7 @@ select_end:
           }
           if ( pItem.pTab != null )
           {
-            sqlite3DebugPrintf( "(table: %s)", pItem.pTab.zName );
+            sqlite3DebugPrintf( "(vtable: %s)", pItem.pTab.zName );
           }
           if ( pItem.zAlias != null )
           {

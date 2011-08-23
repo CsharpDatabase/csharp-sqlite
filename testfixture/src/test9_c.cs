@@ -59,7 +59,7 @@ namespace Community.CsharpSqlite
       }
 
       /* Open a database. */
-      rc = sqlite3_open( ":memory:", ref db );
+      rc = sqlite3_open( ":memory:", out db );
       if ( rc != SQLITE_OK )
       {
         zErrFunction = "sqlite3_open";
@@ -141,7 +141,6 @@ error_out:
       string zErrFunction = "N/A";
       sqlite3 db = null;
       sqlite3_stmt pStmt;
-      string dummyS = "";
       int rc;
 
       if ( objc != 1 )
@@ -153,7 +152,7 @@ error_out:
       /* Open a database. Then close it again. We need to do this so that
       ** we have a "closed database handle" to pass to various API functions.
       */
-      rc = sqlite3_open( ":memory:", ref db );
+      rc = sqlite3_open( ":memory:", out db );
       if ( rc != SQLITE_OK )
       {
         zErrFunction = "sqlite3_open";
@@ -171,7 +170,7 @@ error_out:
 
       pStmt = new sqlite3_stmt();
       pStmt.pc = 1234;
-      rc = sqlite3_prepare( db, null, 0, ref pStmt, ref dummyS );
+      rc = sqlite3_prepare( db, null, 0, ref pStmt, 0 );
       if ( rc != SQLITE_MISUSE )
       {
         zErrFunction = "sqlite3_prepare";
@@ -182,7 +181,7 @@ error_out:
 
       pStmt = new sqlite3_stmt();
       pStmt.pc = 1234;
-      rc = sqlite3_prepare_v2( db, null, 0, ref pStmt, ref dummyS );
+      rc = sqlite3_prepare_v2( db, null, 0, ref pStmt, 0 );
       if ( rc != SQLITE_MISUSE )
       {
         zErrFunction = "sqlite3_prepare_v2";
@@ -192,19 +191,19 @@ error_out:
 
 #if !SQLITE_OMIT_UTF16
 pStmt = (sqlite3_stmt)1234;
-rc = sqlite3_prepare16( db, null, 0, ref pStmt, ref dummyS );
+rc = sqlite3_prepare16( db, null, 0, ref pStmt, 0 );
 if( rc!=SQLITE_MISUSE ){
 zErrFunction = "sqlite3_prepare16";
 goto error_out;
 }
-assert( pStmt==0 );
+Debug.Assert( pStmt==0 );
 pStmt = (sqlite3_stmt)1234;
-rc = sqlite3_prepare16_v2( db, null, 0, ref pStmt, ref dummyS );
+rc = sqlite3_prepare16_v2( db, null, 0, ref pStmt, 0 );
 if( rc!=SQLITE_MISUSE ){
 zErrFunction = "sqlite3_prepare16_v2";
 goto error_out;
 }
-assert( pStmt==0 );
+Debug.Assert( pStmt==0 );
 #endif
 
       return TCL.TCL_OK;
@@ -221,7 +220,7 @@ error_out:
     static public int Sqlitetest9_Init( Tcl_Interp interp )
     {
       //static struct {
-      //   char *zName;
+      //   string zName;
       //   Tcl_ObjCmdProc *xProc;
       //   void *object;
       //}

@@ -8,35 +8,35 @@ namespace Community.CsharpSqlite
 
   public partial class Sqlite3
   {
-    /*
-    ** 2003 January 11
-    **
-    ** The author disclaims copyright to this source code.  In place of
-    ** a legal notice, here is a blessing:
-    **
-    **    May you do good and not evil.
-    **    May you find forgiveness for yourself and forgive others.
-    **    May you share freely, never taking more than you give.
-    **
-    *************************************************************************
-    ** This file contains code used to implement the sqlite3_set_authorizer()
-    ** API.  This facility is an optional feature of the library.  Embedded
-    ** systems that do not need this facility may omit it by recompiling
-    ** the library with -DSQLITE_OMIT_AUTHORIZATION=1
-    *************************************************************************
-    **  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
-    **  C#-SQLite is an independent reimplementation of the SQLite software library
-    **
-    **  SQLITE_SOURCE_ID: 2010-08-23 18:52:01 42537b60566f288167f1b5864a5435986838e3a3
-    **
-    *************************************************************************
-    */
-    //#include "sqliteInt.h"
+/*
+** 2003 January 11
+**
+** The author disclaims copyright to this source code.  In place of
+** a legal notice, here is a blessing:
+**
+**    May you do good and not evil.
+**    May you find forgiveness for yourself and forgive others.
+**    May you share freely, never taking more than you give.
+**
+*************************************************************************
+** This file contains code used to implement the sqlite3_set_authorizer()
+** API.  This facility is an optional feature of the library.  Embedded
+** systems that do not need this facility may omit it by recompiling
+** the library with -DSQLITE_OMIT_AUTHORIZATION=1
+*************************************************************************
+**  Included in SQLite3 port to C#-SQLite;  2008 Noah B Hart
+**  C#-SQLite is an independent reimplementation of the SQLite software library
+**
+**  SQLITE_SOURCE_ID: 2010-08-23 18:52:01 42537b60566f288167f1b5864a5435986838e3a3
+**
+*************************************************************************
+*/
+//#include "sqliteInt.h"
 
-    /*
-    ** All of the code in this file may be omitted by defining a single
-    ** macro.
-    */
+/*
+** All of the code in this file may be omitted by defining a single
+** macro.
+*/
 #if !SQLITE_OMIT_AUTHORIZATION
 
 /*
@@ -85,8 +85,8 @@ namespace Community.CsharpSqlite
 ** setting of the auth function is NULL.
 */
 int sqlite3_set_authorizer(
-sqlite3 *db,
-int (*xAuth)(void*,int,const char*,const char*,const char*,const char*),
+sqlite3 db,
+int (*xAuth)(void*,int,const char*,const char*,const char*,const char),
 void *pArg
 ){
 sqlite3_mutex_enter(db->mutex);
@@ -117,24 +117,24 @@ pParse->rc = SQLITE_ERROR;
 */
 int sqlite3AuthReadCol(
   Parse *pParse,                  /* The parser context */
-  const char *zTab,               /* Table name */
-  const char *zCol,               /* Column name */
+  string zTab,               /* Table name */
+  string zCol,               /* Column name */
   int iDb                         /* Index of containing database. */
 ){
-  sqlite3 *db = pParse->db;       /* Database handle */
-  char *zDb = db->aDb[iDb].zName; /* Name of attached database */
+  sqlite3 db = pParse->db;       /* Database handle */
+  string zDb = db->aDb[iDb].zName; /* Name of attached database */
   int rc;                         /* Auth callback return code */
 
   rc = db->xAuth(db->pAuthArg, SQLITE_READ, zTab,zCol,zDb,pParse->zAuthContext);
   if( rc==SQLITE_DENY ){
-    if( db->nDb>2 || iDb!=0 ){
-      sqlite3ErrorMsg(pParse, "access to %s.%s.%s is prohibited",zDb,zTab,zCol);
-    }else{
-      sqlite3ErrorMsg(pParse, "access to %s.%s is prohibited", zTab, zCol);
-    }
-    pParse->rc = SQLITE_AUTH;
+if( db->nDb>2 || iDb!=0 ){
+  sqlite3ErrorMsg(pParse, "access to %s.%s.%s is prohibited",zDb,zTab,zCol);
+}else{
+  sqlite3ErrorMsg(pParse, "access to %s.%s is prohibited", zTab, zCol);
+}
+pParse->rc = SQLITE_AUTH;
   }else if( rc!=SQLITE_IGNORE && rc!=SQLITE_OK ){
-    sqliteAuthBadReturnCode(pParse);
+sqliteAuthBadReturnCode(pParse);
   }
   return rc;
 }
@@ -154,9 +154,9 @@ Expr *pExpr,          /* The expression to check authorization on */
 Schema *pSchema,      /* The schema of the expression */
 SrcList *pTabList     /* All table that pExpr might refer to */
 ){
-sqlite3 *db = pParse->db;
+sqlite3 db = pParse->db;
 Table *pTab = 0;      /* The table being read */
-const char *zCol;     /* Name of the column of the table */
+string zCol;     /* Name of the column of the table */
 int iSrc;             /* Index in pTabList->a[] of table being read */
 int iDb;              /* The index of the database the expression refers to */
 int iCol;             /* Index of column in table */
@@ -168,33 +168,33 @@ if( iDb<0 ){
 ** temporary table. */
 return;
 }
-  assert( pExpr->op==TK_COLUMN || pExpr->op==TK_TRIGGER );
+  Debug.Assert( pExpr->op==TK_COLUMN || pExpr->op==TK_TRIGGER );
   if( pExpr->op==TK_TRIGGER ){
-    pTab = pParse->pTriggerTab;
+pTab = pParse->pTriggerTab;
   }else{
-    assert( pTabList );
-    for(iSrc=0; ALWAYS(iSrc<pTabList->nSrc); iSrc++){
-      if( pExpr->iTable==pTabList->a[iSrc].iCursor ){
-        pTab = pTabList->a[iSrc].pTab;
+Debug.Assert( pTabList );
+for(iSrc=0; ALWAYS(iSrc<pTabList->nSrc); iSrc++){
+  if( pExpr->iTable==pTabList->a[iSrc].iCursor ){
+    pTab = pTabList->a[iSrc].pTab;
 	break;
-      }
-    }
+  }
+}
   }
   iCol = pExpr->iColumn;
   if( NEVER(pTab==0) ) return;
 
   if( iCol>=0 ){
-    assert( iCol<pTab->nCol );
-    zCol = pTab->aCol[iCol].zName;
+Debug.Assert( iCol<pTab->nCol );
+zCol = pTab->aCol[iCol].zName;
   }else if( pTab->iPKey>=0 ){
-assert( pTab->iPKey<pTab->nCol );
+Debug.Assert( pTab->iPKey<pTab->nCol );
 zCol = pTab->aCol[pTab->iPKey].zName;
 }else{
 zCol = "ROWID";
 }
-assert( iDb>=0 && iDb<db->nDb );
+Debug.Assert( iDb>=0 && iDb<db->nDb );
   if( SQLITE_IGNORE==sqlite3AuthReadCol(pParse, pTab->zName, zCol, iDb) ){
-    pExpr->op = TK_NULL;
+pExpr->op = TK_NULL;
 }
 }
 
@@ -207,11 +207,11 @@ assert( iDb>=0 && iDb<db->nDb );
 int sqlite3AuthCheck(
 Parse *pParse,
 int code,
-const char *zArg1,
-const char *zArg2,
-const char *zArg3
+string zArg1,
+string zArg2,
+string zArg3
 ){
-sqlite3 *db = pParse->db;
+sqlite3 db = pParse->db;
 int rc;
 
 /* Don't do any authorization checks if the database is initialising
@@ -243,9 +243,9 @@ return rc;
 void sqlite3AuthContextPush(
 Parse *pParse,
 AuthContext *pContext,
-const char *zContext
+string zContext
 ){
-assert( pParse );
+Debug.Assert( pParse );
 pContext->pParse = pParse;
 pContext->zAuthContext = pParse->zAuthContext;
 pParse->zAuthContext = zContext;

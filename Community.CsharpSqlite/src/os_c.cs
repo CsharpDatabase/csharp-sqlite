@@ -160,10 +160,10 @@ sqlite3_file id,              /* Database file handle */
 int iPage,
 int pgsz,
 int bExtend,                  /* True to extend file if necessary */
-ref object pp                 /* OUT: Pointer to mapping */
+out object pp                 /* OUT: Pointer to mapping */
 )
     {
-      return id.pMethods.xShmMap( id, iPage, pgsz, bExtend, ref pp );
+      return id.pMethods.xShmMap( id, iPage, pgsz, bExtend, out pp );
     }
 
     /*
@@ -184,7 +184,7 @@ ref object pp                 /* OUT: Pointer to mapping */
       ** down into the VFS layer.  Some SQLITE_OPEN_ flags (for example,
       ** SQLITE_OPEN_FULLMUTEX or SQLITE_OPEN_SHAREDCACHE) are blocked before
       ** reaching the VFS. */
-      rc = pVfs.xOpen( pVfs, zPath, pFile, flags & 0x87f3f, ref pFlagsOut );
+      rc = pVfs.xOpen( pVfs, zPath, pFile, flags & 0x87f3f, out pFlagsOut );
       Debug.Assert( rc == SQLITE_OK || pFile.pMethods == null );
       return rc;
     }
@@ -195,7 +195,7 @@ ref object pp                 /* OUT: Pointer to mapping */
     static int sqlite3OsAccess( sqlite3_vfs pVfs, string zPath, int flags, ref int pResOut )
     {
       DO_OS_MALLOC_TEST( null );
-      return pVfs.xAccess( pVfs, zPath, flags, ref pResOut );
+      return pVfs.xAccess( pVfs, zPath, flags, out pResOut );
     }
     static int sqlite3OsFullPathname(
     sqlite3_vfs pVfs,
@@ -226,9 +226,9 @@ ref object pp                 /* OUT: Pointer to mapping */
       pVfs.xDlClose( pVfs, pHandle );
     }
 #endif
-    static int sqlite3OsRandomness( sqlite3_vfs pVfs, int nByte, ref byte[] zBufOut )
+    static int sqlite3OsRandomness( sqlite3_vfs pVfs, int nByte, byte[] zBufOut )
     {
-      return pVfs.xRandomness( pVfs, nByte, ref zBufOut );
+      return pVfs.xRandomness( pVfs, nByte, zBufOut );
     }
     static int sqlite3OsSleep( sqlite3_vfs pVfs, int nMicro )
     {
@@ -287,7 +287,7 @@ ref object pp                 /* OUT: Pointer to mapping */
       int rc = SQLITE_OK;
       Debug.Assert( pFile != null );
       rc = sqlite3OsClose( pFile );
-      //sqlite3_free( ref  pFile );
+      //sqlite3_free( ref pFile );
       return rc;
     }
 

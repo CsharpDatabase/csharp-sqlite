@@ -44,14 +44,14 @@ namespace Community.CsharpSqlite
     **
     *************************************************************************
     */
-    //#ifndef _SQLITE3_H_
+    //#if !_SQLITE3_H_
     //#define _SQLITE3_H_
     //#include <stdarg.h>     /* Needed for the definition of va_list */
 
     /*
     ** Make sure we can call this stuff from C++.
     */
-    //#ifdef __cplusplus
+    //#if __cplusplus
     //extern "C" {
     //#endif
 
@@ -59,11 +59,11 @@ namespace Community.CsharpSqlite
     /*
     ** Add the ability to override 'extern'
     */
-    //#ifndef SQLITE_EXTERN
+    //#if !SQLITE_EXTERN
     //# define SQLITE_EXTERN extern
     //#endif
 
-    //#ifndef SQLITE_API
+    //#if !SQLITE_API
     //# define SQLITE_API
     //#endif
 
@@ -87,10 +87,10 @@ namespace Community.CsharpSqlite
     /*
     ** Ensure these symbols were not defined by some previous header file.
     */
-    //#ifdef SQLITE_VERSION
+    //#if SQLITE_VERSION
     //# undef SQLITE_VERSION
     //#endif
-    //#ifdef SQLITE_VERSION_NUMBER
+    //#if SQLITE_VERSION_NUMBER
     //# undef SQLITE_VERSION_NUMBER
     //#endif
 
@@ -135,15 +135,15 @@ namespace Community.CsharpSqlite
     ** These interfaces provide the same information as the [SQLITE_VERSION],
     ** [SQLITE_VERSION_NUMBER], and [SQLITE_SOURCE_ID] C preprocessor macros
     ** but are associated with the library instead of the header file.  ^(Cautious
-    ** programmers might include assert() statements in their application to
+    ** programmers might include Debug.Assert() statements in their application to
     ** verify that values returned by these interfaces match the macros in
     ** the header, and thus insure that the application is
     ** compiled with matching library and header files.
     **
     ** <blockquote><pre>
-    ** assert( sqlite3_libversion_number()==SQLITE_VERSION_NUMBER );
-    ** assert( strcmp(sqlite3_sourceid(),SQLITE_SOURCE_ID)==0 );
-    ** assert( strcmp(sqlite3_libversion(),SQLITE_VERSION)==0 );
+    ** Debug.Assert( sqlite3_libversion_number()==SQLITE_VERSION_NUMBER );
+    ** Debug.Assert( strcmp(sqlite3_sourceid(),SQLITE_SOURCE_ID)==0 );
+    ** Debug.Assert( strcmp(sqlite3_libversion(),SQLITE_VERSION)==0 );
     ** </pre></blockquote>)^
     **
     ** ^The sqlite3_version[] string constant contains the text of [SQLITE_VERSION]
@@ -159,8 +159,8 @@ namespace Community.CsharpSqlite
     ** See also: [sqlite_version()] and [sqlite_source_id()].
     */
     //SQLITE_API SQLITE_EXTERN const char sqlite3_version[];
-    //SQLITE_API const char *sqlite3_libversion(void);
-    //SQLITE_API const char *sqlite3_sourceid(void);
+    //SQLITE_API string sqlite3_libversion(void);
+    //SQLITE_API string sqlite3_sourceid(void);
     //SQLITE_API int sqlite3_libversion_number(void);
 
     /*
@@ -185,9 +185,9 @@ namespace Community.CsharpSqlite
     ** See also: SQL functions [sqlite_compileoption_used()] and
     ** [sqlite_compileoption_get()] and the [compile_options pragma].
     */
-    //#ifndef SQLITE_OMIT_COMPILEOPTION_DIAGS
-    //SQLITE_API int sqlite3_compileoption_used(const char *zOptName);
-    //SQLITE_API const char *sqlite3_compileoption_get(int N);
+    //#if !SQLITE_OMIT_COMPILEOPTION_DIAGS
+    //SQLITE_API int sqlite3_compileoption_used(string zOptName);
+    //SQLITE_API string sqlite3_compileoption_get(int N);
     //#endif
 
     /*
@@ -259,7 +259,7 @@ namespace Community.CsharpSqlite
     ** sqlite3_uint64 and sqlite_uint64 types can store integer values 
     ** between 0 and +18446744073709551615 inclusive.
     */
-    //#ifdef SQLITE_INT64_TYPE
+    //#if SQLITE_INT64_TYPE
     //  typedef SQLITE_INT64_TYPE sqlite_int64;
     //  typedef unsigned SQLITE_INT64_TYPE sqlite_uint64;
     //#elif defined(_MSC_VER) || defined(__BORLANDC__)
@@ -276,7 +276,7 @@ namespace Community.CsharpSqlite
     ** If compiling for a processor that lacks floating point support,
     ** substitute integer for floating-point.
     */
-    //#ifdef SQLITE_OMIT_FLOATING_POINT
+    //#if SQLITE_OMIT_FLOATING_POINT
     //# define double sqlite3_int64
     //#endif
 
@@ -304,14 +304,14 @@ namespace Community.CsharpSqlite
     ** ^Calling sqlite3_close() with a NULL pointer argument is a 
     ** harmless no-op.
     */
-    //SQLITE_API int sqlite3_close(sqlite3 *);
+    //SQLITE_API int sqlite3_close(sqlite3 );
 
     /*
     ** The type for a callback function.
     ** This is legacy and deprecated.  It is included for historical
     ** compatibility and is not documented.
     */
-    //typedef int (*sqlite3_callback)(void*,int,char**, char**);
+    //typedef int (*sqlite3_callback)(void*,int,char**, char*);
 
     /*
     ** CAPI3REF: One-Step Query Execution Interface
@@ -376,8 +376,8 @@ namespace Community.CsharpSqlite
     */
     //SQLITE_API int sqlite3_exec(
     //  sqlite3*,                                  /* An open database */
-    //  const char *sql,                           /* SQL to be evaluated */
-    //  int (*callback)(void*,int,char**,char**),  /* Callback function */
+    //  string sql,                           /* SQL to be evaluated */
+    //  int (*callback)(void*,int,char**,char*),  /* Callback function */
     //  void *,                                    /* 1st argument to callback */
     //  char **errmsg                              /* Error msg written here */
     //);
@@ -794,7 +794,7 @@ namespace Community.CsharpSqlite
     //typedef struct sqlite3_io_methods sqlite3_io_methods;
     //struct sqlite3_io_methods {
     //  int iVersion;
-    //  int (*xClose)(sqlite3_file*);
+    //  int (*xClose)(sqlite3_file);
     //  int (*xRead)(sqlite3_file*, void*, int iAmt, sqlite3_int64 iOfst);
     //  int (*xWrite)(sqlite3_file*, const void*, int iAmt, sqlite3_int64 iOfst);
     //  int (*xTruncate)(sqlite3_file*, sqlite3_int64 size);
@@ -803,13 +803,13 @@ namespace Community.CsharpSqlite
     //  int (*xLock)(sqlite3_file*, int);
     //  int (*xUnlock)(sqlite3_file*, int);
     //  int (*xCheckReservedLock)(sqlite3_file*, int *pResOut);
-    //  int (*xFileControl)(sqlite3_file*, int op, void *pArg);
-    //  int (*xSectorSize)(sqlite3_file*);
-    //  int (*xDeviceCharacteristics)(sqlite3_file*);
+    //  int (*xFileControl)(sqlite3_file*, int op, object  *pArg);
+    //  int (*xSectorSize)(sqlite3_file);
+    //  int (*xDeviceCharacteristics)(sqlite3_file);
     //  /* Methods above are valid for version 1 */
-    //  int (*xShmMap)(sqlite3_file*, int iPg, int pgsz, int, void volatile**);
+    //  int (*xShmMap)(sqlite3_file*, int iPg, int pgsz, int, object  volatile*);
     //  int (*xShmLock)(sqlite3_file*, int offset, int n, int flags);
-    //  void (*xShmBarrier)(sqlite3_file*);
+    //  void (*xShmBarrier)(sqlite3_file);
     //  int (*xShmUnmap)(sqlite3_file*, int deleteFlag);
     //  /* Methods above are valid for version 2 */
     //  /* Additional methods may be added in future releases */
@@ -829,9 +829,9 @@ namespace Community.CsharpSqlite
       public dxFileControl xFileControl;
       public dxSectorSize xSectorSize;
       public dxDeviceCharacteristics xDeviceCharacteristics;
-      public dxShmMap xShmMap;//int (*xShmMap)(sqlite3_file*, int iPg, int pgsz, int, void volatile**);
+      public dxShmMap xShmMap;//int (*xShmMap)(sqlite3_file*, int iPg, int pgsz, int, object  volatile*);
       public dxShmLock xShmLock;//int (*xShmLock)(sqlite3_file*, int offset, int n, int flags);
-      public dxShmBarrier xShmBarrier;//void (*xShmBarrier)(sqlite3_file*);
+      public dxShmBarrier xShmBarrier;//void (*xShmBarrier)(sqlite3_file);
       public dxShmUnmap xShmUnmap;//int (*xShmUnmap)(sqlite3_file*, int deleteFlag);
       /* Additional methods may be added in future releases */
 
@@ -1113,26 +1113,26 @@ namespace Community.CsharpSqlite
     //  int szOsFile;            /* Size of subclassed sqlite3_file */
     //  int mxPathname;          /* Maximum file pathname length */
     //  sqlite3_vfs *pNext;      /* Next registered VFS */
-    //  const char *zName;       /* Name of this virtual file system */
+    //  string zName;       /* Name of this virtual file system */
     //  void *pAppData;          /* Pointer to application-specific data */
-    //  int (*xOpen)(sqlite3_vfs*, const char *zName, sqlite3_file*,
+    //  int (*xOpen)(sqlite3_vfs*, string zName, sqlite3_file*,
     //               int flags, int *pOutFlags);
-    //  int (*xDelete)(sqlite3_vfs*, const char *zName, int syncDir);
-    //  int (*xAccess)(sqlite3_vfs*, const char *zName, int flags, int *pResOut);
-    //  int (*xFullPathname)(sqlite3_vfs*, const char *zName, int nOut, char *zOut);
-    //  void *(*xDlOpen)(sqlite3_vfs*, const char *zFilename);
-    //  void (*xDlError)(sqlite3_vfs*, int nByte, char *zErrMsg);
-    //  void (*(*xDlSym)(sqlite3_vfs*,void*, const char *zSymbol))(void);
-    //  void (*xDlClose)(sqlite3_vfs*, void*);
-    //  int (*xRandomness)(sqlite3_vfs*, int nByte, char *zOut);
+    //  int (*xDelete)(sqlite3_vfs*, string zName, int syncDir);
+    //  int (*xAccess)(sqlite3_vfs*, string zName, int flags, int *pResOut);
+    //  int (*xFullPathname)(sqlite3_vfs*, string zName, int nOut, string zOut);
+    //  void *(*xDlOpen)(sqlite3_vfs*, string zFilename);
+    //  void (*xDlError)(sqlite3_vfs*, int nByte, string zErrMsg);
+    //  void (*(*xDlSym)(sqlite3_vfs*,void*, string zSymbol))(void);
+    //  void (*xDlClose)(sqlite3_vfs*, void);
+    //  int (*xRandomness)(sqlite3_vfs*, int nByte, string zOut);
     //  int (*xSleep)(sqlite3_vfs*, int microseconds);
-    //  int (*xCurrentTime)(sqlite3_vfs*, double*);
-    //  int (*xGetLastError)(sqlite3_vfs*, int, char *);
+    //  int (*xCurrentTime)(sqlite3_vfs*, double);
+    //  int (*xGetLastError)(sqlite3_vfs*, int, char );
     //  /*
     //  ** The methods above are in version 1 of the sqlite_vfs object
     //  ** definition.  Those that follow are added in version 2 or later
     //  */
-    //  int (*xCurrentTimeInt64)(sqlite3_vfs*, sqlite3_int64*);
+    //  int (*xCurrentTimeInt64)(sqlite3_vfs*, sqlite3_int64);
     //  /*
     //  ** The methods above are in versions 1 and 2 of the sqlite_vfs object.
     //  ** New fields may be appended in figure versions.  The iVersion
@@ -1168,11 +1168,11 @@ namespace Community.CsharpSqlite
       ** The methods above are in versions 1 and 2 of the sqlite_vfs object.
       ** Those below are for version 3 and greater.
       */
-      //int (*xSetSystemCall)(sqlite3_vfs*, const char *zName, sqlite3_syscall_ptr);
+      //int (*xSetSystemCall)(sqlite3_vfs*, string zName, sqlite3_syscall_ptr);
       public dxSetSystemCall xSetSystemCall;
-      //sqlite3_syscall_ptr (*xGetSystemCall)(sqlite3_vfs*, const char *zName);
+      //sqlite3_syscall_ptr (*xGetSystemCall)(sqlite3_vfs*, string zName);
       public dxGetSystemCall xGetSystemCall;
-      //const char *(*xNextSystemCall)(sqlite3_vfs*, const char *zName);
+      //string (*xNextSystemCall)(sqlite3_vfs*, string zName);
       public dxNextSystemCall xNextSystemCall;
       /*
       ** The methods above are in versions 1 through 3 of the sqlite_vfs object.
@@ -1228,6 +1228,28 @@ namespace Community.CsharpSqlite
         this.xCurrentTime = xCurrentTime;
         this.xGetLastError = xGetLastError;
         this.xCurrentTimeInt64 = xCurrentTimeInt64;
+      }
+      public void CopyTo(sqlite3_vfs ct)
+      {
+        ct.iVersion = this.iVersion;
+        ct.szOsFile = this.szOsFile;
+        ct.mxPathname = this.mxPathname;
+        ct.pNext = this.pNext;
+        ct.zName = this.zName;
+        ct.pAppData = this.pAppData;
+        ct.xOpen = this.xOpen;
+        ct.xDelete = this.xDelete;
+        ct.xAccess = this.xAccess;
+        ct.xFullPathname = this.xFullPathname;
+        ct.xDlOpen = this.xDlOpen;
+        ct.xDlError = this.xDlError;
+        ct.xDlSym = this.xDlSym;
+        ct.xDlClose = this.xDlClose;
+        ct.xRandomness = this.xRandomness;
+        ct.xSleep = this.xSleep;
+        ct.xCurrentTime = this.xCurrentTime;
+        ct.xGetLastError = this.xGetLastError;
+        ct.xCurrentTimeInt64 = this.xCurrentTimeInt64;
       }
     }
 
@@ -1504,28 +1526,32 @@ namespace Community.CsharpSqlite
     //typedef struct sqlite3_mem_methods sqlite3_mem_methods;
     //struct sqlite3_mem_methods {
     //  void *(*xMalloc)(int);         /* Memory allocation function */
-    //  void (*xFree)(void*);          /* Free a prior allocation */
+    //  void (*xFree)(void);          /* Free a prior allocation */
     //  void *(*xRealloc)(void*,int);  /* Resize an allocation */
-    //  int (*xSize)(void*);           /* Return the size of an allocation */
+    //  int (*xSize)(void);           /* Return the size of an allocation */
     //  int (*xRoundup)(int);          /* Round up request size to allocation size */
-    //  int (*xInit)(void*);           /* Initialize the memory allocator */
-    //  void (*xShutdown)(void*);      /* Deinitialize the memory allocator */
+    //  int (*xInit)(void);           /* Initialize the memory allocator */
+    //  void (*xShutdown)(void);      /* Deinitialize the memory allocator */
     //  void *pAppData;                /* Argument to xInit() and xShutdown() */
     //};
-    public struct sqlite3_mem_methods
+    public class sqlite3_mem_methods
     {
       public dxMalloc xMalloc;          //void *(*xMalloc)(int);         /* Memory allocation function */
       public dxMallocInt xMallocInt;    //void *(*xMalloc)(int);         /* Memory allocation function */
       public dxMallocMem xMallocMem;    //void *(*xMalloc)(int);         /* Memory allocation function */
-      public dxFree xFree;              //void (*xFree)(void*);          /* Free a prior allocation */
-      public dxFreeInt xFreeInt;        //void (*xFree)(void*);          /* Free a prior allocation */
-      public dxFreeMem xFreeMem;        //void (*xFree)(void*);          /* Free a prior allocation */
+      public dxFree xFree;              //void (*xFree)(void);          /* Free a prior allocation */
+      public dxFreeInt xFreeInt;        //void (*xFree)(void);          /* Free a prior allocation */
+      public dxFreeMem xFreeMem;        //void (*xFree)(void);          /* Free a prior allocation */
       public dxRealloc xRealloc;        //void *(*xRealloc)(void*,int);  /* Resize an allocation */
-      public dxSize xSize;              //int (*xSize)(void*);           /* Return the size of an allocation */
+      public dxSize xSize;              //int (*xSize)(void);           /* Return the size of an allocation */
       public dxRoundup xRoundup;        //int (*xRoundup)(int);          /* Round up request size to allocation size */
-      public dxMemInit xInit;           //int (*xInit)(void*);           /* Initialize the memory allocator */
-      public dxMemShutdown xShutdown;   //void (*xShutdown)(void*);      /* Deinitialize the memory allocator */
+      public dxMemInit xInit;           //int (*xInit)(void);           /* Initialize the memory allocator */
+      public dxMemShutdown xShutdown;   //void (*xShutdown)(void);      /* Deinitialize the memory allocator */
       public object pAppData;                                      /* Argument to xInit() and xShutdown() */
+
+      public sqlite3_mem_methods()
+      {
+      }
 
       public sqlite3_mem_methods(
       dxMalloc xMalloc,
@@ -1748,7 +1774,7 @@ namespace Community.CsharpSqlite
     **
     ** [[SQLITE_CONFIG_LOG]] <dt>SQLITE_CONFIG_LOG</dt>
     ** <dd> ^The SQLITE_CONFIG_LOG option takes two arguments: a pointer to a
-    ** function with a call signature of void(*)(void*,int,const char*), 
+    ** function with a call signature of void()(void*,int,const char), 
     ** and a pointer to void. ^If the function pointer is not NULL, it is
     ** invoked by [sqlite3_log()] to process each logging event.  ^If the
     ** function pointer is NULL, the [sqlite3_log()] interface becomes a no-op.
@@ -1933,7 +1959,7 @@ namespace Community.CsharpSqlite
     ** unpredictable and might not equal either the old or the new
     ** last insert [rowid].
     */
-    //SQLITE_API sqlite3_int64 sqlite3_last_insert_rowid(sqlite3*);
+    //SQLITE_API sqlite3_int64 sqlite3_last_insert_rowid(sqlite3);
 
     /*
     ** CAPI3REF: Count The Number Of Rows Modified
@@ -1987,7 +2013,7 @@ namespace Community.CsharpSqlite
     ** while [sqlite3_changes()] is running then the value returned
     ** is unpredictable and not meaningful.
     */
-    //SQLITE_API int sqlite3_changes(sqlite3*);
+    //SQLITE_API int sqlite3_changes(sqlite3);
 
     /*
     ** CAPI3REF: Total Number Of Rows Modified
@@ -2013,7 +2039,7 @@ namespace Community.CsharpSqlite
     ** while [sqlite3_total_changes()] is running then the value
     ** returned is unpredictable and not meaningful.
     */
-    //SQLITE_API int sqlite3_total_changes(sqlite3*);
+    //SQLITE_API int sqlite3_total_changes(sqlite3);
 
     /*
     ** CAPI3REF: Interrupt A Long-Running Query
@@ -2052,7 +2078,7 @@ namespace Community.CsharpSqlite
     ** If the database connection closes while [sqlite3_interrupt()]
     ** is running then bad things will likely happen.
     */
-    //SQLITE_API void sqlite3_interrupt(sqlite3*);
+    //SQLITE_API void sqlite3_interrupt(sqlite3);
 
     /*
     ** CAPI3REF: Determine If An SQL Statement Is Complete
@@ -2087,7 +2113,7 @@ namespace Community.CsharpSqlite
     ** The input to [sqlite3_complete16()] must be a zero-terminated
     ** UTF-16 string in native byte order.
     */
-    //SQLITE_API int sqlite3_complete(const char *sql);
+    //SQLITE_API int sqlite3_complete(string sql);
     //SQLITE_API int sqlite3_complete16(const void *sql);
 
     /*
@@ -2154,7 +2180,7 @@ namespace Community.CsharpSqlite
     ** A busy handler must not close the database connection
     ** or [prepared statement] that invoked the busy handler.
     */
-    //SQLITE_API int sqlite3_busy_handler(sqlite3*, int(*)(void*,int), void*);
+    //SQLITE_API int sqlite3_busy_handler(sqlite3*, int()(void*,int), void);
 
     /*
     ** CAPI3REF: Set A Busy Timeout
@@ -2249,8 +2275,8 @@ namespace Community.CsharpSqlite
     ** [sqlite3_errmsg()].
     */
     //SQLITE_API int sqlite3_get_table(
-    //  sqlite3 *db,          /* An open database */
-    //  const char *zSql,     /* SQL to be evaluated */
+    //  sqlite3 db,          /* An open database */
+    //  string zSql,     /* SQL to be evaluated */
     //  char ***pazResult,    /* Results of the query */
     //  int *pnRow,           /* Number of result rows written here */
     //  int *pnColumn,        /* Number of result columns written here */
@@ -2306,13 +2332,13 @@ namespace Community.CsharpSqlite
     ** For example, assume the string variable zText contains text as follows:
     **
     ** <blockquote><pre>
-    **  char *zText = "It's a happy day!";
+    **  string zText = "It's a happy day!";
     ** </pre></blockquote>
     **
     ** One can use this text in an SQL statement as follows:
     **
     ** <blockquote><pre>
-    **  char *zSQL = sqlite3_mprintf("INSERT INTO table VALUES('%q')", zText);
+    **  string zSQL = sqlite3_mprintf("INSERT INTO table VALUES('%q')", zText);
     **  sqlite3_exec(db, zSQL, 0, 0, 0);
     **  sqlite3_free(zSQL);
     ** </pre></blockquote>
@@ -2340,7 +2366,7 @@ namespace Community.CsharpSqlite
     ** single quotes).)^  So, for example, one could say:
     **
     ** <blockquote><pre>
-    **  char *zSQL = sqlite3_mprintf("INSERT INTO table VALUES(%Q)", zText);
+    **  string zSQL = sqlite3_mprintf("INSERT INTO table VALUES(%Q)", zText);
     **  sqlite3_exec(db, zSQL, 0, 0, 0);
     **  sqlite3_free(zSQL);
     ** </pre></blockquote>
@@ -2430,7 +2456,7 @@ namespace Community.CsharpSqlite
     */
     //SQLITE_API void *sqlite3_malloc(int);
     //SQLITE_API void *sqlite3_realloc(void*, int);
-    //SQLITE_API void sqlite3_free(void*);
+    //SQLITE_API void sqlite3_free(void);
 
     /*
     ** CAPI3REF: Memory Allocator Statistics
@@ -2476,7 +2502,7 @@ namespace Community.CsharpSqlite
     ** internally and without recourse to the [sqlite3_vfs] xRandomness
     ** method.
     */
-    //SQLITE_API void sqlite3_randomness(int N, void *P);
+    //SQLITE_API void sqlite3_randomness(int N, object  *P);
 
     /*
     ** CAPI3REF: Compile-Time Authorization Callbacks
@@ -2560,7 +2586,7 @@ namespace Community.CsharpSqlite
     */
     //SQLITE_API int sqlite3_set_authorizer(
     //  sqlite3*,
-    //  int (*xAuth)(void*,int,const char*,const char*,const char*,const char*),
+    //  int (*xAuth)(void*,int,const char*,const char*,const char*,const char),
     //  void *pUserData
     //);
 
@@ -2693,9 +2719,9 @@ namespace Community.CsharpSqlite
     ** sqlite3_profile() function is considered experimental and is
     ** subject to change in future versions of SQLite.
     */
-    //SQLITE_API void *sqlite3_trace(sqlite3*, void(*xTrace)(void*,const char*), void*);
+    //SQLITE_API void *sqlite3_trace(sqlite3*, void(*xTrace)(void*,const char), void);
     //SQLITE_API SQLITE_EXPERIMENTAL void *sqlite3_profile(sqlite3*,
-    //   void(*xProfile)(void*,const char*,sqlite3_uint64), void*);
+    //   void(*xProfile)(void*,const char*,sqlite3_uint64), void);
 
     /*
     ** CAPI3REF: Query Progress Callbacks
@@ -2727,7 +2753,7 @@ namespace Community.CsharpSqlite
     ** database connections for the meaning of "modify" in this paragraph.
     **
     */
-    //SQLITE_API void sqlite3_progress_handler(sqlite3*, int, int(*)(void*), void*);
+    //SQLITE_API void sqlite3_progress_handler(sqlite3*, int, int()(void), void);
 
     /*
     ** CAPI3REF: Opening A New Database Connection
@@ -2924,7 +2950,7 @@ namespace Community.CsharpSqlite
     ** sqlite3_open() or sqlite3_open_v2().
     */
     //SQLITE_API int sqlite3_open(
-    //  const char *filename,   /* Database filename (UTF-8) */
+    //  string filename,   /* Database filename (UTF-8) */
     //  sqlite3 **ppDb          /* OUT: SQLite db handle */
     //);
     //SQLITE_API int sqlite3_open16(
@@ -2932,10 +2958,10 @@ namespace Community.CsharpSqlite
     //  sqlite3 **ppDb          /* OUT: SQLite db handle */
     //);
     //SQLITE_API int sqlite3_open_v2(
-    //  const char *filename,   /* Database filename (UTF-8) */
+    //  string filename,   /* Database filename (UTF-8) */
     //  sqlite3 **ppDb,         /* OUT: SQLite db handle */
     //  int flags,              /* Flags */
-    //  const char *zVfs        /* Name of VFS module to use */
+    //  string zVfs        /* Name of VFS module to use */
     //);
 
     /*
@@ -2955,7 +2981,7 @@ namespace Community.CsharpSqlite
     ** passed into the xOpen VFS method, then the behavior of this routine
     ** is undefined and probably undesirable.
     */
-    //SQLITE_API const char *sqlite3_uri_parameter(const char *zFilename, const char *zParam);
+    //SQLITE_API string sqlite3_uri_parameter(string zFilename, string zParam);
 
 
     /*
@@ -2991,10 +3017,10 @@ namespace Community.CsharpSqlite
     ** was invoked incorrectly by the application.  In that case, the
     ** error code and message may or may not be set.
     */
-    //SQLITE_API int sqlite3_errcode(sqlite3 *db);
-    //SQLITE_API int sqlite3_extended_errcode(sqlite3 *db);
-    //SQLITE_API const char *sqlite3_errmsg(sqlite3*);
-    //SQLITE_API const void *sqlite3_errmsg16(sqlite3*);
+    //SQLITE_API int sqlite3_errcode(sqlite3 db);
+    //SQLITE_API int sqlite3_extended_errcode(sqlite3 db);
+    //SQLITE_API string sqlite3_errmsg(sqlite3);
+    //SQLITE_API const void *sqlite3_errmsg16(sqlite3);
 
     /*
     ** CAPI3REF: SQL Statement Object
@@ -3219,29 +3245,29 @@ namespace Community.CsharpSqlite
     ** </ol>
     */
     //SQLITE_API int sqlite3_prepare(
-    //  sqlite3 *db,            /* Database handle */
-    //  const char *zSql,       /* SQL statement, UTF-8 encoded */
+    //  sqlite3 db,            /* Database handle */
+    //  string zSql,       /* SQL statement, UTF-8 encoded */
     //  int nByte,              /* Maximum length of zSql in bytes. */
     //  sqlite3_stmt **ppStmt,  /* OUT: Statement handle */
-    //  const char **pzTail     /* OUT: Pointer to unused portion of zSql */
+    //  string *pzTail     /* OUT: Pointer to unused portion of zSql */
     //);
     //SQLITE_API int sqlite3_prepare_v2(
-    //  sqlite3 *db,            /* Database handle */
-    //  const char *zSql,       /* SQL statement, UTF-8 encoded */
+    //  sqlite3 db,            /* Database handle */
+    //  string zSql,       /* SQL statement, UTF-8 encoded */
     //  int nByte,              /* Maximum length of zSql in bytes. */
     //  sqlite3_stmt **ppStmt,  /* OUT: Statement handle */
-    //  const char **pzTail     /* OUT: Pointer to unused portion of zSql */
+    //  string *pzTail     /* OUT: Pointer to unused portion of zSql */
     //);
     //SQLITE_API int sqlite3_prepare16(
-    //  sqlite3 *db,            /* Database handle */
-    //  const void *zSql,       /* SQL statement, UTF-16 encoded */
+    //  sqlite3 db,            /* Database handle */
+    //  string zSql,       /* SQL statement, UTF-16 encoded */
     //  int nByte,              /* Maximum length of zSql in bytes. */
     //  sqlite3_stmt **ppStmt,  /* OUT: Statement handle */
     //  const void **pzTail     /* OUT: Pointer to unused portion of zSql */
     //);
     //SQLITE_API int sqlite3_prepare16_v2(
-    //  sqlite3 *db,            /* Database handle */
-    //  const void *zSql,       /* SQL statement, UTF-16 encoded */
+    //  sqlite3 db,            /* Database handle */
+    //  string zSql,       /* SQL statement, UTF-16 encoded */
     //  int nByte,              /* Maximum length of zSql in bytes. */
     //  sqlite3_stmt **ppStmt,  /* OUT: Statement handle */
     //  const void **pzTail     /* OUT: Pointer to unused portion of zSql */
@@ -3254,7 +3280,7 @@ namespace Community.CsharpSqlite
     ** SQL text used to create a [prepared statement] if that statement was
     ** compiled using either [sqlite3_prepare_v2()] or [sqlite3_prepare16_v2()].
     */
-    //SQLITE_API const char *sqlite3_sql(sqlite3_stmt *pStmt);
+    //SQLITE_API string sqlite3_sql(sqlite3_stmt *pStmt);
 
     /*
     ** CAPI3REF: Determine If An SQL Statement Writes The Database
@@ -3422,14 +3448,14 @@ namespace Community.CsharpSqlite
     ** See also: [sqlite3_bind_parameter_count()],
     ** [sqlite3_bind_parameter_name()], and [sqlite3_bind_parameter_index()].
     */
-    //SQLITE_API int sqlite3_bind_blob(sqlite3_stmt*, int, const void*, int n, void(*)(void*));
+    //SQLITE_API int sqlite3_bind_blob(sqlite3_stmt*, int, const void*, int n, void()(void));
     //SQLITE_API int sqlite3_bind_double(sqlite3_stmt*, int, double);
     //SQLITE_API int sqlite3_bind_int(sqlite3_stmt*, int, int);
     //SQLITE_API int sqlite3_bind_int64(sqlite3_stmt*, int, sqlite3_int64);
     //SQLITE_API int sqlite3_bind_null(sqlite3_stmt*, int);
-    //SQLITE_API int sqlite3_bind_text(sqlite3_stmt*, int, const char*, int n, void(*)(void*));
-    //SQLITE_API int sqlite3_bind_text16(sqlite3_stmt*, int, const void*, int, void(*)(void*));
-    //SQLITE_API int sqlite3_bind_value(sqlite3_stmt*, int, const sqlite3_value*);
+    //SQLITE_API int sqlite3_bind_text(sqlite3_stmt*, int, const char*, int n, void()(void));
+    //SQLITE_API int sqlite3_bind_text16(sqlite3_stmt*, int, const void*, int, void()(void));
+    //SQLITE_API int sqlite3_bind_value(sqlite3_stmt*, int, const sqlite3_value);
     //SQLITE_API int sqlite3_bind_zeroblob(sqlite3_stmt*, int, int n);
 
     /*
@@ -3450,7 +3476,7 @@ namespace Community.CsharpSqlite
     ** [sqlite3_bind_parameter_name()], and
     ** [sqlite3_bind_parameter_index()].
     */
-    //SQLITE_API int sqlite3_bind_parameter_count(sqlite3_stmt*);
+    //SQLITE_API int sqlite3_bind_parameter_count(sqlite3_stmt);
 
     /*
     ** CAPI3REF: Name Of A Host Parameter
@@ -3477,7 +3503,7 @@ namespace Community.CsharpSqlite
     ** [sqlite3_bind_parameter_count()], and
     ** [sqlite3_bind_parameter_index()].
     */
-    //SQLITE_API const char *sqlite3_bind_parameter_name(sqlite3_stmt*, int);
+    //SQLITE_API string sqlite3_bind_parameter_name(sqlite3_stmt*, int);
 
     /*
     ** CAPI3REF: Index Of A Parameter With A Given Name
@@ -3493,7 +3519,7 @@ namespace Community.CsharpSqlite
     ** [sqlite3_bind_parameter_count()], and
     ** [sqlite3_bind_parameter_index()].
     */
-    //SQLITE_API int sqlite3_bind_parameter_index(sqlite3_stmt*, const char *zName);
+    //SQLITE_API int sqlite3_bind_parameter_index(sqlite3_stmt*, string zName);
 
     /*
     ** CAPI3REF: Reset All Bindings On A Prepared Statement
@@ -3502,7 +3528,7 @@ namespace Community.CsharpSqlite
     ** the [sqlite3_bind_blob | bindings] on a [prepared statement].
     ** ^Use this routine to reset all host parameters to NULL.
     */
-    //SQLITE_API int sqlite3_clear_bindings(sqlite3_stmt*);
+    //SQLITE_API int sqlite3_clear_bindings(sqlite3_stmt);
 
     /*
     ** CAPI3REF: Number Of Columns In A Result Set
@@ -3541,7 +3567,7 @@ namespace Community.CsharpSqlite
     ** then the name of the column is unspecified and may change from
     ** one release of SQLite to the next.
     */
-    //SQLITE_API const char *sqlite3_column_name(sqlite3_stmt*, int N);
+    //SQLITE_API string sqlite3_column_name(sqlite3_stmt*, int N);
     //SQLITE_API const void *sqlite3_column_name16(sqlite3_stmt*, int N);
 
     /*
@@ -3589,11 +3615,11 @@ namespace Community.CsharpSqlite
     ** for the same [prepared statement] and result column
     ** at the same time then the results are undefined.
     */
-    //SQLITE_API const char *sqlite3_column_database_name(sqlite3_stmt*,int);
+    //SQLITE_API string sqlite3_column_database_name(sqlite3_stmt*,int);
     //SQLITE_API const void *sqlite3_column_database_name16(sqlite3_stmt*,int);
-    //SQLITE_API const char *sqlite3_column_table_name(sqlite3_stmt*,int);
+    //SQLITE_API string sqlite3_column_table_name(sqlite3_stmt*,int);
     //SQLITE_API const void *sqlite3_column_table_name16(sqlite3_stmt*,int);
-    //SQLITE_API const char *sqlite3_column_origin_name(sqlite3_stmt*,int);
+    //SQLITE_API string sqlite3_column_origin_name(sqlite3_stmt*,int);
     //SQLITE_API const void *sqlite3_column_origin_name16(sqlite3_stmt*,int);
 
     /*
@@ -3625,7 +3651,7 @@ namespace Community.CsharpSqlite
     ** is associated with individual values, not with the containers
     ** used to hold those values.
     */
-    //SQLITE_API const char *sqlite3_column_decltype(sqlite3_stmt*,int);
+    //SQLITE_API string sqlite3_column_decltype(sqlite3_stmt*,int);
     //SQLITE_API const void *sqlite3_column_decltype16(sqlite3_stmt*,int);
 
     /*
@@ -3705,7 +3731,7 @@ namespace Community.CsharpSqlite
     ** then the more specific [error codes] are returned directly
     ** by sqlite3_step().  The use of the "v2" interface is recommended.
     */
-    //SQLITE_API int sqlite3_step(sqlite3_stmt*);
+    //SQLITE_API int sqlite3_step(sqlite3_stmt);
 
     /*
     ** CAPI3REF: Number of columns in a result set
@@ -3746,7 +3772,7 @@ namespace Community.CsharpSqlite
     //#define SQLITE_FLOAT    2
     //#define SQLITE_BLOB     4
     //#define SQLITE_NULL     5
-    //#ifdef SQLITE_TEXT
+    //#if SQLITE_TEXT
     //# undef SQLITE_TEXT
     //#else
     //# define SQLITE_TEXT     3
@@ -4074,35 +4100,35 @@ namespace Community.CsharpSqlite
     ** statement in which the function is running.
     */
     //SQLITE_API int sqlite3_create_function(
-    //  sqlite3 *db,
-    //  const char *zFunctionName,
+    //  sqlite3 db,
+    //  string zFunctionName,
     //  int nArg,
     //  int eTextRep,
     //  void *pApp,
-    //  void (*xFunc)(sqlite3_context*,int,sqlite3_value**),
-    //  void (*xStep)(sqlite3_context*,int,sqlite3_value**),
-    //  void (*xFinal)(sqlite3_context*)
+    //  void (*xFunc)(sqlite3_context*,int,sqlite3_value*),
+    //  void (*xStep)(sqlite3_context*,int,sqlite3_value*),
+    //  void (*xFinal)(sqlite3_context)
     //);
     //SQLITE_API int sqlite3_create_function16(
-    //  sqlite3 *db,
-    //  const void *zFunctionName,
+    //  sqlite3 db,
+    //  string zFunctionName,
     //  int nArg,
     //  int eTextRep,
     //  void *pApp,
-    //  void (*xFunc)(sqlite3_context*,int,sqlite3_value**),
-    //  void (*xStep)(sqlite3_context*,int,sqlite3_value**),
-    //  void (*xFinal)(sqlite3_context*)
+    //  void (*xFunc)(sqlite3_context*,int,sqlite3_value*),
+    //  void (*xStep)(sqlite3_context*,int,sqlite3_value*),
+    //  void (*xFinal)(sqlite3_context)
     //);
     //SQLITE_API int sqlite3_create_function_v2(
-    //  sqlite3 *db,
-    //  const char *zFunctionName,
+    //  sqlite3 db,
+    //  string zFunctionName,
     //  int nArg,
     //  int eTextRep,
     //  void *pApp,
-    //  void (*xFunc)(sqlite3_context*,int,sqlite3_value**),
-    //  void (*xStep)(sqlite3_context*,int,sqlite3_value**),
-    //  void (*xFinal)(sqlite3_context*),
-    //  void(*xDestroy)(void*)
+    //  void (*xFunc)(sqlite3_context*,int,sqlite3_value*),
+    //  void (*xStep)(sqlite3_context*,int,sqlite3_value*),
+    //  void (*xFinal)(sqlite3_context),
+    //  void(*xDestroy)(void)
     //);
 
     /*
@@ -4135,13 +4161,13 @@ namespace Community.CsharpSqlite
     ** the use of these functions.  To help encourage people to avoid
     ** using these functions, we are not going to tell you what they do.
     */
-    //#ifndef SQLITE_OMIT_DEPRECATED
-    //SQLITE_API SQLITE_DEPRECATED int sqlite3_aggregate_count(sqlite3_context*);
-    //SQLITE_API SQLITE_DEPRECATED int sqlite3_expired(sqlite3_stmt*);
-    //SQLITE_API SQLITE_DEPRECATED int sqlite3_transfer_bindings(sqlite3_stmt*, sqlite3_stmt*);
+    //#if !SQLITE_OMIT_DEPRECATED
+    //SQLITE_API SQLITE_DEPRECATED int sqlite3_aggregate_count(sqlite3_context);
+    //SQLITE_API SQLITE_DEPRECATED int sqlite3_expired(sqlite3_stmt);
+    //SQLITE_API SQLITE_DEPRECATED int sqlite3_transfer_bindings(sqlite3_stmt*, sqlite3_stmt);
     //SQLITE_API SQLITE_DEPRECATED int sqlite3_global_recover(void);
     //SQLITE_API SQLITE_DEPRECATED void sqlite3_thread_cleanup(void);
-    //SQLITE_API SQLITE_DEPRECATED int sqlite3_memory_alarm(void(*)(void*,sqlite3_int64,int),void*,sqlite3_int64);
+    //SQLITE_API SQLITE_DEPRECATED int sqlite3_memory_alarm(void()(void*,sqlite3_int64,int),void*,sqlite3_int64);
     //#endif
 
     /*
@@ -4189,18 +4215,18 @@ namespace Community.CsharpSqlite
     ** These routines must be called from the same thread as
     ** the SQL function that supplied the [sqlite3_value*] parameters.
     */
-    //SQLITE_API const void *sqlite3_value_blob(sqlite3_value*);
-    //SQLITE_API int sqlite3_value_bytes(sqlite3_value*);
-    //SQLITE_API int sqlite3_value_bytes16(sqlite3_value*);
-    //SQLITE_API double sqlite3_value_double(sqlite3_value*);
-    //SQLITE_API int sqlite3_value_int(sqlite3_value*);
-    //SQLITE_API sqlite3_int64 sqlite3_value_int64(sqlite3_value*);
-    //SQLITE_API const unsigned char *sqlite3_value_text(sqlite3_value*);
-    //SQLITE_API const void *sqlite3_value_text16(sqlite3_value*);
-    //SQLITE_API const void *sqlite3_value_text16le(sqlite3_value*);
-    //SQLITE_API const void *sqlite3_value_text16be(sqlite3_value*);
-    //SQLITE_API int sqlite3_value_type(sqlite3_value*);
-    //SQLITE_API int sqlite3_value_numeric_type(sqlite3_value*);
+    //SQLITE_API const void *sqlite3_value_blob(sqlite3_value);
+    //SQLITE_API int sqlite3_value_bytes(sqlite3_value);
+    //SQLITE_API int sqlite3_value_bytes16(sqlite3_value);
+    //SQLITE_API double sqlite3_value_double(sqlite3_value);
+    //SQLITE_API int sqlite3_value_int(sqlite3_value);
+    //SQLITE_API sqlite3_int64 sqlite3_value_int64(sqlite3_value);
+    //SQLITE_API const unsigned char *sqlite3_value_text(sqlite3_value);
+    //SQLITE_API const void *sqlite3_value_text16(sqlite3_value);
+    //SQLITE_API const void *sqlite3_value_text16le(sqlite3_value);
+    //SQLITE_API const void *sqlite3_value_text16be(sqlite3_value);
+    //SQLITE_API int sqlite3_value_type(sqlite3_value);
+    //SQLITE_API int sqlite3_value_numeric_type(sqlite3_value);
 
     /*
     ** CAPI3REF: Obtain Aggregate Function Context
@@ -4255,7 +4281,7 @@ namespace Community.CsharpSqlite
     ** This routine must be called from the same thread in which
     ** the application-defined function is running.
     */
-    //SQLITE_API void *sqlite3_user_data(sqlite3_context*);
+    //SQLITE_API void *sqlite3_user_data(sqlite3_context);
 
     /*
     ** CAPI3REF: Database Connection For Functions
@@ -4266,7 +4292,7 @@ namespace Community.CsharpSqlite
     ** and [sqlite3_create_function16()] routines that originally
     ** registered the application defined function.
     */
-    //SQLITE_API sqlite3 *sqlite3_context_db_handle(sqlite3_context*);
+    //SQLITE_API sqlite3 *sqlite3_context_db_handle(sqlite3_context);
 
     /*
     ** CAPI3REF: Function Auxiliary Data
@@ -4311,7 +4337,7 @@ namespace Community.CsharpSqlite
     ** the SQL function is running.
     */
     //SQLITE_API void *sqlite3_get_auxdata(sqlite3_context*, int N);
-    //SQLITE_API void sqlite3_set_auxdata(sqlite3_context*, int N, void*, void (*)(void*));
+    //SQLITE_API void sqlite3_set_auxdata(sqlite3_context*, int N, void*, object  ()(void));
 
 
     /*
@@ -4328,7 +4354,7 @@ namespace Community.CsharpSqlite
     ** The typedef is necessary to work around problems in certain
     ** C++ compilers.  See ticket #2191.
     */
-    //typedef void (*sqlite3_destructor_type)(void*);
+    //typedef void (*sqlite3_destructor_type)(void);
     //#define SQLITE_STATIC      ((sqlite3_destructor_type)0)
     //#define SQLITE_TRANSIENT   ((sqlite3_destructor_type)-1)
     static public dxDel SQLITE_STATIC;
@@ -4438,21 +4464,21 @@ namespace Community.CsharpSqlite
     ** than the one containing the application-defined function that received
     ** the [sqlite3_context] pointer, the results are undefined.
     */
-    //SQLITE_API void sqlite3_result_blob(sqlite3_context*, const void*, int, void(*)(void*));
+    //SQLITE_API void sqlite3_result_blob(sqlite3_context*, const void*, int, void()(void));
     //SQLITE_API void sqlite3_result_double(sqlite3_context*, double);
     //SQLITE_API void sqlite3_result_error(sqlite3_context*, const char*, int);
     //SQLITE_API void sqlite3_result_error16(sqlite3_context*, const void*, int);
-    //SQLITE_API void sqlite3_result_error_toobig(sqlite3_context*);
-    //SQLITE_API void sqlite3_result_error_nomem(sqlite3_context*);
+    //SQLITE_API void sqlite3_result_error_toobig(sqlite3_context);
+    //SQLITE_API void sqlite3_result_error_nomem(sqlite3_context);
     //SQLITE_API void sqlite3_result_error_code(sqlite3_context*, int);
     //SQLITE_API void sqlite3_result_int(sqlite3_context*, int);
     //SQLITE_API void sqlite3_result_int64(sqlite3_context*, sqlite3_int64);
-    //SQLITE_API void sqlite3_result_null(sqlite3_context*);
-    //SQLITE_API void sqlite3_result_text(sqlite3_context*, const char*, int, void(*)(void*));
-    //SQLITE_API void sqlite3_result_text16(sqlite3_context*, const void*, int, void(*)(void*));
-    //SQLITE_API void sqlite3_result_text16le(sqlite3_context*, const void*, int,void(*)(void*));
-    //SQLITE_API void sqlite3_result_text16be(sqlite3_context*, const void*, int,void(*)(void*));
-    //SQLITE_API void sqlite3_result_value(sqlite3_context*, sqlite3_value*);
+    //SQLITE_API void sqlite3_result_null(sqlite3_context);
+    //SQLITE_API void sqlite3_result_text(sqlite3_context*, const char*, int, void()(void));
+    //SQLITE_API void sqlite3_result_text16(sqlite3_context*, const void*, int, void()(void));
+    //SQLITE_API void sqlite3_result_text16le(sqlite3_context*, const void*, int,void()(void));
+    //SQLITE_API void sqlite3_result_text16be(sqlite3_context*, const void*, int,void()(void));
+    //SQLITE_API void sqlite3_result_value(sqlite3_context*, sqlite3_value);
     //SQLITE_API void sqlite3_result_zeroblob(sqlite3_context*, int n);
 
     /*
@@ -4536,25 +4562,25 @@ namespace Community.CsharpSqlite
     */
     //SQLITE_API int sqlite3_create_collation(
     //  sqlite3*, 
-    //  const char *zName, 
+    //  string zName, 
     //  int eTextRep, 
     //  void *pArg,
-    //  int(*xCompare)(void*,int,const void*,int,const void*)
+    //  int(*xCompare)(void*,int,const void*,int,const void)
     //);
     //SQLITE_API int sqlite3_create_collation_v2(
     //  sqlite3*, 
-    //  const char *zName, 
+    //  string zName, 
     //  int eTextRep, 
     //  void *pArg,
-    //  int(*xCompare)(void*,int,const void*,int,const void*),
-    //  void(*xDestroy)(void*)
+    //  int(*xCompare)(void*,int,const void*,int,const void),
+    //  void(*xDestroy)(void)
     //);
     //SQLITE_API int sqlite3_create_collation16(
     //  sqlite3*, 
-    //  const void *zName,
+    //  string zName,
     //  int eTextRep, 
     //  void *pArg,
-    //  int(*xCompare)(void*,int,const void*,int,const void*)
+    //  int(*xCompare)(void*,int,const void*,int,const void)
     //);
 
     /*
@@ -4586,15 +4612,15 @@ namespace Community.CsharpSqlite
     //SQLITE_API int sqlite3_collation_needed(
     //  sqlite3*, 
     //  void*, 
-    //  void(*)(void*,sqlite3*,int eTextRep,const char*)
+    //  void()(void*,sqlite3*,int eTextRep,const char)
     //);
     //SQLITE_API int sqlite3_collation_needed16(
     //  sqlite3*, 
     //  void*,
-    //  void(*)(void*,sqlite3*,int eTextRep,const void*)
+    //  void()(void*,sqlite3*,int eTextRep,const void)
     //);
 
-    //#ifdef SQLITE_HAS_CODEC
+    //#if SQLITE_HAS_CODEC
     /*
     ** Specify the key for an encrypted database.  This routine should be
     ** called right after sqlite3_open().
@@ -4603,7 +4629,7 @@ namespace Community.CsharpSqlite
     ** of SQLite.
     */
     //SQLITE_API int sqlite3_key(
-    //  sqlite3 *db,                   /* Database to be rekeyed */
+    //  sqlite3 db,                   /* Database to be rekeyed */
     //  const void *pKey, int nKey     /* The key */
     //);
 
@@ -4616,7 +4642,7 @@ namespace Community.CsharpSqlite
     ** of SQLite.
     */
     //SQLITE_API int sqlite3_rekey(
-    //  sqlite3 *db,                   /* Database to be rekeyed */
+    //  sqlite3 db,                   /* Database to be rekeyed */
     //  const void *pKey, int nKey     /* The new key */
     //);
 
@@ -4625,17 +4651,17 @@ namespace Community.CsharpSqlite
     ** activated, none of the SEE routines will work.
     */
     //SQLITE_API void sqlite3_activate_see(
-    //  const char *zPassPhrase        /* Activation phrase */
+    //  string zPassPhrase        /* Activation phrase */
     //);
     //#endif
 
-    //#ifdef SQLITE_ENABLE_CEROD
+    //#if SQLITE_ENABLE_CEROD
     /*
     ** Specify the activation key for a CEROD database.  Unless 
     ** activated, none of the CEROD routines will work.
     */
     //SQLITE_API void sqlite3_activate_cerod(
-    //  const char *zPassPhrase        /* Activation phrase */
+    //  string zPassPhrase        /* Activation phrase */
     //);
     //#endif
 
@@ -4710,7 +4736,7 @@ namespace Community.CsharpSqlite
     ** connection while this routine is running, then the return value
     ** is undefined.
     */
-    //SQLITE_API int sqlite3_get_autocommit(sqlite3*);
+    //SQLITE_API int sqlite3_get_autocommit(sqlite3);
 
     /*
     ** CAPI3REF: Find The Database Handle Of A Prepared Statement
@@ -4722,7 +4748,7 @@ namespace Community.CsharpSqlite
     ** to the [sqlite3_prepare_v2()] call (or its variants) that was used to
     ** create the statement in the first place.
     */
-    //SQLITE_API sqlite3 *sqlite3_db_handle(sqlite3_stmt*);
+    //SQLITE_API sqlite3 *sqlite3_db_handle(sqlite3_stmt);
 
     /*
     ** CAPI3REF: Find the next prepared statement
@@ -4783,8 +4809,8 @@ namespace Community.CsharpSqlite
     **
     ** See also the [sqlite3_update_hook()] interface.
     */
-    //SQLITE_API void *sqlite3_commit_hook(sqlite3*, int(*)(void*), void*);
-    //SQLITE_API void *sqlite3_rollback_hook(sqlite3*, void(*)(void *), void*);
+    //SQLITE_API void *sqlite3_commit_hook(sqlite3*, int()(void), void);
+    //SQLITE_API void *sqlite3_rollback_hook(sqlite3*, void()(void ), void);
 
     /*
     ** CAPI3REF: Data Change Notification Callbacks
@@ -4834,7 +4860,7 @@ namespace Community.CsharpSqlite
     */
     //SQLITE_API void *sqlite3_update_hook(
     //  sqlite3*, 
-    //  void(*)(void *,int ,char const *,char const *,sqlite3_int64),
+    //  void()(void *,int ,char const *,char const *,sqlite3_int64),
     //  void*
     //);
 
@@ -5007,10 +5033,10 @@ namespace Community.CsharpSqlite
     ** [SQLITE_ENABLE_COLUMN_METADATA] C-preprocessor symbol defined.
     */
     //SQLITE_API int sqlite3_table_column_metadata(
-    //  sqlite3 *db,                /* Connection handle */
-    //  const char *zDbName,        /* Database name or NULL */
-    //  const char *zTableName,     /* Table name */
-    //  const char *zColumnName,    /* Column name */
+    //  sqlite3 db,                /* Connection handle */
+    //  string zDbName,        /* Database name or NULL */
+    //  string zTableName,     /* Table name */
+    //  string zColumnName,    /* Column name */
     //  char const **pzDataType,    /* OUTPUT: Declared data type */
     //  char const **pzCollSeq,     /* OUTPUT: Collation sequence name */
     //  int *pNotNull,              /* OUTPUT: True if NOT NULL constraint exists */
@@ -5044,9 +5070,9 @@ namespace Community.CsharpSqlite
     ** See also the [load_extension() SQL function].
     */
     //SQLITE_API int sqlite3_load_extension(
-    //  sqlite3 *db,          /* Load the extension into this database connection */
-    //  const char *zFile,    /* Name of the shared library containing extension */
-    //  const char *zProc,    /* Entry point.  Derived from zFile if 0 */
+    //  sqlite3 db,          /* Load the extension into this database connection */
+    //  string zFile,    /* Name of the shared library containing extension */
+    //  string zProc,    /* Entry point.  Derived from zFile if 0 */
     //  char **pzErrMsg       /* Put error message here if not 0 */
     //);
 
@@ -5063,7 +5089,7 @@ namespace Community.CsharpSqlite
     ** to turn extension loading on and call it with onoff==0 to turn
     ** it back off again.
     */
-    //SQLITE_API int sqlite3_enable_load_extension(sqlite3 *db, int onoff);
+    //SQLITE_API int sqlite3_enable_load_extension(sqlite3 db, int onoff);
 
     /*
     ** CAPI3REF: Automatically Load Statically Linked Extensions
@@ -5080,8 +5106,8 @@ namespace Community.CsharpSqlite
     **
     ** <blockquote><pre>
     ** &nbsp;  int xEntryPoint(
-    ** &nbsp;    sqlite3 *db,
-    ** &nbsp;    const char **pzErrMsg,
+    ** &nbsp;    sqlite3 db,
+    ** &nbsp;    string *pzErrMsg,
     ** &nbsp;    const struct sqlite3_api_routines *pThunk
     ** &nbsp;  );
     ** </pre></blockquote>)^
@@ -5145,32 +5171,32 @@ namespace Community.CsharpSqlite
     */
     //struct sqlite3_module {
     //  int iVersion;
-    //  int (*xCreate)(sqlite3*, void *pAux,
-    //               int argc, const char *const*argv,
-    //               sqlite3_vtab **ppVTab, char**);
-    //  int (*xConnect)(sqlite3*, void *pAux,
-    //               int argc, const char *const*argv,
-    //               sqlite3_vtab **ppVTab, char**);
-    //  int (*xBestIndex)(sqlite3_vtab *pVTab, sqlite3_index_info*);
+    //  int (*xCreate)(sqlite3*, object  *pAux,
+    //               int argc, string[] argv,
+    //               sqlite3_vtab **ppVTab, char*);
+    //  int (*xConnect)(sqlite3*, object  *pAux,
+    //               int argc, string[] argv,
+    //               sqlite3_vtab **ppVTab, char*);
+    //  int (*xBestIndex)(sqlite3_vtab *pVTab, sqlite3_index_info);
     //  int (*xDisconnect)(sqlite3_vtab *pVTab);
     //  int (*xDestroy)(sqlite3_vtab *pVTab);
     //  int (*xOpen)(sqlite3_vtab *pVTab, sqlite3_vtab_cursor **ppCursor);
-    //  int (*xClose)(sqlite3_vtab_cursor*);
-    //  int (*xFilter)(sqlite3_vtab_cursor*, int idxNum, const char *idxStr,
+    //  int (*xClose)(sqlite3_vtab_cursor);
+    //  int (*xFilter)(sqlite3_vtab_cursor*, int idxNum, string idxStr,
     //                int argc, sqlite3_value **argv);
-    //  int (*xNext)(sqlite3_vtab_cursor*);
-    //  int (*xEof)(sqlite3_vtab_cursor*);
+    //  int (*xNext)(sqlite3_vtab_cursor);
+    //  int (*xEof)(sqlite3_vtab_cursor);
     //  int (*xColumn)(sqlite3_vtab_cursor*, sqlite3_context*, int);
     //  int (*xRowid)(sqlite3_vtab_cursor*, sqlite3_int64 *pRowid);
-    //  int (*xUpdate)(sqlite3_vtab *, int, sqlite3_value **, sqlite3_int64 *);
+    //  int (*xUpdate)(sqlite3_vtab *, int, sqlite3_value **, sqlite3_int64 );
     //  int (*xBegin)(sqlite3_vtab *pVTab);
     //  int (*xSync)(sqlite3_vtab *pVTab);
     //  int (*xCommit)(sqlite3_vtab *pVTab);
     //  int (*xRollback)(sqlite3_vtab *pVTab);
-    //  int (*xFindFunction)(sqlite3_vtab *pVtab, int nArg, const char *zName,
-    //                       void (**pxFunc)(sqlite3_context*,int,sqlite3_value**),
+    //  int (*xFindFunction)(sqlite3_vtab *pVtab, int nArg, string zName,
+    //                       void (**pxFunc)(sqlite3_context*,int,sqlite3_value*),
     //                       void **ppArg);
-    //  int (*xRename)(sqlite3_vtab *pVtab, const char *zNew);
+    //  int (*xRename)(sqlite3_vtab *pVtab, string zNew);
     ///* The methods above are in version 1 of the sqlite_module object. Those 
     //** below are for version 2 and greater. */
     //int (*xSavepoint)(sqlite3_vtab *pVTab, int);
@@ -5181,8 +5207,8 @@ namespace Community.CsharpSqlite
     public class sqlite3_module
     {
       public int iVersion;
-      public smdxCreate xCreate;
-      public smdxConnect xConnect;
+      public smdxCreateConnect xCreate;
+      public smdxCreateConnect xConnect;
       public smdxBestIndex xBestIndex;
       public smdxDisconnect xDisconnect;
       public smdxDestroy xDestroy;
@@ -5194,18 +5220,117 @@ namespace Community.CsharpSqlite
       public smdxColumn xColumn;
       public smdxRowid xRowid;
       public smdxUpdate xUpdate;
-      public smdxBegin xBegin;
-      public smdxSync xSync;
-      public smdxCommit xCommit;
-      public smdxRollback xRollback;
+      public smdxFunction xBegin;
+      public smdxFunction xSync;
+      public smdxFunction xCommit;
+      public smdxFunction xRollback;
       public smdxFindFunction xFindFunction;
       public smdxRename xRename;
   /* The methods above are in version 1 of the sqlite_module object. Those 
   ** below are for version 2 and greater. */
-      public smdxSavepoint xSavepoint;
-      public smdxRelease xRelease;
-      public smdxRollbackTo xRollbackTo;
-        }
+      public smdxFunctionArg xSavepoint;
+      public smdxFunctionArg xRelease;
+      public smdxFunctionArg xRollbackTo;
+
+    //Version 1
+      public sqlite3_module(
+       int iVersion,
+       smdxCreateConnect xCreate,
+       smdxCreateConnect xConnect,
+       smdxBestIndex xBestIndex,
+       smdxDisconnect xDisconnect,
+       smdxDestroy xDestroy,
+       smdxOpen xOpen,
+       smdxClose xClose,
+       smdxFilter xFilter,
+       smdxNext xNext,
+       smdxEof xEof,
+       smdxColumn xColumn,
+       smdxRowid xRowid,
+       smdxUpdate xUpdate,
+       smdxFunction xBegin,
+       smdxFunction xSync,
+       smdxFunction xCommit,
+       smdxFunction xRollback,
+       smdxFindFunction xFindFunction,
+       smdxRename xRename )
+      {
+        this.iVersion = iVersion;
+        this.xCreate = xCreate;
+        this.xConnect = xConnect;
+        this.xBestIndex = xBestIndex;
+        this.xDisconnect = xDisconnect;
+        this.xDestroy = xDestroy;
+        this.xOpen = xOpen;
+        this.xClose = xClose;
+        this.xFilter = xFilter;
+        this.xNext = xNext;
+        this.xEof = xEof;
+        this.xColumn = xColumn;
+        this.xRowid = xRowid;
+        this.xUpdate = xUpdate;
+        this.xBegin = xBegin;
+        this.xSync = xSync;
+        this.xCommit = xCommit;
+        this.xRollback = xRollback;
+        this.xFindFunction = xFindFunction;
+        this.xRename = xRename;
+      }
+      
+      //Version 2
+      public     sqlite3_module(
+       int iVersion,
+       smdxCreateConnect xCreate,
+       smdxCreateConnect xConnect,
+       smdxBestIndex xBestIndex,
+       smdxDisconnect xDisconnect,
+       smdxDestroy xDestroy,
+       smdxOpen xOpen,
+       smdxClose xClose,
+       smdxFilter xFilter,
+       smdxNext xNext,
+       smdxEof xEof,
+       smdxColumn xColumn,
+       smdxRowid xRowid,
+       smdxUpdate xUpdate,
+       smdxFunction xBegin,
+       smdxFunction xSync,
+       smdxFunction xCommit,
+       smdxFunction xRollback,
+       smdxFindFunction xFindFunction,
+       smdxRename xRename,
+  /* The methods above are in version 1 of the sqlite_module object. Those 
+  ** below are for version 2 and greater. */
+       smdxFunctionArg xSavepoint,
+       smdxFunctionArg xRelease,
+       smdxFunctionArg xRollbackTo
+      )
+      {
+        this.iVersion = iVersion;
+        this.xCreate = xCreate;
+        this.xConnect = xConnect;
+        this.xBestIndex = xBestIndex;
+        this.xDisconnect = xDisconnect;
+        this.xDestroy = xDestroy;
+        this.xOpen = xOpen;
+        this.xClose = xClose;
+        this.xFilter = xFilter;
+        this.xNext = xNext;
+        this.xEof = xEof;
+        this.xColumn = xColumn;
+        this.xRowid = xRowid;
+        this.xUpdate = xUpdate;
+        this.xBegin = xBegin;
+        this.xSync = xSync;
+        this.xCommit = xCommit;
+        this.xRollback = xRollback;
+        this.xFindFunction = xFindFunction;
+        this.xRename = xRename;
+        this.xSavepoint = xSavepoint;
+        this.xRelease = xRelease;
+        this.xRollbackTo = xRollbackTo;
+      }
+    }
 
 
     /*
@@ -5296,7 +5421,7 @@ namespace Community.CsharpSqlite
     public class sqlite3_index_orderby
     {
       public int iColumn;              /* Column number */
-      public bool desc;       /* True for DESC.  False for ASC. */
+      public bool desc;                /* True for DESC.  False for ASC. */
     }
     public class sqlite3_index_constraint_usage
     {
@@ -5369,17 +5494,17 @@ namespace Community.CsharpSqlite
     ** destructor.
     */
     //SQLITE_API int sqlite3_create_module(
-    //  sqlite3 *db,               /* SQLite connection to register module with */
-    //  const char *zName,         /* Name of the module */
+    //  sqlite3 db,               /* SQLite connection to register module with */
+    //  string zName,         /* Name of the module */
     //  const sqlite3_module *p,   /* Methods for the module */
     //  void *pClientData          /* Client data for xCreate/xConnect */
     //);
     //SQLITE_API int sqlite3_create_module_v2(
-    //  sqlite3 *db,               /* SQLite connection to register module with */
-    //  const char *zName,         /* Name of the module */
+    //  sqlite3 db,               /* SQLite connection to register module with */
+    //  string zName,         /* Name of the module */
     //  const sqlite3_module *p,   /* Methods for the module */
     //  void *pClientData,         /* Client data for xCreate/xConnect */
-    //  void(*xDestroy)(void*)     /* Module destructor function */
+    //  void(*xDestroy)(void)     /* Module destructor function */
     //);
 
     /*
@@ -5403,10 +5528,10 @@ namespace Community.CsharpSqlite
     //struct sqlite3_vtab {
     //  const sqlite3_module *pModule;  /* The module for this virtual table */
     //  int nRef;                       /* NO LONGER USED */
-    //  char *zErrMsg;                  /* Error message from sqlite3_mprintf() */
+    //  string zErrMsg;                  /* Error message from sqlite3_mprintf() */
     //  /* Virtual table implementations will typically add additional fields */
     //};
-    public struct sqlite3_vtab
+    public class sqlite3_vtab
     {
       public sqlite3_module pModule;       /* The module for this virtual table */
       public int nRef;                     /* Used internally */
@@ -5437,7 +5562,7 @@ namespace Community.CsharpSqlite
     //};
     public class sqlite3_vtab_cursor
     {
-      sqlite3_vtab pVtab;      /* Virtual table of this cursor */
+      public sqlite3_vtab pVtab;      /* Virtual table of this cursor */
       /* Virtual table implementations will typically add additional fields */
     };
 
@@ -5449,7 +5574,7 @@ namespace Community.CsharpSqlite
     ** to declare the format (the names and datatypes of the columns) of
     ** the virtual tables they implement.
     */
-    //SQLITE_API int sqlite3_declare_vtab(sqlite3*, const char *zSQL);
+    //SQLITE_API int sqlite3_declare_vtab(sqlite3*, string zSQL);
 
     /*
     ** CAPI3REF: Overload A Function For A Virtual Table
@@ -5467,7 +5592,7 @@ namespace Community.CsharpSqlite
     ** purpose is to be a placeholder function that can be overloaded
     ** by a [virtual table].
     */
-    //SQLITE_API int sqlite3_overload_function(sqlite3*, const char *zFuncName, int nArg);
+    //SQLITE_API int sqlite3_overload_function(sqlite3*, string zFuncName, int nArg);
 
     /*
     ** The interface to the virtual-table mechanism defined above (back up
@@ -5551,9 +5676,9 @@ namespace Community.CsharpSqlite
     */
     //SQLITE_API int sqlite3_blob_open(
     //  sqlite3*,
-    //  const char *zDb,
-    //  const char *zTable,
-    //  const char *zColumn,
+    //  string zDb,
+    //  string zTable,
+    //  string zColumn,
     //  sqlite3_int64 iRow,
     //  int flags,
     //  sqlite3_blob **ppBlob
@@ -5605,7 +5730,7 @@ namespace Community.CsharpSqlite
     ** ^Calling this routine with a null pointer (such as would be returned
     ** by a failed call to [sqlite3_blob_open()]) is a harmless no-op.
     */
-    //SQLITE_API int sqlite3_blob_close(sqlite3_blob *);
+    //SQLITE_API int sqlite3_blob_close(sqlite3_blob );
 
     /*
     ** CAPI3REF: Return The Size Of An Open BLOB
@@ -5620,7 +5745,7 @@ namespace Community.CsharpSqlite
     ** been closed by [sqlite3_blob_close()].  Passing any other pointer in
     ** to this routine results in undefined and probably undesirable behavior.
     */
-    //SQLITE_API int sqlite3_blob_bytes(sqlite3_blob *);
+    //SQLITE_API int sqlite3_blob_bytes(sqlite3_blob );
 
     /*
     ** CAPI3REF: Read Data From A BLOB Incrementally
@@ -5648,7 +5773,7 @@ namespace Community.CsharpSqlite
     **
     ** See also: [sqlite3_blob_write()].
     */
-    //SQLITE_API int sqlite3_blob_read(sqlite3_blob *, void *Z, int N, int iOffset);
+    //SQLITE_API int sqlite3_blob_read(sqlite3_blob *, object  *Z, int N, int iOffset);
 
     /*
     ** CAPI3REF: Write Data Into A BLOB Incrementally
@@ -5686,7 +5811,7 @@ namespace Community.CsharpSqlite
     **
     ** See also: [sqlite3_blob_read()].
     */
-    //SQLITE_API int sqlite3_blob_write(sqlite3_blob *, const void *z, int n, int iOffset);
+    //SQLITE_API int sqlite3_blob_write(sqlite3_blob *, string z, int n, int iOffset);
 
     /*
     ** CAPI3REF: Virtual File System Objects
@@ -5717,9 +5842,9 @@ namespace Community.CsharpSqlite
     ** ^(If the default VFS is unregistered, another VFS is chosen as
     ** the default.  The choice for the new VFS is arbitrary.)^
     */
-    //SQLITE_API sqlite3_vfs *sqlite3_vfs_find(const char *zVfsName);
+    //SQLITE_API sqlite3_vfs *sqlite3_vfs_find(string zVfsName);
     //SQLITE_API int sqlite3_vfs_register(sqlite3_vfs*, int makeDflt);
-    //SQLITE_API int sqlite3_vfs_unregister(sqlite3_vfs*);
+    //SQLITE_API int sqlite3_vfs_unregister(sqlite3_vfs);
 
     /*
     ** CAPI3REF: Mutexes
@@ -5836,10 +5961,10 @@ namespace Community.CsharpSqlite
     ** See also: [sqlite3_mutex_held()] and [sqlite3_mutex_notheld()].
     */
     //SQLITE_API sqlite3_mutex *sqlite3_mutex_alloc(int);
-    //SQLITE_API void sqlite3_mutex_free(sqlite3_mutex*);
-    //SQLITE_API void sqlite3_mutex_enter(sqlite3_mutex*);
-    //SQLITE_API int sqlite3_mutex_try(sqlite3_mutex*);
-    //SQLITE_API void sqlite3_mutex_leave(sqlite3_mutex*);
+    //SQLITE_API void sqlite3_mutex_free(sqlite3_mutex);
+    //SQLITE_API void sqlite3_mutex_enter(sqlite3_mutex);
+    //SQLITE_API int sqlite3_mutex_try(sqlite3_mutex);
+    //SQLITE_API void sqlite3_mutex_leave(sqlite3_mutex);
 
     /*
     ** CAPI3REF: Mutex Methods Object
@@ -5911,12 +6036,12 @@ namespace Community.CsharpSqlite
     //  int (*xMutexInit)(void);
     //  int (*xMutexEnd)(void);
     //  sqlite3_mutex *(*xMutexAlloc)(int);
-    //  void (*xMutexFree)(sqlite3_mutex *);
-    //  void (*xMutexEnter)(sqlite3_mutex *);
-    //  int (*xMutexTry)(sqlite3_mutex *);
-    //  void (*xMutexLeave)(sqlite3_mutex *);
-    //  int (*xMutexHeld)(sqlite3_mutex *);
-    //  int (*xMutexNotheld)(sqlite3_mutex *);
+    //  void (*xMutexFree)(sqlite3_mutex );
+    //  void (*xMutexEnter)(sqlite3_mutex );
+    //  int (*xMutexTry)(sqlite3_mutex );
+    //  void (*xMutexLeave)(sqlite3_mutex );
+    //  int (*xMutexHeld)(sqlite3_mutex );
+    //  int (*xMutexNotheld)(sqlite3_mutex );
     //};
     public class sqlite3_mutex_methods
     {
@@ -5976,8 +6101,8 @@ namespace Community.CsharpSqlite
     ** CAPI3REF: Mutex Verification Routines
     **
     ** The sqlite3_mutex_held() and sqlite3_mutex_notheld() routines
-    ** are intended for use inside assert() statements.  ^The SQLite core
-    ** never uses these routines except inside an assert() and applications
+    ** are intended for use inside Debug.Assert() statements.  ^The SQLite core
+    ** never uses these routines except inside an Debug.Assert() and applications
     ** are advised to follow the lead of the core.  ^The SQLite core only
     ** provides implementations for these routines when it is compiled
     ** with the SQLITE_DEBUG flag.  ^External mutex implementations
@@ -5996,14 +6121,14 @@ namespace Community.CsharpSqlite
     ** the routine should return 1.   This seems counter-intuitive since
     ** clearly the mutex cannot be held if it does not exist.  But
     ** the reason the mutex does not exist is because the build is not
-    ** using mutexes.  And we do not want the assert() containing the
+    ** using mutexes.  And we do not want the Debug.Assert() containing the
     ** call to sqlite3_mutex_held() to fail, so a non-zero return is
     ** the appropriate thing to do.  ^The sqlite3_mutex_notheld()
     ** interface should also return 1 when given a NULL pointer.
     */
-    //#ifndef NDEBUG
-    //SQLITE_API int sqlite3_mutex_held(sqlite3_mutex*);
-    //SQLITE_API int sqlite3_mutex_notheld(sqlite3_mutex*);
+    //#if !NDEBUG
+    //SQLITE_API int sqlite3_mutex_held(sqlite3_mutex);
+    //SQLITE_API int sqlite3_mutex_notheld(sqlite3_mutex);
     //#endif
 
     /*
@@ -6046,7 +6171,7 @@ namespace Community.CsharpSqlite
     ** ^If the [threading mode] is Single-thread or Multi-thread then this
     ** routine returns a NULL pointer.
     */
-    //SQLITE_API sqlite3_mutex *sqlite3_db_mutex(sqlite3*);
+    //SQLITE_API sqlite3_mutex *sqlite3_db_mutex(sqlite3);
 
     /*
     ** CAPI3REF: Low-Level Control Of Database Files
@@ -6080,7 +6205,7 @@ namespace Community.CsharpSqlite
     **
     ** See also: [SQLITE_FCNTL_LOCKSTATE]
     */
-    //SQLITE_API int sqlite3_file_control(sqlite3*, const char *zDbName, int op, void*);
+    //SQLITE_API int sqlite3_file_control(sqlite3*, string zDbName, int op, void);
 
     /*
     ** CAPI3REF: Testing Interface
@@ -6612,30 +6737,30 @@ namespace Community.CsharpSqlite
     //typedef struct sqlite3_pcache_methods sqlite3_pcache_methods;
     //struct sqlite3_pcache_methods {
     //  void *pArg;
-    //  int (*xInit)(void*);
-    //  void (*xShutdown)(void*);
+    //  int (*xInit)(void);
+    //  void (*xShutdown)(void);
     //  sqlite3_pcache *(*xCreate)(int szPage, int bPurgeable);
     //  void (*xCachesize)(sqlite3_pcache*, int nCachesize);
-    //  int (*xPagecount)(sqlite3_pcache*);
+    //  int (*xPagecount)(sqlite3_pcache);
     //  void *(*xFetch)(sqlite3_pcache*, unsigned key, int createFlag);
     //  void (*xUnpin)(sqlite3_pcache*, void*, int discard);
     //  void (*xRekey)(sqlite3_pcache*, void*, unsigned oldKey, unsigned newKey);
     //  void (*xTruncate)(sqlite3_pcache*, unsigned iLimit);
-    //  void (*xDestroy)(sqlite3_pcache*);
+    //  void (*xDestroy)(sqlite3_pcache);
     //};
     public class sqlite3_pcache_methods
     {
       public object pArg;
-      public dxPC_Init xInit;//int (*xInit)(void*);
-      public dxPC_Shutdown xShutdown;//public void (*xShutdown)(void*);
+      public dxPC_Init xInit;//int (*xInit)(void);
+      public dxPC_Shutdown xShutdown;//public void (*xShutdown)(void);
       public dxPC_Create xCreate;//public sqlite3_pcache *(*xCreate)(int szPage, int bPurgeable);
       public dxPC_Cachesize xCachesize;//public void (*xCachesize)(sqlite3_pcache*, int nCachesize);
-      public dxPC_Pagecount xPagecount;//public int (*xPagecount)(sqlite3_pcache*);
+      public dxPC_Pagecount xPagecount;//public int (*xPagecount)(sqlite3_pcache);
       public dxPC_Fetch xFetch;//public void *(*xFetch)(sqlite3_pcache*, unsigned key, int createFlag);
       public dxPC_Unpin xUnpin;//public void (*xUnpin)(sqlite3_pcache*, void*, int discard);
       public dxPC_Rekey xRekey;//public void (*xRekey)(sqlite3_pcache*, void*, unsigned oldKey, unsigned newKey);
       public dxPC_Truncate xTruncate;//public void (*xTruncate)(sqlite3_pcache*, unsigned iLimit);
-      public dxPC_Destroy xDestroy;//public void (*xDestroy)(sqlite3_pcache*);
+      public dxPC_Destroy xDestroy;//public void (*xDestroy)(sqlite3_pcache);
 
       public sqlite3_pcache_methods()
       {
@@ -6854,9 +6979,9 @@ namespace Community.CsharpSqlite
     */
     //SQLITE_API sqlite3_backup *sqlite3_backup_init(
     //  sqlite3 *pDest,                        /* Destination database handle */
-    //  const char *zDestName,                 /* Destination database name */
+    //  string zDestName,                 /* Destination database name */
     //  sqlite3 *pSource,                      /* Source database handle */
-    //  const char *zSourceName                /* Source database name */
+    //  string zSourceName                /* Source database name */
     //);
     //SQLITE_API int sqlite3_backup_step(sqlite3_backup *p, int nPage);
     //SQLITE_API int sqlite3_backup_finish(sqlite3_backup *p);
@@ -6992,7 +7117,7 @@ namespace Community.CsharpSqlite
     ** case-independent fashion, using the same definition of case independence 
     ** that SQLite uses internally when comparing identifiers.
     */
-    //SQLITE_API int sqlite3_strnicmp(const char *, const char *, int);
+    //SQLITE_API int sqlite3_strnicmp(string , string , int);
 
     /*
     ** CAPI3REF: Error Logging Interface
@@ -7015,7 +7140,7 @@ namespace Community.CsharpSqlite
     ** a few hundred characters, it will be truncated to the length of the
     ** buffer.
     */
-    //SQLITE_API void sqlite3_log(int iErrCode, const char *zFormat, ...);
+    //SQLITE_API void sqlite3_log(int iErrCode, string zFormat, ...);
 
     /*
     ** CAPI3REF: Write-Ahead Log Commit Hook
@@ -7054,7 +7179,7 @@ namespace Community.CsharpSqlite
     */
     //SQLITE_API void *sqlite3_wal_hook(
     //  sqlite3*, 
-    //  int(*)(void *,sqlite3*,const char*,int),
+    //  int()(void *,sqlite3*,const char*,int),
     //  void*
     //);
 
@@ -7082,7 +7207,7 @@ namespace Community.CsharpSqlite
     ** pages.  The use of this interface
     ** for a particular application.
     */
-    //SQLITE_API int sqlite3_wal_autocheckpoint(sqlite3 *db, int N);
+    //SQLITE_API int sqlite3_wal_autocheckpoint(sqlite3 db, int N);
 
     /*
     ** CAPI3REF: Checkpoint a database
@@ -7100,7 +7225,7 @@ namespace Community.CsharpSqlite
     **
     ** See also: [sqlite3_wal_checkpoint_v2()]
     */
-    //SQLITE_API int sqlite3_wal_checkpoint(sqlite3 *db, const char *zDb);
+    //SQLITE_API int sqlite3_wal_checkpoint(sqlite3 db, string zDb);
 
     /*
     ** CAPI3REF: Checkpoint a database
@@ -7173,8 +7298,8 @@ namespace Community.CsharpSqlite
     ** attached database, SQLITE_ERROR is returned to the caller.
     */
     //SQLITE_API int sqlite3_wal_checkpoint_v2(
-    //  sqlite3 *db,                    /* Database handle */
-    //  const char *zDb,                /* Name of attached database (or NULL) */
+    //  sqlite3 db,                    /* Database handle */
+    //  string zDb,                /* Name of attached database (or NULL) */
     //  int eMode,                      /* SQLITE_CHECKPOINT_* value */
     //  int *pnLog,                     /* OUT: Size of WAL log in frames */
     //  int *pnCkpt                     /* OUT: Total number of frames checkpointed */
@@ -7264,7 +7389,7 @@ namespace Community.CsharpSqlite
     ** of the SQL statement that triggered the call to the [xUpdate] method of the
     ** [virtual table].
     */
-    //SQLITE_API int sqlite3_vtab_on_conflict(sqlite3 *);
+    //SQLITE_API int sqlite3_vtab_on_conflict(sqlite3 );
 
     /*
     ** CAPI3REF: Conflict resolution modes
@@ -7291,11 +7416,11 @@ namespace Community.CsharpSqlite
     ** Undo the hack that converts floating point types to integer for
     ** builds on processors without floating point support.
     */
-    //#ifdef SQLITE_OMIT_FLOATING_POINT
+    //#if SQLITE_OMIT_FLOATING_POINT
     //# undef double
     //#endif
 
-    //#ifdef __cplusplus
+    //#if __cplusplus
     //}  /* End of the 'extern "C"' block */
     //#endif
     //#endif
@@ -7313,11 +7438,11 @@ namespace Community.CsharpSqlite
     *************************************************************************
     */
 
-    //#ifndef _SQLITE3RTREE_H_
+    //#if !_SQLITE3RTREE_H_
     //#define _SQLITE3RTREE_H_
 
 
-    //#ifdef __cplusplus
+    //#if __cplusplus
     //extern "C" {
     //#endif
 
@@ -7330,8 +7455,8 @@ namespace Community.CsharpSqlite
     **   SELECT ... FROM <rtree> WHERE <rtree col> MATCH $zGeom(... params ...)
     */
     //SQLITE_API int sqlite3_rtree_geometry_callback(
-    //  sqlite3 *db,
-    //  const char *zGeom,
+    //  sqlite3 db,
+    //  string zGeom,
     //  int (*xGeom)(sqlite3_rtree_geometry *, int nCoord, double *aCoord, int *pRes),
     //  void *pContext
     //);
@@ -7346,11 +7471,11 @@ namespace Community.CsharpSqlite
     //  int nParam;                     /* Size of array aParam[] */
     //  double *aParam;                 /* Parameters passed to SQL geom function */
     //  void *pUser;                    /* Callback implementation user data */
-    //  void (*xDelUser)(void *);       /* Called by SQLite to clean up pUser */
+    //  void (*xDelUser)(void );       /* Called by SQLite to clean up pUser */
     //};
 
 
-    //#ifdef __cplusplus
+    //#if __cplusplus
     //}  /* end of the 'extern "C"' block */
     //#endif
 

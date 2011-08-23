@@ -382,7 +382,7 @@ static void sqlite3_progress_handler (sqlite3 db,       int nOps, dxProgress xPr
     //  sqlite3_backup_pagecount,
     //  sqlite3_backup_remaining,
     //  sqlite3_backup_step,
-    //#ifndef SQLITE_OMIT_COMPILEOPTION_DIAGS
+    //#if !SQLITE_OMIT_COMPILEOPTION_DIAGS
     //  sqlite3_compileoption_get,
     //  sqlite3_compileoption_used,
     //#else
@@ -399,12 +399,12 @@ static void sqlite3_progress_handler (sqlite3 db,       int nOps, dxProgress xPr
     //  sqlite3_sourceid,
     //  sqlite3_stmt_status,
     //  sqlite3_strnicmp,
-    //#ifdef SQLITE_ENABLE_UNLOCK_NOTIFY
+    //#if SQLITE_ENABLE_UNLOCK_NOTIFY
     //  sqlite3_unlock_notify,
     //#else
     //  0,
     //#endif
-    //#ifndef SQLITE_OMIT_WAL
+    //#if !SQLITE_OMIT_WAL
     //  sqlite3_wal_autocheckpoint,
     //  sqlite3_wal_checkpoint,
     //  sqlite3_wal_hook,
@@ -436,7 +436,7 @@ static void sqlite3_progress_handler (sqlite3 db,       int nOps, dxProgress xPr
     {
       sqlite3_vfs pVfs = db.pVfs;
       HANDLE handle;
-      dxInit xInit; //int (*xInit)(sqlite3*,char**,const sqlite3_api_routines*);
+      dxInit xInit; //int (*xInit)(sqlite3*,char**,const sqlite3_api_routines);
       StringBuilder zErrmsg = new StringBuilder( 100 );
       //object aHandle;
       const int nMsg = 300;
@@ -474,9 +474,9 @@ static void sqlite3_progress_handler (sqlite3 db,       int nOps, dxProgress xPr
         sqlite3OsDlError( pVfs, nMsg - 1, zErrmsg.ToString() );
         return SQLITE_ERROR;
       }
-      //xInit = (int(*)(sqlite3*,char**,const sqlite3_api_routines*))
+      //xInit = (int()(sqlite3*,char**,const sqlite3_api_routines))
       //                 sqlite3OsDlSym(pVfs, handle, zProc);
-      xInit = (dxInit)sqlite3OsDlSym( pVfs, handle, ref  zProc );
+      xInit = (dxInit)sqlite3OsDlSym( pVfs, handle, ref zProc );
       Debugger.Break(); // TODO --
       //if( xInit==0 ){
       //  if( pzErrMsg ){
@@ -697,7 +697,7 @@ wsdAutoext.nExt = 0;
     {
       int i;
       bool go = true;
-      dxInit xInit;//)(sqlite3*,char**,const sqlite3_api_routines*);
+      dxInit xInit;//)(sqlite3*,char**,const sqlite3_api_routines);
 
       wsdAutoextInit();
 #if SQLITE_OMIT_WSD

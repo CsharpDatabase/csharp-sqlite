@@ -46,7 +46,7 @@ namespace Community.CsharpSqlite
     static int vacuumFinalize( sqlite3 db, sqlite3_stmt pStmt, string pzErrMsg )
     {
       int rc;
-      rc = sqlite3VdbeFinalize( (Vdbe)pStmt );
+      rc = sqlite3VdbeFinalize( ref pStmt );
       if ( rc != 0 )
       {
         sqlite3SetString( ref pzErrMsg, db, sqlite3_errmsg( db ) );
@@ -68,8 +68,7 @@ namespace Community.CsharpSqlite
       {
         return SQLITE_NOMEM;
       }
-      string Dummy = null;
-      if ( SQLITE_OK != sqlite3_prepare( db, zSql, -1, ref pStmt, ref Dummy ) )
+      if ( SQLITE_OK != sqlite3_prepare( db, zSql, -1, ref pStmt, 0 ) )
       {
         sqlite3SetString( ref pzErrMsg, db, sqlite3_errmsg( db ) );
         return sqlite3_errcode( db );
@@ -93,8 +92,7 @@ sqlite3_step(pStmt);
       sqlite3_stmt pStmt = null;
       int rc;
 
-      string Dummy = null;
-      rc = sqlite3_prepare( db, zSql, -1, ref pStmt, ref Dummy );
+      rc = sqlite3_prepare( db, zSql, -1, ref pStmt, 0 );
       if ( rc != SQLITE_OK )
         return rc;
 

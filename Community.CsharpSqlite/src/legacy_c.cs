@@ -172,7 +172,7 @@ namespace Community.CsharpSqlite
             if ( xCallback( pArg, nCol, azVals, azCols ) != 0 )
             {
               rc = SQLITE_ABORT;
-              sqlite3VdbeFinalize( pStmt );
+              sqlite3VdbeFinalize( ref pStmt );
               pStmt = null;
               sqlite3Error( db, SQLITE_ABORT, 0 );
               goto exec_out;
@@ -181,7 +181,7 @@ namespace Community.CsharpSqlite
 
           if ( rc != SQLITE_ROW )
           {
-            rc = sqlite3VdbeFinalize( pStmt );
+            rc = sqlite3VdbeFinalize( ref pStmt );
             pStmt = null;
             if ( rc != SQLITE_SCHEMA )
             {
@@ -199,14 +199,14 @@ namespace Community.CsharpSqlite
           }
         }
 
-        sqlite3DbFree( db, ref  azCols );
+        sqlite3DbFree( db, ref azCols );
         azCols = null;
       }
 
 exec_out:
       if ( pStmt != null )
-        sqlite3VdbeFinalize( pStmt );
-      sqlite3DbFree( db, ref  azCols );
+        sqlite3VdbeFinalize( ref pStmt );
+      sqlite3DbFree( db, ref azCols );
 
       rc = sqlite3ApiExit( db, rc );
       if ( rc != SQLITE_OK && ALWAYS( rc == sqlite3_errcode( db ) ) && pzErrMsg != null )

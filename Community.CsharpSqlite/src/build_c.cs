@@ -102,27 +102,27 @@ void sqlite3TableLock(
   int iDb,           /* Index of the database containing the table to lock */
   int iTab,          /* Root page number of the table to be locked */
   u8 isWriteLock,    /* True for a write lock */
-  const char *zName  /* Name of the table to be locked */
+  string zName  /* Name of the table to be locked */
 ){
   Parse *pToplevel = sqlite3ParseToplevel(pParse);
   int i;
   int nBytes;
   TableLock *p;
-  assert( iDb>=0 );
+  Debug.Assert( iDb>=0 );
 
   for(i=0; i<pToplevel->nTableLock; i++){
-    p = &pToplevel->aTableLock[i];
+    p = pToplevel->aTableLock[i];
     if( p->iDb==iDb && p->iTab==iTab ){
       p->isWriteLock = (p->isWriteLock || isWriteLock);
       return;
     }
   }
 
-  nBytes = sizeof(TableLock) * (pToplevel->nTableLock+1);
+  nBytes = sizeof(vtableLock) * (pToplevel->nTableLock+1);
   pToplevel->aTableLock =
       sqlite3DbReallocOrFree(pToplevel->db, pToplevel->aTableLock, nBytes);
   if( pToplevel->aTableLock ){
-    p = &pToplevel->aTableLock[pToplevel->nTableLock++];
+    p = pToplevel->aTableLock[pToplevel->nTableLock++];
     p->iDb = iDb;
     p->iTab = iTab;
     p->isWriteLock = isWriteLock;
@@ -221,14 +221,15 @@ p.zName, P4_STATIC );
             }
           }
 #if !SQLITE_OMIT_VIRTUALTABLE
-{
-int i;
-for(i=0; i<pParse.nVtabLock; i++){
-char *vtab = (char *)sqlite3GetVTable(db, pParse->apVtabLock[i]);
-sqlite3VdbeAddOp4(v, OP_VBegin, 0, 0, 0, vtab, P4_VTAB);
-}
-pParse.nVtabLock = 0;
-}
+          {
+            int i;
+            for ( i = 0; i < pParse.nVtabLock; i++ )
+            {
+              VTable vtab = sqlite3GetVTable( db, pParse.apVtabLock[i] );
+              sqlite3VdbeAddOp4( v, OP_VBegin, 0, 0, 0, vtab, P4_VTAB );
+            }
+            pParse.nVtabLock = 0;
+          }
 #endif
 
           /* Once all the cookies have been verified and transactions opened,
@@ -290,7 +291,7 @@ pParse.nVtabLock = 0;
     */
     static void sqlite3NestedParse( Parse pParse, string zFormat, params object[] ap )
     {
-      string zSql;        //  char *zSql;
+      string zSql;        //  string zSql;
       string zErrMsg = "";//  char* zErrMsg = 0;
       sqlite3 db = pParse.db;
 
@@ -567,7 +568,7 @@ pParse.nVtabLock = 0;
       if ( db.nDb <= 2 && db.aDb != db.aDbStatic )
       {
         Array.Copy( db.aDb, db.aDbStatic, 2 );// memcpy(db.aDbStatic, db.aDb, 2*sizeof(db.aDb[0]));
-        sqlite3DbFree( db, ref db.aDb );
+        //sqlite3DbFree( db, ref db.aDb );
         //db.aDb = db.aDbStatic;
       }
     }
@@ -712,7 +713,7 @@ pParse.nVtabLock = 0;
       string zName;
       if ( pName != null && pName.z != null )
       {
-        zName = pName.z.Substring( 0, pName.n );//sqlite3DbStrNDup(db, (char*)pName.z, pName.n);
+        zName = pName.z.Substring( 0, pName.n );//sqlite3DbStrNDup(db, (char)pName.z, pName.n);
         sqlite3Dequote( ref zName );
       }
       else
@@ -834,7 +835,7 @@ pParse.nVtabLock = 0;
 
     /*
     ** This routine is used to check if the UTF-8 string zName is a legal
-    ** unqualified name for a new schema object (table, index, view or
+    ** unqualified name for a new schema object (vtable, index, view or
     ** trigger). All names are legal except those that begin with the string
     ** "sqlite_" (in upper, lower or mixed case). This portion of the namespace
     ** is reserved for internal use.
@@ -929,7 +930,7 @@ pParse.nVtabLock = 0;
 Debug.Assert( (isTemp & 1)==isTemp );
 {
 int code;
-char *zDb = db.aDb[iDb].zName;
+string zDb = db.aDb[iDb].zName;
 if( sqlite3AuthCheck(pParse, SQLITE_INSERT, SCHEMA_TABLE(isTemp), 0, zDb) ){
 goto begin_table_error;
 }
@@ -946,7 +947,7 @@ code = SQLITE_CREATE_TEMP_TABLE;
 code = SQLITE_CREATE_TABLE;
 }
 }
-if( !isVirtual && sqlite3AuthCheck(pParse, code, zName, 0, zDb) ){
+if( null==isVirtual && sqlite3AuthCheck(pParse, code, zName, 0, zDb) ){
 goto begin_table_error;
 }
 }
@@ -959,7 +960,7 @@ goto begin_table_error;
 ** and types will be used, so there is no need to test for namespace
 ** collisions.
 */
-      if ( !IN_DECLARE_VTAB )
+      if ( !IN_DECLARE_VTAB( pParse ) )
       {
         String zDb = db.aDb[iDb].zName;
         if ( SQLITE_OK != sqlite3ReadSchema( pParse ) )
@@ -988,13 +989,13 @@ goto begin_table_error;
       }
 
       pTable = new Table();// sqlite3DbMallocZero(db, Table).Length;
-      if ( pTable == null )
-      {
-        //        db.mallocFailed = 1;
-        pParse.rc = SQLITE_NOMEM;
-        pParse.nErr++;
-        goto begin_table_error;
-      }
+      //if ( pTable == null )
+      //{
+      //  db.mallocFailed = 1;
+      //  pParse.rc = SQLITE_NOMEM;
+      //  pParse.nErr++;
+      //  goto begin_table_error;
+      //}
       pTable.zName = zName;
       pTable.iPKey = -1;
       pTable.pSchema = db.aDb[iDb].pSchema;
@@ -1095,8 +1096,8 @@ begin_table_error:
     ** returns true if the two strings are equal, otherwise false.
     */
     //#define STRICMP(x, y) (\
-    //sqlite3UpperToLower[*(unsigned char *)(x)]==   \
-    //sqlite3UpperToLower[*(unsigned char *)(y)]     \
+    //sqlite3UpperToLower[*(unsigned char )(x)]==   \
+    //sqlite3UpperToLower[*(unsigned char )(y)]     \
     //&& sqlite3StrICmp((x)+1,(y)+1)==0 )
 
     /*
@@ -1344,7 +1345,7 @@ begin_table_error:
       Table pTab = pParse.pNewTable;
       string zType = null;
       int iCol = -1, i;
-      if ( pTab == null || IN_DECLARE_VTAB )
+      if ( pTab == null || IN_DECLARE_VTAB( pParse ) )
         goto primary_key_exit;
       if ( ( pTab.tabFlags & TF_HasPrimaryKey ) != 0 )
       {
@@ -1423,7 +1424,7 @@ primary_key_exit:
       sqlite3 db = pParse.db;
 #if !SQLITE_OMIT_CHECK
       Table pTab = pParse.pNewTable;
-      if ( pTab != null && !IN_DECLARE_VTAB )
+      if ( pTab != null && !IN_DECLARE_VTAB( pParse ) )
       {
         pTab.pCheck = sqlite3ExprAnd( db, pTab.pCheck, pCheckExpr );
       }
@@ -1856,7 +1857,7 @@ primary_key_exit:
           sqlite3VdbeChangeP5( v, 1 );
           pParse.nTab = 2;
           sqlite3SelectDestInit( dest, SRT_Table, 1 );
-          sqlite3Select( pParse, pSelect, ref  dest );
+          sqlite3Select( pParse, pSelect, ref dest );
           sqlite3VdbeAddOp1( v, OP_Close, 1 );
           if ( pParse.nErr == 0 )
           {
@@ -1980,7 +1981,7 @@ primary_key_exit:
     {
       Table p;
       int n;
-      string z;//const char *z;
+      string z;//string z;
       Token sEnd;
       DbFixer sFix = new DbFixer();
       Token pName = null;
@@ -2075,12 +2076,12 @@ primary_key_exit:
       int nErr = 0;     /* Number of errors encountered */
       int n;            /* Temporarily holds the number of cursors assigned */
       sqlite3 db = pParse.db;  /* Database connection for malloc errors */
-      dxAuth xAuth;     //)(void*,int,const char*,const char*,const char*,const char*);
+      dxAuth xAuth;     //)(void*,int,const char*,const char*,const char*,const char);
 
       Debug.Assert( pTable != null );
 
 #if !SQLITE_OMIT_VIRTUALTABLE
-if ( sqlite3VtabCallConnect( pParse, pTable ) )
+if ( sqlite3VtabCallConnect( pParse, pTable )!=0 )
 {
 return SQLITE_ERROR;
 }
@@ -2567,7 +2568,7 @@ exit_drop_table:
       //string z;
 
       Debug.Assert( pTo != null );
-      if ( p == null || IN_DECLARE_VTAB )
+      if ( p == null || IN_DECLARE_VTAB( pParse ) )
         goto fk_end;
       if ( pFromCol == null )
       {
@@ -2848,7 +2849,8 @@ return;
 
       Debug.Assert( pStart == null || pEnd != null ); /* pEnd must be non-NULL if pStart is */
       Debug.Assert( pParse.nErr == 0 );      /* Never called with prior errors */
-      if ( /* db.mallocFailed != 0 || */ IN_DECLARE_VTAB )
+      if ( /* db.mallocFailed != 0  || */
+       IN_DECLARE_VTAB( pParse ) )
       {
         goto exit_create_index;
       }
@@ -2868,7 +2870,7 @@ return;
         ** before looking up the table.
         */
         Debug.Assert( pName1 != null && pName2 != null );
-        iDb = sqlite3TwoPartName( pParse, pName1, pName2, ref  pName );
+        iDb = sqlite3TwoPartName( pParse, pName1, pName2, ref pName );
         if ( iDb < 0 )
           goto exit_create_index;
 
@@ -3059,12 +3061,12 @@ goto exit_create_index;
       //{
       //  goto exit_create_index;
       //}
-      pIndex.azColl = new string[nCol + 1];//(char**)(pIndex[1]);
-      pIndex.aiColumn = new int[nCol + 1];//(int *)(pIndex->azColl[nCol]);
-      pIndex.aiRowEst = new int[nCol + 1];//(unsigned *)(pIndex->aiColumn[nCol]);
-      pIndex.aSortOrder = new byte[nCol + 1];//(u8 *)(pIndex->aiRowEst[nCol+1]);
-      //pIndex.zName = null;// (char*)( &pIndex->aSortOrder[nCol] );
-      zExtra = new StringBuilder( nName + 1 );// (char*)( &pIndex.zName[nName + 1] );
+      pIndex.azColl = new string[nCol + 1];//(char*)(pIndex[1]);
+      pIndex.aiColumn = new int[nCol + 1];//(int )(pIndex->azColl[nCol]);
+      pIndex.aiRowEst = new int[nCol + 1];//(unsigned )(pIndex->aiColumn[nCol]);
+      pIndex.aSortOrder = new byte[nCol + 1];//(u8 )(pIndex->aiRowEst[nCol+1]);
+      //pIndex.zName = null;// (char)( &pIndex->aSortOrder[nCol] );
+      zExtra = new StringBuilder( nName + 1 );// (char)( &pIndex.zName[nName + 1] );
       if ( zName.Length == nName )
         pIndex.zName = zName;
       else
@@ -3530,7 +3532,7 @@ exit_drop_index:
         Array.Resize( ref pArray, newSize );
       }
       pArray[pnEntry] = new T();
-      //z = (char*)pArray;
+      //z = (char)pArray;
       //memset(z[*pnEntry * szEntry], 0, szEntry);
       pIdx = pnEntry;
       ++pnEntry;
@@ -4391,14 +4393,14 @@ Debug.Assert( !SAVEPOINT_BEGIN && SAVEPOINT_RELEASE==1 && SAVEPOINT_ROLLBACK==2 
       int nCol = pIdx.nColumn;
       //int nBytes = KeyInfo.Length + (nCol - 1) * CollSeq*.Length + nCol;
       sqlite3 db = pParse.db;
-      KeyInfo pKey = new KeyInfo();// (KeyInfo*)sqlite3DbMallocZero(db, nBytes);
+      KeyInfo pKey = new KeyInfo();// (KeyInfo)sqlite3DbMallocZero(db, nBytes);
 
       if ( pKey != null )
       {
         pKey.db = pParse.db;
         pKey.aSortOrder = new byte[nCol];
-        pKey.aColl = new CollSeq[nCol];// (u8*)&(pKey.aColl[nCol]);
-        //        Debug.Assert(pKey.aSortOrder[nCol] == &(((u8*)pKey)[nBytes]));
+        pKey.aColl = new CollSeq[nCol];// (u8)&(pKey.aColl[nCol]);
+        //        Debug.Assert(pKey.aSortOrder[nCol] == (((u8)pKey)[nBytes]));
         for ( i = 0; i < nCol; i++ )
         {
           string zColl = pIdx.azColl[i];

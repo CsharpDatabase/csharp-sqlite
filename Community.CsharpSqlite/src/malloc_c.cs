@@ -221,7 +221,7 @@ return sqlite3MemoryAlarm(xCallback, pArg, iThreshold);
       {
         int i;
         sqlite3GlobalConfig.szScratch = ROUNDDOWN8( sqlite3GlobalConfig.szScratch - 4 );
-        //mem0.aScratchFree = (u32*)&((char*)sqlite3GlobalConfig.pScratch)
+        //mem0.aScratchFree = (u32)&((char)sqlite3GlobalConfig.pScratch)
         //  [sqlite3GlobalConfig.szScratch*sqlite3GlobalConfig.nScratch];
         //for(i=0; i<sqlite3GlobalConfig.nScratch; i++){ mem0.aScratchFree[i] = i; }
         //mem0.nScratchFree = sqlite3GlobalConfig.nScratch;
@@ -293,7 +293,7 @@ return sqlite3MemoryAlarm(xCallback, pArg, iThreshold);
     ** Change the alarm callback
     */
     static int sqlite3MemoryAlarm(
-    dxalarmCallback xCallback, //void(*xCallback)(void pArg, sqlite3_int64 used,int N),
+    dxalarmCallback xCallback, //void(*xCallback)(object pArg, sqlite3_int64 used,int N),
     object pArg,
     sqlite3_int64 iThreshold
     )
@@ -545,7 +545,7 @@ p = sqlite3GlobalConfig.m.xMalloc(nFull);
           {
             if ( sqlite3GlobalConfig.pScratch[i] == null || sqlite3GlobalConfig.pScratch[i].Length < n )
               continue;
-            p = sqlite3GlobalConfig.pScratch[i];// (void*)&((char*)sqlite3GlobalConfig.pScratch)[i];
+            p = sqlite3GlobalConfig.pScratch[i];// (void)&((char)sqlite3GlobalConfig.pScratch)[i];
             sqlite3GlobalConfig.pScratch[i] = null;
             break;
           }
@@ -554,7 +554,7 @@ p = sqlite3GlobalConfig.m.xMalloc(nFull);
             goto scratch_overflow;
           sqlite3StatusAdd( SQLITE_STATUS_SCRATCH_USED, 1 );
           sqlite3StatusSet( SQLITE_STATUS_SCRATCH_SIZE, n );
-          //assert(  (((u8*)p - (u8*)0) & 7)==0 );
+          //Debug.Assert(  (((u8)p - (u8)0) & 7)==0 );
         }
       }
 #if SQLITE_THREADSAFE && !(NDEBUG)
@@ -611,7 +611,7 @@ scratch_overflow:
         else // larger Scratch 2 already in use, let the C# GC handle
         {
           //int i;
-          //i = (int)((u8*)p - (u8*)sqlite3GlobalConfig.pScratch);
+          //i = (int)((u8)p - (u8)sqlite3GlobalConfig.pScratch);
           //i /= sqlite3GlobalConfig.szScratch;
           //Debug.Assert(i >= 0 && i < sqlite3GlobalConfig.nScratch);
           //sqlite3_mutex_enter(mem0.mutex);
@@ -631,18 +631,18 @@ scratch_overflow:
     //if( p>=sqlite3GlobalConfig.pScratch && p<mem0.pScratchEnd ){
     //  /* Release memory from the SQLITE_CONFIG_SCRATCH allocation */
     //  ScratchFreeslot *pSlot;
-    //  pSlot = (ScratchFreeslot*)p;
+    //  pSlot = (ScratchFreeslot)p;
     //  sqlite3_mutex_enter(mem0.mutex);
     //  pSlot->pNext = mem0.pScratchFree;
     //  mem0.pScratchFree = pSlot;
     //  mem0.nScratchFree++;
-    //  assert( mem0.nScratchFree <= (u32)sqlite3GlobalConfig.nScratch );
+    //  Debug.Assert( mem0.nScratchFree <= (u32)sqlite3GlobalConfig.nScratch );
     //  sqlite3StatusAdd(SQLITE_STATUS_SCRATCH_USED, -1);
     //  sqlite3_mutex_leave(mem0.mutex);
     //}else{
     //  /* Release memory back to the heap */
-    //  assert( sqlite3MemdebugHasType(p, MEMTYPE_SCRATCH) );
-    //  assert( sqlite3MemdebugNoType(p, ~MEMTYPE_SCRATCH) );
+    //  Debug.Assert( sqlite3MemdebugHasType(p, MEMTYPE_SCRATCH) );
+    //  Debug.Assert( sqlite3MemdebugNoType(p, ~MEMTYPE_SCRATCH) );
     //  sqlite3MemdebugSetType(p, MEMTYPE_HEAP);
     //  if( sqlite3GlobalConfig.bMemstat ){
     //    int iSize = sqlite3MallocSize(p);
@@ -663,7 +663,7 @@ scratch_overflow:
     ** TRUE if p is a lookaside memory allocation from db
     */
 #if !SQLITE_OMIT_LOOKASIDE
-static int isLookaside(sqlite3 *db, void *p){
+static int isLookaside(sqlite3 db, object  *p){
 return p && p>=db.lookaside.pStart && p<db.lookaside.pEnd;
 }
 #else
@@ -680,8 +680,8 @@ return p && p>=db.lookaside.pStart && p<db.lookaside.pEnd;
 */
     //int sqlite3MallocSize(void* p)
     //{
-    //  assert(sqlite3MemdebugHasType(p, MEMTYPE_HEAP));
-    //  assert( sqlite3MemdebugNoType(p, MEMTYPE_DB) );
+    //  Debug.Assert(sqlite3MemdebugHasType(p, MEMTYPE_HEAP));
+    //  Debug.Assert( sqlite3MemdebugNoType(p, MEMTYPE_DB) );
     //  return sqlite3GlobalConfig.m.xSize(p);
     //}
     static int sqlite3MallocSize( byte[][] p )
@@ -776,7 +776,7 @@ db.pnBytesFreed += sqlite3DbMallocSize( db, p );
         //}
 #if !SQLITE_OMIT_LOOKASIDE
 if( isLookaside(db, p) ){
-LookasideSlot *pBuf = (LookasideSlot*)p;
+LookasideSlot *pBuf = (LookasideSlot)p;
 pBuf.pNext = db.lookaside.pFree;
 db.lookaside.pFree = pBuf;
 db.lookaside.nOut--;
@@ -909,8 +909,8 @@ db.lookaside.nOut--;
     ** This is an important assumption.  There are many places in the
     ** code that do things like this:
     **
-    **         int *a = (int*)sqlite3DbMallocRaw(db, 100);
-    **         int *b = (int*)sqlite3DbMallocRaw(db, 200);
+    **         int *a = (int)sqlite3DbMallocRaw(db, 100);
+    **         int *b = (int)sqlite3DbMallocRaw(db, 200);
     **         if( b ) a[10] = 9;
     **
     ** In other words, if a subsequent malloc (ex: "b") worked, it is assumed
@@ -939,7 +939,7 @@ db->lookaside.anStat[0]++;
 if( db->lookaside.nOut>db->lookaside.mxOut ){
 db->lookaside.mxOut = db->lookaside.nOut;
 }
-return (void*)pBuf;
+return (void)pBuf;
 }
 }
 }
@@ -949,7 +949,7 @@ return (void*)pBuf;
       //}
 #endif
       p = sqlite3Malloc( n );
-      //if( !p && db ){
+      //if( null==p && db ){
       //  db->mallocFailed = 1;
       //}
 #if !SQLITE_OMIT_LOOKASIDE
@@ -992,7 +992,7 @@ sqlite3DbFree(db, ref p);
           Debug.Assert( sqlite3MemdebugHasType( p, MEMTYPE_LOOKASIDE | MEMTYPE_HEAP ) );
           sqlite3MemdebugSetType( p, MEMTYPE_HEAP );
           pNew = sqlite3_realloc( p, n );
-          //if( !pNew ){
+          //if( null==pNew ){
           //sqlite3MemdebugSetType(p, MEMTYPE_DB|MEMTYPE_HEAP);
           //  db->mallocFailed = 1;
           //}
@@ -1027,26 +1027,26 @@ sqlite3MemdebugSetType(pNew, MEMTYPE_DB |
     ** called via macros that record the current file and line number in the
     ** ThreadData structure.
     */
-    //char *sqlite3DbStrDup(sqlite3 *db, const char *z){
-    //  char *zNew;
+    //char *sqlite3DbStrDup(sqlite3 db, string z){
+    //  string zNew;
     //  size_t n;
     //  if( z==0 ){
     //    return 0;
     //  }
     //  n = sqlite3Strlen30(z) + 1;
-    //  assert( (n&0x7fffffff)==n );
+    //  Debug.Assert( (n&0x7fffffff)==n );
     //  zNew = sqlite3DbMallocRaw(db, (int)n);
     //  if( zNew ){
     //    memcpy(zNew, z, n);
     //  }
     //  return zNew;
     //}
-    //char *sqlite3DbStrNDup(sqlite3 *db, const char *z, int n){
-    //  char *zNew;
+    //char *sqlite3DbStrNDup(sqlite3 db, string z, int n){
+    //  string zNew;
     //  if( z==0 ){
     //    return 0;
     //  }
-    //  assert( (n&0x7fffffff)==n );
+    //  Debug.Assert( (n&0x7fffffff)==n );
     //  zNew = sqlite3DbMallocRaw(db, n+1);
     //  if( zNew ){
     //    memcpy(zNew, z, n);

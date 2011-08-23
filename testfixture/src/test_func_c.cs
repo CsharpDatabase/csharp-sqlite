@@ -160,7 +160,7 @@ static void test_destructor16(
 //int nArg,                 /* Number of function arguments */
 //sqlite3_value[] argv      /* Values for all function arguments */
 ){
-char *zVal;
+string zVal;
 int len;
 
 test_destructor_count_var++;
@@ -168,7 +168,7 @@ Debug.Assert(nArg==1 );
 if( sqlite3_value_type(argv[0])==SQLITE_NULL ) return;
 len = sqlite3_value_bytes16(argv[0]);
 zVal = testContextMalloc(pCtx, len+3);
-if( !zVal ){
+if( null==zVal ){
 return;
 }
 zVal[len+1] = 0;
@@ -301,7 +301,7 @@ sqlite3_result_text16(pCtx, zVal, -1, destructor);
     //int nArg,                 /* Number of function arguments */
     //sqlite3_value[] argv      /* Values for all function arguments */
     //){
-    //  int *pCounter = (int*)sqlite3_get_auxdata(pCtx, 0);
+    //  int *pCounter = (int)sqlite3_get_auxdata(pCtx, 0);
     //  if( pCounter==0 ){
     //    pCounter = sqlite3_malloc( sizeof(*pCounter) );
     //    if( pCounter==0 ){
@@ -361,7 +361,7 @@ sqlite3_value_text(argv[0]);
       string zSql;
 
       zSql = sqlite3_value_text( argv[0] );
-      rc = sqlite3_prepare_v2( db, zSql, -1, ref  pStmt, 0 );
+      rc = sqlite3_prepare_v2( db, zSql, -1, ref pStmt, 0 );
       if ( rc == SQLITE_OK )
       {
         rc = sqlite3_step( pStmt );
@@ -442,11 +442,11 @@ static void testHexToUtf16be(
   sqlite3_value **argv
 ){
   int n;
-  const char *zIn;
-  char *zOut;
-  assert( nArg==1 );
+  string zIn;
+  string zOut;
+  Debug.Assert( nArg==1 );
   n = sqlite3_value_bytes(argv[0]);
-  zIn = (const char*)sqlite3_value_text(argv[0]);
+  zIn = (const char)sqlite3_value_text(argv[0]);
   zOut = sqlite3_malloc( n/2 );
   if( zOut==0 ){
     sqlite3_result_error_nomem(pCtx);
@@ -497,11 +497,11 @@ static void testHexToUtf16le(
   sqlite3_value **argv
 ){
   int n;
-  const char *zIn;
-  char *zOut;
-  assert( nArg==1 );
+  string zIn;
+  string zOut;
+  Debug.Assert( nArg==1 );
   n = sqlite3_value_bytes(argv[0]);
-  zIn = (const char*)sqlite3_value_text(argv[0]);
+  zIn = (const char)sqlite3_value_text(argv[0]);
   zOut = sqlite3_malloc( n/2 );
   if( zOut==0 ){
     sqlite3_result_error_nomem(pCtx);
@@ -559,7 +559,7 @@ new _aFuncs(  "test_isolation",        2, SQLITE_UTF8, test_isolation),
     Tcl_Obj[] objv
     )
     {
-      //extern int Md5_Register(sqlite3*);
+      //extern int Md5_Register(sqlite3);
       int rc = sqlite3_auto_extension( (dxInit)registerTestFunctions );
       if ( rc == SQLITE_OK )
       {
@@ -594,12 +594,12 @@ new _aFuncs(  "test_isolation",        2, SQLITE_UTF8, test_isolation),
     Tcl_Obj[] objv
     )
     {
-      //extern int getDbPointer(Tcl_Interp*, const char*, sqlite3**);
+      //extern int getDbPointer(Tcl_Interp*, const char*, sqlite3*);
       sqlite3 db = null;
       int rc;
       int mxArg;
 
-      if ( getDbPointer( interp, TCL.Tcl_GetString( objv[1] ), ref db ) != 0 )
+      if ( getDbPointer( interp, TCL.Tcl_GetString( objv[1] ), out db ) != 0 )
         return TCL.TCL_ERROR;
 
       rc = sqlite3_create_function( db, "tx", 1, SQLITE_UTF8, 0, tStep, tStep, tFinal );
@@ -671,7 +671,7 @@ abuse_err:
     public static int Sqlitetest_func_Init( Tcl_Interp interp )
     {
       //static struct {
-      //   char *zName;
+      //   string zName;
       //   Tcl_ObjCmdProc *xProc;
       //}
       _aObjCmd[] aObjCmd = new _aObjCmd[]  {
@@ -679,7 +679,7 @@ new _aObjCmd( "autoinstall_test_functions",    autoinstall_test_funcs ),
 new _aObjCmd( "abuse_create_function",         abuse_create_function  ),
 };
       int i;
-      //extern int Md5_Register(sqlite3*);
+      //extern int Md5_Register(sqlite3);
 
       for ( i = 0; i < aObjCmd.Length; i++ )
       {//sizeof(aObjCmd)/sizeof(aObjCmd[0]); i++){

@@ -362,7 +362,7 @@ namespace tcl.lang
     * Tcl_DoubleAsWide - converter from double to wideInt.
     *
     * The following invariant should hold for any long value 'longVal':
-    *	longVal == Tcl_WideAsLong(Tcl_LongAsWide(longVal))
+    *	longVal == TCL.Tcl_WideAsLong(Tcl_LongAsWide(longVal))
     *
     * Note on converting between Tcl_WideInt and strings.  This
     * implementation (in tclObj.c) depends on the functions strtoull()
@@ -658,7 +658,7 @@ namespace tcl.lang
     * Argument descriptors for math function callbacks in expressions:
     */
     //typedef enum {
-    //    TCL_INT, TCL_DOUBLE, TCL_EITHER, TCL_WIDE_INT
+    //    TCL_INT, TCL.TCL_DOUBLE, TCL.TCL_EITHER, TCL.TCL_WIDE_INT
     //} Tcl_ValueType;
     //typedef struct Tcl_Value {
     //    Tcl_ValueType type;		/* Indicates intValue or doubleValue is
@@ -680,7 +680,7 @@ namespace tcl.lang
     * Procedure types defined by Tcl:
     */
 
-    //typedef int (Tcl_AppInitProc) _ANSI_ARGS_((Tcl_Interp *interp));
+    //typedef int (Tcl_AppInitProc) _ANSI_ARGS_((Tcl_Interp interp));
     //typedef int (Tcl_AsyncProc) _ANSI_ARGS_((ClientData clientData,
     //  Tcl_Interp interp, int code));
     //typedef void (Tcl_ChannelProc) _ANSI_ARGS_((ClientData clientData, int mask));
@@ -689,16 +689,16 @@ namespace tcl.lang
     //typedef int (Tcl_CmdProc) _ANSI_ARGS_((ClientData clientData,
     //  Tcl_Interp interp, int argc, CONST84 char *argv[]));
     //typedef void (Tcl_CmdTraceProc) _ANSI_ARGS_((ClientData clientData,
-    //  Tcl_Interp interp, int level, char *command, Tcl_CmdProc proc,
+    //  Tcl_Interp interp, int level, char *command, TCL.TCL_CmdProc proc,
     //  ClientData cmdClientData, int argc, CONST84 char *argv[]));
     //typedef int (Tcl_CmdObjTraceProc) _ANSI_ARGS_((ClientData clientData,
-    //  Tcl_Interp interp, int level, CONST char *command,
+    //  Tcl_Interp interp, int level, string command,
     //  Tcl_Command commandInfo, int objc, struct Tcl_Obj * CONST * objv));
     //typedef void (Tcl_CmdObjTraceDeleteProc) _ANSI_ARGS_((ClientData clientData));
     //typedef void (Tcl_DupInternalRepProc) _ANSI_ARGS_((struct Tcl_Obj *srcPtr,
     //        struct Tcl_Obj *dupPtr));
     //typedef int (Tcl_EncodingConvertProc)_ANSI_ARGS_((ClientData clientData,
-    //  CONST char *src, int srcLen, int flags, Tcl_EncodingState *statePtr,
+    //  string src, int srcLen, int flags, TCL.TCL_EncodingState *statePtr,
     //  char *dst, int dstLen, int *srcReadPtr, int *dstWrotePtr,
     //  int *dstCharsPtr));
     //typedef void (Tcl_EncodingFreeProc)_ANSI_ARGS_((ClientData clientData));
@@ -716,14 +716,14 @@ namespace tcl.lang
     //typedef void (Tcl_FreeProc) _ANSI_ARGS_((char *blockPtr));
     //typedef void (Tcl_IdleProc) _ANSI_ARGS_((ClientData clientData));
     //typedef void (Tcl_InterpDeleteProc) _ANSI_ARGS_((ClientData clientData,
-    //  Tcl_Interp *interp));
+    //  Tcl_Interp interp));
     //typedef int (Tcl_MathProc) _ANSI_ARGS_((ClientData clientData,
-    //  Tcl_Interp interp, Tcl_Value *args, Tcl_Value *resultPtr));
+    //  Tcl_Interp interp, TCL.TCL_Value *args, TCL.TCL_Value *resultPtr));
     //typedef void (Tcl_NamespaceDeleteProc) _ANSI_ARGS_((ClientData clientData));
     //typedef int (Tcl_ObjCmdProc) _ANSI_ARGS_((ClientData clientData,
     //  Tcl_Interp interp, int objc, struct Tcl_Obj * CONST * objv));
-    //typedef int (Tcl_PackageInitProc) _ANSI_ARGS_((Tcl_Interp *interp));
-    //typedef void (Tcl_PanicProc) _ANSI_ARGS_(TCL_VARARGS(CONST char *, format));
+    //typedef int (Tcl_PackageInitProc) _ANSI_ARGS_((Tcl_Interp interp));
+    //typedef void (Tcl_PanicProc) _ANSI_ARGS_(TCL_VARARGS(string , format));
     //typedef void (Tcl_TcpAcceptProc) _ANSI_ARGS_((ClientData callbackData,
     //        Tcl_Channel chan, char *address, int port));
     //typedef void (Tcl_TimerProc) _ANSI_ARGS_((ClientData clientData));
@@ -733,7 +733,7 @@ namespace tcl.lang
     //typedef char *(Tcl_VarTraceProc) _ANSI_ARGS_((ClientData clientData,
     //  Tcl_Interp interp, CONST84 char part1, CONST84 char part2, int flags));
     //typedef void (Tcl_CommandTraceProc) _ANSI_ARGS_((ClientData clientData,
-    //  Tcl_Interp interp, CONST char *oldName, CONST char *newName,
+    //  Tcl_Interp interp, string oldName, string newName,
     //  int flags));
     //typedef void (Tcl_CreateFileHandlerProc) _ANSI_ARGS_((int fd, int mask,
     //  Tcl_FileProc proc, ClientData clientData));
@@ -925,7 +925,7 @@ namespace tcl.lang
     * A call frame is initialized and pushed using Tcl_PushCallFrame and
     * popped using Tcl_PopCallFrame. Storage for a Tcl_CallFrame must be
     * provided by the Tcl_PushCallFrame caller, and callers typically allocate
-    * them on the C call stack for efficiency. For this reason, Tcl_CallFrame
+    * them on the C call stack for efficiency. For this reason, TCL.TCL_CallFrame
     * is defined as a structure and not as an opaque token. However, most
     * Tcl_CallFrame fields are hidden since applications should not access
     * them directly; others are declared as "dummyX".
@@ -1049,9 +1049,9 @@ namespace tcl.lang
     * Special freeProc values that may be passed to Tcl_SetResult (see
     * the man page for details):
     */
-    public const int TCL_VOLATILE = 1;//((Tcl_FreeProc *) 1)
-    public const int TCL_STATIC = 2;//((Tcl_FreeProc *) 0)
-    public const int TCL_DYNAMIC = 3;//((Tcl_FreeProc *) 3)
+    public const int TCL_VOLATILE = 1;//((Tcl_FreeProc ) 1)
+    public const int TCL_STATIC = 2;//((Tcl_FreeProc ) 0)
+    public const int TCL_DYNAMIC = 3;//((Tcl_FreeProc ) 3)
 
     /*
     * Flag values passed to variable-related procedures.
@@ -1127,7 +1127,7 @@ namespace tcl.lang
     //typedef int (Tcl_CompareHashKeysProc) _ANSI_ARGS_((VOID *keyPtr,
     //  Tcl_HashEntry *hPtr));
     //typedef Tcl_HashEntry *(Tcl_AllocHashEntryProc) _ANSI_ARGS_((
-    //  Tcl_HashTable *tablePtr, VOID *keyPtr));
+    //  Tcl_HashTable *tablePtr, object  *keyPtr));
     //typedef void (Tcl_FreeHashEntryProc) _ANSI_ARGS_((Tcl_HashEntry *hPtr));
 
     /*
@@ -1264,15 +1264,15 @@ namespace tcl.lang
     //           * function. */
     //    int keyType;			/* Type of keys used in this table.
     //           * It's either TCL_CUSTOM_KEYS,
-    //           * TCL_STRING_KEYS, TCL_ONE_WORD_KEYS,
+    //           * TCL_STRING_KEYS, TCL.TCL_ONE_WORD_KEYS,
     //           * or an integer giving the number of
     //           * ints that is the size of the key.
     //           */
 #if TCL_PRESERVE_BINARY_COMPATABILITY
 //    Tcl_HashEntry *(*findProc) _ANSI_ARGS_((Tcl_HashTable *tablePtr,
-//      CONST char *key));
+//      string key));
 //    Tcl_HashEntry *(*createProc) _ANSI_ARGS_((Tcl_HashTable *tablePtr,
-//      CONST char *key, int *newPtr));
+//      string key, int *newPtr));
 #endif
     //    Tcl_HashKeyType *typePtr;		/* Type of the keys used in the
     //           * Tcl_HashTable. */
@@ -1331,14 +1331,14 @@ namespace tcl.lang
     //#define Tcl_GetHashValue(h) ((h)->clientData)
     //#define Tcl_SetHashValue(h, value) ((h)->clientData = (ClientData) (value))
 #if TCL_PRESERVE_BINARY_COMPATABILITY
-//#   define Tcl_GetHashKey(tablePtr, h) \
-//  ((char *) (((tablePtr)->keyType == TCL_ONE_WORD_KEYS || \
-//        (tablePtr)->keyType == TCL_CUSTOM_PTR_KEYS) \
+//#   define Tcl_GetHashKey(vtablePtr, h) \
+//  ((char ) (((vtablePtr)->keyType == TCL.Tcl_ONE_WORD_KEYS || \
+//        (vtablePtr)->keyType == TCL.Tcl_CUSTOM_PTR_KEYS) \
 //       ? (h)->key.oneWordValue \
 //       : (h)->key.string))
 #else
-    //#   define Tcl_GetHashKey(tablePtr, h) \
-    //  ((char *) (((tablePtr)->keyType == TCL_ONE_WORD_KEYS) \
+    //#   define Tcl_GetHashKey(vtablePtr, h) \
+    //  ((char ) (((vtablePtr)->keyType == TCL.Tcl_ONE_WORD_KEYS) \
     //       ? (h)->key.oneWordValue \
     //       : (h)->key.string))
 #endif
@@ -1349,16 +1349,16 @@ namespace tcl.lang
 */
 
 #if TCL_PRESERVE_BINARY_COMPATABILITY
-//#   define Tcl_FindHashEntry(tablePtr, key) \
-//  (*((tablePtr)->findProc))(tablePtr, key)
-//#   define Tcl_CreateHashEntry(tablePtr, key, newPtr) \
-//  (*((tablePtr)->createProc))(tablePtr, key, newPtr)
+//#   define Tcl_FindHashEntry(vtablePtr, key) \
+//  (*((vtablePtr)->findProc))(vtablePtr, key)
+//#   define Tcl_CreateHashEntry(vtablePtr, key, newPtr) \
+//  (*((vtablePtr)->createProc))(vtablePtr, key, newPtr)
 #else //* !TCL_PRESERVE_BINARY_COMPATABILITY */
     /*
 * Macro to use new extended version of Tcl_InitHashTable.
 */
-    //#   define Tcl_InitHashTable(tablePtr, keyType) \
-    //  Tcl_InitHashTableEx(tablePtr, keyType, NULL)
+    //#   define Tcl_InitHashTable(vtablePtr, keyType) \
+    //  Tcl_InitHashTableEx(vtablePtr, keyType, NULL)
 #endif // * TCL_PRESERVE_BINARY_COMPATABILITY */
 
 
@@ -1391,7 +1391,7 @@ namespace tcl.lang
     * Positions to pass to Tcl_QueueEvent:
     */
     //typedef enum {
-    //    TCL_QUEUE_TAIL, TCL_QUEUE_HEAD, TCL_QUEUE_MARK
+    //    TCL_QUEUE_TAIL, TCL.TCL_QUEUE_HEAD, TCL.TCL_QUEUE_MARK
     //} Tcl_QueuePosition;
 
     /*
@@ -1427,7 +1427,7 @@ namespace tcl.lang
 
     /*
     * Flag values to pass to Tcl_OpenCommandChannel to indicate the
-    * disposition of the stdio handles.  TCL_STDIN, TCL_STDOUT, TCL_STDERR,
+    * disposition of the stdio handles.  TCL_STDIN, TCL.TCL_STDOUT, TCL.TCL_STDERR,
     * are also used in Tcl_GetStdChannel.
     */
     //#define TCL_STDIN		(1<<1)
@@ -1446,7 +1446,7 @@ namespace tcl.lang
     * Value to use as the closeProc for a channel that supports the
     * close2Proc interface.
     */
-    //#define TCL_CLOSE2PROC	((Tcl_DriverCloseProc *)1)
+    //#define TCL_CLOSE2PROC	((Tcl_DriverCloseProc )1)
 
     /*
     * Channel version tag.  This was introduced in 8.3.2/8.4.
@@ -1469,7 +1469,7 @@ namespace tcl.lang
     //typedef int	(Tcl_DriverBlockModeProc) _ANSI_ARGS_((
     //        ClientData instanceData, int mode));
     //typedef int	(Tcl_DriverCloseProc) _ANSI_ARGS_((ClientData instanceData,
-    //        Tcl_Interp *interp));
+    //        Tcl_Interp interp));
     //typedef int	(Tcl_DriverClose2Proc) _ANSI_ARGS_((ClientData instanceData,
     //        Tcl_Interp interp, int flags));
     //typedef int	(Tcl_DriverInputProc) _ANSI_ARGS_((ClientData instanceData,
@@ -1479,11 +1479,11 @@ namespace tcl.lang
     //typedef int	(Tcl_DriverSeekProc) _ANSI_ARGS_((ClientData instanceData,
     //        long offset, int mode, int *errorCodePtr));
     //typedef int	(Tcl_DriverSetOptionProc) _ANSI_ARGS_((
-    //        ClientData instanceData, Tcl_Interp interp,
-    //              CONST char *optionName, CONST char *value));
+    //        ClientData instanceData, TCL.TCL_Interp interp,
+    //              string optionName, string value));
     //typedef int	(Tcl_DriverGetOptionProc) _ANSI_ARGS_((
-    //        ClientData instanceData, Tcl_Interp interp,
-    //        CONST84 char *optionName, Tcl_DString *dsPtr));
+    //        ClientData instanceData, TCL.TCL_Interp interp,
+    //        CONST84 char *optionName, TCL.TCL_DString *dsPtr));
     //typedef void	(Tcl_DriverWatchProc) _ANSI_ARGS_((
     //        ClientData instanceData, int mask));
     //typedef int	(Tcl_DriverGetHandleProc) _ANSI_ARGS_((
@@ -1494,7 +1494,7 @@ namespace tcl.lang
     //typedef int	(Tcl_DriverHandlerProc) _ANSI_ARGS_((
     //        ClientData instanceData, int interestMask));
     //typedef Tcl_WideInt (Tcl_DriverWideSeekProc) _ANSI_ARGS_((
-    //        ClientData instanceData, Tcl_WideInt offset,
+    //        ClientData instanceData, TCL.TCL_WideInt offset,
     //        int mode, int *errorCodePtr));
 
     //  /* TIP #218, Channel Thread Actions */
@@ -1658,26 +1658,26 @@ namespace tcl.lang
     /*
     * Typedefs for the various filesystem operations:
     */
-    //typedef int (Tcl_FSStatProc) _ANSI_ARGS_((Tcl_Obj pathPtr, Tcl_StatBuf *buf));
+    //typedef int (Tcl_FSStatProc) _ANSI_ARGS_((Tcl_Obj pathPtr, TCL.TCL_StatBuf *buf));
     //typedef int (Tcl_FSAccessProc) _ANSI_ARGS_((Tcl_Obj pathPtr, int mode));
     //typedef Tcl_Channel (Tcl_FSOpenFileChannelProc)
-    //  _ANSI_ARGS_((Tcl_Interp interp, Tcl_Obj pathPtr,
+    //  _ANSI_ARGS_((Tcl_Interp interp, TCL.TCL_Obj pathPtr,
     //  int mode, int permissions));
     //typedef int (Tcl_FSMatchInDirectoryProc) _ANSI_ARGS_((Tcl_Interp* interp,
-    //  Tcl_Obj *result, Tcl_Obj pathPtr, CONST char pattern,
+    //  Tcl_Obj *result, TCL.TCL_Obj pathPtr, CONST char pattern,
     //  Tcl_GlobTypeData * types));
-    //typedef Tcl_Obj* (Tcl_FSGetCwdProc) _ANSI_ARGS_((Tcl_Interp *interp));
+    //typedef Tcl_Obj* (Tcl_FSGetCwdProc) _ANSI_ARGS_((Tcl_Interp interp));
     //typedef int (Tcl_FSChdirProc) _ANSI_ARGS_((Tcl_Obj pathPtr));
     //typedef int (Tcl_FSLstatProc) _ANSI_ARGS_((Tcl_Obj pathPtr,
     //             Tcl_StatBuf *buf));
     //typedef int (Tcl_FSCreateDirectoryProc) _ANSI_ARGS_((Tcl_Obj pathPtr));
     //typedef int (Tcl_FSDeleteFileProc) _ANSI_ARGS_((Tcl_Obj pathPtr));
     //typedef int (Tcl_FSCopyDirectoryProc) _ANSI_ARGS_((Tcl_Obj *srcPathPtr,
-    //     Tcl_Obj *destPathPtr, Tcl_Obj **errorPtr));
+    //     Tcl_Obj *destPathPtr, TCL.TCL_Obj **errorPtr));
     //typedef int (Tcl_FSCopyFileProc) _ANSI_ARGS_((Tcl_Obj *srcPathPtr,
     //          Tcl_Obj *destPathPtr));
     //typedef int (Tcl_FSRemoveDirectoryProc) _ANSI_ARGS_((Tcl_Obj pathPtr,
-    //          int recursive, Tcl_Obj **errorPtr));
+    //          int recursive, TCL.TCL_Obj **errorPtr));
     //typedef int (Tcl_FSRenameFileProc) _ANSI_ARGS_((Tcl_Obj *srcPathPtr,
     //          Tcl_Obj *destPathPtr));
     //typedef void (Tcl_FSUnloadFileProc) _ANSI_ARGS_((Tcl_LoadHandle loadHandle));
@@ -1689,12 +1689,12 @@ namespace tcl.lang
     //typedef int (Tcl_FSNormalizePathProc) _ANSI_ARGS_((Tcl_Interp interp,
     //       Tcl_Obj pathPtr, int nextCheckpoint));
     //typedef int (Tcl_FSFileAttrsGetProc) _ANSI_ARGS_((Tcl_Interp interp,
-    //          int index, Tcl_Obj pathPtr,
+    //          int index, TCL.TCL_Obj pathPtr,
     //          Tcl_Obj **objPtrRef));
     //typedef CONST char** (Tcl_FSFileAttrStringsProc) _ANSI_ARGS_((Tcl_Obj pathPtr,
     //          Tcl_Obj** objPtrRef));
     //typedef int (Tcl_FSFileAttrsSetProc) _ANSI_ARGS_((Tcl_Interp interp,
-    //          int index, Tcl_Obj pathPtr,
+    //          int index, TCL.TCL_Obj pathPtr,
     //          Tcl_Obj *objPtr));
     //typedef Tcl_Obj* (Tcl_FSLinkProc) _ANSI_ARGS_((Tcl_Obj pathPtr,
     //                 Tcl_Obj *toPtr, int linkType));
@@ -1743,7 +1743,7 @@ namespace tcl.lang
     */
 
     //typedef struct Tcl_Filesystem {
-    //    CONST char *typeName;   /* The name of the filesystem. */
+    //    string typeName;   /* The name of the filesystem. */
     //    int structureLength;    /* Length of this structure, so future
     //           * binary compatibility can be assured. */
     //    Tcl_FSVersion version;
@@ -1949,7 +1949,7 @@ namespace tcl.lang
     * together all the functions that are used by the specific encoding.
     */
     //typedef struct Tcl_EncodingType {
-    //    CONST char *encodingName;	/* The name of the encoding, e.g.  "euc-jp".
+    //    string encodingName;	/* The name of the encoding, e.g.  "euc-jp".
     //         * This name is the unique key for this
     //         * encoding type. */
     //    Tcl_EncodingConvertProc *toUtfProc;
@@ -2019,7 +2019,7 @@ namespace tcl.lang
     //typedef struct Tcl_Token {
     //    int type;			/* Type of token, such as TCL_TOKEN_WORD;
     //         * see below for valid types. */
-    //    CONST char *start;		/* First character in token. */
+    //    string start;		/* First character in token. */
     //    int size;			/* Number of bytes in token. */
     //    int numComponents;		/* If this token is composed of other
     //         * tokens, this field tells how many of
@@ -2068,7 +2068,7 @@ namespace tcl.lang
     *				the variable is an array reference then
     *				there will be one or more additional
     *				tokens, of type TCL_TOKEN_TEXT,
-    *				TCL_TOKEN_BS, TCL_TOKEN_COMMAND, and
+    *				TCL_TOKEN_BS, TCL.TCL_TOKEN_COMMAND, and
     *				TCL_TOKEN_VARIABLE, that describe the
     *				array index; numComponents counts the
     *				total number of nested tokens that make
@@ -2133,14 +2133,14 @@ namespace tcl.lang
     //#define NUM_STATIC_TOKENS 20
 
     //typedef struct Tcl_Parse {
-    //    CONST char *commentStart;	/* Pointer to # that begins the first of
+    //    string commentStart;	/* Pointer to # that begins the first of
     //         * one or more comments preceding the
     //         * command. */
     //    int commentSize;		/* Number of bytes in comments (up through
     //         * newline character that terminates the
     //         * last comment).  If there were no
     //         * comments, this field is 0. */
-    //    CONST char *commandStart;	/* First character in first word of command. */
+    //    string commandStart;	/* First character in first word of command. */
     //    int commandSize;		/* Number of bytes in command, including
     //         * first character of first word, up
     //         * through the terminating newline,
@@ -2164,13 +2164,13 @@ namespace tcl.lang
     //     * Tcl_ParseCommand.
     //     */
 
-    //    CONST char *string;		/* The original command string passed to
+    //    string string;		/* The original command string passed to
     //         * Tcl_ParseCommand. */
-    //    CONST char *end;		/* Points to the character just after the
+    //    string end;		/* Points to the character just after the
     //         * last one in the command string. */
-    //    Tcl_Interp *interp;		/* Interpreter to use for error reporting,
+    //    Tcl_Interp interp;		/* Interpreter to use for error reporting,
     //         * or NULL. */
-    //    CONST char *term;		/* Points to character in string that
+    //    string term;		/* Points to character in string that
     //         * terminated most recent token.  Filled in
     //         * by ParseTokens.  If an error occurs,
     //         * points to beginning of region where the
@@ -2276,7 +2276,7 @@ namespace tcl.lang
     //#define Tcl_Ckalloc Tcl_Alloc
     //#define Tcl_Ckfree Tcl_Free
     //#define Tcl_Ckrealloc Tcl_Realloc
-    //#define Tcl_Return Tcl_SetResult
+    //#define Tcl_return TCL.TCL_SetResult
     //#define Tcl_TildeSubst Tcl_TranslateFileName
     //#define panic Tcl_Panic
     //#define panicVA Tcl_PanicVA
@@ -2300,8 +2300,8 @@ namespace tcl.lang
     * linked into an application.
     */
 
-    //EXTERN CONST char *	Tcl_InitStubs _ANSI_ARGS_((Tcl_Interp interp,
-    //          CONST char *version, int exact));
+    //EXTERN string 	Tcl_InitStubs _ANSI_ARGS_((Tcl_Interp interp,
+    //          string version, int exact));
 
 #if !USE_TCL_STUBS
 
@@ -2357,7 +2357,7 @@ namespace tcl.lang
     //#undef TCL_STORAGE_CLASS
     //#define TCL_STORAGE_CLASS
 
-    //EXTERN int		Tcl_AppInit _ANSI_ARGS_((Tcl_Interp *interp));
+    //EXTERN int		Tcl_AppInit _ANSI_ARGS_((Tcl_Interp interp));
 
     //#undef TCL_STORAGE_CLASS
     //#define TCL_STORAGE_CLASS DLLIMPORT

@@ -39,7 +39,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRUE _MSC_VER WIN32 NET_35 SQLITE_ASCII SQLITE_DEBUG SQLITE_DISABLE_LFS  SQLITE_ENABLE_COLUMN_METADATA SQLITE_HAS_CODEC SQLITE_MUTEX_W32 SQLITE_OMIT_AUTHORIZATION SQLITE_OMIT_DEPRECATED SQLITE_OMIT_GET_TABLE SQLITE_OMIT_INCRBLOB SQLITE_OMIT_LOOKASIDE SQLITE_OMIT_SHARED_CACHE SQLITE_OMIT_UTF16 SQLITE_OMIT_VIRTUALTABLE SQLITE_OMIT_WAL SQLITE_OS_WIN SQLITE_THREADSAFE SQLITE_TEST SQLITE_USE_URI SQLITE_POOL_MEM SQLITE_ENABLE_OVERSIZE_CELL_CHECK SQLITE_ENABLE_STAT2 VDBE_PROFILE_OFF  TCLSH</DefineConstants>
+    <DefineConstants>DEBUG;TRUE _MSC_VER WIN32 NET_35 SQLITE_ASCII SQLITE_DEBUG SQLITE_DISABLE_LFS  SQLITE_ENABLE_COLUMN_METADATA SQLITE_HAS_CODEC SQLITE_MUTEX_W32 SQLITE_OMIT_AUTHORIZATION SQLITE_OMIT_DEPRECATED SQLITE_OMIT_GET_TABLE SQLITE_OMIT_INCRBLOB SQLITE_OMIT_LOOKASIDE SQLITE_OMIT_SHARED_CACHE SQLITE_OMIT_UTF16 SQLITE_OMIT_WAL SQLITE_OS_WIN SQLITE_THREADSAFE SQLITE_TEST SQLITE_USE_URI SQLITE_POOL_MEM SQLITE_ENABLE_OVERSIZE_CELL_CHECK SQLITE_ENABLE_STAT2 VDBE_PROFILE_OFF TCLSH</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <NoWarn>0168 ; 0169; 0414; 0618; 0649</NoWarn>
@@ -58,7 +58,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRUE _MSC_VER WIN32 NET_35 SQLITE_ASCII SQLITE_DEBUG SQLITE_DISABLE_LFS  SQLITE_ENABLE_COLUMN_METADATA SQLITE_HAS_CODEC SQLITE_MUTEX_W32 SQLITE_OMIT_AUTHORIZATION SQLITE_OMIT_DEPRECATED SQLITE_OMIT_GET_TABLE SQLITE_OMIT_INCRBLOB SQLITE_OMIT_LOOKASIDE SQLITE_OMIT_SHARED_CACHE SQLITE_OMIT_UTF16 SQLITE_OMIT_VIRTUALTABLE SQLITE_OMIT_WAL SQLITE_OS_WIN SQLITE_THREADSAFE SQLITE_TEST SQLITE_USE_URI SQLITE_POOL_MEM SQLITE_ENABLE_OVERSIZE_CELL_CHECK SQLITE_ENABLE_STAT2 VDBE_PROFILE_OFF  TCLSH</DefineConstants>
+    <DefineConstants>DEBUG;TRUE _MSC_VER WIN32 NET_35 SQLITE_ASCII SQLITE_DEBUG SQLITE_DISABLE_LFS  SQLITE_ENABLE_COLUMN_METADATA SQLITE_HAS_CODEC SQLITE_MUTEX_W32 SQLITE_OMIT_AUTHORIZATION SQLITE_OMIT_DEPRECATED SQLITE_OMIT_GET_TABLE SQLITE_OMIT_INCRBLOB SQLITE_OMIT_LOOKASIDE SQLITE_OMIT_SHARED_CACHE SQLITE_OMIT_UTF16 SQLITE_OMIT_WAL SQLITE_OS_WIN SQLITE_THREADSAFE SQLITE_TEST SQLITE_USE_URI SQLITE_POOL_MEM SQLITE_ENABLE_OVERSIZE_CELL_CHECK SQLITE_ENABLE_STAT2 VDBE_PROFILE_OFF TCLSH</DefineConstants>
     <NoWarn>0168 ; 0169; 0414; 0618; 0649</NoWarn>
     <DebugType>full</DebugType>
     <PlatformTarget>x86</PlatformTarget>
@@ -76,7 +76,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\x86\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRUE _MSC_VER WIN32 NET_35 SQLITE_ASCII SQLITE_DEBUG SQLITE_DISABLE_LFS  SQLITE_ENABLE_COLUMN_METADATA SQLITE_HAS_CODEC SQLITE_MUTEX_W32 SQLITE_OMIT_AUTHORIZATION SQLITE_OMIT_DEPRECATED SQLITE_OMIT_GET_TABLE SQLITE_OMIT_INCRBLOB SQLITE_OMIT_LOOKASIDE SQLITE_OMIT_SHARED_CACHE SQLITE_OMIT_UTF16 SQLITE_OMIT_VIRTUALTABLE SQLITE_OMIT_WAL SQLITE_OS_WIN SQLITE_THREADSAFE SQLITE_TEST SQLITE_USE_URI SQLITE_POOL_MEM SQLITE_ENABLE_OVERSIZE_CELL_CHECK SQLITE_ENABLE_STAT2 VDBE_PROFILE_OFF  TCLSH</DefineConstants>
+    <DefineConstants>DEBUG;TRUE _MSC_VER WIN32 NET_35 SQLITE_ASCII SQLITE_DEBUG SQLITE_DISABLE_LFS  SQLITE_ENABLE_COLUMN_METADATA SQLITE_HAS_CODEC SQLITE_MUTEX_W32 SQLITE_OMIT_AUTHORIZATION SQLITE_OMIT_DEPRECATED SQLITE_OMIT_GET_TABLE SQLITE_OMIT_INCRBLOB SQLITE_OMIT_LOOKASIDE SQLITE_OMIT_SHARED_CACHE SQLITE_OMIT_UTF16 SQLITE_OMIT_WAL SQLITE_OS_WIN SQLITE_THREADSAFE SQLITE_TEST SQLITE_USE_URI SQLITE_POOL_MEM SQLITE_ENABLE_OVERSIZE_CELL_CHECK SQLITE_ENABLE_STAT2 VDBE_PROFILE_OFF TCLSH</DefineConstants>
     <NoWarn>0168 ; 0169; 0414; 0618; 0649</NoWarn>
     <DebugType>full</DebugType>
     <PlatformTarget>x86</PlatformTarget>
@@ -801,6 +801,8 @@
     <Compile Include="src\test1_c.cs" />
     <Compile Include="src\test2_c.cs" />
     <Compile Include="src\test3_c.cs" />
+    <Compile Include="src\test8_c.cs" />
+    <Compile Include="src\test_intarray_c.cs" />
     <Compile Include="src\test9_c.cs" />
     <Compile Include="src\testfixture.cs" />
     <Compile Include="src\test_autoext_c.cs" />
@@ -808,11 +810,18 @@
     <Compile Include="src\test_btree_c.cs" />
     <Compile Include="src\test_config_c.cs" />
     <Compile Include="src\test_func_c.cs" />
+    <Compile Include="src\test_fuzzer_c.cs" />
     <Compile Include="src\test_hexio_c.cs" />
     <Compile Include="src\test_malloc_c.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="src\test_mutex_c.cs" />
+    <Compile Include="src\test_schema_c.cs" />
+    <Compile Include="src\test_stat_c.cs" />
+    <Compile Include="src\test_tclvar_c.cs" />
+    <Compile Include="src\test_vfstrace_c.cs" />
+    <Compile Include="src\test_vfs_c.cs" />
+    <Compile Include="src\test_wholenumber_c.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\test\8_3_names.test">
@@ -2179,6 +2188,57 @@
     </None>
     <None Include="..\test\view.test">
       <Link>test\view.test</Link>
+    </None>
+    <None Include="..\test\vtab1.test">
+      <Link>test\vtab1.test</Link>
+    </None>
+    <None Include="..\test\vtab2.test">
+      <Link>test\vtab2.test</Link>
+    </None>
+    <None Include="..\test\vtab3.test">
+      <Link>test\vtab3.test</Link>
+    </None>
+    <None Include="..\test\vtab4.test">
+      <Link>test\vtab4.test</Link>
+    </None>
+    <None Include="..\test\vtab5.test">
+      <Link>test\vtab5.test</Link>
+    </None>
+    <None Include="..\test\vtab6.test">
+      <Link>test\vtab6.test</Link>
+    </None>
+    <None Include="..\test\vtab7.test">
+      <Link>test\vtab7.test</Link>
+    </None>
+    <None Include="..\test\vtab8.test">
+      <Link>test\vtab8.test</Link>
+    </None>
+    <None Include="..\test\vtab9.test">
+      <Link>test\vtab9.test</Link>
+    </None>
+    <None Include="..\test\vtabA.test">
+      <Link>test\vtabA.test</Link>
+    </None>
+    <None Include="..\test\vtabB.test">
+      <Link>test\vtabB.test</Link>
+    </None>
+    <None Include="..\test\vtabC.test">
+      <Link>test\vtabC.test</Link>
+    </None>
+    <None Include="..\test\vtabD.test">
+      <Link>test\vtabD.test</Link>
+    </None>
+    <None Include="..\test\vtabE.test">
+      <Link>test\vtabE.test</Link>
+    </None>
+    <None Include="..\test\vtab_alter.test">
+      <Link>test\vtab_alter.test</Link>
+    </None>
+    <None Include="..\test\vtab_err.test">
+      <Link>test\vtab_err.test</Link>
+    </None>
+    <None Include="..\test\vtab_shared.test">
+      <Link>test\vtab_shared.test</Link>
     </None>
     <None Include="..\test\wal.test">
       <Link>test\wal.test</Link>

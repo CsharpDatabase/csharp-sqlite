@@ -1269,7 +1269,7 @@ if( db ) sqlite3_interrupt(db);
   {
     if ( p.db == null )
     {
-      Sqlite3.sqlite3_open( p.zDbFilename, ref p.db );
+      Sqlite3.sqlite3_open( p.zDbFilename, out p.db );
       db = p.db;
       if ( db != null && Sqlite3.sqlite3_errcode( db ) == Sqlite3.SQLITE_OK )
       {
@@ -1442,7 +1442,7 @@ if( db ) sqlite3_interrupt(db);
         zDestFile = azArg[2].ToString();
         zDb = azArg[1].ToString();
       }
-      rc = Sqlite3.sqlite3_open( zDestFile, ref pDest );
+      rc = Sqlite3.sqlite3_open( zDestFile, out pDest );
       if ( rc != Sqlite3.SQLITE_OK )
       {
         fprintf( stderr, "Error: cannot open %s\n", zDestFile );
@@ -1984,7 +1984,7 @@ sqlite3IoTrace = iotracePrintf;
                                             zSrcFile = azArg[2].ToString();
                                             zDb = azArg[1].ToString();
                                           }
-                                          rc = Sqlite3.sqlite3_open( zSrcFile, ref pSrc );
+                                          rc = Sqlite3.sqlite3_open( zSrcFile, out pSrc );
                                           if ( rc != Sqlite3.SQLITE_OK )
                                           {
                                             fprintf( stderr, "Error: cannot open %s\n", zSrcFile );

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Diagnostics;
 using System.Text;
 
@@ -119,7 +120,7 @@ namespace tcl.lang
       str.release();
     }
 
-    public static void Tcl_DStringInit( ref   TclObject str )
+    public static void Tcl_DStringInit( out TclObject str )
     {
       str = TclString.newInstance( "" );
       str.preserve();
@@ -185,7 +186,7 @@ namespace tcl.lang
       x = null;
     }
 
-    public static bool Tcl_GetBoolean( Interp interp, TclObject to, ref int result )
+    public static bool Tcl_GetBoolean( Interp interp, TclObject to, out int result )
     {
       try
       {
@@ -194,11 +195,12 @@ namespace tcl.lang
       }
       catch
       {
+        result = 0;
         return true;
       }
     }
 
-    public static bool Tcl_GetBoolean( Interp interp, TclObject to, ref bool result )
+    public static bool Tcl_GetBoolean( Interp interp, TclObject to, out bool result )
     {
       try
       {
@@ -207,11 +209,12 @@ namespace tcl.lang
       }
       catch
       {
+        result = false;
         return true;
       }
     }
 
-    public static bool Tcl_GetBooleanFromObj( Interp interp, TclObject to, ref bool result )
+    public static bool Tcl_GetBooleanFromObj( Interp interp, TclObject to, out bool result )
     {
       try
       {
@@ -220,11 +223,12 @@ namespace tcl.lang
       }
       catch
       {
+        result = false;
         return true;
       }
     }
 
-    public static bool Tcl_GetCommandInfo( Interp interp, string command, ref WrappedCommand value )
+    public static bool Tcl_GetCommandInfo( Interp interp, string command, out WrappedCommand value )
     {
       try
       {
@@ -233,17 +237,18 @@ namespace tcl.lang
       }
       catch
       {
+        value = null;
         return true;
       }
     }
 
-    public static byte[] Tcl_GetByteArrayFromObj( TclObject to, ref int n )
+    public static byte[] Tcl_GetByteArrayFromObj( TclObject to, out int n )
     {
       n = TclByteArray.getLength( null, to );
       return Encoding.UTF8.GetBytes( to.ToString() );
     }
 
-    public static bool Tcl_GetDouble( Interp interp, TclObject to, ref double value )
+    public static bool Tcl_GetDouble( Interp interp, TclObject to, out double value )
     {
       try
       {
@@ -252,11 +257,12 @@ namespace tcl.lang
       }
       catch
       {
+        value = 0;
         return true;
       }
     }
 
-    public static bool Tcl_GetDoubleFromObj( Interp interp, TclObject to, ref double value )
+    public static bool Tcl_GetDoubleFromObj( Interp interp, TclObject to, out double value )
     {
       try
       {
@@ -268,11 +274,12 @@ namespace tcl.lang
       }
       catch
       {
+        value = 0;
         return true;
       }
     }
 
-    public static bool Tcl_GetIndexFromObj( Interp interp, TclObject to, string[] table, string msg, int flags, ref int index )
+    public static bool Tcl_GetIndexFromObj( Interp interp, TclObject to, string[] table, string msg, int flags, out int index )
     {
       try
       {
@@ -281,11 +288,12 @@ namespace tcl.lang
       }
       catch
       {
+        index = 0;
         return true;
       }
     }
 
-    public static bool Tcl_GetInt( Interp interp, TclObject to, ref int value )
+    public static bool Tcl_GetInt( Interp interp, TclObject to, out int value )
     {
       try
       {
@@ -294,11 +302,12 @@ namespace tcl.lang
       }
       catch
       {
+        value = 0;
         return true;
       }
     }
 
-    public static bool Tcl_GetInt( Interp interp, TclObject to, ref u32 value )
+    public static bool Tcl_GetInt( Interp interp, TclObject to, out u32 value )
     {
       try
       {
@@ -307,11 +316,12 @@ namespace tcl.lang
       }
       catch
       {
+        value = 0;
         return true;
       }
     }
 
-    public static int Tcl_GetIntFromObj( Interp interp, TclObject to, ref int value )
+    public static int Tcl_GetIntFromObj( Interp interp, TclObject to, out int value )
     {
       try
       {
@@ -320,11 +330,12 @@ namespace tcl.lang
       }
       catch
       {
+        value = 0;
         return TCL.TCL_ERROR;
       }
     }
 
-    public static bool Tcl_GetLong( Interp interp, TclObject to, ref i64 value )
+    public static bool Tcl_GetLong( Interp interp, TclObject to, out i64 value )
     {
       try
       {
@@ -333,6 +344,7 @@ namespace tcl.lang
       }
       catch
       {
+        value = 0;
         return true;
       }
     }
@@ -354,7 +366,7 @@ namespace tcl.lang
       return to.ToString();
     }
 
-    public static string Tcl_GetStringFromObj( TclObject to, ref int n )
+    public static string Tcl_GetStringFromObj( TclObject to, out int n )
     {
       string ts = System.Text.Encoding.UTF8.GetString( System.Text.Encoding.UTF8.GetBytes( to.ToString() ) );
       n = ts.Length;
@@ -399,17 +411,40 @@ namespace tcl.lang
           //}
           return to;
         }
-        if ( var.isSQLITE3_Link() )
+        else if ( var.isSQLITE3_Link() )
         {
           to = (TclObject)var.sqlite3_get();
         }
+        else
+        {
+          to = TclList.newInstance();
+          foreach ( string key in ( (Hashtable)array.value ).Keys )
+          {
+            Var  s = (Var)( (Hashtable)array.value )[key];
+            if (s.value != null) TclList.append( null, to, TclString.newInstance( s.value.ToString() ) );
+          }
+        }
         return to;
       }
-      catch
+      catch (Exception e)
       {
         return null;
       };
     }
+
+    public static TclObject Tcl_GetVar( Interp interp, string part, VarFlag flags )
+    {
+      try
+      {
+        TclObject to = interp.getVar( part, flags );
+        return to;
+      }
+      catch ( Exception e )
+      {
+        return TclObj.newInstance( "" );
+      };
+    }
+
 
     public static TclObject Tcl_GetVarType( Interp interp, string part1, string part2, VarFlag flags )
     {
@@ -424,7 +459,7 @@ namespace tcl.lang
       };
     }
 
-    public static bool Tcl_GetWideIntFromObj( Interp interp, TclObject to, ref sqlite_int64 value )
+    public static bool Tcl_GetWideIntFromObj( Interp interp, TclObject to, out sqlite_int64 value )
     {
       try
       {
@@ -439,6 +474,7 @@ namespace tcl.lang
       }
       catch
       {
+        value = 0;
         return true;
       };
     }
@@ -470,17 +506,43 @@ namespace tcl.lang
       }
     }
 
-    public static bool Tcl_ListObjGetElements( Interp interp, TclObject to, ref int nArg, ref Tcl_Obj[] aArg )
+    public static void Tcl_ListObjIndex( Interp interp, TclObject to, int nItem, out TclObject elmObj )
     {
       try
       {
-        aArg = TclList.getElements( interp, to );
-        nArg = aArg.Length;
+        elmObj = TclList.index( interp, to, nItem );
+      }
+      catch
+      {
+        elmObj = null;
+      }
+    }
+
+    public static bool Tcl_ListObjGetElements( Interp interp, TclObject to, out int nItem, out TclObject[] elmObj )
+    {
+      try
+      {
+        elmObj = TclList.getElements( interp, to );
+        nItem = elmObj.Length;
         return false;
       }
       catch
       {
+        elmObj =null;
+        nItem = 0;
         return true;
+      }
+    }
+
+    public static void Tcl_ListObjLength( Interp interp, TclObject to, out int nArg )
+    {
+      try
+      {
+        nArg = TclList.getLength( interp, to );
+      }
+      catch
+      {
+        nArg = 0;
       }
     }
 
@@ -631,6 +693,11 @@ namespace tcl.lang
       interp.setResult( result );
     }
 
+    public static void Tcl_SetVar( Interp interp, string part, string value, int flags )
+    {
+      interp.setVar( part, value, (VarFlag)flags );
+    }
+    
     public static void Tcl_SetVar2( Interp interp, string part1, string part2, string value, int flags )
     {
       interp.setVar( part1, part2, value, (VarFlag)flags );

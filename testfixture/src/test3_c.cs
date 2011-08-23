@@ -130,7 +130,7 @@ namespace Community.CsharpSqlite
         " FILENAME NCACHE\"", "" );
         return TCL.TCL_ERROR;
       }
-      if ( TCL.Tcl_GetInt( interp, argv[2], ref nCache ) )
+      if ( TCL.Tcl_GetInt( interp, argv[2], out nCache ) )
         return TCL.TCL_ERROR;
       nRefSqlite3++;
       if ( nRefSqlite3 == 1 )
@@ -307,9 +307,9 @@ namespace Community.CsharpSqlite
         return TCL.TCL_ERROR;
       }
       pBt = (Btree)sqlite3TestTextToPtr( interp, argv[1].ToString() );
-      if ( TCL.Tcl_GetInt( interp, argv[2], ref  iTable ) )
+      if ( TCL.Tcl_GetInt( interp, argv[2], out iTable ) )
         return TCL.TCL_ERROR;
-      if ( TCL.Tcl_GetBoolean( interp, argv[3], ref wrFlag ) )
+      if ( TCL.Tcl_GetBoolean( interp, argv[3], out wrFlag ) )
         return TCL.TCL_ERROR;
       //pCur = (BtCursor )ckalloc(sqlite3BtreeCursorSize());
       pCur = new BtCursor();// memset( pCur, 0, sqlite3BtreeCursorSize() );
@@ -570,13 +570,13 @@ namespace Community.CsharpSqlite
         " START MULTIPLIER COUNT incrEMENT\"", 0 );
         return TCL.TCL_ERROR;
       }
-      if ( TCL.Tcl_GetInt( interp, argv[1], ref start ) )
+      if ( TCL.Tcl_GetInt( interp, argv[1], out start ) )
         return TCL.TCL_ERROR;
-      if ( TCL.Tcl_GetInt( interp, argv[2], ref mult ) )
+      if ( TCL.Tcl_GetInt( interp, argv[2], out mult ) )
         return TCL.TCL_ERROR;
-      if ( TCL.Tcl_GetInt( interp, argv[3], ref count ) )
+      if ( TCL.Tcl_GetInt( interp, argv[3], out count ) )
         return TCL.TCL_ERROR;
-      if ( TCL.Tcl_GetInt( interp, argv[4], ref incr ) )
+      if ( TCL.Tcl_GetInt( interp, argv[4], out incr ) )
         return TCL.TCL_ERROR;
       _in = start;
       _in *= mult;
@@ -590,7 +590,7 @@ namespace Community.CsharpSqlite
           TCL.Tcl_AppendResult( interp, zErr );
           return TCL.TCL_ERROR;
         }
-        n2 = getVarint( zBuf, 0, ref _out );
+        n2 = getVarint( zBuf, 0, out _out );
         if ( n1 != n2 )
         {
           sqlite3_snprintf( 100, zErr, "putVarint returned %d and GetVar_int returned %d", n1, n2 );
@@ -606,7 +606,7 @@ namespace Community.CsharpSqlite
         if ( ( _in & 0xffffffff ) == _in )
         {
           u32 _out32 = 0;
-          n2 = getVarint32( zBuf, ref _out32 );
+          n2 = getVarint32( zBuf, out _out32 );
           _out = _out32;
           if ( n1 != n2 )
           {
@@ -630,7 +630,7 @@ namespace Community.CsharpSqlite
         */
         for ( j = 0; j < 19; j++ )
         {
-          getVarint( zBuf, 0, ref _out );
+          getVarint( zBuf, 0, out _out );
         }
         _in += incr;
       }
@@ -666,7 +666,7 @@ namespace Community.CsharpSqlite
         return TCL.TCL_ERROR;
       }
 
-      if ( TCL.Tcl_GetCommandInfo( interp, argv[1].ToString(), ref info ) )
+      if ( TCL.Tcl_GetCommandInfo( interp, argv[1].ToString(), out info ) )
       {
         TCL.Tcl_AppendResult( interp, "No such db-handle: \"", argv[1], "\"" );
         return TCL.TCL_ERROR;

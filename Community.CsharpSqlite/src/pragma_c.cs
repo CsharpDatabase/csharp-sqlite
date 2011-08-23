@@ -1362,7 +1362,7 @@ else
                                                       int i, j, addr, mxErr;
 
                                                       /* Code that appears at the end of the integrity check.  If no error
-                                                      ** messages have been generated, output OK.  Otherwise output the
+                                                      ** messages have been generated, refput OK.  Otherwise output the
                                                       ** error message
                                                       */
                                                       VdbeOpList[] endCode = new VdbeOpList[]  {

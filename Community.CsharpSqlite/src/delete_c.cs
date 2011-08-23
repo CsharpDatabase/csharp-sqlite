@@ -298,8 +298,8 @@ return null;
       ** deleted from is a view
       */
 #if !SQLITE_OMIT_TRIGGER
-      int iDummy = 0;
-      pTrigger = sqlite3TriggersExist( pParse, pTab, TK_DELETE, null, ref iDummy );
+      int iDummy;
+      pTrigger = sqlite3TriggersExist( pParse, pTab, TK_DELETE, null, out iDummy );
       isView = pTab.pSelect != null;
 #else
       const Trigger pTrigger = null;
@@ -454,13 +454,15 @@ sqlite3AuthContextPush(pParse, sContext, pTab.zName);
 
         /* Delete the row */
 #if !SQLITE_OMIT_VIRTUALTABLE
-if( IsVirtual(pTab) ){
-const char *pVTab = (const char *)sqlite3GetVTable(db, pTab);
-sqlite3VtabMakeWritable(pParse, pTab);
-sqlite3VdbeAddOp4(v, OP_VUpdate, 0, 1, iRowid, pVTab, P4_VTAB);
-sqlite3VdbeChangeP5(v, OE_Abort);
-sqlite3MayAbort(pParse);
-}else
+        if ( IsVirtual( pTab ) )
+        {
+          VTable pVTab = sqlite3GetVTable( db, pTab );
+          sqlite3VtabMakeWritable( pParse, pTab );
+          sqlite3VdbeAddOp4( v, OP_VUpdate, 0, 1, iRowid, pVTab, P4_VTAB );
+          sqlite3VdbeChangeP5( v, OE_Abort );
+          sqlite3MayAbort( pParse );
+        }
+        else
 #endif
         {
           int count = ( pParse.nested == 0 ) ? 1 : 0;    /* True to count changes */
@@ -515,10 +517,10 @@ sqlite3AuthContextPop(sContext);
     /* Make sure "isView" and other macros defined above are undefined. Otherwise
     ** thely may interfere with compilation of other functions in this file
     ** (or in another file, if this file becomes part of the amalgamation).  */
-    //#ifdef isView
+    //#if isView
     // #undef isView
     //#endif
-    //#ifdef pTrigger
+    //#if pTrigger
     // #undef pTrigger
     //#endif
 

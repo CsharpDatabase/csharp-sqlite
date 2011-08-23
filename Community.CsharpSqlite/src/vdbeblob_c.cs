@@ -41,7 +41,7 @@ struct Incrblob {
   int iOffset;            /* Byte offset of blob in cursor data */
   BtCursor *pCsr;         /* Cursor pointing at blob row */
   sqlite3_stmt *pStmt;    /* Statement holding cursor open */
-  sqlite3 *db;            /* The associated database */
+  sqlite3 db;            /* The associated database */
 };
 
 /*
@@ -49,9 +49,9 @@ struct Incrblob {
 */
 int sqlite3_blob_open(
   sqlite3* db,            /* The database connection */
-  const char *zDb,        /* The attached database containing the blob */
-  const char *zTable,     /* The table containing the blob */
-  const char *zColumn,    /* The column containing the blob */
+  string zDb,        /* The attached database containing the blob */
+  string zTable,     /* The table containing the blob */
+  string zColumn,    /* The column containing the blob */
   sqlite_int64 iRow,      /* The row containing the glob */
   int flags,              /* True -> read/write access, false -> read-only */
   sqlite3_blob **ppBlob   /* Handle for accessing the blob returned here */
@@ -93,7 +93,7 @@ int sqlite3_blob_open(
 
   Vdbe *v = 0;
   int rc = SQLITE_OK;
-  char *zErr = 0;
+  string zErr = 0;
   Table *pTab;
   Parse *pParse;
 
@@ -120,7 +120,7 @@ int sqlite3_blob_open(
       sqlite3ErrorMsg(pParse, "cannot open view: %s", zTable);
     }
 #endif
-    if( !pTab ){
+    if( null==pTab ){
       if( pParse->zErrMsg ){
         sqlite3DbFree(db, zErr);
         zErr = pParse->zErrMsg;
@@ -150,7 +150,7 @@ int sqlite3_blob_open(
     ** It is against the rules to open a column to which either of these
     ** descriptions applies for writing.  */
     if( flags ){
-      const char *zFault = 0;
+      string zFault = 0;
       Index *pIdx;
 #if !SQLITE_OMIT_FOREIGN_KEY
       if( db->flags&SQLITE_ForeignKeys ){
@@ -229,7 +229,7 @@ int sqlite3_blob_open(
       */
       sqlite3VdbeChangeP4(v, 3+flags, SQLITE_INT_TO_PTR(pTab->nCol+1),P4_INT32);
       sqlite3VdbeChangeP2(v, 7, pTab->nCol);
-      if( !db->mallocFailed ){
+      if( null==db->mallocFailed ){
         pParse->nVar = 1;
         pParse->nMem = 1;
         pParse->nTab = 1;
@@ -241,11 +241,11 @@ int sqlite3_blob_open(
       goto blob_open_out;
     }
 
-    sqlite3_bind_int64((sqlite3_stmt *)v, 1, iRow);
-    rc = sqlite3_step((sqlite3_stmt *)v);
+    sqlite3_bind_int64((sqlite3_stmt )v, 1, iRow);
+    rc = sqlite3_step((sqlite3_stmt )v);
     if( rc!=SQLITE_ROW ){
       nAttempt++;
-      rc = sqlite3_finalize((sqlite3_stmt *)v);
+      rc = sqlite3_finalize((sqlite3_stmt )v);
       sqlite3DbFree(db, zErr);
       zErr = sqlite3MPrintf(db, sqlite3_errmsg(db));
       v = 0;
@@ -268,7 +268,7 @@ int sqlite3_blob_open(
       rc = SQLITE_ERROR;
       goto blob_open_out;
     }
-    pBlob = (Incrblob *)sqlite3DbMallocZero(db, sizeof(Incrblob));
+    pBlob = (Incrblob )sqlite3DbMallocZero(db, sizeof(Incrblob));
     if( db->mallocFailed ){
       sqlite3DbFree(db, ref pBlob);
       goto blob_open_out;
@@ -278,11 +278,11 @@ int sqlite3_blob_open(
     sqlite3BtreeEnterCursor(pBlob->pCsr);
     sqlite3BtreeCacheOverflow(pBlob->pCsr);
     sqlite3BtreeLeaveCursor(pBlob->pCsr);
-    pBlob->pStmt = (sqlite3_stmt *)v;
+    pBlob->pStmt = (sqlite3_stmt )v;
     pBlob->iOffset = v->apCsr[0]->aOffset[iCol];
     pBlob->nByte = sqlite3VdbeSerialTypeLen(type);
     pBlob->db = db;
-    *ppBlob = (sqlite3_blob *)pBlob;
+    *ppBlob = (sqlite3_blob )pBlob;
     rc = SQLITE_OK;
   }else if( rc==SQLITE_OK ){
     sqlite3DbFree(db, zErr);
@@ -307,9 +307,9 @@ blob_open_out:
 ** sqlite3_blob_open().
 */
 int sqlite3_blob_close(sqlite3_blob *pBlob){
-  Incrblob *p = (Incrblob *)pBlob;
+  Incrblob *p = (Incrblob )pBlob;
   int rc;
-  sqlite3 *db;
+  sqlite3 db;
 
   if( p ){
     db = p->db;
@@ -331,17 +331,17 @@ static int blobReadWrite(
   void *z, 
   int n, 
   int iOffset, 
-  int (*xCall)(BtCursor*, u32, u32, void*)
+  int (*xCall)(BtCursor*, u32, u32, void)
 ){
   int rc;
-  Incrblob *p = (Incrblob *)pBlob;
+  Incrblob *p = (Incrblob )pBlob;
   Vdbe *v;
-  sqlite3 *db;
+  sqlite3 db;
 
   if( p==0 ) return SQLITE_MISUSE_BKPT();
   db = p->db;
   sqlite3_mutex_enter(db->mutex);
-  v = (Vdbe*)p->pStmt;
+  v = (Vdbe)p->pStmt;
 
   if( n<0 || iOffset<0 || (iOffset+n)>p->nByte ){
     /* Request is out of range. Return a transient error. */
@@ -356,13 +356,13 @@ static int blobReadWrite(
     /* Call either BtreeData() or BtreePutData(). If SQLITE_ABORT is
     ** returned, clean-up the statement handle.
     */
-    assert( db == v->db );
+    Debug.Assert( db == v->db );
     sqlite3BtreeEnterCursor(p->pCsr);
     rc = xCall(p->pCsr, iOffset+p->iOffset, n, z);
     sqlite3BtreeLeaveCursor(p->pCsr);
     if( rc==SQLITE_ABORT ){
       sqlite3VdbeFinalize(v);
-      p->pStmt = 0;
+      p->pStmt = null;
     }else{
       db->errCode = rc;
       v->rc = rc;
@@ -376,15 +376,15 @@ static int blobReadWrite(
 /*
 ** Read data from a blob handle.
 */
-int sqlite3_blob_read(sqlite3_blob *pBlob, void *z, int n, int iOffset){
+int sqlite3_blob_read(sqlite3_blob *pBlob, object  *z, int n, int iOffset){
   return blobReadWrite(pBlob, z, n, iOffset, sqlite3BtreeData);
 }
 
 /*
 ** Write data to a blob handle.
 */
-int sqlite3_blob_write(sqlite3_blob *pBlob, const void *z, int n, int iOffset){
-  return blobReadWrite(pBlob, (void *)z, n, iOffset, sqlite3BtreePutData);
+int sqlite3_blob_write(sqlite3_blob *pBlob, string z, int n, int iOffset){
+  return blobReadWrite(pBlob, (void )z, n, iOffset, sqlite3BtreePutData);
 }
 
 /*
@@ -394,7 +394,7 @@ int sqlite3_blob_write(sqlite3_blob *pBlob, const void *z, int n, int iOffset){
 ** so no mutex is required for access.
 */
 int sqlite3_blob_bytes(sqlite3_blob *pBlob){
-  Incrblob *p = (Incrblob *)pBlob;
+  Incrblob *p = (Incrblob )pBlob;
   return p ? p->nByte : 0;
 }
 

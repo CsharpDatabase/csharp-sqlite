@@ -121,7 +121,7 @@ rc = isnan(x);
     }
     static int sqlite3Strlen30( StringBuilder z )
     {
-      //const char *z2 = z;
+      //string z2 = z;
       if ( z == null )
         return 0;
       //while( *z2 ){ z2++; }
@@ -131,7 +131,7 @@ rc = isnan(x);
     }
     static int sqlite3Strlen30( string z )
     {
-      //const char *z2 = z;
+      //string z2 = z;
       if ( z == null )
         return 0;
       //while( *z2 ){ z2++; }
@@ -311,8 +311,8 @@ rc = isnan(x);
     static int sqlite3StrNICmp( string zLeft, int offsetLeft, string zRight, int N )
     {
       //register unsigned char *a, *b;
-      //a = (unsigned char *)zLeft;
-      //b = (unsigned char *)zRight;
+      //a = (unsigned char )zLeft;
+      //b = (unsigned char )zRight;
       int a = 0, b = 0;
       while ( N-- > 0 && a < zLeft.Length - offsetLeft && b < zRight.Length && zLeft[a + offsetLeft] != 0 && UpperToLower[zLeft[a + offsetLeft]] == UpperToLower[zRight[b]] )
       {
@@ -325,8 +325,8 @@ rc = isnan(x);
     static int sqlite3StrNICmp( string zLeft, string zRight, int N )
     {
       //register unsigned char *a, *b;
-      //a = (unsigned char *)zLeft;
-      //b = (unsigned char *)zRight;
+      //a = (unsigned char )zLeft;
+      //b = (unsigned char )zRight;
       int a = 0, b = 0;
       while ( N-- > 0 && a < zLeft.Length && b < zRight.Length && ( zLeft[a] == zRight[b] || ( zLeft[a] != 0 && zLeft[a] < 256 && zRight[b] < 256 && UpperToLower[zLeft[a]] == UpperToLower[zRight[b]] ) ) )
       {
@@ -664,8 +664,8 @@ return !sqlite3Atoi64(z, pResult, length, enc);
       int neg = 0; /* assume positive */
       int i;
       int c = 0;
-      int zDx = 0;//  const char *zStart;
-      //const char *zEnd = zNum + length;
+      int zDx = 0;//  string zStart;
+      //string zEnd = zNum + length;
 
       if ( enc == SQLITE_UTF16BE )
         zDx++;
@@ -844,37 +844,37 @@ return !sqlite3Atoi64(z, pResult, length, enc);
     ** bit clear.  Except, if we get to the 9th byte, it stores the full
     ** 8 bits and is the last byte.
     */
-    static int getVarint( byte[] p, ref u32 v )
+    static int getVarint( byte[] p, out u32 v )
     {
       v = p[0];
       if ( v <= 0x7F )
         return 1;
       u64 u64_v = 0;
-      int result = sqlite3GetVarint( p, 0, ref u64_v );
+      int result = sqlite3GetVarint( p, 0, out u64_v );
       v = (u32)u64_v;
       return result;
     }
-    static int getVarint( byte[] p, int offset, ref u32 v )
+    static int getVarint( byte[] p, int offset, out u32 v )
     {
       v = p[offset + 0];
       if ( v <= 0x7F )
         return 1;
       u64 u64_v = 0;
-      int result = sqlite3GetVarint( p, offset, ref u64_v );
+      int result = sqlite3GetVarint( p, offset, out u64_v );
       v = (u32)u64_v;
       return result;
     }
-    static int getVarint( byte[] p, int offset, ref int v )
+    static int getVarint( byte[] p, int offset, out int v )
     {
       v = p[offset + 0];
       if ( v <= 0x7F )
         return 1;
       u64 u64_v = 0;
-      int result = sqlite3GetVarint( p, offset, ref u64_v );
+      int result = sqlite3GetVarint( p, offset, out u64_v );
       v = (int)u64_v;
       return result;
     }
-    static int getVarint( byte[] p, int offset, ref i64 v )
+    static int getVarint( byte[] p, int offset, out i64 v )
     {
       v = offset >= p.Length ? 0 : (int)p[offset + 0];
       if ( v <= 0x7F )
@@ -887,28 +887,28 @@ return !sqlite3Atoi64(z, pResult, length, enc);
       else
       {
         u64 u64_v = 0;
-        int result = sqlite3GetVarint( p, offset, ref u64_v );
+        int result = sqlite3GetVarint( p, offset, out u64_v );
         v = (i64)u64_v;
         return result;
       }
     }
-    static int getVarint( byte[] p, int offset, ref u64 v )
+    static int getVarint( byte[] p, int offset, out u64 v )
     {
       v = p[offset + 0];
       if ( v <= 0x7F )
         return 1;
-      int result = sqlite3GetVarint( p, offset, ref v );
+      int result = sqlite3GetVarint( p, offset, out v );
       return result;
     }
-    static int getVarint32( byte[] p, ref u32 v )
+    static int getVarint32( byte[] p, out u32 v )
     { //(*B=*(A))<=0x7f?1:sqlite3GetVarint32(A,B))
       v = p[0];
       if ( v <= 0x7F )
         return 1;
-      return sqlite3GetVarint32( p, 0, ref v );
+      return sqlite3GetVarint32( p, 0, out v );
     }
     static byte[] pByte4 = new byte[4];
-    static int getVarint32( string s, u32 offset, ref int v )
+    static int getVarint32( string s, u32 offset, out int v )
     { //(*B=*(A))<=0x7f?1:sqlite3GetVarint32(A,B))
       v = s[(int)offset];
       if ( v <= 0x7F )
@@ -918,11 +918,11 @@ return !sqlite3Atoi64(z, pResult, length, enc);
       pByte4[2] = (u8)s[(int)offset + 2];
       pByte4[3] = (u8)s[(int)offset + 3];
       u32 u32_v = 0;
-      int result = sqlite3GetVarint32( pByte4, 0, ref u32_v );
+      int result = sqlite3GetVarint32( pByte4, 0, out u32_v );
       v = (int)u32_v;
-      return sqlite3GetVarint32( pByte4, 0, ref v );
+      return sqlite3GetVarint32( pByte4, 0, out v );
     }
-    static int getVarint32( string s, u32 offset, ref u32 v )
+    static int getVarint32( string s, u32 offset, out u32 v )
     { //(*B=*(A))<=0x7f?1:sqlite3GetVarint32(A,B))
       v = s[(int)offset];
       if ( v <= 0x7F )
@@ -931,29 +931,29 @@ return !sqlite3Atoi64(z, pResult, length, enc);
       pByte4[1] = (u8)s[(int)offset + 1];
       pByte4[2] = (u8)s[(int)offset + 2];
       pByte4[3] = (u8)s[(int)offset + 3];
-      return sqlite3GetVarint32( pByte4, 0, ref v );
+      return sqlite3GetVarint32( pByte4, 0, out v );
     }
-    static int getVarint32( byte[] p, u32 offset, ref u32 v )
+    static int getVarint32( byte[] p, u32 offset, out u32 v )
     { //(*B=*(A))<=0x7f?1:sqlite3GetVarint32(A,B))
       v = p[offset];
       if ( v <= 0x7F )
         return 1;
-      return sqlite3GetVarint32( p, (int)offset, ref v );
+      return sqlite3GetVarint32( p, (int)offset, out v );
     }
-    static int getVarint32( byte[] p, int offset, ref u32 v )
+    static int getVarint32( byte[] p, int offset, out u32 v )
     { //(*B=*(A))<=0x7f?1:sqlite3GetVarint32(A,B))
       v = offset >= p.Length ? 0 : (u32)p[offset];
       if ( v <= 0x7F )
         return 1;
-      return sqlite3GetVarint32( p, offset, ref v );
+      return sqlite3GetVarint32( p, offset, out v );
     }
-    static int getVarint32( byte[] p, int offset, ref int v )
+    static int getVarint32( byte[] p, int offset, out int v )
     { //(*B=*(A))<=0x7f?1:sqlite3GetVarint32(A,B))
       v = p[offset + 0];
       if ( v <= 0x7F )
         return 1;
       u32 u32_v = 0;
-      int result = sqlite3GetVarint32( p, offset, ref u32_v );
+      int result = sqlite3GetVarint32( p, offset, out u32_v );
       v = (int)u32_v;
       return result;
     }
@@ -1057,7 +1057,7 @@ return !sqlite3Atoi64(z, pResult, length, enc);
     ** Read a 64-bit variable-length integer from memory starting at p[0].
     ** Return the number of bytes read.  The value is stored in *v.
     */
-    static u8 sqlite3GetVarint( byte[] p, int offset, ref u64 v )
+    static u8 sqlite3GetVarint( byte[] p, int offset, out u64 v )
     {
       u32 a, b, s;
 
@@ -1228,25 +1228,25 @@ return !sqlite3Atoi64(z, pResult, length, enc);
     ** single-byte case.  All code should use the MACRO version as
     ** this function assumes the single-byte case has already been handled.
     */
-    static u8 sqlite3GetVarint32( byte[] p, ref int v )
+    static u8 sqlite3GetVarint32( byte[] p, out int v )
     {
       u32 u32_v = 0;
-      u8 result = sqlite3GetVarint32( p, 0, ref u32_v );
+      u8 result = sqlite3GetVarint32( p, 0, out u32_v );
       v = (int)u32_v;
       return result;
     }
-    static u8 sqlite3GetVarint32( byte[] p, int offset, ref int v )
+    static u8 sqlite3GetVarint32( byte[] p, int offset, out int v )
     {
       u32 u32_v = 0;
-      u8 result = sqlite3GetVarint32( p, offset, ref u32_v );
+      u8 result = sqlite3GetVarint32( p, offset, out u32_v );
       v = (int)u32_v;
       return result;
     }
-    static u8 sqlite3GetVarint32( byte[] p, ref u32 v )
+    static u8 sqlite3GetVarint32( byte[] p, out u32 v )
     {
-      return sqlite3GetVarint32( p, 0, ref v );
+      return sqlite3GetVarint32( p, 0, out v );
     }
-    static u8 sqlite3GetVarint32( byte[] p, int offset, ref u32 v )
+    static u8 sqlite3GetVarint32( byte[] p, int offset, out u32 v )
     {
       u32 a, b;
 
@@ -1306,7 +1306,7 @@ return !sqlite3Atoi64(z, pResult, length, enc);
         u8 n;
 
         //p -= 2;
-        n = sqlite3GetVarint( p, offset, ref v64 );
+        n = sqlite3GetVarint( p, offset, out v64 );
         Debug.Assert( n > 3 && n <= 9 );
         if ( ( v64 & SQLITE_MAX_U32 ) != v64 )
         {
@@ -1360,7 +1360,7 @@ u64 v64 = 0;
 int n;
 
 //p -= 4;
-n = sqlite3GetVarint( p, offset, ref v64 );
+n = sqlite3GetVarint( p, offset, out v64 );
 Debug.Assert( n > 5 && n <= 9 );
 v = (u32)v64;
 return n;
@@ -1472,7 +1472,7 @@ return n;
       StringBuilder zBlob;
       int i;
 
-      zBlob = new StringBuilder( n / 2 + 1 );// (char*)sqlite3DbMallocRaw(db, n / 2 + 1);
+      zBlob = new StringBuilder( n / 2 + 1 );// (char)sqlite3DbMallocRaw(db, n / 2 + 1);
       n--;
       if ( zBlob != null )
       {
@@ -1661,7 +1661,7 @@ return n;
 **     test.db-wal        =>   test.wal
 **     test.db-shm        =>   test.shm
 */
-static void sqlite3FileSuffix3(string zBaseFilename, char *z){
+static void sqlite3FileSuffix3(string zBaseFilename, string z){
   string zOk;
   zOk = sqlite3_uri_parameter(zBaseFilename, "8_3_names");
   if( zOk != null && sqlite3GetBoolean(zOk) ){

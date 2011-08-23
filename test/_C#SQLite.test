@@ -11,7 +11,7 @@
 #########################################################################################
 source $testdir/permutations.test
 
-set excludeList { ^* _* *.tcl
+set excludeList { ^* _* *.c *.tcl
   all.test        async.test         quick.test  veryquick.test
   memleak.test    permutations.test  soak.test   fts3.test
   mallocAll.test  rtree.test }
@@ -49,7 +49,7 @@ append excludeList { incrblob3.test journal2.test pager2.test quota.test tkt-9d6
 ######################################
 #Exclude for now TODO
 ######################################
-append excludeList { e_select2.test savepoint6.test speed*.test}
+append excludeList { analyze7.test e_select2.test savepoint6.test speed*.test}
 
 if { $TESTSUITE == "ALL" } { 
 set csTests [test_set $alltests -exclude $excludeList] 

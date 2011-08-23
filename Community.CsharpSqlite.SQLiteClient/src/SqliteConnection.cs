@@ -358,7 +358,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 			if (Version == 3) {
 				sqlite_handle = (IntPtr)1;
 				int flags = Sqlite3.SQLITE_OPEN_NOMUTEX | Sqlite3.SQLITE_OPEN_READWRITE | Sqlite3.SQLITE_OPEN_CREATE;
-				int err = Sqlite3.sqlite3_open_v2( db_file, ref sqlite_handle2, flags, null );
+				int err = Sqlite3.sqlite3_open_v2( db_file, out sqlite_handle2, flags, null );
 				//int err = Sqlite.sqlite3_open16(db_file, out sqlite_handle);
 				if (err == (int)SqliteError.ERROR)
 					throw new ApplicationException (Sqlite3.sqlite3_errmsg(sqlite_handle2));

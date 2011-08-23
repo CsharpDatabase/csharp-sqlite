@@ -1469,7 +1469,7 @@ break;
         }
         if ( zCharSet != null )
         {
-          //sqlite3_free( ref  azChar );
+          //sqlite3_free( ref azChar );
         }
       }
       StringBuilder sb = new StringBuilder( nIn );
@@ -1540,7 +1540,7 @@ sqlite3_result_text(context, "?000", 4, SQLITE_STATIC);
 }
 #endif //* SQLITE_SOUNDEX */
 
-#if ! SQLITE_OMIT_LOAD_EXTENSION
+#if !SQLITE_OMIT_LOAD_EXTENSION
     /*
 ** A function that loads a shared-library extension then returns NULL.
 */

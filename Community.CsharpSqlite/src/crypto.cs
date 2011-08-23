@@ -661,7 +661,7 @@ static void CODEC_TRACE( string T, params object[] ap ) { if ( sqlite3PagerTrace
           PgHdr page = null;
           Pager pPager = pDb.pBt.pBt.pPager;
 
-          sqlite3pager_get_codec( pDb.pBt.pBt.pPager, ref  ctx );
+          sqlite3pager_get_codec( pDb.pBt.pBt.pPager, ref ctx );
 
           if ( ctx == null )
           {
@@ -694,7 +694,7 @@ static void CODEC_TRACE( string T, params object[] ap ) { if ( sqlite3PagerTrace
           ** note: don't deallocate rekey since it may be used in a subsequent iteration
           */
           rc = sqlite3BtreeBeginTrans( pDb.pBt, 1 ); /* begin write transaction */
-          sqlite3PagerPagecount( pPager, ref page_count );
+          sqlite3PagerPagecount( pPager, out page_count );
           for ( pgno = 1; rc == SQLITE_OK && pgno <= page_count; pgno++ )
           { /* pgno's start at 1 see pager.c:pagerAcquire */
             if ( 0 == sqlite3pager_is_mj_pgno( pPager, pgno ) )

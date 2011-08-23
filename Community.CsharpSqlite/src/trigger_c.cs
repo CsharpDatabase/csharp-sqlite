@@ -141,7 +141,7 @@ namespace Community.CsharpSqlite
       else
       {
         /* Figure out the db that the the trigger will be created in */
-        iDb = sqlite3TwoPartName( pParse, pName1, pName2, ref  pName );
+        iDb = sqlite3TwoPartName( pParse, pName1, pName2, ref pName );
         if ( iDb < 0 )
         {
           goto trigger_cleanup;
@@ -778,7 +778,7 @@ new VdbeOpList( OP_Next,       0, ADDR(1),  0), /* 8 */
     Table pTab,            /* The table the contains the triggers */
     int op,                /* one of TK_DELETE, TK_INSERT, TK_UPDATE */
     ExprList pChanges,     /* Columns that change in an UPDATE statement */
-    ref int pMask          /* OUT: Mask of TRIGGER_BEFORE|TRIGGER_AFTER */
+    out int pMask          /* OUT: Mask of TRIGGER_BEFORE|TRIGGER_AFTER */
     )
     {
       int mask = 0;

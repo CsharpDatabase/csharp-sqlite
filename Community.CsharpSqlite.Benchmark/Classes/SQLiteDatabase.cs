@@ -45,7 +45,7 @@ namespace Community.CsharpSqlite
 #else
 Sqlite3.sqlite3_open
 #endif
-( DatabaseName, ref db ) != Sqlite3.SQLITE_OK )
+( DatabaseName, out db ) != Sqlite3.SQLITE_OK )
       {
         // if there is some error, database pointer is set to 0 and exception is throws
         db = null;

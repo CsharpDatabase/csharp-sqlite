@@ -50,7 +50,7 @@ namespace Community.CsharpSqlite
         if ( zExternal == null )
           return;
         db.xCollNeeded( db.pCollNeededArg, db, enc, zExternal );
-        sqlite3DbFree( db, ref  zExternal );
+        sqlite3DbFree( db, ref zExternal );
       }
 #if !SQLITE_OMIT_UTF16
 if( db.xCollNeeded16!=null ){
@@ -494,37 +494,36 @@ FuncDefHash pHash = GLOBAL( FuncDefHash, sqlite3GlobalFunctions );
     */
     static void sqlite3SchemaClear( Schema p )
     {
-      p.Clear();
-      //Hash temp1;
-      //Hash temp2;
-      //HashElem pElem;
+      Hash temp1;
+      Hash temp2;
+      HashElem pElem;
       Schema pSchema = p;
 
-      //temp1 = pSchema.tblHash;
-      //temp2 = pSchema.trigHash;
-      //sqlite3HashInit( pSchema.trigHash );
-      //sqlite3HashClear( pSchema.idxHash );
-      //for ( pElem = sqliteHashFirst( temp2 ); pElem != null; pElem = sqliteHashNext( pElem ) )
-      //{
-      //  Trigger pTrigger = (Trigger)sqliteHashData( pElem );
-      //  sqlite3DeleteTrigger( null, ref pTrigger );
-      //}
-      //sqlite3HashClear( temp2 );
-      //sqlite3HashInit( pSchema.trigHash );
-      //for ( pElem = temp1.first; pElem != null; pElem = pElem.next )//sqliteHashFirst(&temp1); pElem; pElem = sqliteHashNext(pElem))
-      //{
-      //  Table pTab = (Table)pElem.data; //sqliteHashData(pElem);
-      //  sqlite3DeleteTable(null, ref pTab );
-      //}
-      //sqlite3HashClear( temp1 );
-      //sqlite3HashClear( pSchema.fkeyHash );
-      //pSchema.pSeqTab = null;
+      temp1 = pSchema.tblHash;
+      temp2 = pSchema.trigHash;
+      sqlite3HashInit( pSchema.trigHash );
+      sqlite3HashClear( pSchema.idxHash );
+      for ( pElem = sqliteHashFirst( temp2 ); pElem != null; pElem = sqliteHashNext( pElem ) )
+      {
+        Trigger pTrigger = (Trigger)sqliteHashData( pElem );
+        sqlite3DeleteTrigger( null, ref pTrigger );
+      }
+      sqlite3HashClear( temp2 );
+      sqlite3HashInit( pSchema.trigHash );
+      for ( pElem = temp1.first; pElem != null; pElem = pElem.next )//sqliteHashFirst(&temp1); pElem; pElem = sqliteHashNext(pElem))
+      {
+        Table pTab = (Table)pElem.data; //sqliteHashData(pElem);
+        sqlite3DeleteTable( null, ref pTab );
+      }
+      sqlite3HashClear( temp1 );
+      sqlite3HashClear( pSchema.fkeyHash );
+      pSchema.pSeqTab = null;
       if ( ( pSchema.flags & DB_SchemaLoaded ) != 0 )
       {
         pSchema.iGeneration++;
         pSchema.flags = (u16)( pSchema.flags & ( ~DB_SchemaLoaded ) );
       }
-
+      p.Clear();
     }
 
     /*

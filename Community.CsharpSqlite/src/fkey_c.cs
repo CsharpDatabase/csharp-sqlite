@@ -167,7 +167,7 @@ namespace Community.CsharpSqlite
     ** is set to point to the unique index. 
     ** 
     ** If the parent key consists of a single column (the foreign key constraint
-    ** is not a composite foreign key), output variable *paiCol is set to NULL.
+    ** is not a composite foreign key), refput variable *paiCol is set to NULL.
     ** Otherwise, it is set to point to an allocated array of size N, where
     ** N is the number of columns in the parent key. The first element of the
     ** array is the index of the child table column that is mapped by the FK
@@ -200,18 +200,21 @@ namespace Community.CsharpSqlite
       Parse pParse,                  /* Parse context to store any error in */
       Table pParent,                 /* Parent table of FK constraint pFKey */
       FKey pFKey,                    /* Foreign key to find index for */
-      ref Index ppIdx,               /* OUT: Unique index on parent table */
-      ref int[] paiCol               /* OUT: Map of index columns in pFKey */
+      out Index ppIdx,               /* OUT: Unique index on parent table */
+      out int[] paiCol               /* OUT: Map of index columns in pFKey */
     )
     {
       Index pIdx = null;                 /* Value to return via *ppIdx */
+      ppIdx = null;
       int[] aiCol = null;                /* Value to return via *paiCol */
+      paiCol = null;
+
       int nCol = pFKey.nCol;             /* Number of columns in parent key */
       string zKey = pFKey.aCol[0].zCol;  /* Name of left-most parent key column */
 
       /* The caller is responsible for zeroing output parameters. */
-      Debug.Assert( ppIdx == null ); //assert( ppIdx && *ppIdx==0 );
-      Debug.Assert( paiCol == null ); //assert( !paiCol || *paiCol==0 );
+      //assert( ppIdx && *ppIdx==0 );
+      //assert( !paiCol || *paiCol==0 );
       Debug.Assert( pParse != null );
 
       /* If this is a non-composite (single column) foreign key, check if it 
@@ -822,7 +825,7 @@ namespace Community.CsharpSqlite
         {
           pTo = sqlite3LocateTable( pParse, 0, pFKey.zTo, zDb );
         }
-        if ( null == pTo || locateFkeyIndex( pParse, pTo, pFKey, ref pIdx, ref aiFree ) != 0 )
+        if ( null == pTo || locateFkeyIndex( pParse, pTo, pFKey, out pIdx, out aiFree ) != 0 )
         {
           if ( 0 == isIgnoreErrors /* || db.mallocFailed */)
             return;
@@ -897,7 +900,7 @@ namespace Community.CsharpSqlite
           continue;
         }
 
-        if ( locateFkeyIndex( pParse, pTab, pFKey, ref pIdx, ref aiCol ) != 0 )
+        if ( locateFkeyIndex( pParse, pTab, pFKey, out pIdx, out aiCol ) != 0 )
         {
           if ( 0 == isIgnoreErrors /*|| db.mallocFailed */)
             return;
@@ -965,9 +968,9 @@ namespace Community.CsharpSqlite
         }
         for ( p = sqlite3FkReferences( pTab ); p != null; p = p.pNextTo )
         {
-          Index pIdx = null;
-          int[] iDummy = null;
-          locateFkeyIndex( pParse, pTab, p, ref pIdx, ref iDummy );
+          Index pIdx;
+          int[] iDummy;
+          locateFkeyIndex( pParse, pTab, p, out pIdx, out iDummy );
           if ( pIdx != null )
           {
             for ( i = 0; i < pIdx.nColumn; i++ )
@@ -1111,7 +1114,7 @@ namespace Community.CsharpSqlite
         int i;                        /* Iterator variable */
         Expr pWhen = null;            /* WHEN clause for the trigger */
 
-        if ( locateFkeyIndex( pParse, pTab, pFKey, ref pIdx, ref aiCol ) != 0 )
+        if ( locateFkeyIndex( pParse, pTab, pFKey, out pIdx, out aiCol ) != 0 )
           return null;
         Debug.Assert( aiCol != null || pFKey.nCol == 1 );
 

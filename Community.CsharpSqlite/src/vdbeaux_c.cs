@@ -368,6 +368,19 @@ pOp.cnt = 0;
       return addr;
     }
 
+#if !SQLITE_OMIT_VIRTUALTABLE
+    //VTable
+    static int sqlite3VdbeAddOp4( Vdbe p, int op, int p1, int p2, int p3, VTable pP4, int p4type )
+    {
+      Debug.Assert( pP4 != null );
+      union_p4 _p4 = new union_p4();
+      _p4.pVtab = pP4;
+      int addr = sqlite3VdbeAddOp3( p, op, p1, p2, p3 );
+      sqlite3VdbeChangeP4( p, addr, _p4, p4type );
+      return addr;
+    }
+#endif
+    
     //  static int sqlite3VdbeAddOp4(
     //  Vdbe p,               /* Add the opcode to this VM */
     //  int op,               /* The new opcode */
@@ -578,7 +591,7 @@ pOp.cnt = 0;
     ** match, or false otherwise. This function is intended to be used as
     ** part of an assert statement in the compiler. Similar to:
     **
-    **   assert( sqlite3VdbeAssertMayAbort(pParse->pVdbe, pParse->mayAbort) );
+    **   Debug.Assert( sqlite3VdbeAssertMayAbort(pParse->pVdbe, pParse->mayAbort) );
     */
     static int sqlite3VdbeAssertMayAbort( Vdbe v, int mayAbort )
     {
@@ -608,7 +621,7 @@ pOp.cnt = 0;
       /* Return true if hasAbort==mayAbort. Or if a malloc failure occured.
       ** If malloc failed, then the while() loop above may not have iterated
       ** through all opcodes and hasAbort may be set incorrectly. Return
-      ** true for this case to prevent the assert() in the callers frame
+      ** true for this case to prevent the Debug.Assert() in the callers frame
       ** from failing.  */
       return ( hasAbort == mayAbort ) ? 1 : 0;//v.db.mallocFailed !=0|| hasAbort==mayAbort );
     }
@@ -648,15 +661,21 @@ pOp.cnt = 0;
         else if ( ( opcode == OP_Transaction && pOp.p2 != 0 ) || opcode == OP_Vacuum )
         {
           p.readOnly = false;
-#if ! SQLITE_OMIT_VIRTUALTABLE
-}else if( opcode==OP_VUpdate ){
-if( pOp.p2>nMaxArgs ) nMaxArgs = pOp.p2;
-}else if( opcode==OP_VFilter ){
-int n;
-Debug.Assert( i < p.nOp - 3 );
-Debug.Assert( pOp[-1].opcode==OP_Integer );
-n = pOp[-1].p1;
-if( n>nMaxArgs ) nMaxArgs = n;
+#if !SQLITE_OMIT_VIRTUALTABLE
+        }
+        else if ( opcode == OP_VUpdate )
+        {
+          if ( pOp.p2 > nMaxArgs )
+            nMaxArgs = pOp.p2;
+        }
+        else if ( opcode == OP_VFilter )
+        {
+          int n;
+          Debug.Assert( p.nOp - i >= 3 );
+          Debug.Assert( p.aOp[i - 1].opcode == OP_Integer );//pOp[-1].opcode==OP_Integer );
+          n = p.aOp[i - 1].p1;//pOp[-1].p1;
+          if ( n > nMaxArgs )
+            nMaxArgs = n;
 #endif
         }
 
@@ -833,7 +852,7 @@ if( n>nMaxArgs ) nMaxArgs = n;
       if ( ALWAYS( pDef ) && ( pDef.flags & SQLITE_FUNC_EPHEM ) != 0 )
       {
         pDef = null;
-        sqlite3DbFree( db, ref  pDef );
+        sqlite3DbFree( db, ref pDef );
       }
     }
 
@@ -1080,7 +1099,7 @@ if( n>nMaxArgs ) nMaxArgs = n;
       if ( n == P4_INT32 )
       {
         /* Note: this cast is safe, because the origin data point was an int
-        ** that was cast to a (const char *). */
+        ** that was cast to a (string ). */
         pOp.p4.i = _p4.i; // SQLITE_PTR_TO_INT(zP4);
         pOp.p4type = P4_INT32;
       }
@@ -1111,10 +1130,10 @@ if( n>nMaxArgs ) nMaxArgs = n;
         if ( pKeyInfo != null )
         {
           //u8 *aSortOrder;
-          // memcpy((char*)pKeyInfo, zP4, nByte - nField);
+          // memcpy((char)pKeyInfo, zP4, nByte - nField);
           //aSortOrder = pKeyInfo.aSortOrder;
           //if( aSortOrder ){
-          //  pKeyInfo.aSortOrder = (unsigned char*)&pKeyInfo.aColl[nField];
+          //  pKeyInfo.aSortOrder = (unsigned char)&pKeyInfo.aColl[nField];
           //  memcpy(pKeyInfo.aSortOrder, aSortOrder, nField);
           //}
           pKeyInfo = _p4.pKeyInfo.Copy();
@@ -1143,7 +1162,7 @@ if( n>nMaxArgs ) nMaxArgs = n;
         pOp.p4.pColl = _p4.pColl;
         pOp.p4type = P4_COLLSEQ;
       }
-      else if ( n == P4_DYNAMIC || n == P4_STATIC )
+      else if ( n == P4_DYNAMIC || n == P4_STATIC || n == P4_MPRINTF )
       {
         pOp.p4.z = _p4.z;
         pOp.p4type = P4_DYNAMIC;
@@ -1379,12 +1398,13 @@ if( p.nOp==0 ) return dummy;
             }
             break;
           }
-#if ! SQLITE_OMIT_VIRTUALTABLE
-case P4_VTAB: {
-sqlite3_vtab pVtab = pOp.p4.pVtab.pVtab;
-sqlite3_snprintf(nTemp, ref zTemp, "vtab:%p:%p", pVtab, pVtab.pModule);
-break;
-}
+#if !SQLITE_OMIT_VIRTUALTABLE
+        case P4_VTAB:
+          {
+            sqlite3_vtab pVtab = pOp.p4.pVtab.pVtab;
+            sqlite3_snprintf( nTemp, zTemp, "vtab:%p:%p", pVtab, pVtab.pModule );
+            break;
+          }
 #endif
         case P4_INTARRAY:
           {
@@ -1455,7 +1475,7 @@ break;
 void sqlite3VdbeEnter(Vdbe *p){
   int i;
   yDbMask mask;
-  sqlite3 *db;
+  sqlite3 db;
   Db *aDb;
   int nDb;
   if( p.lockMask==0 ) return;  /* The common case */
@@ -1477,7 +1497,7 @@ void sqlite3VdbeEnter(Vdbe *p){
 void sqlite3VdbeLeave(Vdbe *p){
   int i;
   yDbMask mask;
-  sqlite3 *db;
+  sqlite3 db;
   Db *aDb;
   int nDb;
   if( p.lockMask==0 ) return;  /* The common case */
@@ -1598,7 +1618,7 @@ void sqlite3VdbeLeave(Vdbe *p){
       p = null;// sqlite3DbFree( p.v.db, p );
     }
 
-#if ! SQLITE_OMIT_EXPLAIN
+#if !SQLITE_OMIT_EXPLAIN
     /*
 ** Give a listing of the program in the virtual machine.
 **
@@ -1666,7 +1686,7 @@ void sqlite3VdbeLeave(Vdbe *p){
         {
           /* On the first call to sqlite3_step(), pSub will hold a NULL.  It is
           ** initialized to a BLOB by the P4_SUBPROGRAM processing logic below */
-          apSub = p.aMem[9]._SubProgram;      //    apSub = (SubProgram**)pSub->z;
+          apSub = p.aMem[9]._SubProgram;      //    apSub = (SubProgram*)pSub->z;
           nSub = apSub.Length;// pSub->n / sizeof( Vdbe* );
         }
         for ( i = 0; i < nSub; i++ )
@@ -1749,7 +1769,7 @@ void sqlite3VdbeLeave(Vdbe *p){
           if ( pOp.p4type == P4_SUBPROGRAM )
           {
             //Debugger.Break(); // TODO
-            //int nByte = 0;//(nSub+1)*sizeof(SubProgram*);
+            //int nByte = 0;//(nSub+1)*sizeof(SubProgram);
             int j;
             for ( j = 0; j < nSub; j++ )
             {
@@ -1762,7 +1782,7 @@ void sqlite3VdbeLeave(Vdbe *p){
               pSub._SubProgram = apSub;// (SubProgram)pSub.z;
               apSub[nSub++] = pOp.p4.pProgram;
               pSub.flags |= MEM_Blob;
-              pSub.n = 0;//nSub*sizeof(SubProgram*);
+              pSub.n = 0;//nSub*sizeof(SubProgram);
             }
           }
         }
@@ -1875,7 +1895,7 @@ void sqlite3VdbeLeave(Vdbe *p){
       if ( pOp.opcode == OP_Trace && pOp.p4.z != null )
       {
         string z = pOp.p4.z;
-        z = z.Trim();// while ( sqlite3Isspace( *(u8*)z ) ) z++;
+        z = z.Trim();// while ( sqlite3Isspace( *(u8)z ) ) z++;
         Console.Write( "SQL: [%s]\n", z );
       }
     }
@@ -1943,12 +1963,12 @@ sqlite3IoTrace( "SQL %s\n", z.Trim() );
     //  int* pnByte          /* If allocation cannot be made, increment *pnByte */
     //)
     //{
-    //  assert(EIGHT_BYTE_ALIGNMENT(*ppFrom));
+    //  Debug.Assert(EIGHT_BYTE_ALIGNMENT(*ppFrom));
     //  if (pBuf) return pBuf;
     //  nByte = ROUND8(nByte);
     //  if (&(*ppFrom)[nByte] <= pEnd)
     //  {
-    //    pBuf = (void*)*ppFrom;
+    //    pBuf = (void)*ppFrom;
     //    *ppFrom += nByte;
     //  }
     //  else
@@ -2055,8 +2075,8 @@ sqlite3IoTrace( "SQL %s\n", z.Trim() );
       /* Allocate space for memory registers, SQL variables, VDBE cursors and 
       ** an array to marshal SQL function arguments in.
       */
-      //zCsr = (u8*)&p->aOp[p->nOp];       /* Memory avaliable for allocation */
-      //zEnd = (u8*)&p->aOp[p->nOpAlloc];  /* First byte past end of zCsr[] */
+      //zCsr = (u8)&p->aOp[p->nOp];       /* Memory avaliable for allocation */
+      //zEnd = (u8)&p->aOp[p->nOpAlloc];  /* First byte past end of zCsr[] */
         resolveP2Values( p, ref nArg );
         p.usesStmtJournal =  (pParse.isMultiWrite !=0 && pParse.mayAbort !=0 );
         if( pParse.explain !=0 && nMem<10 ){
@@ -2064,8 +2084,8 @@ sqlite3IoTrace( "SQL %s\n", z.Trim() );
         }
 
         //memset(zCsr, 0, zEnd-zCsr);
-        //zCsr += ( zCsr - (u8*)0 ) & 7;
-        //assert( EIGHT_BYTE_ALIGNMENT( zCsr ) );
+        //zCsr += ( zCsr - (u8)0 ) & 7;
+        //Debug.Assert( EIGHT_BYTE_ALIGNMENT( zCsr ) );
         p.expired = false;
 
         //
@@ -2095,7 +2115,7 @@ sqlite3IoTrace( "SQL %s\n", z.Trim() );
         //    p->pFree = sqlite3DbMallocZero( db, nByte );
         //  }
         //  zCsr = p->pFree;
-        //  zEnd = &zCsr[nByte];
+        //  zEnd = zCsr[nByte];
         //} while ( nByte && !db->mallocFailed );
 
         //p->nCursor = (u16)nCursor;
@@ -2112,7 +2132,7 @@ sqlite3IoTrace( "SQL %s\n", z.Trim() );
         //  memset(pParse->azVar, 0, pParse->nzVar*sizeof(pParse->azVar[0]));
         //}
         p.nzVar = (i16)pParse.nzVar;
-        p.azVar = new string[p.nzVar == 0 ? 1 : p.nzVar]; //p.azVar = (char**)p.apArg[nArg];
+        p.azVar = new string[p.nzVar == 0 ? 1 : p.nzVar]; //p.azVar = (char*)p.apArg[nArg];
         for ( n = 0; n < p.nzVar; n++ )
         {
           p.azVar[n] = pParse.azVar[n];
@@ -2137,10 +2157,10 @@ sqlite3IoTrace( "SQL %s\n", z.Trim() );
         }
         p.nVar = (ynVar)nVar;
         //
-        p.apArg = new Mem[nArg == 0 ? 1 : nArg];//p.apArg = (Mem**)p.aVar[nVar];
+        p.apArg = new Mem[nArg == 0 ? 1 : nArg];//p.apArg = (Mem*)p.aVar[nVar];
         //
 
-        p.apCsr = new VdbeCursor[nCursor == 0 ? 1 : nCursor];//p.apCsr = (VdbeCursor**)p.azVar[nVar];
+        p.apCsr = new VdbeCursor[nCursor == 0 ? 1 : nCursor];//p.apCsr = (VdbeCursor*)p.azVar[nVar];
         p.apCsr[0] = new VdbeCursor();
         p.nCursor = (u16)nCursor;
         if ( p.aVar != null )
@@ -2183,7 +2203,7 @@ sqlite3IoTrace( "SQL %s\n", z.Trim() );
 
       if ( pCx.pBt != null )
       {
-        sqlite3BtreeClose( ref  pCx.pBt );
+        sqlite3BtreeClose( ref pCx.pBt );
         /* The pCx.pCursor will be close automatically, if it exists, by
         ** the call above. */
       }
@@ -2191,14 +2211,15 @@ sqlite3IoTrace( "SQL %s\n", z.Trim() );
       {
         sqlite3BtreeCloseCursor( pCx.pCursor );
       }
-#if ! SQLITE_OMIT_VIRTUALTABLE
-if( pCx.pVtabCursor ){
-sqlite3_vtab_cursor pVtabCursor = pCx.pVtabCursor;
-const sqlite3_module pModule = pCx.pModule;
-p.inVtabMethod = 1;
-pModule.xClose(pVtabCursor);
-p.inVtabMethod = 0;
-}
+#if !SQLITE_OMIT_VIRTUALTABLE
+      if ( pCx.pVtabCursor != null )
+      {
+        sqlite3_vtab_cursor pVtabCursor = pCx.pVtabCursor;
+        sqlite3_module pModule = pCx.pModule;
+        p.inVtabMethod = 1;
+        pModule.xClose( ref pVtabCursor );
+        p.inVtabMethod = 0;
+      }
 #endif
     }
     /*
@@ -2276,7 +2297,7 @@ p.inVtabMethod = 0;
     {
       sqlite3 db = p.db;
 #if SQLITE_DEBUG
-      /* Execute assert() statements to ensure that the Vdbe.apCsr[] and 
+      /* Execute Debug.Assert() statements to ensure that the Vdbe.apCsr[] and 
 ** Vdbe.aMem[] arrays have already been cleaned up.  */
       int i;
       //TODO for(i=0; i<p.nCursor; i++) Debug.Assert( p.apCsr==null || p.apCsr[i]==null );
@@ -2304,7 +2325,7 @@ p.inVtabMethod = 0;
       sqlite3DbFree( db, ref p.aColName );
       n = nResColumn * COLNAME_N;
       p.nResColumn = (u16)nResColumn;
-      p.aColName = new Mem[n];// (Mem*)sqlite3DbMallocZero(db, Mem.Length * n);
+      p.aColName = new Mem[n];// (Mem)sqlite3DbMallocZero(db, Mem.Length * n);
       //if (p.aColName == 0) return;
       while ( n-- > 0 )
       {
@@ -2376,7 +2397,7 @@ p.inVtabMethod = 0;
 ** required, as an xSync() callback may add an attached database
 ** to the transaction.
 */
-      rc = sqlite3VtabSync( db, p.zErrMsg );
+      rc = sqlite3VtabSync( db, ref p.zErrMsg );
 
       /* This loop determines (a) if the commit hook should be invoked and
       ** (b) how many database files have open write transactions, not
@@ -2454,7 +2475,7 @@ p.inVtabMethod = 0;
       ** This requires a master journal file to ensure the transaction is
       ** committed atomicly.
       */
-#if ! SQLITE_OMIT_DISKIO
+#if !SQLITE_OMIT_DISKIO
       else
       {
         sqlite3_vfs pVfs = db.pVfs;
@@ -3126,7 +3147,7 @@ fclose(out);
     ** Clean up and delete a VDBE after execution.  Return an integer which is
     ** the result code.  Write any error message text into pzErrMsg.
     */
-    static int sqlite3VdbeFinalize( Vdbe p )
+    static int sqlite3VdbeFinalize( ref Vdbe p )
     {
       int rc = SQLITE_OK;
       if ( p.magic == VDBE_MAGIC_RUN || p.magic == VDBE_MAGIC_HALT )
@@ -3167,7 +3188,7 @@ fclose(out);
     ** VdbeDelete() also unlinks the Vdbe from the list of VMs associated with
     ** the database connection.
     */
-    static void sqlite3VdbeDeleteObject( sqlite3 db, Vdbe p )
+    static void sqlite3VdbeDeleteObject( sqlite3 db, ref Vdbe p )
     {
       SubProgram pSub, pNext;
       int i;
@@ -3187,7 +3208,8 @@ fclose(out);
       sqlite3DbFree( db, ref p.aColName );
       sqlite3DbFree( db, ref p.zSql );
       sqlite3DbFree( db, ref p.pFree );
-      sqlite3DbFree( db, ref p );
+      // Free memory allocated from db within p
+      //sqlite3DbFree( db, p );
     }
 
     /*
@@ -3215,7 +3237,7 @@ fclose(out);
       }
       p.magic = VDBE_MAGIC_DEAD;
       p.db = null;
-      sqlite3VdbeDeleteObject( db, p );
+      sqlite3VdbeDeleteObject( db, ref p );
     }
 
     /*
@@ -3857,15 +3879,15 @@ swapMixedEndianFloat(x);
       //}
       //else
       {
-        p = pSpace;//(UnpackedRecord*)pSpace;
+        p = pSpace;//(UnpackedRecord)pSpace;
         p.flags = UNPACKED_NEED_DESTROY;
       }
       p.pKeyInfo = pKeyInfo;
       p.nField = (u16)( pKeyInfo.nField + 1 );
-      //p->aMem = pMem = (Mem*)&( (char*)p )[ROUND8( sizeof( UnpackedRecord ) )];
-      //assert( EIGHT_BYTE_ALIGNMENT( pMem ) );
+      //p->aMem = pMem = (Mem)&( (char)p )[ROUND8( sizeof( UnpackedRecord ) )];
+      //Debug.Assert( EIGHT_BYTE_ALIGNMENT( pMem ) );
       p.aMem = new Mem[p.nField + 1];
-      idx = (u32)getVarint32( aKey, 0, ref szHdr );// GetVarint( aKey, szHdr );
+      idx = (u32)getVarint32( aKey, 0, out szHdr );// GetVarint( aKey, szHdr );
       d = (int)szHdr;
       u = 0;
       while ( idx < (int)szHdr && u < p.nField && d <= nKey )
@@ -3874,7 +3896,7 @@ swapMixedEndianFloat(x);
         pMem = p.aMem[u];
         u32 serial_type = 0;
 
-        idx += (u32)getVarint32( aKey, idx, ref serial_type );// GetVarint( aKey + idx, serial_type );
+        idx += (u32)getVarint32( aKey, idx, out serial_type );// GetVarint( aKey + idx, serial_type );
         pMem.enc = pKeyInfo.enc;
         pMem.db = pKeyInfo.db;
         /* pMem->flags = 0; // sqlite3VdbeSerialGet() will set this for us */
@@ -3885,7 +3907,7 @@ swapMixedEndianFloat(x);
       }
       Debug.Assert( u <= pKeyInfo.nField + 1 );
       p.nField = (u16)u;
-      return p;// (void*)p;
+      return p;// (void)p;
     }
 
     /*
@@ -3973,7 +3995,7 @@ swapMixedEndianFloat(x);
       mem1.enc = pKeyInfo.enc;
       mem1.db = pKeyInfo.db;
       /* mem1.flags = 0;  // Will be initialized by sqlite3VdbeSerialGet() */
-      //  VVA_ONLY( mem1.zMalloc = 0; ) /* Only needed by assert() statements */
+      //  VVA_ONLY( mem1.zMalloc = 0; ) /* Only needed by Debug.Assert() statements */
 
       /* Compilers may complain that mem1.u.i is potentially uninitialized.
       ** We could initialize it, as shown here, to silence those complaints.
@@ -3984,7 +4006,7 @@ swapMixedEndianFloat(x);
       */
       /*  mem1.u.i = 0;  // not needed, here to silence compiler warning */
 
-      idx1 = (u32)( ( szHdr1 = pKey1[offset] ) <= 0x7f ? 1 : getVarint32( pKey1, offset, ref szHdr1 ) );// GetVarint( aKey1, szHdr1 );
+      idx1 = (u32)( ( szHdr1 = pKey1[offset] ) <= 0x7f ? 1 : getVarint32( pKey1, offset, out szHdr1 ) );// GetVarint( aKey1, szHdr1 );
       d1 = (int)szHdr1;
       if ( ( pPKey2.flags & UNPACKED_IGNORE_ROWID ) != 0 )
       {
@@ -3996,7 +4018,7 @@ swapMixedEndianFloat(x);
         u32 serial_type1;
 
         /* Read the serial types for the next element in each key. */
-        idx1 += (u32)( ( serial_type1 = pKey1[offset + idx1] ) <= 0x7f ? 1 : getVarint32( pKey1, (uint)( offset + idx1 ), ref serial_type1 ) ); //GetVarint( aKey1 + idx1, serial_type1 );
+        idx1 += (u32)( ( serial_type1 = pKey1[offset + idx1] ) <= 0x7f ? 1 : getVarint32( pKey1, (uint)( offset + idx1 ), out serial_type1 ) ); //GetVarint( aKey1 + idx1, serial_type1 );
         if ( d1 <= 0 || d1 >= nKey1 && sqlite3VdbeSerialTypeLen( serial_type1 ) > 0 )
           break;
 
@@ -4036,7 +4058,7 @@ swapMixedEndianFloat(x);
       }
 
       /* No memory allocation is ever used on mem1.  Prove this using
-      ** the following assert().  If the assert() fails, it indicates a
+      ** the following Debug.Assert().  If the Debug.Assert() fails, it indicates a
       ** memory leak and a need to call sqlite3VdbeMemRelease(&mem1).
       */
       //Debug.Assert( mem1.zMalloc==null );
@@ -4105,7 +4127,7 @@ swapMixedEndianFloat(x);
       }
 
       /* The index entry must begin with a header size */
-      getVarint32( m.zBLOB, 0, ref szHdr );
+      getVarint32( m.zBLOB, 0, out szHdr );
       testcase( szHdr == 3 );
       testcase( szHdr == m.n );
       if ( unlikely( szHdr < 3 || (int)szHdr > m.n ) )
@@ -4115,7 +4137,7 @@ swapMixedEndianFloat(x);
 
       /* The last field of the index should be an integer - the ROWID.
       ** Verify that the last entry really is an integer. */
-      getVarint32( m.zBLOB, szHdr - 1, ref typeRowid );
+      getVarint32( m.zBLOB, szHdr - 1, out typeRowid );
       testcase( typeRowid == 1 );
       testcase( typeRowid == 2 );
       testcase( typeRowid == 3 );

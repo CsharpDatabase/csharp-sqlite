@@ -5,11 +5,6 @@
 set testdir [file dirname $argv0]
 source $testdir/tester.tcl
 
-# Uncomment the _RunWorking line to run all the tests
-# or copy one of test filenames 
-# or enter TCL commands such as the ones that are listed 
-# after these comments
-
 do_test SIMPLE_SQLITE_VERSION {
     execsql { 
     SELECT SQLITE_VERSION(), SQLITE_SOURCE_ID();
@@ -20,6 +15,8 @@ do_test SIMPLE_SQLITE_VERSION {
 ##########################################################################################
 #puts -nonewline "Press RETURN to exit..."; gets stdin; exit 0
 
+set filter ""
+
 if [info exists argv] { 
   set TESTSUITE $argv
   puts "Running tests ($argv)"
@@ -27,8 +24,6 @@ if [info exists argv] {
   set TESTSUITE "QUICK" 
   puts "running allquicktests"
 }
-
-set filter ""
 if [string compare $filter "skip"] {
 if ![string compare $filter ""] {puts -nonewline "Enter test name prefix:"; set filter [gets stdin]}
 source $testdir/_C#SQLite.test
@@ -60,12 +55,12 @@ do_test SIMPLE_SQLITE_VERSION {
     execsql { 
     SELECT SQLITE_VERSION(), SQLITE_SOURCE_ID();
   }
-} {3.7.6.3C# {Ported to C# from 2011-05-19 13:26:54 ed1da510a239ea767a01dc332b667119fa3c908e}}
+} {3.7.7(C#) {Ported to C# from 2011-06-23 19:49:22 4374b7e83ea0a3fbc3691f9c0c936272862f32f2}}
 
 
 do_test SIMPLE_COUNT_SQL_MASTER {
     execsql { 
-    SELECT COUNT(*) FROM SQLITE_MASTER;
+    SELECT COUNT() FROM SQLITE_MASTER;
   }
 } {0}
 do_test SIMPLE_CREATE_TABLE {
@@ -95,196 +90,3 @@ do_test SIMPLE_SELECT_ALL {
 #
 # test_list C#SQLitetests will display the individual file names
 ##########################################################################################
-
-proc test_join {tn sqljoin tbljoinargs} {
-  set sql [te_read_sql db "SELECT * FROM $sqljoin"]
-  set te  [te_tbljoin db {*}$tbljoinargs]
-  te_dataset_eq_unordered $tn $sql $te
-}
-
-proc te_read_tbl {db tbl} {
- te_read_sql $db "SELECT * FROM '$tbl'"
-}
-
-proc te_tbljoin {db t1 t2 args} {
-  te_join [te_read_tbl $db $t1] [te_read_tbl $db $t2] {*}$args
-}
-
-proc te_dataset_eq_unordered {testname got expected} {
-  lset got      1 [lsort [lindex $got 1]]
-  lset expected 1 [lsort [lindex $expected 1]]
-  te_dataset_eq $testname $got $expected
-}
-
-proc te_dataset_eq {testname got expected} {
-  uplevel #0 [list do_test $testname [list set {} $got] $expected]
-}
-
-proc te_read_sql {db sql} {
-  set S [sqlite3_prepare_v2 $db $sql -1 DUMMY]
-
-  set cols [list]
-  for {set i 0} {$i < [sqlite3_column_count $S]} {incr i} {
-    lappend cols [sqlite3_column_name $S $i]
-  }
-
-  set rows [list]
-  while {[sqlite3_step $S] == "SQLITE_ROW"} {
-    set r [list]
-    for {set i 0} {$i < [sqlite3_column_count $S]} {incr i} {
-      lappend r [list [sqlite3_column_type $S $i] [sqlite3_column_text $S $i]]
-    }
-    lappend rows $r
-  }
-  sqlite3_finalize $S
-
-  return [list $cols $rows]
-}
-
-proc te_join {data1 data2 args} {
-
-  set testproc ""
-  set usinglist [list]
-  set isleft 0
-  for {set i 0} {$i < [llength $args]} {incr i} {
-    set a [lindex $args $i]
-    if { $a != "{}" } {
-    switch -- $a {
-      -on     { set testproc [lindex $args [incr i]] }
-      -using  { set usinglist [lindex $args [incr i]] }
-      -left   { set isleft 1 }
-      default {
-        error "Unknown argument: $a"
-      }
-    }
-  }
-}
-  set c1 [lindex $data1 0]
-  set c2 [lindex $data2 0]
-  set omitlist [list]
-  set nullrowlist [list]
-  set cret $c1
-
-  set cidx 0
-  foreach col $c2 {
-    set idx [lsearch $usinglist $col]
-    if {$idx>=0} {lappend omitlist $cidx}
-    if {$idx<0} {
-      lappend nullrowlist {NULL {}}
-      lappend cret $col
-    }
-    incr cidx
-  }
-  set omitlist [lsort -integer -decreasing $omitlist]
-
-
-  set rret [list]
-  foreach r1 [lindex $data1 1] {
-    set one 0
-    foreach r2 [lindex $data2 1] {
-      set ok 1
-      if {$testproc != ""} {
-        set ok [eval $testproc [list $c1 $r1 $c2 $r2]]
-      }
-      if {$ok} {
-        set one 1
-        foreach idx $omitlist {set r2 [lreplace $r2 $idx $idx]}
-        lappend rret [concat $r1 $r2]
-      }
-    }
-
-    if {$isleft && $one==0} {
-      lappend rret [concat $r1 $nullrowlist]
-    }
-  }
-  
-  list $cret $rret
-}
-
-proc te_equals {args} {
-
-  if {[llength $args]<6} {error "invalid arguments to te_equals"}
-  foreach {c1 c2 cols1 row1 cols2 row2} [lrange $args end-5 end] break
-
-  set nocase 0
-  set affinity none
-
-  for {set i 0} {$i < ([llength $args]-6)} {incr i} {
-    set a [lindex $args $i]
-    switch -- $a {
-      -nocase {
-        set nocase 1
-      }
-      -affinity {
-        set affinity [string tolower [lindex $args [incr i]]]
-      }
-      default {
-        error "invalid arguments to te_equals"
-      }
-    }
-  }
-
-  set idx2 [if {[string is integer $c2]} { set c2 } else { lsearch $cols2 $c2 }]
-  set idx1 [if {[string is integer $c1]} { set c1 } else { lsearch $cols1 $c1 }]
-
-  set t1 [lindex $row1 $idx1 0]
-  set t2 [lindex $row2 $idx2 0]
-  set v1 [lindex $row1 $idx1 1]
-  set v2 [lindex $row2 $idx2 1]
-
-  te_apply_affinity $affinity t1 v1
-  te_apply_affinity $affinity t2 v2
-
-  if {$t1 == "NULL" || $t2 == "NULL"} { return 0 }
-  if {$nocase && $t1 == "TEXT"} { set v1 [string tolower $v1] }
-  if {$nocase && $t2 == "TEXT"} { set v2 [string tolower $v2] }
-
-
-  set res [expr {$t1 == $t2 && [string equal $v1 $v2]}]
-  return $res
-}
-proc te_apply_affinity {affinity typevar valvar} {
-  upvar $typevar type
-  upvar $valvar val
-
-  switch -- $affinity {
-    integer {
-      if {[string is double $val]} { set type REAL }
-      if {[string is wideinteger $val]} { set type INTEGER }
-      if {$type == "REAL" && int($val)==$val} { 
-        set type INTEGER 
-        set val [expr {int($val)}]
-      }
-    }
-    text {
-      set type TEXT
-    }
-    none { }
-
-    default { error "invalid affinity: $affinity" }
-  }
-}
-execsql {
-  CREATE TABLE t1(a, b);
-  CREATE TABLE t2(a, b);
-  CREATE TABLE t3(b COLLATE nocase);
-
-  INSERT INTO t1 VALUES(2, 'B');
-  INSERT INTO t1 VALUES(1, 'A');
-  INSERT INTO t1 VALUES(4, 'D');
-  INSERT INTO t1 VALUES(NULL, NULL);
-  INSERT INTO t1 VALUES(3, NULL);
-
-  INSERT INTO t2 VALUES(1, 'A');
-  INSERT INTO t2 VALUES(2, NULL);
-  INSERT INTO t2 VALUES(5, 'E');
-  INSERT INTO t2 VALUES(NULL, NULL);
-  INSERT INTO t2 VALUES(3, 'C');
-
-  INSERT INTO t3 VALUES('a');
-  INSERT INTO t3 VALUES('c');
-  INSERT INTO t3 VALUES('b');
-} 
-
-  test_join 2.1.1.1.1  "t1, t2"                {t1 t2}
-  test_join 2.1.1.2.1  "t1, t2 ON (t1.a=t2.a)"  {t1 t2 -on {te_equals a a}}

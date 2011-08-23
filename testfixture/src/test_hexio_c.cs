@@ -141,9 +141,9 @@ namespace Community.CsharpSqlite
         TCL.Tcl_WrongNumArgs( interp, 1, objv, "FILENAME OFFSET AMT" );
         return TCL.TCL_ERROR;
       }
-      if ( TCL.TCL_OK != TCL.Tcl_GetIntFromObj( interp, objv[2], ref offset ) )
+      if ( TCL.TCL_OK != TCL.Tcl_GetIntFromObj( interp, objv[2], out offset ) )
         return TCL.TCL_ERROR;
-      if ( TCL.TCL_OK != TCL.Tcl_GetIntFromObj( interp, objv[3], ref amt ) )
+      if ( TCL.TCL_OK != TCL.Tcl_GetIntFromObj( interp, objv[3], out amt ) )
         return TCL.TCL_ERROR;
       zFile = TCL.Tcl_GetString( objv[1] );
       zBuf = new byte[amt * 2 + 1];// sqlite3Malloc( amt * 2 + 1 );
@@ -200,10 +200,10 @@ namespace Community.CsharpSqlite
         TCL.Tcl_WrongNumArgs( interp, 1, objv, "FILENAME OFFSET HEXDATA" );
         return TCL.TCL_ERROR;
       }
-      if ( TCL.TCL_OK != TCL.Tcl_GetIntFromObj( interp, objv[2], ref offset ) )
+      if ( TCL.TCL_OK != TCL.Tcl_GetIntFromObj( interp, objv[2], out offset ) )
         return TCL.TCL_ERROR;
       zFile = TCL.Tcl_GetString( objv[1] );
-      zIn = TCL.Tcl_GetStringFromObj( objv[3], ref nIn );
+      zIn = TCL.Tcl_GetStringFromObj( objv[3], out nIn );
       aOut = new byte[nIn / 2 + 1];//sqlite3Malloc( nIn/2 );
       if ( aOut == null )
       {
@@ -255,7 +255,7 @@ namespace Community.CsharpSqlite
         TCL.Tcl_WrongNumArgs( interp, 1, objv, "HEXDATA" );
         return TCL.TCL_ERROR;
       }
-      zIn = TCL.Tcl_GetStringFromObj( objv[1], ref nIn );
+      zIn = TCL.Tcl_GetStringFromObj( objv[1], out nIn );
       aOut = new byte[nIn / 2];// sqlite3Malloc( nIn / 2 );
       if ( aOut == null )
       {
@@ -308,7 +308,7 @@ namespace Community.CsharpSqlite
         TCL.Tcl_WrongNumArgs( interp, 1, objv, "INTEGER" );
         return TCL.TCL_ERROR;
       }
-      if ( TCL.TCL_OK != TCL.Tcl_GetIntFromObj( interp, objv[1], ref val ) )
+      if ( TCL.TCL_OK != TCL.Tcl_GetIntFromObj( interp, objv[1], out val ) )
         return TCL.TCL_ERROR;
       aNum[0] = (byte)( val >> 8 );
       aNum[1] = (byte)val;
@@ -338,7 +338,7 @@ namespace Community.CsharpSqlite
         TCL.Tcl_WrongNumArgs( interp, 1, objv, "INTEGER" );
         return TCL.TCL_ERROR;
       }
-      if ( TCL.TCL_OK != TCL.Tcl_GetIntFromObj( interp, objv[1], ref val ) )
+      if ( TCL.TCL_OK != TCL.Tcl_GetIntFromObj( interp, objv[1], out val ) )
         return TCL.TCL_ERROR;
       aNum[0] = (byte)( val >> 24 );
       aNum[1] = (byte)( val >> 16 );
@@ -371,7 +371,7 @@ namespace Community.CsharpSqlite
         TCL.Tcl_WrongNumArgs(interp, 1, objv, "HEX");
         return TCL.TCL_ERROR;
       }
-      zOrig = TCL.Tcl_GetStringFromObj(objv[1], ref n);
+      zOrig = TCL.Tcl_GetStringFromObj(objv[1], out n);
       z = new byte[2 * n + 1];//sqlite3Malloc( n + 3 );
       nOut = sqlite3TestHexToBin( zOrig, n, z );
       //z[n] = 0;
@@ -384,13 +384,13 @@ namespace Community.CsharpSqlite
       Tcl_AppendResult(interp, 
           "[utf8_to_utf8] unavailable - SQLITE_DEBUG not defined", 0
       );
-      return TCL_ERROR;
+      return TCL.TCL_ERROR;
     #endif
     }
 
 
-    //static int getFts3Varint(const char *p, sqlite_int64 *v){
-    //  const unsigned char *q = (const unsigned char *) p;
+    //static int getFts3Varint(string p, sqlite_int64 *v){
+    //  const unsigned char *q = (const unsigned char ) p;
     //  sqlite_uint64 x = 0, y = 1;
     //  while( (*q & 0x80) == 0x80 ){
     //    x += y * (*q++ & 0x7f);
@@ -398,7 +398,7 @@ namespace Community.CsharpSqlite
     //  }
     //  x += y * (*q++);
     //  *v = (sqlite_int64) x;
-    //  return (int) (q - (unsigned char *)p);
+    //  return (int) (q - (unsigned char )p);
     //}
 
 
@@ -410,25 +410,25 @@ namespace Community.CsharpSqlite
     //*/
     //static int read_fts3varint(
     //  void * clientData,
-    //  Tcl_Interp *interp,
+    //  Tcl_Interp interp,
     //  int objc,
-    //  Tcl_Obj *CONST objv[]
+    //  Tcl_Obj[] objv
     //){
     //  int nBlob;
-    //  unsigned char *zBlob;
+    //  unsigned string zBlob;
     //  sqlite3_int64 iVal;
     //  int nVal;
 
     //  if( objc!=3 ){
     //    Tcl_WrongNumArgs(interp, 1, objv, "BLOB VARNAME");
-    //    return TCL_ERROR;
+    //    return TCL.TCL_ERROR;
     //  }
-    //  zBlob = Tcl_GetByteArrayFromObj(objv[1], &nBlob);
+    //  zBlob = TCL.Tcl_GetByteArrayFromObj(objv[1], &nBlob);
 
-    //  nVal = getFts3Varint((char*)zBlob, (sqlite3_int64 *)(&iVal));
-    //  Tcl_ObjSetVar2(interp, objv[2], 0, Tcl_NewWideIntObj(iVal), 0);
-    //  Tcl_SetObjResult(interp, Tcl_NewIntObj(nVal));
-    //  return TCL_OK;
+    //  nVal = getFts3Varint((char)zBlob, (sqlite3_int64 )(&iVal));
+    //  Tcl_ObjSetVar2(interp, objv[2], 0, TCL.TCL_NewWideIntObj(iVal), 0);
+    //  Tcl_SetObjResult(interp, TCL.TCL_NewIntObj(nVal));
+    //  return TCL.TCL_OK;
     //}
 
 

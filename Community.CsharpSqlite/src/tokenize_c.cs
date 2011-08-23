@@ -563,11 +563,11 @@ namespace Community.CsharpSqlite
       i = 0;
       Debug.Assert( pzErrMsg != null );
       pEngine = sqlite3ParserAlloc();//sqlite3ParserAlloc((void*(*)(size_t))sqlite3Malloc);
-      if ( pEngine == null )
-      {
-        ////        db.mallocFailed = 1;
-        return SQLITE_NOMEM;
-      }
+      //if ( pEngine == null )
+      //{
+      //  db.mallocFailed = 1;
+      //  return SQLITE_NOMEM;
+      //}
       Debug.Assert( pParse.pNewTable == null );
       Debug.Assert( pParse.pNewTrigger == null );
       Debug.Assert( pParse.nVar == 0 );
@@ -673,9 +673,9 @@ pParse.nTableLock = 0;
 }
 #endif
 #if !SQLITE_OMIT_VIRTUALTABLE
-sqlite3_free(pParse.apVtabLock);
+      pParse.apVtabLock = null;//sqlite3_free( pParse.apVtabLock );
 #endif
-      if ( !IN_DECLARE_VTAB )
+      if ( !IN_DECLARE_VTAB(pParse) )
       {
         /* If the pParse.declareVtab flag is set, do not delete any table
         ** structure built up in pParse.pNewTable. The calling code (see vtab.c)

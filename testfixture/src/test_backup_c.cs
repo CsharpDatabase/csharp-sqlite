@@ -35,8 +35,8 @@ namespace Community.CsharpSqlite
     //#include <assert.h>
 
     /* These functions are implemented in test1.c. */
-    //int getDbPointer(Tcl_Interp *, const char *, sqlite3 **);
-    //const char *sqlite3TestErrorName(int);
+    //int getDbPointer(Tcl_Interp *, string , sqlite3 *);
+    //string sqlite3TestErrorName(int);
 
     enum BackupSubCommandEnum
     {
@@ -62,7 +62,7 @@ namespace Community.CsharpSqlite
       }
     }
 
-    static int Tcl_GetIndexFromObjStruct( Interp interp, TclObject to, BackupSubCommand[] table, int len, string msg, int flags, ref int index )
+    static int Tcl_GetIndexFromObjStruct( Interp interp, TclObject to, BackupSubCommand[] table, int len, string msg, int flags, out int index )
     {
       string zCmd = to.ToString();
       for ( index = 0; index < len; index++ )
@@ -93,7 +93,7 @@ new BackupSubCommand(null,0,0,null)
       int rc;
 
       rc = Tcl_GetIndexFromObjStruct(
-      interp, objv[1], aSub, aSub.Length, "option", 0, ref iCmd
+      interp, objv[1], aSub, aSub.Length, "option", 0, out iCmd
       );
       if ( rc != TCL.TCL_OK )
       {
@@ -113,7 +113,7 @@ new BackupSubCommand(null,0,0,null)
             string zCmdName;
             WrappedCommand cmdInfo = null;
             zCmdName = TCL.Tcl_GetString( objv[0] );
-            TCL.Tcl_GetCommandInfo( interp, zCmdName, ref cmdInfo );
+            TCL.Tcl_GetCommandInfo( interp, zCmdName, out cmdInfo );
             cmdInfo.deleteProc = null;
             TCL.Tcl_SetCommandInfo( interp, zCmdName, cmdInfo );
             TCL.Tcl_DeleteCommand( interp, zCmdName );
@@ -126,7 +126,7 @@ new BackupSubCommand(null,0,0,null)
         case BackupSubCommandEnum.BACKUP_STEP:
           {
             int nPage = 0;
-            if ( TCL.TCL_OK != TCL.Tcl_GetIntFromObj( interp, objv[2], ref nPage ) )
+            if ( TCL.TCL_OK != TCL.Tcl_GetIntFromObj( interp, objv[2], out nPage ) )
             {
               return TCL.TCL_ERROR;
             }
@@ -180,9 +180,9 @@ new BackupSubCommand(null,0,0,null)
       }
 
       zCmd = TCL.Tcl_GetString( objv[1] );
-      getDbPointer( interp, TCL.Tcl_GetString( objv[2] ), ref pDestDb );
+      getDbPointer( interp, TCL.Tcl_GetString( objv[2] ), out pDestDb );
       zDestName = TCL.Tcl_GetString( objv[3] );
-      getDbPointer( interp, TCL.Tcl_GetString( objv[4] ), ref pSrcDb );
+      getDbPointer( interp, TCL.Tcl_GetString( objv[4] ), out pSrcDb );
       zSrcName = TCL.Tcl_GetString( objv[5] );
 
       pBackup = sqlite3_backup_init( pDestDb, zDestName, pSrcDb, zSrcName );

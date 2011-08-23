@@ -173,9 +173,9 @@ return rc;
       if ( ( f & ( MEM_Str | MEM_Blob ) ) != 0 ) // TODO -- && pMem.z != pMem.zMalloc )
       {
         if ( sqlite3VdbeMemGrow( pMem, pMem.n + 2, 1 ) != 0 )
-        {
-          return SQLITE_NOMEM;
-        }
+        //{
+        //  return SQLITE_NOMEM;
+        //}
         //pMem.z[pMem->n] = 0;
         //pMem.z[pMem->n + 1] = 0;
         pMem.flags |= MEM_Term;
@@ -1119,7 +1119,7 @@ return SQLITE_NOMEM;
       f1 = pMem1.flags;
       f2 = pMem2.flags;
       combined_flags = f1 | f2;
-      //TODO Debug.Assert( ( combined_flags & MEM_RowSet ) == 0 );
+      Debug.Assert( ( combined_flags & MEM_RowSet ) == 0 );
 
       /* If one value is NULL, it is less than the other. If both values
       ** are NULL, return 0.

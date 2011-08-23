@@ -58,7 +58,7 @@ namespace Community.CsharpSqlite
 
     /* Macro to find the minimum of two numeric values.
     */
-    //#if ! MIN
+    //#if !MIN
     //# define MIN(x,y) ((x)<(y)?(x):(y))
     //#endif
     static int MIN( int x, int y )

@@ -343,7 +343,7 @@ namespace Community.CsharpSqlite
       if ( pIn.pLeft != null )
       {
         RowSetEntry p = new RowSetEntry();
-        rowSetTreeToList( pIn.pLeft, ref  ppFirst, ref  p );
+        rowSetTreeToList( pIn.pLeft, ref ppFirst, ref p );
         p.pRight = pIn;
       }
       else
@@ -352,7 +352,7 @@ namespace Community.CsharpSqlite
       }
       if ( pIn.pRight != null )
       {
-        rowSetTreeToList( pIn.pRight, ref  pIn.pRight, ref   ppLast );
+        rowSetTreeToList( pIn.pRight, ref pIn.pRight, ref ppLast );
       }
       else
       {
@@ -445,7 +445,7 @@ namespace Community.CsharpSqlite
       {
         RowSetEntry pHead = new RowSetEntry();
         RowSetEntry pTail = new RowSetEntry();
-        rowSetTreeToList( p.pTree, ref  pHead, ref  pTail );
+        rowSetTreeToList( p.pTree, ref pHead, ref pTail );
         p.pTree = null;
         p.pEntry = rowSetMerge( p.pEntry, pHead );
       }

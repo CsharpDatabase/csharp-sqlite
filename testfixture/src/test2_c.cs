@@ -604,7 +604,7 @@ namespace Community.CsharpSqlite
         " PENDING-BYTE\"" );
         return TCL.TCL_ERROR;
       }
-      if ( TCL.Tcl_GetInt( interp, argv[1], ref pbyte ) )
+      if ( TCL.Tcl_GetInt( interp, argv[1], out pbyte ) )
         return TCL.TCL_ERROR;
       rc = sqlite3_test_control( SQLITE_TESTCTRL_PENDING_BYTE, pbyte );
       TCL.Tcl_SetObjResult( interp, TCL.Tcl_NewIntObj( rc ) );
@@ -633,7 +633,7 @@ namespace Community.CsharpSqlite
         TCL.Tcl_AppendResult( interp, "wrong # args: should be \"", argv[0],
         " SIZE PROGRAM\"" );
       }
-      if ( TCL.Tcl_GetInt( interp, argv[1], ref sz ) )
+      if ( TCL.Tcl_GetInt( interp, argv[1], out sz ) )
         return TCL.TCL_ERROR;
       z = argv[2].ToString() + '\0';
       int iz = 0;

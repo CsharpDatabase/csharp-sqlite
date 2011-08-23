@@ -40,7 +40,7 @@ namespace Community.CsharpSqlite
     //#include <string.h>
 
     /* defined in test1.c */
-    //const char *sqlite3TestErrorName(int);
+    //string sqlite3TestErrorName(int);
 
     /* A countable mutex */
     public partial class sqlite3_mutex
@@ -126,7 +126,7 @@ namespace Community.CsharpSqlite
       if ( eType == SQLITE_MUTEX_FAST || eType == SQLITE_MUTEX_RECURSIVE )
       {
         pRet = new sqlite3_mutex();
-        ;//(sqlite3_mutex*)malloc( sizeof( sqlite3_mutex ) );
+        ;//(sqlite3_mutex)malloc( sizeof( sqlite3_mutex ) );
       }
       else
       {
@@ -256,7 +256,7 @@ namespace Community.CsharpSqlite
         TCL.Tcl_WrongNumArgs( interp, 1, objv, "BOOLEAN" );
         return TCL.TCL_ERROR;
       }
-      if ( TCL.Tcl_GetBoolean( interp, objv[1], ref isInstall ))
+      if ( TCL.Tcl_GetBoolean( interp, objv[1], out isInstall ))
       {
         return TCL.TCL_ERROR;
       }
@@ -399,7 +399,7 @@ namespace Community.CsharpSqlite
         this.iValue = iValue;
       }
     }
-    static bool Tcl_GetIndexFromObjStruct( Interp interp, TclObject to, ConfigOption[] table, int s, string msg, int flags, ref int index )
+    static bool Tcl_GetIndexFromObjStruct( Interp interp, TclObject to, ConfigOption[] table, int s, string msg, int flags, out int index )
     {
       try
       {
@@ -412,6 +412,7 @@ namespace Community.CsharpSqlite
       }
       catch
       {
+        index = 0;
         return true;
       }
     }
@@ -440,9 +441,9 @@ new ConfigOption(null,0)
         return TCL.TCL_ERROR;
       }
 
-      if ( Tcl_GetIndexFromObjStruct( interp, objv[1], aOpt, s, "flag", 0, ref i ) )
+      if ( Tcl_GetIndexFromObjStruct( interp, objv[1], aOpt, s, "flag", 0, out i ) )
       {
-        if ( TCL.TCL_OK != TCL.Tcl_GetIntFromObj( interp, objv[1], ref i ) )
+        if ( TCL.TCL_OK != TCL.Tcl_GetIntFromObj( interp, objv[1], out i ) )
         {
           return TCL.TCL_ERROR;
         }
@@ -457,16 +458,16 @@ new ConfigOption(null,0)
       return TCL.TCL_OK;
     }
 
-    //static sqlite3 *getDbPointer(Tcl_Interp *pInterp, Tcl_Obj *pObj){
-    //sqlite3 *db;
+    //static sqlite3 *getDbPointer(Tcl_Interp *pInterp, TCL.TCL_Obj *pObj){
+    //sqlite3 db;
     //Tcl_CmdInfo info;
-    //char *zCmd = TCL.Tcl_GetString(pObj);
+    //string zCmd = TCL.Tcl_GetString(pObj);
     //if( TCL.Tcl_GetCommandInfo(pInterp, zCmd, &info) ){
-    //  db = *((sqlite3 **)info.objClientData);
+    //  db = *((sqlite3 *)info.objClientData);
     //}else{
-    //  db = (sqlite3*)sqlite3TestTextToPtr(zCmd);
+    //  db = (sqlite3)sqlite3TestTextToPtr(zCmd);
     //}
-    //assert( db );
+    //Debug.Assert( db );
     //return db;
 
     static int test_enter_db_mutex(
@@ -482,7 +483,7 @@ new ConfigOption(null,0)
         TCL.Tcl_WrongNumArgs( interp, 1, objv, "DB" );
         return TCL.TCL_ERROR;
       }
-      getDbPointer( interp, TCL.Tcl_GetString( objv[1] ), ref db );
+      getDbPointer( interp, TCL.Tcl_GetString( objv[1] ), out db );
       if ( null == db )
       {
         return TCL.TCL_ERROR;
@@ -504,7 +505,7 @@ new ConfigOption(null,0)
         TCL.Tcl_WrongNumArgs( interp, 1, objv, "DB" );
         return TCL.TCL_ERROR;
       }
-      getDbPointer( interp, TCL.Tcl_GetString( objv[1] ), ref db );
+      getDbPointer( interp, TCL.Tcl_GetString( objv[1] ), out db );
       if ( null == db )
       {
         return TCL.TCL_ERROR;
@@ -516,7 +517,7 @@ new ConfigOption(null,0)
     static public int Sqlitetest_mutex_Init( Tcl_Interp interp )
     {
       //static struct {
-      //  char *zName;
+      //  string zName;
       //  Tcl_ObjCmdProc *xProc;
       //}
       _aObjCmd[] aCmd = new _aObjCmd[]{

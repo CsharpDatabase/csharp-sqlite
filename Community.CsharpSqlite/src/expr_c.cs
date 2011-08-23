@@ -385,14 +385,14 @@ namespace Community.CsharpSqlite
     {
       if ( p != null )
       {
-        heightOfExpr( p.pWhere, ref  pnHeight );
-        heightOfExpr( p.pHaving, ref  pnHeight );
-        heightOfExpr( p.pLimit, ref  pnHeight );
-        heightOfExpr( p.pOffset, ref  pnHeight );
+        heightOfExpr( p.pWhere, ref pnHeight );
+        heightOfExpr( p.pHaving, ref pnHeight );
+        heightOfExpr( p.pLimit, ref pnHeight );
+        heightOfExpr( p.pOffset, ref pnHeight );
         heightOfExprList( p.pEList, ref pnHeight );
         heightOfExprList( p.pGroupBy, ref pnHeight );
-        heightOfExprList( p.pOrderBy, ref  pnHeight );
-        heightOfSelect( p.pPrior, ref  pnHeight );
+        heightOfExprList( p.pOrderBy, ref pnHeight );
+        heightOfSelect( p.pPrior, ref pnHeight );
       }
     }
 
@@ -499,7 +499,7 @@ namespace Community.CsharpSqlite
           else
           {
             int c;
-            //pNew.u.zToken = (char*)&pNew[1];
+            //pNew.u.zToken = (char)&pNew[1];
             if ( pToken.n > 0 )
               pNew.u.zToken = pToken.z.Substring( 0, pToken.n );//memcpy(pNew.u.zToken, pToken.z, pToken.n);
             else if ( pToken.n == 0 && pToken.z == "" )
@@ -958,7 +958,7 @@ sqlite3DbFree( db, ref p.u._zToken );
         //{
         ///Expr  zAlloc = new Expr();//sqlite3DbMallocRaw( db, dupedExprSize( p, flags ) );
         //}
-        // (Expr*)zAlloc;
+        // (Expr)zAlloc;
 
         //if ( pNew != null )
         {
@@ -1002,7 +1002,7 @@ sqlite3DbFree( db, ref p.u._zToken );
           /* Copy the p->u.zToken string, if any. */
           if ( nToken != 0 )
           {
-            string zToken;// = pNew.u.zToken = (char*)&zAlloc[nNewSize];
+            string zToken;// = pNew.u.zToken = (char)&zAlloc[nNewSize];
             zToken = p.u.zToken.Substring( 0, nToken );// memcpy( zToken, p.u.zToken, nToken );
           }
 
@@ -1499,7 +1499,7 @@ return null;
       {
         case TK_UPLUS:
           {
-            rc = sqlite3ExprIsInteger( p.pLeft, ref  pValue );
+            rc = sqlite3ExprIsInteger( p.pLeft, ref pValue );
             break;
           }
         case TK_UMINUS:
@@ -2298,7 +2298,7 @@ return null;
     /*
 ** Duplicate an 8-byte value
 */
-    //static char *dup8bytes(Vdbe v, const char *in){
+    //static char *dup8bytes(Vdbe v, string in){
     //  char *out = sqlite3DbMallocRaw(sqlite3VdbeDb(v), 8);
     //  if( out ){
     //    memcpy(out, in, 8);
@@ -2320,7 +2320,7 @@ return null;
       if ( ALWAYS( !String.IsNullOrEmpty( z ) ) )
       {
         double value = 0;
-        //char *zV;
+        //string zV;
         sqlite3AtoF( z, ref value, sqlite3Strlen30( z ), SQLITE_UTF8 );
         Debug.Assert( !sqlite3IsNaN( value ) ); /* The new AtoF never returns NaN */
         if ( negateFlag )
@@ -2558,7 +2558,7 @@ return;
       Table pTab,     /* The table containing the value */
       int iTabCur,    /* The cursor for this table */
       int iCol,       /* Index of the column to extract */
-      int regOut      /* Extract the valud into this register */
+      int regOut      /* Extract the value into this register */
     )
     {
       if ( iCol < 0 || iCol == pTab.iPKey )
@@ -2683,7 +2683,7 @@ return;
 ** Return true if any register in the range iFrom..iTo (inclusive)
 ** is used as part of the column cache.
 **
-** This routine is used within assert() and testcase() macros only
+** This routine is used within Debug.Assert() and testcase() macros only
 ** and does not appear in a normal build.
 */
     static int usedAsColumnCache( Parse pParse, int iFrom, int iTo )
@@ -3103,14 +3103,14 @@ static int usedAsColumnCache( Parse pParse, int iFrom, int iTo ){return 0;}
 ** "glob(B,A).  We want to use the A in "A glob B" to test
 ** for function overloading.  But we use the B term in "glob(B,A)".
 */
-if ( nFarg >= 2 && ( pExpr.flags & EP_InfixFunc ) )
-{
-pDef = sqlite3VtabOverloadFunction( db, pDef, nFarg, pFarg.a[1].pExpr );
-}
-else if ( nFarg > 0 )
-{
-pDef = sqlite3VtabOverloadFunction( db, pDef, nFarg, pFarg.a[0].pExpr );
-}
+            if ( nFarg >= 2 && ( pExpr.flags & EP_InfixFunc ) != 0 )
+            {
+              pDef = sqlite3VtabOverloadFunction( db, pDef, nFarg, pFarg.a[1].pExpr );
+            }
+            else if ( nFarg > 0 )
+            {
+              pDef = sqlite3VtabOverloadFunction( db, pDef, nFarg, pFarg.a[0].pExpr );
+            }
 #endif
             for ( i = 0; i < nFarg; i++ )
             {
@@ -4340,7 +4340,7 @@ pDef = sqlite3VtabOverloadFunction( db, pDef, nFarg, pFarg.a[0].pExpr );
     ** This routine should only be called after the expression has been
     ** analyzed by sqlite3ResolveExprNames().
     */
-    static void sqlite3ExprAnalyzeAggregates( NameContext pNC, ref  Expr pExpr )
+    static void sqlite3ExprAnalyzeAggregates( NameContext pNC, ref Expr pExpr )
     {
       Walker w = new Walker();
       w.xExprCallback = (dxExprCallback)analyzeAggregate;

@@ -295,7 +295,7 @@ namespace Community.CsharpSqlite
                         token = tkEND;
                       }
                       else
-#if ! SQLITE_OMIT_EXPLAIN
+#if !SQLITE_OMIT_EXPLAIN
                         if ( nId == 7 && sqlite3StrNICmp( zSql, zIdx, "explain", 7 ) == 0 )
                         {
                           token = tkEXPLAIN;
@@ -330,7 +330,7 @@ namespace Community.CsharpSqlite
       return ( state == 1 ) ? 1 : 0;//return state==1;
     }
 
-#if ! SQLITE_OMIT_UTF16
+#if !SQLITE_OMIT_UTF16
 /*
 ** This routine is the same as the sqlite3_complete() routine described
 ** above, except that the parameter is required to be UTF-16 encoded, not

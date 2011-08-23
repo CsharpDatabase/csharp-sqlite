@@ -254,7 +254,7 @@ namespace Community.CsharpSqlite
             //db.pnBytesFreed = nByte;
             for ( pVdbe = db.pVdbe; pVdbe != null; pVdbe = pVdbe.pNext )
             {
-              sqlite3VdbeDeleteObject( db, pVdbe );
+              sqlite3VdbeDeleteObject( db, ref pVdbe );
             }
             db.pnBytesFreed = 0;
 
