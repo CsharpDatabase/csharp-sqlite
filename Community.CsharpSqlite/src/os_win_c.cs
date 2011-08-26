@@ -2796,6 +2796,8 @@ pFile.zDeleteOnClose = zConverted;
         {
 #if WINDOWS_PHONE
            if ( !System.IO.IsolatedStorage.IsolatedStorageFile.GetUserStoreForApplication().FileExists( zFilename ) )
+#elif SQLITE_SILVERLIGHT
+            if (!IsolatedStorageFile.GetUserStoreForApplication().FileExists(zFilename))
 #else
           if ( !File.Exists( zFilename ) )
 #endif
@@ -2807,6 +2809,8 @@ pFile.zDeleteOnClose = zConverted;
           {
 #if WINDOWS_PHONE
               System.IO.IsolatedStorage.IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(zFilename);
+#elif SQLITE_SILVERLIGHT
+              IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(zFilename);
 #else
             File.Delete( zConverted );
 #endif
@@ -2902,6 +2906,8 @@ pFile.zDeleteOnClose = zConverted;
       {
 #if WINDOWS_PHONE
           pResOut = System.IO.IsolatedStorage.IsolatedStorageFile.GetUserStoreForApplication().FileExists(zFilename) ? 1 : 0;
+#elif SQLITE_SILVERLIGHT
+          pResOut = IsolatedStorageFile.GetUserStoreForApplication().FileExists(zFilename) ? 1 : 0;
 #else
         pResOut = File.Exists( zFilename ) ? 1 : 0;
 #endif
@@ -2934,7 +2940,7 @@ pFile.zDeleteOnClose = zConverted;
         //    attr = INVALID_FILE_ATTRIBUTES;
         //  }
         //}
-#if WINDOWS_PHONE || WINDOWS_MOBILE
+#if WINDOWS_PHONE || WINDOWS_MOBILE || SQLITE_SILVERLIGHT
         if (new DirectoryInfo(zFilename).Exists)
 #else
         attr = File.GetAttributes( zFilename );// GetFileAttributesW( (WCHAR)zConverted );
