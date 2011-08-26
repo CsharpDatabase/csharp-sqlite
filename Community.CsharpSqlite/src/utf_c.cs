@@ -478,7 +478,7 @@ return rc;
       //return (int)(zOut - zStart);
       try
       {
-        string z1 = Encoding.UTF8.GetString( zIn );
+        string z1 = Encoding.UTF8.GetString( zIn, 0, zIn.Length );
         byte[] zOut = Encoding.UTF8.GetBytes( z1 );
         //if ( zOut.Length != zIn.Length )
         //  return 0;

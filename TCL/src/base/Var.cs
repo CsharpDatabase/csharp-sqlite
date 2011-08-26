@@ -303,7 +303,7 @@ namespace tcl.lang
       }
       public void Append( byte[] append )
       {
-        _StringBuilder.Append( Encoding.UTF8.GetString( append ) );
+        _StringBuilder.Append( Encoding.UTF8.GetString( append, 0, append.Length ) );
       }
 
       public void Append( string append )

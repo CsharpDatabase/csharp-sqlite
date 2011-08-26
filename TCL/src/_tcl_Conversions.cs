@@ -368,7 +368,8 @@ namespace tcl.lang
 
     public static string Tcl_GetStringFromObj( TclObject to, out int n )
     {
-      string ts = System.Text.Encoding.UTF8.GetString( System.Text.Encoding.UTF8.GetBytes( to.ToString() ) );
+      byte[] tb = System.Text.Encoding.UTF8.GetBytes( to.ToString() );
+      string ts = System.Text.Encoding.UTF8.GetString( tb, 0, tb.Length );
       n = ts.Length;
       return ts;
     }
@@ -595,7 +596,7 @@ namespace tcl.lang
       if ( iLength > 0 && iLength < value.Length )
         return TclString.newInstance( Encoding.UTF8.GetString( value, 0, iLength ) );
       else
-        return TclString.newInstance( Encoding.UTF8.GetString( value ) );
+        return TclString.newInstance( Encoding.UTF8.GetString( value, 0, value.Length ) );
     }
 
     public static TclObject Tcl_NewStringObj( string value, int iLength )

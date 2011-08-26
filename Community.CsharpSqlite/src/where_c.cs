@@ -2735,7 +2735,8 @@ WhereCost pCost            /* Lowest cost query plan */
 
           if ( eType == SQLITE_BLOB )
           {
-            z = Encoding.UTF8.GetString( sqlite3_value_blob( pVal ) );
+            byte[] blob = sqlite3_value_blob( pVal );
+            z = Encoding.UTF8.GetString( blob, 0, blob.Length );
             pColl = db.pDfltColl;
             Debug.Assert( pColl.enc == SQLITE_UTF8 );
           }

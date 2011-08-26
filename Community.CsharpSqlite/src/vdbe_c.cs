@@ -1477,7 +1477,7 @@ pOp.p1 = pOut.n;
                     pOut.z = pIn2.z.Substring( 0, pIn2.n ) + sb.ToString();
                   }
                   else // UTF-8 Blob
-                    pOut.z = pIn2.z.Substring( 0, pIn2.n ) + Encoding.UTF8.GetString( pIn1.zBLOB );
+                    pOut.z = pIn2.z.Substring( 0, pIn2.n ) + Encoding.UTF8.GetString( pIn1.zBLOB, 0, pIn1.zBLOB.Length );
                 }
               else
               {

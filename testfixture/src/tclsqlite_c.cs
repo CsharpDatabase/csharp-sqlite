@@ -4050,7 +4050,7 @@ TCL.Tcl_AppendResult( interp, "0", null );
       MD5Update( ctx, Encoding.UTF8.GetBytes( argv[1].ToString() ), Encoding.UTF8.GetByteCount( argv[1].ToString() ) );
       MD5Final( digest, ctx );
       DigestToBase16( digest, zBuf );
-      TCL.Tcl_AppendResult( interp, Encoding.UTF8.GetString( zBuf ) );
+      TCL.Tcl_AppendResult( interp, Encoding.UTF8.GetString( zBuf, 0, zBuf.Length ) );
       return TCL.TCL_OK;
     }
 
@@ -4157,7 +4157,7 @@ TCL.Tcl_AppendResult( interp, "0", null );
         MD5Final( digest, p );
       }
       DigestToBase16( digest, zBuf );
-      sqlite3_result_text( context, Encoding.UTF8.GetString( zBuf ), -1, SQLITE_TRANSIENT );
+      sqlite3_result_text( context, Encoding.UTF8.GetString( zBuf, 0, zBuf.Length ), -1, SQLITE_TRANSIENT );
     }
 
     static int Md5_Register( sqlite3 db, ref string dummy1, sqlite3_api_routines dummy2 )

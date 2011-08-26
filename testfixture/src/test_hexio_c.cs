@@ -169,7 +169,7 @@ namespace Community.CsharpSqlite
         got = 0;
       }
       sqlite3TestBinToHex( zBuf, got );
-      TCL.Tcl_AppendResult( interp, System.Text.Encoding.UTF8.GetString( zBuf ).Substring( 0, got * 2 ) );
+      TCL.Tcl_AppendResult( interp, System.Text.Encoding.UTF8.GetString( zBuf, 0, zBuf.Length ).Substring( 0, got * 2 ) );
       zBuf = null;// sqlite3DbFree( db, ref zBuf );
       return TCL.TCL_OK;
     }

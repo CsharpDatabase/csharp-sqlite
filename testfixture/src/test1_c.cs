@@ -3771,7 +3771,7 @@ new _aSpecialFp( "-NaN0", 0xfff80000, 0x00000000 ),
       if ( TCL.TCL_OK != TCL.Tcl_GetIntFromObj( interp, objv[4], out bytes ) )
         return TCL.TCL_ERROR;
 
-      rc = sqlite3_bind_text( pStmt, idx, Encoding.UTF8.GetString( value ), bytes, SQLITE_TRANSIENT );
+      rc = sqlite3_bind_text( pStmt, idx, Encoding.UTF8.GetString( value, 0, value.Length ), bytes, SQLITE_TRANSIENT );
       if ( sqlite3TestErrCode( interp, StmtToDb( pStmt ), rc ) != 0 )
         return TCL.TCL_ERROR;
       if ( rc != SQLITE_OK )

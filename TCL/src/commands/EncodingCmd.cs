@@ -101,7 +101,7 @@ namespace tcl.lang
                 byte[] bytes = TclByteArray.getBytes( interp, data );
 
                 // ATK
-                interp.setResult( System.Text.Encoding.UTF8.GetString( bytes ) );
+                interp.setResult( System.Text.Encoding.UTF8.GetString( bytes, 0, bytes.Length) );
               }
               else
               {
