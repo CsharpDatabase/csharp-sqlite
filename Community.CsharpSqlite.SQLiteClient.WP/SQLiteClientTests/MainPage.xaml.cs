@@ -47,7 +47,7 @@ namespace Test.WP
              {
                  TestCases tests = new TestCases();
 
-                 cnn.ConnectionString = "Data Source=test.db3";
+                 cnn.ConnectionString = "data source=test.db3,password=0x01010101010101010101010101010101";
                  cnn.Open();
                  tests.Run(cnn, this);
              }

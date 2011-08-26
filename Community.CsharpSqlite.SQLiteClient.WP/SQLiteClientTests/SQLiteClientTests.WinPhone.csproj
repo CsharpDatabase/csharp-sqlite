@@ -31,7 +31,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>Bin\Debug</OutputPath>
-    <DefineConstants>TRACE;DEBUG;SQLITE_SILVERLIGHT WINDOWS_PHONE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;SQLITE_DEBUG SQLITE_SILVERLIGHT WINDOWS_PHONE</DefineConstants>
     <NoStdLib>true</NoStdLib>
     <NoConfig>true</NoConfig>
     <ErrorReport>prompt</ErrorReport>
@@ -99,7 +99,7 @@
       <Project>{A1CF8CB2-DB66-4036-AB1F-9D205D5C93E9}</Project>
       <Name>Community.CsharpSqlite.WinPhone</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\System.Data.Ersatz\System.Data.Ersatz.WinPhone.csproj">
+    <ProjectReference Include="..\..\System.Data.Ersatz\WinPhone\System.Data.Ersatz.WinPhone.csproj">
       <Project>{60396C62-02C2-45FE-98BD-4A16E076722B}</Project>
       <Name>System.Data.Ersatz.WinPhone</Name>
     </ProjectReference>

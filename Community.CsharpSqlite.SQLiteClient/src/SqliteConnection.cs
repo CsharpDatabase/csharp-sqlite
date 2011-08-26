@@ -191,7 +191,7 @@ namespace Community.CsharpSqlite.SQLiteClient
           string token = piece.Substring( 0, firstEqual );
           string tvalue = piece.Remove( 0, firstEqual + 1 ).Trim();
           string tvalue_lc = tvalue.ToLower( System.Globalization.CultureInfo.InvariantCulture ).Trim();
-          switch ( token )
+          switch ( token.ToLower( System.Globalization.CultureInfo.InvariantCulture ).Trim() )
           {
             case "data source":
 						case "uri": 

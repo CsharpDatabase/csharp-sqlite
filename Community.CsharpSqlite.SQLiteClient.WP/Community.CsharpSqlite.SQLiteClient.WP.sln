@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Community.CsharpSqlite.WinP
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Data.Ersatz.WinPhone", "..\System.Data.Ersatz\WinPhone\System.Data.Ersatz.WinPhone.csproj", "{60396C62-02C2-45FE-98BD-4A16E076722B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SQLiteClientTests.WinPhone", "SQLiteClientTests\SQLiteClientTests.WinPhone.csproj", "{C1A7EA2C-8FAE-46F3-BBE1-AFD6DDB81A3E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -25,6 +27,12 @@ Global
 		{60396C62-02C2-45FE-98BD-4A16E076722B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{60396C62-02C2-45FE-98BD-4A16E076722B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{60396C62-02C2-45FE-98BD-4A16E076722B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C1A7EA2C-8FAE-46F3-BBE1-AFD6DDB81A3E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1A7EA2C-8FAE-46F3-BBE1-AFD6DDB81A3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C1A7EA2C-8FAE-46F3-BBE1-AFD6DDB81A3E}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{C1A7EA2C-8FAE-46F3-BBE1-AFD6DDB81A3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C1A7EA2C-8FAE-46F3-BBE1-AFD6DDB81A3E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C1A7EA2C-8FAE-46F3-BBE1-AFD6DDB81A3E}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

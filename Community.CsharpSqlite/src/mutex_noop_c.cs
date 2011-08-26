@@ -81,7 +81,7 @@ return sMutex;
 }
 #endif //* !SQLITE_DEBUG */
 
-#if SQLITE_DEBUG
+#if SQLITE_DEBUG && !SQLITE_MUTEX_OMIT
     /*
 ** In this implementation, error checking is provided for testing
 ** and debugging purposes.  The mutexes still do not provide any
