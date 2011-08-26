@@ -7,6 +7,7 @@ using System.Threading;
 using System.Collections.Generic;
 using Community.CsharpSqlite;
 using Community.CsharpSqlite.SQLiteClient;
+using System.Globalization;
 
 namespace SQLiteClientTests
 {
@@ -827,12 +828,86 @@ namespace SQLiteClientTests
 
       Console.WriteLine( "Test Done." );
     }
-    
+
+    public void Issue_124()
+    {
+      Console.WriteLine( "Test Start." );
+
+      Sqlite3.sqlite3 db = null;
+      Sqlite3.sqlite3_open( ":memory:", out db );
+      Sqlite3.Vdbe stmt = null;
+      string zero = null;
+      string val;
+
+      Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+
+      //create table
+      {
+        Sqlite3.sqlite3_prepare_v2( db, "create table Test (val REAL NOT NULL)", -1, ref stmt, ref zero );
+        Sqlite3.sqlite3_step( stmt );
+        Sqlite3.sqlite3_finalize( stmt );
+      }
+
+      //insert 0.1
+      {
+        Sqlite3.sqlite3_prepare_v2( db, "insert into Test(val) values ('0.1')", -1, ref stmt, ref zero );
+        Sqlite3.sqlite3_step( stmt );
+        Sqlite3.sqlite3_finalize( stmt );
+      }
+      //insert 0.1
+      {
+        Sqlite3.sqlite3_prepare_v2( db, "insert into Test(val) values ('0.2')", -1, ref stmt, ref zero );
+        Sqlite3.sqlite3_step( stmt );
+        Sqlite3.sqlite3_finalize( stmt );
+      }
+
+      //insert 0.000000001
+      {
+        Sqlite3.sqlite3_prepare_v2( db, "insert into Test(val) values ('0.000000001')", -1, ref stmt, ref zero );
+        Sqlite3.sqlite3_step( stmt );
+        Sqlite3.sqlite3_finalize( stmt );
+      }
+
+      //invariant culture
+      {
+        System.Console.WriteLine( "invariant culture" );
+        Sqlite3.sqlite3_prepare_v2( db, "select val from Test", -1, ref stmt, ref zero );
+        Sqlite3.sqlite3_step( stmt );
+        val = Sqlite3.sqlite3_column_text( stmt, 0 );
+        System.Console.WriteLine( "value: " + val );
+        Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture( "ru" );
+        Sqlite3.sqlite3_step( stmt );
+        val = Sqlite3.sqlite3_column_text( stmt, 0 );
+        System.Console.WriteLine( "value: " + val );
+        Sqlite3.sqlite3_step( stmt );
+        val = Sqlite3.sqlite3_column_text( stmt, 0 );
+        System.Console.WriteLine( "value: " + val );
+        Sqlite3.sqlite3_finalize( stmt );
+      }
+
+      //ru-ru culture
+      {
+        System.Console.WriteLine( "ru" );
+        Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture( "ru" );
+        Sqlite3.sqlite3_prepare_v2( db, "select val from Test", -1, ref stmt, ref zero );
+        Sqlite3.sqlite3_step( stmt );
+        val = Sqlite3.sqlite3_column_text( stmt, 0 );
+        System.Console.WriteLine( "value: " + val );
+        Sqlite3.sqlite3_step( stmt );
+        val = Sqlite3.sqlite3_column_text( stmt, 0 );
+        System.Console.WriteLine( "value: " + val );
+        Sqlite3.sqlite3_finalize( stmt );
+      }
+
+
+      Console.WriteLine( "Test Done." );
+    }
+
     public static int Main( string[] args )
     {
       SQLiteClientTestDriver tests = new SQLiteClientTestDriver();
 
-      int Test = 119;
+      int Test = 124;
       switch ( Test )
       {
         case 1:
@@ -868,9 +943,12 @@ namespace SQLiteClientTests
         case 119:
           tests.Issue_119();
           break;
+        case 124:
+          tests.Issue_124();
+          break;
       }
       Console.WriteLine( "Press Enter to Continue" );
-      //Console.ReadKey();
+      Console.ReadKey();
       tests = null;
 
       return 0;

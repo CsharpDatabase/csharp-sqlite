@@ -10,6 +10,7 @@ using u32 = System.UInt32;
 namespace Community.CsharpSqlite
 {
   using sqlite3_value = Sqlite3.Mem;
+  using System.Globalization;
 
   public partial class Sqlite3
   {
@@ -303,10 +304,10 @@ return SQLITE_OK;
           pMem.z = "Inf";
         else if ( Double.IsPositiveInfinity( pMem.r ) )
           pMem.z = "+Inf";
-        else if ( pMem.r.ToString().Contains( "." ) )
-          pMem.z = pMem.r.ToString().ToLower();//sqlite3_snprintf(nByte, pMem.z, "%!.15g", pMem->r);
+        else if ( pMem.r.ToString( CultureInfo.InvariantCulture ).Contains( "." ) )
+          pMem.z = pMem.r.ToString( CultureInfo.InvariantCulture ).ToLower();//sqlite3_snprintf(nByte, pMem.z, "%!.15g", pMem->r);
         else
-          pMem.z = pMem.r.ToString() + ".0";
+          pMem.z = pMem.r.ToString( CultureInfo.InvariantCulture) + ".0";
       }
       pMem.n = sqlite3Strlen30( pMem.z );
       pMem.enc = SQLITE_UTF8;
