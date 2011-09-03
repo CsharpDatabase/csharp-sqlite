@@ -166,7 +166,7 @@ sqlite3_value[] argv
   ** or may not be initialised.
   */
   flags = (int)db.openFlags;
-  rc = sqlite3ParseUri( db.pVfs.zName, zFile, ref flags, ref pVfs, ref zPath, ref zErr );
+  rc = sqlite3ParseUri( vfsList.zName, zFile, ref flags, ref pVfs, ref zPath, ref zErr );
   if ( rc != SQLITE_OK )
   {
     //if ( rc == SQLITE_NOMEM )

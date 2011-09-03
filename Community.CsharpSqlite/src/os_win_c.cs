@@ -2536,7 +2536,7 @@ int isTemp = 0;
       || eType == SQLITE_OPEN_TRANSIENT_DB || eType == SQLITE_OPEN_WAL
       );
 
-      Debug.Assert( pFile != null );
+      //assert( id!=0 );
       UNUSED_PARAMETER( pVfs );
 
       pFile.fs = null;//.h = INVALID_HANDLE_VALUE;
