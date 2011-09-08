@@ -316,7 +316,7 @@ out object pp                 /* OUT: Pointer to mapping */
     */
     static bool isInit = false;
 
-    static sqlite3_vfs sqlite3_vfs_find( string zVfs )
+    static public sqlite3_vfs sqlite3_vfs_find(string zVfs)
     {
       sqlite3_vfs pVfs = null;
 #if SQLITE_THREADSAFE
@@ -375,7 +375,7 @@ out object pp                 /* OUT: Pointer to mapping */
     ** VFS multiple times.  The new VFS becomes the default if makeDflt is
     ** true.
     */
-    static int sqlite3_vfs_register( sqlite3_vfs pVfs, int makeDflt )
+    static public int sqlite3_vfs_register( sqlite3_vfs pVfs, int makeDflt )
     {
       sqlite3_mutex mutex;
 #if !SQLITE_OMIT_AUTOINIT

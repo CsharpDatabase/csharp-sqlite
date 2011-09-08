@@ -362,7 +362,7 @@ memset( pHash, 0, sizeof( sqlite3GlobalFunctions ) );
     ** behavior.
     */
     // Overloads for ap assignments
-    static int sqlite3_config( int op, sqlite3_pcache_methods ap )
+    static public int sqlite3_config( int op, sqlite3_pcache_methods ap )
     {      //  va_list ap;
       int rc = SQLITE_OK;
       switch ( op )
@@ -377,7 +377,7 @@ memset( pHash, 0, sizeof( sqlite3GlobalFunctions ) );
       return rc;
     }
 
-    static int sqlite3_config( int op, ref sqlite3_pcache_methods ap )
+    static public int sqlite3_config(int op, ref sqlite3_pcache_methods ap)
     {      //  va_list ap;
       int rc = SQLITE_OK;
       switch ( op )
@@ -395,7 +395,7 @@ memset( pHash, 0, sizeof( sqlite3GlobalFunctions ) );
       return rc;
     }
 
-    static int sqlite3_config( int op, sqlite3_mem_methods ap )
+    static public int sqlite3_config(int op, sqlite3_mem_methods ap)
     {      //  va_list ap;
       int rc = SQLITE_OK;
       switch ( op )
@@ -410,7 +410,7 @@ memset( pHash, 0, sizeof( sqlite3GlobalFunctions ) );
       return rc;
     }
 
-    static int sqlite3_config( int op, ref sqlite3_mem_methods ap )
+    static public int sqlite3_config(int op, ref sqlite3_mem_methods ap)
     {      //  va_list ap;
       int rc = SQLITE_OK;
       switch ( op )
@@ -427,7 +427,7 @@ memset( pHash, 0, sizeof( sqlite3GlobalFunctions ) );
     }
 
 #if SQLITE_THREADSAFE // && SQLITE_THREADSAFE>0
-    static int sqlite3_config( int op, sqlite3_mutex_methods ap )
+    static public int sqlite3_config( int op, sqlite3_mutex_methods ap )
     {
       //  va_list ap;
       int rc = SQLITE_OK;
@@ -443,7 +443,7 @@ memset( pHash, 0, sizeof( sqlite3GlobalFunctions ) );
       return rc;
     }
 
-    static int sqlite3_config( int op, ref sqlite3_mutex_methods ap )
+    static public int sqlite3_config( int op, ref sqlite3_mutex_methods ap )
     {
       //  va_list ap;
       int rc = SQLITE_OK;
@@ -460,7 +460,7 @@ memset( pHash, 0, sizeof( sqlite3GlobalFunctions ) );
     }
 #endif
 
-    static int sqlite3_config( int op, params object[] ap )
+    static public int sqlite3_config(int op, params object[] ap)
     {
       //  va_list ap;
       int rc = SQLITE_OK;
@@ -3148,7 +3148,7 @@ error_out:
     /*
     ** Interface to the testing logic.
     */
-    static int sqlite3_test_control( int op, params object[] ap )
+    static public int sqlite3_test_control(int op, params object[] ap)
     {
       int rc = 0;
 #if !SQLITE_OMIT_BUILTIN_TEST

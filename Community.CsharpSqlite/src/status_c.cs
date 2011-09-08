@@ -108,7 +108,7 @@ namespace Community.CsharpSqlite
     ** 32-bit integer is an atomic operation.  If that assumption is not true,
     ** then this routine is not threadsafe.
     */
-    static int sqlite3_status( int op, ref int pCurrent, ref int pHighwater, int resetFlag )
+    static public int sqlite3_status( int op, ref int pCurrent, ref int pHighwater, int resetFlag )
     {
       wsdStatInit();
       if ( op < 0 || op >= ArraySize( wsdStat.nowValue ) )
@@ -126,7 +126,7 @@ namespace Community.CsharpSqlite
     /*
     ** Query status information for a single database connection
     */
-    static int sqlite3_db_status(
+    static public int sqlite3_db_status(
     sqlite3 db,          /* The database connection whose status is desired */
     int op,              /* Status verb */
     ref int pCurrent,    /* Write current value here */

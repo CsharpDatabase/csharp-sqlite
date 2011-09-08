@@ -115,7 +115,7 @@ if( 0==isPrepareV2 ) return;
     /*
     ** Return the SQL associated with a prepared statement
     */
-    static string sqlite3_sql( sqlite3_stmt pStmt )
+    static public string sqlite3_sql( sqlite3_stmt pStmt )
     {
       Vdbe p = (Vdbe)pStmt;
       return ( p != null && p.isPrepareV2 ? p.zSql : "" );

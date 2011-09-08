@@ -121,7 +121,22 @@ static void sqlite3_progress_handler (sqlite3 db,       int nOps, dxProgress xPr
 
 #if SQLITE_OMIT_GET_TABLE
     //# define //sqlite3_free_table    0
-    //# define sqlite3_get_table     0
+    static public int sqlite3_free_table(ref string[] pazResult) { pazResult = null; return 0; }
+
+    static public int sqlite3_get_table(
+    sqlite3 db,             /* An open database */
+    string zSql,            /* SQL to be evaluated */
+    ref string[] pazResult, /* Results of the query */
+    ref int pnRow,          /* Number of result rows written here */
+    object dummy,       
+    ref string pzErrmsg     /* Error msg written here */
+    )
+    {
+        int iDummy = 0;
+        return sqlite3_get_table(db, zSql, ref pazResult, ref pnRow, ref iDummy, ref pzErrmsg);
+    }
+
+        //# define sqlite3_get_table     0
     static public int sqlite3_get_table(
     sqlite3 db,             /* An open database */
     string zSql,            /* SQL to be evaluated */

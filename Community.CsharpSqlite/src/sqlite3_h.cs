@@ -124,9 +124,9 @@ namespace Community.CsharpSqlite
     //#define SQLITE_VERSION        "3.7.7"
     //#define SQLITE_VERSION_NUMBER 3007007
     //#define SQLITE_SOURCE_ID      "2011-06-23 19:49:22 4374b7e83ea0a3fbc3691f9c0c936272862f32f2"
-    const string SQLITE_VERSION = "3.7.7(C#)";
-    const int SQLITE_VERSION_NUMBER = 300700701;
-    const string SQLITE_SOURCE_ID = "Ported to C# from 2011-06-23 19:49:22 4374b7e83ea0a3fbc3691f9c0c936272862f32f2";
+    public const string SQLITE_VERSION = "3.7.7(C#)";
+    public const int SQLITE_VERSION_NUMBER = 300700701;
+    public const string SQLITE_SOURCE_ID = "Ported to C# from 2011-06-23 19:49:22 4374b7e83ea0a3fbc3691f9c0c936272862f32f2";
 
     /*
     ** CAPI3REF: Run-Time Library Version Numbers
@@ -1821,22 +1821,22 @@ namespace Community.CsharpSqlite
     //#define SQLITE_CONFIG_GETPCACHE    15  /* sqlite3_pcache_methods* */
     //#define SQLITE_CONFIG_LOG          16  /* xFunc, void* */
     //#define SQLITE_CONFIG_URI          17  /* int */
-    const int SQLITE_CONFIG_SINGLETHREAD = 1;
-    const int SQLITE_CONFIG_MULTITHREAD = 2;
-    const int SQLITE_CONFIG_SERIALIZED = 3;
-    const int SQLITE_CONFIG_MALLOC = 4;
-    const int SQLITE_CONFIG_GETMALLOC = 5;
-    const int SQLITE_CONFIG_SCRATCH = 6;
-    const int SQLITE_CONFIG_PAGECACHE = 7;
-    const int SQLITE_CONFIG_HEAP = 8;
-    const int SQLITE_CONFIG_MEMSTATUS = 9;
-    const int SQLITE_CONFIG_MUTEX = 10;
-    const int SQLITE_CONFIG_GETMUTEX = 11;
-    const int SQLITE_CONFIG_LOOKASIDE = 13;
-    const int SQLITE_CONFIG_PCACHE = 14;
-    const int SQLITE_CONFIG_GETPCACHE = 15;
-    const int SQLITE_CONFIG_LOG = 16;
-    const int SQLITE_CONFIG_URI = 17;
+    public const int SQLITE_CONFIG_SINGLETHREAD = 1;
+    public const int SQLITE_CONFIG_MULTITHREAD = 2;
+    public const int SQLITE_CONFIG_SERIALIZED = 3;
+    public const int SQLITE_CONFIG_MALLOC = 4;
+    public const int SQLITE_CONFIG_GETMALLOC = 5;
+    public const int SQLITE_CONFIG_SCRATCH = 6;
+    public const int SQLITE_CONFIG_PAGECACHE = 7;
+    public const int SQLITE_CONFIG_HEAP = 8;
+    public const int SQLITE_CONFIG_MEMSTATUS = 9;
+    public const int SQLITE_CONFIG_MUTEX = 10;
+    public const int SQLITE_CONFIG_GETMUTEX = 11;
+    public const int SQLITE_CONFIG_LOOKASIDE = 13;
+    public const int SQLITE_CONFIG_PCACHE = 14;
+    public const int SQLITE_CONFIG_GETPCACHE = 15;
+    public const int SQLITE_CONFIG_LOG = 16;
+    public const int SQLITE_CONFIG_URI = 17;
 
     /*
     ** CAPI3REF: Database Connection Configuration Options
@@ -6254,23 +6254,23 @@ namespace Community.CsharpSqlite
     //#define SQLITE_TESTCTRL_SCRATCHMALLOC           18
     //#define SQLITE_TESTCTRL_LOCALTIME_FAULT         19
     //#define SQLITE_TESTCTRL_LAST                    19
-    const int SQLITE_TESTCTRL_FIRST = 5;
-    const int SQLITE_TESTCTRL_PRNG_SAVE = 5;
-    const int SQLITE_TESTCTRL_PRNG_RESTORE = 6;
-    const int SQLITE_TESTCTRL_PRNG_RESET = 7;
-    const int SQLITE_TESTCTRL_BITVEC_TEST = 8;
-    const int SQLITE_TESTCTRL_FAULT_INSTALL = 9;
-    const int SQLITE_TESTCTRL_BENIGN_MALLOC_HOOKS = 10;
-    const int SQLITE_TESTCTRL_PENDING_BYTE = 11;
-    const int SQLITE_TESTCTRL_ASSERT = 12;
-    const int SQLITE_TESTCTRL_ALWAYS = 13;
-    const int SQLITE_TESTCTRL_RESERVE = 14;
-    const int SQLITE_TESTCTRL_OPTIMIZATIONS = 15;
-    const int SQLITE_TESTCTRL_ISKEYWORD = 16;
-    const int SQLITE_TESTCTRL_PGHDRSZ = 17;
-    const int SQLITE_TESTCTRL_SCRATCHMALLOC = 18;
-    const int SQLITE_TESTCTRL_LOCALTIME_FAULT = 19;
-    const int SQLITE_TESTCTRL_LAST = 19;
+    public const int SQLITE_TESTCTRL_FIRST = 5;
+    public const int SQLITE_TESTCTRL_PRNG_SAVE = 5;
+    public const int SQLITE_TESTCTRL_PRNG_RESTORE = 6;
+    public const int SQLITE_TESTCTRL_PRNG_RESET = 7;
+    public const int SQLITE_TESTCTRL_BITVEC_TEST = 8;
+    public const int SQLITE_TESTCTRL_FAULT_INSTALL = 9;
+    public const int SQLITE_TESTCTRL_BENIGN_MALLOC_HOOKS = 10;
+    public const int SQLITE_TESTCTRL_PENDING_BYTE = 11;
+    public const int SQLITE_TESTCTRL_ASSERT = 12;
+    public const int SQLITE_TESTCTRL_ALWAYS = 13;
+    public const int SQLITE_TESTCTRL_RESERVE = 14;
+    public const int SQLITE_TESTCTRL_OPTIMIZATIONS = 15;
+    public const int SQLITE_TESTCTRL_ISKEYWORD = 16;
+    public const int SQLITE_TESTCTRL_PGHDRSZ = 17;
+    public const int SQLITE_TESTCTRL_SCRATCHMALLOC = 18;
+    public const int SQLITE_TESTCTRL_LOCALTIME_FAULT = 19;
+    public const int SQLITE_TESTCTRL_LAST = 19;
 
     /*
     ** CAPI3REF: SQLite Runtime Status
@@ -6396,16 +6396,16 @@ namespace Community.CsharpSqlite
     //#define SQLITE_STATUS_PAGECACHE_SIZE       7
     //#define SQLITE_STATUS_SCRATCH_SIZE         8
     //#define SQLITE_STATUS_MALLOC_COUNT         9
-    const int SQLITE_STATUS_MEMORY_USED = 0;
-    const int SQLITE_STATUS_PAGECACHE_USED = 1;
-    const int SQLITE_STATUS_PAGECACHE_OVERFLOW = 2;
-    const int SQLITE_STATUS_SCRATCH_USED = 3;
-    const int SQLITE_STATUS_SCRATCH_OVERFLOW = 4;
-    const int SQLITE_STATUS_MALLOC_SIZE = 5;
-    const int SQLITE_STATUS_PARSER_STACK = 6;
-    const int SQLITE_STATUS_PAGECACHE_SIZE = 7;
-    const int SQLITE_STATUS_SCRATCH_SIZE = 8;
-    const int SQLITE_STATUS_MALLOC_COUNT = 9;
+    public const int SQLITE_STATUS_MEMORY_USED = 0;
+    public const int SQLITE_STATUS_PAGECACHE_USED = 1;
+    public const int SQLITE_STATUS_PAGECACHE_OVERFLOW = 2;
+    public const int SQLITE_STATUS_SCRATCH_USED = 3;
+    public const int SQLITE_STATUS_SCRATCH_OVERFLOW = 4;
+    public const int SQLITE_STATUS_MALLOC_SIZE = 5;
+    public const int SQLITE_STATUS_PARSER_STACK = 6;
+    public const int SQLITE_STATUS_PAGECACHE_SIZE = 7;
+    public const int SQLITE_STATUS_SCRATCH_SIZE = 8;
+    public const int SQLITE_STATUS_MALLOC_COUNT = 9;
 
     /*
     ** CAPI3REF: Database Connection Status
@@ -6500,14 +6500,14 @@ namespace Community.CsharpSqlite
     //#define SQLITE_DBSTATUS_LOOKASIDE_MISS_SIZE  5
     //#define SQLITE_DBSTATUS_LOOKASIDE_MISS_FULL  6
     //#define SQLITE_DBSTATUS_MAX                  6   /* Largest defined DBSTATUS */
-    const int SQLITE_DBSTATUS_LOOKASIDE_USED = 0;
-    const int SQLITE_DBSTATUS_CACHE_USED = 1;
-    const int SQLITE_DBSTATUS_SCHEMA_USED = 2;
-    const int SQLITE_DBSTATUS_STMT_USED = 3;
-    const int SQLITE_DBSTATUS_LOOKASIDE_HIT = 4;
-    const int SQLITE_DBSTATUS_LOOKASIDE_MISS_SIZE = 5;
-    const int SQLITE_DBSTATUS_LOOKASIDE_MISS_FULL = 6;
-    const int SQLITE_DBSTATUS_MAX = 6;
+    public const int SQLITE_DBSTATUS_LOOKASIDE_USED = 0;
+    public const int SQLITE_DBSTATUS_CACHE_USED = 1;
+    public const int SQLITE_DBSTATUS_SCHEMA_USED = 2;
+    public const int SQLITE_DBSTATUS_STMT_USED = 3;
+    public const int SQLITE_DBSTATUS_LOOKASIDE_HIT = 4;
+    public const int SQLITE_DBSTATUS_LOOKASIDE_MISS_SIZE = 5;
+    public const int SQLITE_DBSTATUS_LOOKASIDE_MISS_FULL = 6;
+    public const int SQLITE_DBSTATUS_MAX = 6;
 
 
     /*
@@ -6567,9 +6567,9 @@ namespace Community.CsharpSqlite
     //#define SQLITE_STMTSTATUS_FULLSCAN_STEP     1
     //#define SQLITE_STMTSTATUS_SORT              2
     //#define SQLITE_STMTSTATUS_AUTOINDEX         3
-    const int SQLITE_STMTSTATUS_FULLSCAN_STEP = 1;
-    const int SQLITE_STMTSTATUS_SORT = 2;
-    const int SQLITE_STMTSTATUS_AUTOINDEX = 3;
+    public const int SQLITE_STMTSTATUS_FULLSCAN_STEP = 1;
+    public const int SQLITE_STMTSTATUS_SORT = 2;
+    public const int SQLITE_STMTSTATUS_AUTOINDEX = 3;
 
     /*
     ** CAPI3REF: Custom Page Cache Object
