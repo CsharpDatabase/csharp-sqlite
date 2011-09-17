@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Community.CsharpSqlite</RootNamespace>
     <AssemblyName>C#-SQLite3</AssemblyName>
-    <StartupObject>Shell</StartupObject>
+    <StartupObject>Community.CsharpSqlite.Shell</StartupObject>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>2.0</OldToolsVersion>

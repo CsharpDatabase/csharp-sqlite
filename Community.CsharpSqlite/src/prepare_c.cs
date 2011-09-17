@@ -941,6 +941,17 @@ end_prepare:
       string sOut = null;
       return sqlite3_prepare( db, zSql, nBytes, ref ppStmt, ref sOut );
     }
+    static public int sqlite3_prepare(
+    sqlite3 db,           /* Database handle. */
+    StringBuilder zSql,          /* UTF-8 encoded SQL statement. */
+    int nBytes,           /* Length of zSql in bytes. */
+    ref sqlite3_stmt ppStmt,  /* OUT: A pointer to the prepared statement */
+    int dummy             /* OUT: End of parsed string */
+    )
+    {
+        string sOut = null;
+        return sqlite3_prepare(db, zSql.ToString(), nBytes, ref ppStmt, ref sOut);
+    }
     /*
     ** Two versions of the official API.  Legacy and new use.  In the legacy
     ** version, the original SQL text is not saved in the prepared statement

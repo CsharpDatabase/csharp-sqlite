@@ -146,7 +146,7 @@ static void sqlite3IoTrace( string X, params object[] ap ) {  }
     **    *  Recursive calls to this routine from thread X return immediately
     **       without blocking.
     */
-    static int sqlite3_initialize()
+    static public int sqlite3_initialize()
     {
       //--------------------------------------------------------------------
       // Under C#, Need to initialize some static variables
@@ -511,22 +511,21 @@ memset( pHash, 0, sizeof( sqlite3GlobalFunctions ) );
           case SQLITE_CONFIG_GETMUTEX:
             {
               /* Retrieve the current mutex implementation */
-              Debugger.Break(); // TODO -- *va_arg(ap, sqlite3_mutex_methods) = sqlite3GlobalConfig.mutex;
+              // TODO -- *va_arg(ap, sqlite3_mutex_methods) = sqlite3GlobalConfig.mutex;
               break;
             }
 #endif
           case SQLITE_CONFIG_MALLOC:
             {
-              Debugger.Break(); // TODO --
               /* Specify an alternative malloc implementation */
-              sqlite3GlobalConfig.m = va_arg( ap, (sqlite3_mem_methods)null );
+              // TODO -- sqlite3GlobalConfig.m = va_arg(ap, (sqlite3_mem_methods)null);
               break;
             }
           case SQLITE_CONFIG_GETMALLOC:
             {
               /* Retrieve the current malloc() implementation */
               //if ( sqlite3GlobalConfig.m.xMalloc == null ) sqlite3MemSetDefault();
-              //Debugger.Break(); // TODO --//va_arg(ap, sqlite3_mem_methods) =  sqlite3GlobalConfig.m;
+              // TODO --//va_arg(ap, sqlite3_mem_methods) =  sqlite3GlobalConfig.m;
               break;
             }
           case SQLITE_CONFIG_MEMSTATUS:
@@ -556,7 +555,7 @@ memset( pHash, 0, sizeof( sqlite3GlobalFunctions ) );
           case SQLITE_CONFIG_PCACHE:
             {
               /* Specify an alternative page cache implementation */
-              Debugger.Break(); // TODO --sqlite3GlobalConfig.pcache = (sqlite3_pcache_methods)va_arg(ap, "sqlite3_pcache_methods");
+              // TODO --sqlite3GlobalConfig.pcache = (sqlite3_pcache_methods)va_arg(ap, "sqlite3_pcache_methods");
               break;
             }
 
@@ -566,7 +565,7 @@ memset( pHash, 0, sizeof( sqlite3GlobalFunctions ) );
               {
                 sqlite3PCacheSetDefault();
               }
-              Debugger.Break(); // TODO -- *va_arg(ap, sqlite3_pcache_methods) = sqlite3GlobalConfig.pcache;
+              // TODO -- *va_arg(ap, sqlite3_pcache_methods) = sqlite3GlobalConfig.pcache;
               break;
             }
 
@@ -3415,7 +3414,7 @@ error_out:
 ** returns a NULL pointer.
 */
 static string sqlite3_uri_parameter(string zFilename, string zParam){
-  Debugger.Break();
+  // TODO -- Implement URI
   //zFilename += sqlite3Strlen30(zFilename) + 1;
   //while( zFilename[0] ){
   //  int x = strcmp(zFilename, zParam);

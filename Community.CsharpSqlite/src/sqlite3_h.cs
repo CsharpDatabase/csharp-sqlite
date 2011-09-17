@@ -126,7 +126,7 @@ namespace Community.CsharpSqlite
     //#define SQLITE_SOURCE_ID      "2011-06-23 19:49:22 4374b7e83ea0a3fbc3691f9c0c936272862f32f2"
     public const string SQLITE_VERSION = "3.7.7(C#)";
     public const int SQLITE_VERSION_NUMBER = 300700701;
-    public const string SQLITE_SOURCE_ID = "Ported to C# from 2011-06-23 19:49:22 4374b7e83ea0a3fbc3691f9c0c936272862f32f2";
+    public const string SQLITE_SOURCE_ID = "2011-06-23 19:49:22 4374b7e83ea0a3fbc3691f9c0c936272862f32f2";
 
     /*
     ** CAPI3REF: Run-Time Library Version Numbers
