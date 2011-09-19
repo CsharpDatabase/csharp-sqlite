@@ -1,5 +1,6 @@
 using System.Diagnostics;
-
+using System.Text;
+  
 namespace Community.CsharpSqlite
 {
 #if TCLSH
@@ -170,7 +171,7 @@ error_out:
 
       pStmt = new sqlite3_stmt();
       pStmt.pc = 1234;
-      rc = sqlite3_prepare( db, null, 0, ref pStmt, 0 );
+      rc = sqlite3_prepare( db, (StringBuilder)null, 0, ref pStmt, 0 );
       if ( rc != SQLITE_MISUSE )
       {
         zErrFunction = "sqlite3_prepare";
