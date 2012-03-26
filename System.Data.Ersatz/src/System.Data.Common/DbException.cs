@@ -35,7 +35,11 @@ using System.Runtime.InteropServices;
 
 namespace System.Data.Common {
 
+#if NETFX_CORE
+	public abstract class DbException : Exception
+#else
 	public abstract class DbException : ExternalException
+#endif
 	{
 		protected DbException ()
 		{

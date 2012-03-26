@@ -46,7 +46,7 @@ namespace System.Data.Common {
 		#endregion // Constructors
 
 		#region Properties
-#if !WINDOWS_PHONE
+#if !(WINDOWS_PHONE || NETFX_CORE)
 		[Browsable (false)]
 #endif
 		public abstract DbType DbType { get; set; }
@@ -68,7 +68,7 @@ namespace System.Data.Common {
 
 		[DefaultValue (null)]
 		public abstract object Value { get; set; }
-#if !WINDOWS_PHONE
+#if !(WINDOWS_PHONE || NETFX_CORE)
 		[Browsable (false)]
 #endif
 		[EditorBrowsable (EditorBrowsableState.Never)]

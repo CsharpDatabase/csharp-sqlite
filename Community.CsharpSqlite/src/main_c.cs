@@ -2232,7 +2232,7 @@ static int sqlite3ParseUri(
       while ( iIn < nUri && zUri[iIn] != '/' )
         iIn++;
 
-      if ( iIn != 7 && ( iIn != 16 || String.Compare( "localhost", zUri.Substring( 7, 9 ), StringComparison.InvariantCultureIgnoreCase ) != 0 ) )//memcmp("localhost", &zUri[7], 9)) )
+      if ( iIn != 7 && ( iIn != 16 || String.Compare( "localhost", zUri.Substring( 7, 9 ), StringComparison.OrdinalIgnoreCase ) != 0 ) )//memcmp("localhost", &zUri[7], 9)) )
       {
         pzErrMsg = sqlite3_mprintf("invalid uri authority: %.*s", 
             iIn-7, zUri.Substring(7));
@@ -2986,7 +2986,7 @@ void sqlite3_thread_cleanup()
         for ( iCol = 0; iCol < pTab.nCol; iCol++ )
         {
           pCol = pTab.aCol[iCol];
-          if ( pCol.zName.Equals( zColumnName, StringComparison.InvariantCultureIgnoreCase ) )
+          if ( pCol.zName.Equals( zColumnName, StringComparison.OrdinalIgnoreCase ) )
           {
             break;
           }
@@ -3122,7 +3122,7 @@ error_out:
           Debug.Assert( fd != null );
           if ( op == SQLITE_FCNTL_FILE_POINTER )
           {
-#if (SQLITE_SILVERLIGHT || WINDOWS_MOBILE)
+#if (SQLITE_SILVERLIGHT || WINDOWS_MOBILE || SQLITE_WINRT)
               pArg = (long)-1; // not supported
 #else
             pArg = (long)fd.fs.Handle;

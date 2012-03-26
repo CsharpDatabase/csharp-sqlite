@@ -134,7 +134,7 @@ sqlite3_value[] argv
   {
     string z = db.aDb[i].zName;
     Debug.Assert( z != null && zName != null );
-    if ( z.Equals( zName, StringComparison.InvariantCultureIgnoreCase ) )
+    if ( z.Equals( zName, StringComparison.OrdinalIgnoreCase ) )
     {
       zErrDyn = sqlite3MPrintf( db, "database %s is already in use", zName );
       goto attach_error;
@@ -325,7 +325,7 @@ sqlite3_value[] argv
     pDb = db.aDb[i];
     if ( pDb.pBt == null )
       continue;
-    if ( pDb.zName.Equals( zName, StringComparison.InvariantCultureIgnoreCase ) )
+    if ( pDb.zName.Equals( zName, StringComparison.OrdinalIgnoreCase ) )
       break;
   }
 
@@ -544,7 +544,7 @@ SrcList pList       /* The Source list to check and modify */
     {
       pItem.zDatabase = zDb;// sqlite3DbStrDup( pFix.pParse.db, zDb );
     }
-    else if ( !pItem.zDatabase.Equals( zDb ,StringComparison.InvariantCultureIgnoreCase )  )
+    else if ( !pItem.zDatabase.Equals( zDb ,StringComparison.OrdinalIgnoreCase )  )
     {
       sqlite3ErrorMsg( pFix.pParse,
       "%s %T cannot reference objects in database %s",

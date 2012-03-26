@@ -54,11 +54,11 @@ namespace System.Data.Common {
 
 		public abstract string Database { get; }
 		public abstract string DataSource { get; }
-#if !WINDOWS_PHONE		
+#if !(WINDOWS_PHONE || NETFX_CORE)		
 		[Browsable (false)]
 #endif
 		public abstract string ServerVersion { get; }
-#if !WINDOWS_PHONE		
+#if !(WINDOWS_PHONE || NETFX_CORE)
 		[Browsable (false)]
 #endif
 		public abstract ConnectionState State { get; }

@@ -190,8 +190,16 @@ namespace Community.CsharpSqlite.SQLiteClient
           }
           string token = piece.Substring( 0, firstEqual );
           string tvalue = piece.Remove( 0, firstEqual + 1 ).Trim();
-          string tvalue_lc = tvalue.ToLower( System.Globalization.CultureInfo.InvariantCulture ).Trim();
-          switch ( token.ToLower( System.Globalization.CultureInfo.InvariantCulture ).Trim() )
+          string tvalue_lc = tvalue.ToLower( 
+#if !SQLITE_WINRT
+              System.Globalization.CultureInfo.InvariantCulture 
+#endif
+              ).Trim();
+          switch ( token.ToLower(
+#if !SQLITE_WINRT
+              System.Globalization.CultureInfo.InvariantCulture 
+#endif
+).Trim())
           {
             case "data source":
 						case "uri": 
@@ -201,7 +209,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 								db_file = tvalue.Substring (5);
 							} else if (tvalue_lc.StartsWith ("/")) {
 								db_file = tvalue;
- #if !(SQLITE_SILVERLIGHT || WINDOWS_MOBILE)
+ #if !(SQLITE_SILVERLIGHT || WINDOWS_MOBILE || SQLITE_WINRT)
 							} else if (tvalue_lc.StartsWith ("|DataDirectory|",
 											 StringComparison.InvariantCultureIgnoreCase)) {
 								AppDomainSetup ads = AppDomain.CurrentDomain.SetupInformation;
@@ -376,7 +384,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 			state = ConnectionState.Open;
 		}
 
-#if !SQLITE_SILVERLIGHT
+#if !(SQLITE_SILVERLIGHT || SQLITE_WINRT)
 	public override DataTable GetSchema( String collectionName )
 	{
 		return GetSchema( collectionName, null );
@@ -574,7 +582,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 		throw new ArgumentException( "Identifiers can not contain a single quote." );
 	}
 
-#if !SQLITE_SILVERLIGHT
+#if !(SQLITE_SILVERLIGHT || SQLITE_WINRT)
 	DataTable GetSchemaViews( string[] restrictionValues )
 	{
 		SqliteCommand cmd = new SqliteCommand(

@@ -10,8 +10,10 @@ namespace Community.CsharpSqlite
 {
   using sqlite3_int64 = System.Int64;
   using sqlite3_stmt = Sqlite3.Vdbe;
+#if !SQLITE_WINRT 
   using System.Security.Cryptography;
   using System.IO;
+#endif
 
   public partial class Sqlite3
   {

@@ -814,7 +814,7 @@ isView = false;
         {
           for ( j = 0; j < pTab.nCol; j++ )
           {
-            if ( pColumn.a[i].zName.Equals( pTab.aCol[j].zName ,StringComparison.InvariantCultureIgnoreCase )  )
+            if ( pColumn.a[i].zName.Equals( pTab.aCol[j].zName ,StringComparison.OrdinalIgnoreCase )  )
             {
               pColumn.a[i].idx = j;
               if ( j == pTab.iPKey )
@@ -1800,7 +1800,7 @@ insert_cleanup:
       {
         return false;
       }
-      return z1.Equals( z2 ,StringComparison.InvariantCultureIgnoreCase ) ;
+      return z1.Equals( z2 ,StringComparison.OrdinalIgnoreCase ) ;
     }
 
 

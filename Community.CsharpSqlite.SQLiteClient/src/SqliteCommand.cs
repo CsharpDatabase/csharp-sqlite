@@ -40,7 +40,9 @@ using System.Data;
 using System.Data.Common;
 using Community.CsharpSqlite;
 using System.Globalization;
-
+#if SQLITE_WINRT
+using System.Reflection;
+#endif
 namespace Community.CsharpSqlite.SQLiteClient
 {
 	public class SqliteCommand : DbCommand, ICloneable
@@ -52,7 +54,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 		private string sql;
 		private int timeout;
 		private CommandType type;
-#if !SQLITE_SILVERLIGHT
+#if !(SQLITE_SILVERLIGHT || SQLITE_WINRT)
 		private UpdateRowSource upd_row_source;
 #endif
 		private SqliteParameterCollection sql_params;
@@ -177,7 +179,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 			get { return _designTimeVisible; }
 			set { _designTimeVisible = value; }
 		}
-#if !SQLITE_SILVERLIGHT
+#if !(SQLITE_SILVERLIGHT || SQLITE_WINRT)
 		public override UpdateRowSource UpdatedRowSource
 		{
 			get
@@ -229,8 +231,12 @@ namespace Community.CsharpSqlite.SQLiteClient
 				}
 
 				Type ptype = param.Value.GetType();
+#if (SQLITE_WINRT)
+				if ( ptype.GetTypeInfo().IsEnum )
+#else
 				if ( ptype.IsEnum )
-					ptype = Enum.GetUnderlyingType( ptype );
+#endif
+                    ptype = Enum.GetUnderlyingType( ptype );
 
 				SqliteError err;
 
@@ -251,7 +257,11 @@ namespace Community.CsharpSqlite.SQLiteClient
 				} else if ( ptype.Equals( typeof( Char ) ) )
 				{
 					err = (SqliteError)Sqlite3.sqlite3_bind_int( pStmt, i, (Char)param.Value );
+#if (SQLITE_WINRT)
+                } else if (ptype.GetTypeInfo().IsEnum)
+#else
 				} else if ( ptype.IsEnum )
+#endif
 				{
 					err = (SqliteError)Sqlite3.sqlite3_bind_int( pStmt, i, (Int32)param.Value );
 				} else if ( ptype.Equals( typeof( Int16 ) ) )

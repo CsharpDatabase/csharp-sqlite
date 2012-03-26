@@ -53,7 +53,7 @@ namespace System.Data.Common {
 		public abstract CommandType CommandType { get; set; }
 
 		[DefaultValue (null)]
-#if !WINDOWS_PHONE
+#if !(WINDOWS_PHONE || NETFX_CORE)
 		[Browsable (false)]
 #endif
 		public DbConnection Connection {
@@ -66,7 +66,7 @@ namespace System.Data.Common {
 		protected abstract DbTransaction DbTransaction { get; set; }
 
 		[EditorBrowsable (EditorBrowsableState.Never)]
-#if !WINDOWS_PHONE
+#if !(WINDOWS_PHONE || NETFX_CORE)
 		[Browsable (false)]
 #endif
 		[DefaultValue (true)]
@@ -85,13 +85,13 @@ namespace System.Data.Common {
 			get { return Transaction; }
 			set { Transaction = (DbTransaction) value; }
 		}
-#if !WINDOWS_PHONE
+#if !(WINDOWS_PHONE || NETFX_CORE)
 		[Browsable (false)]
 #endif
 		public DbParameterCollection Parameters {
 			get { return DbParameterCollection; }
 		}
-#if !WINDOWS_PHONE
+#if !(WINDOWS_PHONE || NETFX_CORE)
 		[Browsable (false)]
 #endif
 		[DefaultValue (null)]

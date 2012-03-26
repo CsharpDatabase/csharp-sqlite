@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Package xmlns="http://schemas.microsoft.com/appx/2010/manifest">
+  <Identity Name="57077BD7-4A47-4289-8F7C-DAE675E39C5A" Publisher="CN=Michael" Version="1.0.0.0" />
+  <Properties>
+    <DisplayName>MetroSQLiteClientTest</DisplayName>
+    <PublisherDisplayName>Michael O. Schoneman</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+    <Description>MetroSQLiteClientTest</Description>
+  </Properties>
+  <Prerequisites>
+    <OSMinVersion>6.2</OSMinVersion>
+    <OSMaxVersionTested>6.2</OSMaxVersionTested>
+  </Prerequisites>
+  <Resources>
+    <Resource Language="x-generate" />
+  </Resources>
+  <Applications>
+    <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="MetroSQLiteClientTest.App">
+      <VisualElements DisplayName="MetroSQLiteClientTest" Logo="Assets\Logo.png" SmallLogo="Assets\SmallLogo.png" Description="MetroSQLiteClientTest" ForegroundText="light" BackgroundColor="#222222">
+        <DefaultTile ShowName="allLogos" />
+        <SplashScreen Image="Assets\SplashScreen.png" />
+      </VisualElements>
+    </Application>
+  </Applications>
+  <Capabilities>
+    <Capability Name="internetClient" />
+  </Capabilities>
+</Package>

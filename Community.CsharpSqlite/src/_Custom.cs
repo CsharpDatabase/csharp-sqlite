@@ -6,12 +6,15 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-#if !(SQLITE_SILVERLIGHT || WINDOWS_MOBILE)
+#if !(SQLITE_SILVERLIGHT || WINDOWS_MOBILE || SQLITE_WINRT)
 using System.Management;
 #endif
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+#if SQLITE_WINRT
+using System.Reflection;
+#endif
 
 using i64 = System.Int64;
 
@@ -54,7 +57,9 @@ static void fprintf( TextWriter tw, string zFormat, params object[] ap )
 }
 static void printf( string zFormat, params object[] ap )
 {
+#if !SQLITE_WINRT
   Console.Out.Write( sqlite3_mprintf( zFormat, ap ) );
+#endif
 }
 
 
@@ -355,7 +360,12 @@ static Token va_arg( object[] ap, Token sysType )
 
 static UInt32 va_arg( object[] ap, UInt32 sysType )
 {
+#if SQLITE_WINRT
+  Type t = ap[vaNEXT].GetType();
+  if ( t.GetTypeInfo().IsClass )
+#else
   if ( ap[vaNEXT].GetType().IsClass )
+#endif
   {
     return (UInt32)ap[vaNEXT++].GetHashCode();
   }
@@ -367,7 +377,12 @@ static UInt32 va_arg( object[] ap, UInt32 sysType )
 
 static UInt64 va_arg( object[] ap, UInt64 sysType )
 {
+#if SQLITE_WINRT
+  Type t = ap[vaNEXT].GetType();
+  if (t.GetTypeInfo().IsClass)
+#else
   if ( ap[vaNEXT].GetType().IsClass )
+#endif
   {
     return (UInt64)ap[vaNEXT++].GetHashCode();
   }
@@ -449,7 +464,7 @@ public struct FILETIME
 // Example (C#)
 public static int GetbytesPerSector( StringBuilder diskPath )
 {
-#if !(SQLITE_SILVERLIGHT || WINDOWS_MOBILE)
+#if !(SQLITE_SILVERLIGHT || WINDOWS_MOBILE || SQLITE_WINRT)
   ManagementObjectSearcher mosLogicalDisks = new ManagementObjectSearcher( "select * from Win32_LogicalDisk where DeviceID = '" + diskPath.ToString().Remove( diskPath.Length - 1, 1 ) + "'" );
   try
   {

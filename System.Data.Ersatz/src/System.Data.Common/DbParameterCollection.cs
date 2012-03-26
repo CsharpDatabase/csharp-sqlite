@@ -48,7 +48,7 @@ namespace System.Data.Common {
 		#endregion // Constructors
 
 		#region Properties
-#if !WINDOWS_PHONE
+#if !(WINDOWS_PHONE || NETFX_CORE)
 		[Browsable (false)]
 #endif
 		public abstract int Count {
@@ -64,21 +64,21 @@ namespace System.Data.Common {
 			get { return this [index]; }
 			set { this [index] = (DbParameter) value; }
 		}
-#if !WINDOWS_PHONE
+#if !(WINDOWS_PHONE || NETFX_CORE)
 		[Browsable (false)]
 #endif
 		[EditorBrowsable (EditorBrowsableState.Never)]
 		public abstract bool IsFixedSize {
 			get;
 		}
-#if !WINDOWS_PHONE
+#if !(WINDOWS_PHONE || NETFX_CORE)
 		[Browsable (false)]
 #endif
 		[EditorBrowsable (EditorBrowsableState.Never)]
 		public abstract bool IsReadOnly {
 			get;
 		}
-#if !WINDOWS_PHONE
+#if !(WINDOWS_PHONE || NETFX_CORE)
 		[Browsable (false)]
 #endif
 		[EditorBrowsable (EditorBrowsableState.Never)]
@@ -101,7 +101,7 @@ namespace System.Data.Common {
 			get { return GetParameter (index); }
 			set { SetParameter (index, value); }
 		}
-#if !WINDOWS_PHONE
+#if !(WINDOWS_PHONE || NETFX_CORE)
 		[Browsable (false)]
 #endif
 		[EditorBrowsable (EditorBrowsableState.Never)]

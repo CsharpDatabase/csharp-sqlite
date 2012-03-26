@@ -1632,11 +1632,11 @@ return null;
     */
     static bool sqlite3IsRowid( string z )
     {
-      if ( z.Equals( "_ROWID_", StringComparison.InvariantCultureIgnoreCase ) )
+      if ( z.Equals( "_ROWID_", StringComparison.OrdinalIgnoreCase ) )
         return true;
-      if ( z.Equals( "ROWID", StringComparison.InvariantCultureIgnoreCase ) )
+      if ( z.Equals( "ROWID", StringComparison.OrdinalIgnoreCase ) )
         return true;
-      if ( z.Equals( "OID", StringComparison.InvariantCultureIgnoreCase ) )
+      if ( z.Equals( "OID", StringComparison.OrdinalIgnoreCase ) )
         return true;
       return false;
     }
@@ -4076,7 +4076,7 @@ static int usedAsColumnCache( Parse pParse, int iFrom, int iTo ){return 0;}
       {
         if ( ExprHasProperty( pB, EP_IntValue ) || NEVER( pB.u.zToken == null ) )
           return 2;
-        if ( !pA.u.zToken.Equals( pB.u.zToken ,StringComparison.InvariantCultureIgnoreCase )  )
+        if ( !pA.u.zToken.Equals( pB.u.zToken ,StringComparison.OrdinalIgnoreCase )  )
         {
           return 2;
         }

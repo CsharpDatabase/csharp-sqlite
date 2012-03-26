@@ -1422,7 +1422,9 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
         sqlite3VXPrintf( acc, 0, zFormat, ap );
         va_end( ref ap );
       }
+#if !SQLITE_WINRT
       Console.Write( sqlite3StrAccumFinish( acc ) );
+#endif
       //fflush(stdout);
     }
 #endif
