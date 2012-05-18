@@ -6870,7 +6870,7 @@ break;
                   }
                   else
                   {
-                    p.errorAction = (byte)( ( pOp.p5 == OE_Replace ) ? OE_Abort : pOp.p5 );
+                    p.errorAction = pOp.p5 == (u8)OE_Replace ? (u8)OE_Abort : pOp.p5;
                   }
                 }
                 else
