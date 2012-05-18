@@ -598,12 +598,10 @@ static void EnterCriticalSection( Object mtx )
 static void InitializeCriticalSection( Object mtx )
 {
   //Debug.WriteLine(String.Format( "{2}: +InitializeCriticalSection; Mutex {0} Thread {1}", mtx.GetHashCode(), Thread.CurrentThread.ManagedThreadId, System.DateTime.Now.Ticks ));
-  Monitor.Enter( mtx );
 }
 static void DeleteCriticalSection( Object mtx )
 {
   //Debug.WriteLine(String.Format( "{2}: +DeleteCriticalSection; Mutex {0} Thread {1}", mtx.GetHashCode(), Thread.CurrentThread.ManagedThreadId, System.DateTime.Now.Ticks) );
-  Monitor.Exit( mtx );
 }
 static void LeaveCriticalSection( Object mtx )
 {

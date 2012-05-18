@@ -388,7 +388,8 @@ rc = SQLITE_OK;
       Debug.Assert( p.owner == tid );
       p.nRef--;
       Debug.Assert( p.nRef == 0 || p.id == SQLITE_MUTEX_RECURSIVE );
-      if (p.nRef == 0) LeaveCriticalSection( p.mutex );
+      if ( p.nRef == 0 ) p.owner = 0;
+      LeaveCriticalSection( p.mutex );
 #if SQLITE_DEBUG
       if ( p.trace != 0 )
       {
