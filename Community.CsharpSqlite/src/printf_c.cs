@@ -1392,7 +1392,7 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
     */
     static void sqlite3_log( int iErrCode, string zFormat, params va_list[] ap )
     {
-      if ( sqlite3GlobalConfig.xLog != null )
+      if (sqlite3GlobalConfig != null && sqlite3GlobalConfig.xLog != null)
       {
         //va_list ap;                             /* Vararg list */
         lock ( lock_va_list )
