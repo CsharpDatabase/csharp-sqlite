@@ -887,7 +887,11 @@ return FALSE;
       Debug.Assert( id != null );
       Debug.Assert( pFile.pShm == null );
 #if SQLITE_DEBUG
+#if WINDOWS_PHONE || SQLITE_SILVERLIGHT
+      OSTRACE( "CLOSE %d\n", pFile.fs.GetHashCode());
+#else
       OSTRACE( "CLOSE %d (%s)\n", pFile.fs.GetHashCode(), pFile.fs.Name );
+#endif
 #endif
       do
       {
@@ -1079,7 +1083,11 @@ free(pFile.zDeleteOnClose);
 
       Debug.Assert( pFile != null );
 #if SQLITE_DEBUG
-      OSTRACE( "TRUNCATE %d %lld\n", id.fs.Name, nByte );
+#if WINDOWS_PHONE || SQLITE_SILVERLIGHT
+      OSTRACE( "TRUNCATE %d %lld\n", id.fs.GetHashCode(), nByte );
+#else
+      OSTRACE( "TRUNCATE %s %lld\n", id.fs.Name, nByte );
+#endif
 #endif
 #if SQLITE_TEST
       if ( SimulateIOError() )
@@ -1562,7 +1570,11 @@ error = 1;
       {
         rc = 1;
 #if SQLITE_DEBUG
-        OSTRACE( "TEST WR-LOCK %d %d (local)\n", pFile.fs.Name, rc );
+#if WINDOWS_PHONE || SQLITE_SILVERLIGHT
+        OSTRACE( "TEST WR-LOCK %d %d (local)\n", pFile.fs.GetHashCode(), rc );
+#else
+        OSTRACE( "TEST WR-LOCK %s %d (local)\n", pFile.fs.Name, rc );
+#endif
 #endif
       }
       else
@@ -2759,7 +2771,11 @@ dwFlagsAndAttributes |= FileOptions.RandomAccess; // FILE_FLAG_RANDOM_ACCESS;
 #endif
 
 #if SQLITE_DEBUG
-            OSTRACE( "OPEN %d (%s)\n", fs.GetHashCode(), fs.Name );
+#if WINDOWS_PHONE || SQLITE_SILVERLIGHT
+            OSTRACE( "OPEN %d (%s)\n", fs.GetHashCode(), zName );
+#else
+            OSTRACE("OPEN %d (%s)\n", fs.GetHashCode(), fs.Name);
+#endif
 #endif
           }
           catch ( Exception e )
