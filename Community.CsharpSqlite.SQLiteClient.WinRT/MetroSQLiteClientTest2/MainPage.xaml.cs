@@ -21,14 +21,42 @@ using Windows.UI.Xaml.Navigation;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
 
-namespace MetroSQLiteClientTest
+namespace MetroSQLiteClientTest2
 {
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
-    public sealed partial class TestPage : Page
+    public sealed partial class MainPage : Page
     {
-        #region Synchronous File Operations
+        public MainPage()
+        {
+            SyncContext = SynchronizationContext.Current;
+            this.InitializeComponent();
+            _testComboBox.Items.Add("Test 1");
+            _testComboBox.Items.Add("Test 2");
+            _testComboBox.Items.Add("Test 3");
+            _testComboBox.Items.Add("Test 4");
+            _testComboBox.Items.Add("Test 5");
+            _testComboBox.Items.Add("Test 6");
+            _testComboBox.Items.Add("Test 7");
+            _testComboBox.Items.Add("Issue 65");
+            _testComboBox.Items.Add("Issue 76");
+            _testComboBox.Items.Add("Issue 86");
+            _testComboBox.Items.Add("Issue 119");
+            _testComboBox.Items.Add("Issue 124");
+            _testComboBox.SelectedIndex = 0;
+        }
+
+        /// <summary>
+        /// Invoked when this page is about to be displayed in a Frame.
+        /// </summary>
+        /// <param name="e">Event data that describes how this page was reached.  The Parameter
+        /// property is typically used to configure the page.</param>
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
+        }
+
+                #region Synchronous File Operations
 
         static private bool FileExists(string path)
         {
@@ -549,34 +577,6 @@ namespace MetroSQLiteClientTest
 
         public SynchronizationContext SyncContext { get; set; }
 
-        public TestPage()
-        {
-            SyncContext = SynchronizationContext.Current;
-            this.InitializeComponent();
-            _testComboBox.Items.Add("Test 1");
-            _testComboBox.Items.Add("Test 2");
-            _testComboBox.Items.Add("Test 3");
-            _testComboBox.Items.Add("Test 4");
-            _testComboBox.Items.Add("Test 5");
-            _testComboBox.Items.Add("Test 6");
-            _testComboBox.Items.Add("Test 7");
-            _testComboBox.Items.Add("Issue 65");
-            _testComboBox.Items.Add("Issue 76");
-            _testComboBox.Items.Add("Issue 86");
-            _testComboBox.Items.Add("Issue 119");
-            _testComboBox.Items.Add("Issue 124");
-            _testComboBox.SelectedIndex = 0;
-        }
-
-        /// <summary>
-        /// Invoked when this page is about to be displayed in a Frame.
-        /// </summary>
-        /// <param name="e">Event data that describes how this page was reached.  The Parameter
-        /// property is typically used to configure the page.</param>
-        protected override void OnNavigatedTo(NavigationEventArgs e)
-        {
-        }
-
         private async void Button_Click_1(object sender, RoutedEventArgs e)
         {
             _runButton.IsEnabled = false;
@@ -605,5 +605,6 @@ namespace MetroSQLiteClientTest
             }
             _runButton.IsEnabled = true;
         }
+
     }
 }

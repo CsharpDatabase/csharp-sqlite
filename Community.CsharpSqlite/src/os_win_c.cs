@@ -16,6 +16,7 @@ using u8 = System.Byte;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Streams;
+using System.Runtime.InteropServices.WindowsRuntime;
 #elif WINDOWS_PHONE || SQLITE_SILVERLIGHT  
 using System.IO.IsolatedStorage;
 #endif
@@ -958,8 +959,12 @@ free(pFile.zDeleteOnClose);
       try
       {
 #if SQLITE_WINRT
-          Stream stream = id.fs.AsStreamForRead();
-        nRead = stream.Read( pBuf, 0, amt ); // i  if( null==ReadFile(pFile->h, pBuf, amt, &nRead, 0) ){
+          using (IInputStream inputStream = id.fs.GetInputStreamAt((ulong)offset))
+          {
+              IBuffer buffer = pBuf.AsBuffer(0,0,pBuf.Length);
+              inputStream.ReadAsync(buffer, (uint)amt, InputStreamOptions.None).AsTask().Wait();
+              nRead = (int)buffer.Length;
+          }
 #else
         nRead = id.fs.Read( pBuf, 0, amt ); // i  if( null==ReadFile(pFile->h, pBuf, amt, &nRead, 0) ){
 #endif
@@ -1027,13 +1032,17 @@ free(pFile.zDeleteOnClose);
       {
         Debug.Assert( pBuf.Length >= amt );
 #if SQLITE_WINRT
-    Stream stream = id.fs.AsStreamForWrite();
-    stream.Write(pBuf, 0, amt);
+        using (IOutputStream outStream = id.fs.GetOutputStreamAt((ulong)offset))
+        {
+            outStream.WriteAsync(pBuf.AsBuffer(0, amt)).AsTask().Wait();
+            outStream.FlushAsync().AsTask().Wait();
+            wrote = (ulong)amt;
+        }
 #else
         id.fs.Write( pBuf, 0, amt );
+        wrote = id.fs.Position - wrote;
 #endif
         rc = 1;// Success
-        wrote = id.fs.Position - wrote;
       }
       catch ( IOException e )
       {
@@ -2738,7 +2747,7 @@ dwFlagsAndAttributes |= FileOptions.RandomAccess; // FILE_FLAG_RANDOM_ACCESS;
                 fileTask = StorageFile.GetFileFromPathAsync(zConverted).AsTask<StorageFile>();
             }
             fileTask.Wait();
-            Task<IRandomAccessStream> streamTask = fileTask.Result.OpenAsync(FileAccessMode.ReadWriteUnsafe).AsTask<IRandomAccessStream>();
+            Task<IRandomAccessStream> streamTask = fileTask.Result.OpenAsync(FileAccessMode.ReadWrite).AsTask<IRandomAccessStream>();
             streamTask.Wait();
             fs = streamTask.Result;
 #elif WINDOWS_PHONE || SQLITE_SILVERLIGHT  
@@ -3770,6 +3779,5 @@ Debug.Assert(winSysInfo.dwAllocationGranularity > 0);
         return exists;
     }
 #endif 
-
   }
 }

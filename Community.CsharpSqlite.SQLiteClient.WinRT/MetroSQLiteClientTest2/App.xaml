@@ -1,8 +1,8 @@
 ﻿<Application
-    x:Class="MetroSQLiteClientTest.App"
+    x:Class="MetroSQLiteClientTest2.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:MetroSQLiteClientTest">
+    xmlns:local="using:MetroSQLiteClientTest2">
 
     <Application.Resources>
         <ResourceDictionary>
