@@ -646,7 +646,7 @@ static void CODEC_TRACE( string T, params object[] ap ) { if ( sqlite3PagerTrace
     ** Note: this will require modifications to the sqlite3Codec to support rekey
     **
     */
-    static int sqlite3_rekey( sqlite3 db, string pKey, int nKey )
+    public static int sqlite3_rekey( sqlite3 db, string pKey, int nKey )
     {
       CODEC_TRACE( "sqlite3_rekey: entered db=%d pKey=%s, nKey=%d\n", db, pKey, nKey );
       //activate_openssl();

@@ -1314,7 +1314,7 @@ return 1;
     /*
     ** Cause any pending operation to stop at its earliest opportunity.
     */
-    static void sqlite3_interrupt( sqlite3 db )
+    public static void sqlite3_interrupt( sqlite3 db )
     {
       db.u1.isInterrupted = true;
     }
@@ -1586,7 +1586,7 @@ return rc;
 ** If the invoked function returns non-zero, then the commit becomes a
 ** rollback.
 */
-    static object sqlite3_commit_hook(
+    public static object sqlite3_commit_hook(
     sqlite3 db,             /* Attach the hook to this database */
     dxCommitCallback xCallback,   //int (*xCallback)(void),  /* Function to invoke on each commit */
     object pArg             /* Argument to the function */
@@ -1605,7 +1605,7 @@ return rc;
     ** Register a callback to be invoked each time a row is updated,
     ** inserted or deleted using this database connection.
     */
-    static object sqlite3_update_hook(
+    public static object sqlite3_update_hook(
     sqlite3 db,             /* Attach the hook to this database */
     dxUpdateCallback xCallback,   //void (*xCallback)(void*,int,char const *,char const *,sqlite_int64),
     object pArg             /* Argument to the function */
@@ -1624,7 +1624,7 @@ return rc;
     ** Register a callback to be invoked each time a transaction is rolled
     ** back by this database connection.
     */
-    static object sqlite3_rollback_hook(
+    public static object sqlite3_rollback_hook(
     sqlite3 db,             /* Attach the hook to this database */
     dxRollbackCallback xCallback,   //void (*xCallback)(void), /* Callback function */
     object pArg             /* Argument to the function */
@@ -2752,7 +2752,7 @@ return sqlite3ApiExit(0, rc);
     /*
 ** Register a new collation sequence with the database handle db.
 */
-    static int sqlite3_create_collation(
+    public static int sqlite3_create_collation(
     sqlite3 db,
     string zName,
     int enc,
