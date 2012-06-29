@@ -3439,7 +3439,7 @@ signal(SIGINT, Interrupt_handler);
 ** the size of the alternative malloc heap,
 ** and the first command to execute.
 */
-            for (i = 1; i < argc - 1; i++)
+            for (i = 0; i < argc - 1; i++)
             {
                 string z;
                 if (argv[i][0] != '-')
@@ -3569,7 +3569,7 @@ return 1;
             ** file is processed so that the command-line arguments will override
             ** settings in the initialization file.
             */
-            for (i = 1; i < argc && argv[i][0] == '-'; i++)
+            for (i = 0; i < argc && argv[i][0] == '-'; i++)
             {
                 string z = argv[i];
                 if (z[1] == '-') { z = z.Remove(0, 1); } //z++;
