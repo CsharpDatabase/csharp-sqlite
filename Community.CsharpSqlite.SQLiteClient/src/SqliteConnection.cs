@@ -7,6 +7,7 @@
 //            Everaldo Canuto  <everaldo_canuto@yahoo.com.br>
 //            Daniel Morgan <monodanmorg@yahoo.com>
 //            Noah Hart <Noah.Hart@gmail.com>
+//            Stewart Adcock <stewart.adcock@medit.fr>
 //
 // Copyright (C) 2002  Vladimir Vukicevic
 //
@@ -174,15 +175,10 @@ namespace Community.CsharpSqlite.SQLiteClient
 				db_file = null;
 				db_mode = 0644;
 				
-				string[] conn_pieces = connstring.Split (',');
+        string[] conn_pieces = connstring.Split(new char[]{',',';'}, StringSplitOptions.RemoveEmptyEntries);
         for ( int i = 0; i < conn_pieces.Length; i++ )
         {
           string piece = conn_pieces[i].Trim();
-          // ignore empty elements
-          if ( piece.Length == 0 )
-          {
-            continue;
-          }
           int firstEqual = piece.IndexOf( '=' );
           if ( firstEqual == -1 )
           {
@@ -190,16 +186,8 @@ namespace Community.CsharpSqlite.SQLiteClient
           }
           string token = piece.Substring( 0, firstEqual );
           string tvalue = piece.Remove( 0, firstEqual + 1 ).Trim();
-          string tvalue_lc = tvalue.ToLower( 
-#if !SQLITE_WINRT
-              System.Globalization.CultureInfo.InvariantCulture 
-#endif
-              ).Trim();
-          switch ( token.ToLower(
-#if !SQLITE_WINRT
-              System.Globalization.CultureInfo.InvariantCulture 
-#endif
-).Trim())
+          string tvalue_lc = tvalue.ToLower( System.Globalization.CultureInfo.InvariantCulture ).Trim();
+          switch ( token.ToLower( System.Globalization.CultureInfo.InvariantCulture ).Trim() )
           {
             case "data source":
 						case "uri": 
@@ -209,7 +197,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 								db_file = tvalue.Substring (5);
 							} else if (tvalue_lc.StartsWith ("/")) {
 								db_file = tvalue;
- #if !(SQLITE_SILVERLIGHT || WINDOWS_MOBILE || SQLITE_WINRT)
+ #if !(SQLITE_SILVERLIGHT || WINDOWS_MOBILE)
 							} else if (tvalue_lc.StartsWith ("|DataDirectory|",
 											 StringComparison.InvariantCultureIgnoreCase)) {
 								AppDomainSetup ads = AppDomain.CurrentDomain.SetupInformation;
@@ -246,7 +234,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 							break;
 
 			case "password":
-				if (!String.IsNullOrEmpty(db_password) && ( db_password.Length != 34 || !db_password.StartsWith("0x")))
+				if (!string.IsNullOrEmpty(db_password) && ( db_password.Length != 34 || !db_password.StartsWith("0x")))
 							throw new InvalidOperationException ("Invalid password string: must be 34 hex digits starting with 0x");
 					db_password =  tvalue ;
 				break;
@@ -343,8 +331,8 @@ namespace Community.CsharpSqlite.SQLiteClient
 				return;
 			}
 			
-			IntPtr errmsg = IntPtr.Zero;
 			/*
+      IntPtr errmsg = IntPtr.Zero;
 			if (Version == 2){
 				try {
 					sqlite_handle = Sqlite.sqlite_open(db_file, db_mode, out errmsg);
@@ -374,7 +362,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 				if (busy_timeout != 0)
 					Sqlite3.sqlite3_busy_timeout(sqlite_handle2, busy_timeout);
 					//Sqlite.sqlite3_busy_timeout (sqlite_handle, busy_timeout);
-				if ( !String.IsNullOrEmpty( db_password ) )
+				if ( !string.IsNullOrEmpty( db_password ) )
 				{
 					SqliteCommand cmd = (SqliteCommand)this.CreateCommand();
 					cmd.CommandText = "pragma hexkey='" + db_password + "'";
@@ -384,7 +372,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 			state = ConnectionState.Open;
 		}
 
-#if !(SQLITE_SILVERLIGHT || SQLITE_WINRT)
+#if !SQLITE_SILVERLIGHT
 	public override DataTable GetSchema( String collectionName )
 	{
 		return GetSchema( collectionName, null );
@@ -582,7 +570,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 		throw new ArgumentException( "Identifiers can not contain a single quote." );
 	}
 
-#if !(SQLITE_SILVERLIGHT || SQLITE_WINRT)
+#if !SQLITE_SILVERLIGHT
 	DataTable GetSchemaViews( string[] restrictionValues )
 	{
 		SqliteCommand cmd = new SqliteCommand(

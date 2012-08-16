@@ -73,7 +73,7 @@ namespace Community.CsharpSqlite
       || desiredEnc == SQLITE_UTF16BE );
       if ( ( pMem.flags & MEM_Str ) == 0 || pMem.enc == desiredEnc )
       {
-        if ( String.IsNullOrEmpty( pMem.z ) && pMem.zBLOB != null )
+        if ( string.IsNullOrEmpty( pMem.z ) && pMem.zBLOB != null )
           pMem.z = Encoding.UTF8.GetString( pMem.zBLOB, 0, pMem.zBLOB.Length );
         return SQLITE_OK;
       }
@@ -122,7 +122,7 @@ return rc;
       if ( preserve != 0 )
       {//& pMem.z==pMem.zMalloc ){
         if ( pMem.z == null )
-          pMem.z = "";//      sqlite3DbReallocOrFree( pMem.db, pMem.z, n );
+          pMem.z = string.Empty;//      sqlite3DbReallocOrFree( pMem.db, pMem.z, n );
         else
           if ( n < pMem.z.Length )
             pMem.z = pMem.z.Substring( 0, n );
@@ -131,7 +131,7 @@ return rc;
       else
       {
         //  sqlite3DbFree(pMem->db,ref pMem.zMalloc);
-        pMem.z = "";//   sqlite3DbMallocRaw( pMem.db, n );
+        pMem.z = string.Empty;//   sqlite3DbMallocRaw( pMem.db, n );
       }
       //}
 
@@ -1427,10 +1427,10 @@ return SQLITE_NOMEM;
     )
     {
       int op;
-      string zVal = "";
+      string zVal = string.Empty;
       sqlite3_value pVal = null;
       int negInt = 1;
-      string zNeg = "";
+      string zNeg = string.Empty;
 
       if ( pExpr == null )
       {

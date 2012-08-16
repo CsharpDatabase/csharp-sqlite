@@ -89,7 +89,7 @@ namespace Community.CsharpSqlite
         */
         int n;
         Table pTab = pIdx.pTable;
-        sqlite3 db = sqlite3VdbeDb( v );
+        ////sqlite3 db = sqlite3VdbeDb( v );
         StringBuilder pIdx_zColAff = new StringBuilder( pIdx.nColumn + 2 );// (char )sqlite3DbMallocRaw(0, pIdx->nColumn+2);
         //      if ( pIdx_zColAff == null )
         //      {
@@ -134,7 +134,7 @@ namespace Community.CsharpSqlite
       {
         StringBuilder zColAff;
         int i;
-        sqlite3 db = sqlite3VdbeDb( v );
+        ////sqlite3 db = sqlite3VdbeDb( v );
 
         zColAff = new StringBuilder( pTab.nCol + 1 );// (char)sqlite3DbMallocRaw(0, pTab->nCol+1);
         if ( zColAff == null )
@@ -503,7 +503,6 @@ namespace Community.CsharpSqlite
       sqlite3 db;           /* The main database structure */
       Table pTab;           /* The table to insert into.  aka TABLE */
       string zTab;          /* Name of the table into which we are inserting */
-      string zDb;           /* Name of the database holding this table */
       int i = 0;
       int j = 0;
       int idx = 0;            /* Loop counters */
@@ -521,7 +520,6 @@ namespace Community.CsharpSqlite
       int addrSelect = 0;   /* Address of coroutine that implements the SELECT */
       SelectDest dest;      /* Destination for SELECT on rhs of INSERT */
       int iDb;              /* Index of database holding TABLE */
-      Db pDb;               /* The database containing table being inserted into */
       bool appendFlag = false;   /* True if the insert is likely to be an append */
 
       /* Register allocations */
@@ -562,9 +560,11 @@ namespace Community.CsharpSqlite
       }
       iDb = sqlite3SchemaToIndex( db, pTab.pSchema );
       Debug.Assert( iDb < db.nDb );
-      pDb = db.aDb[iDb];
-      zDb = pDb.zName;
 #if !SQLITE_OMIT_AUTHORIZATION
+      Db pDb;               /* The database containing table being inserted into */
+      pDb = db.aDb[iDb];
+      string zDb;           /* Name of the database holding this table */
+      zDb = pDb.zName;
 if( sqlite3AuthCheck(pParse, SQLITE_INSERT, pTab.zName, 0, zDb) ){
 goto insert_cleanup;
 }
@@ -814,7 +814,7 @@ isView = false;
         {
           for ( j = 0; j < pTab.nCol; j++ )
           {
-            if ( pColumn.a[i].zName.Equals( pTab.aCol[j].zName ,StringComparison.OrdinalIgnoreCase )  )
+            if ( pColumn.a[i].zName.Equals( pTab.aCol[j].zName ,StringComparison.InvariantCultureIgnoreCase )  )
             {
               pColumn.a[i].idx = j;
               if ( j == pTab.iPKey )
@@ -1800,7 +1800,7 @@ insert_cleanup:
       {
         return false;
       }
-      return z1.Equals( z2 ,StringComparison.OrdinalIgnoreCase ) ;
+      return z1.Equals( z2 ,StringComparison.InvariantCultureIgnoreCase ) ;
     }
 
 

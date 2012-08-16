@@ -106,7 +106,7 @@ struct sqlite3PrngType *p = &GLOBAL(struct sqlite3PrngType, sqlite3Prng);
         u8[] k = new u8[256];
         wsdPrng.j = 0;
         wsdPrng.i = 0;
-        sqlite3OsRandomness( sqlite3_vfs_find( "" ), 256, k );
+        sqlite3OsRandomness( sqlite3_vfs_find( string.Empty ), 256, k );
         for ( i = 0; i < 255; i++ )
         {
           wsdPrng.s[i] = (u8)i;
@@ -137,7 +137,7 @@ struct sqlite3PrngType *p = &GLOBAL(struct sqlite3PrngType, sqlite3Prng);
     */
     static void sqlite3_randomness( int N, ref i64 pBuf )
     {
-      u8[] zBuf = new u8[N];
+      ////u8[] zBuf = new u8[N];
       pBuf = 0;
 #if SQLITE_THREADSAFE
       sqlite3_mutex mutex = sqlite3MutexAlloc( SQLITE_MUTEX_STATIC_PRNG );

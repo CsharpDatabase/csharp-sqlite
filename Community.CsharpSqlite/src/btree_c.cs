@@ -60,8 +60,6 @@ static void TRACE( string X, params object[] ap )
 }
 #endif
 
-
-
 /*
 ** Extract a 2-byte big-endian integer from an array of unsigned bytes.
 ** But if the value is zero, make it 65536.
@@ -1337,7 +1335,7 @@ static int defragmentPage( MemPage pPage )
     pc = get2byte( data, pAddr );
     testcase( pc == iCellFirst );
     testcase( pc == iCellLast );
-#if !(SQLITE_ENABLE_OVERSIZE_CELL_CHECK)
+#if !SQLITE_ENABLE_OVERSIZE_CELL_CHECK
     /* These conditions have already been verified in btreeInitPage()
 ** if SQLITE_ENABLE_OVERSIZE_CELL_CHECK is defined
 */
@@ -1349,7 +1347,7 @@ static int defragmentPage( MemPage pPage )
     Debug.Assert( pc >= iCellFirst && pc <= iCellLast );
     size = cellSizePtr( pPage, temp, pc );
     cbrk -= size;
-#if (SQLITE_ENABLE_OVERSIZE_CELL_CHECK)
+#if SQLITE_ENABLE_OVERSIZE_CELL_CHECK
     if ( cbrk < iCellFirst || pc + size > usableSize )
     {
       return SQLITE_CORRUPT_BKPT();
@@ -1710,7 +1708,7 @@ static int btreeInitPage( MemPage pPage )
     */
     iCellFirst = cellOffset + 2 * pPage.nCell;
     iCellLast = usableSize - 4;
-#if (SQLITE_ENABLE_OVERSIZE_CELL_CHECK)
+#if SQLITE_ENABLE_OVERSIZE_CELL_CHECK
     {
       int i;            /* Index into the cell pointer array */
       int sz;           /* Size of a cell */
@@ -2034,7 +2032,7 @@ int vfsFlags            /* Flags passed through to sqlite3_vfs.xOpen() */
   byte[] zDbHeader = new byte[100]; /* Database header content */
 
   /* True if opening an ephemeral, temporary database */
-  bool isTempDb = String.IsNullOrEmpty( zFilename );//zFilename==0 || zFilename[0]==0;
+  bool isTempDb = string.IsNullOrEmpty( zFilename );//zFilename==0 || zFilename[0]==0;
 
   /* Set the variable isMemdb to true for an in-memory database, or 
   ** false for a file-based database.
@@ -2144,11 +2142,13 @@ p.sharable = 1;
     ** the right size.  This is to guard against size changes that result
     ** when compiling on a different architecture.
     */
-    Debug.Assert( sizeof( i64 ) == 8 || sizeof( i64 ) == 4 );
-    Debug.Assert( sizeof( u64 ) == 8 || sizeof( u64 ) == 4 );
-    Debug.Assert( sizeof( u32 ) == 4 );
-    Debug.Assert( sizeof( u16 ) == 2 );
-    Debug.Assert( sizeof( Pgno ) == 4 );
+    // These are defined as constants in the CLI specifications.
+    // (See, for example, C# spec sections 18.5.8 and 4.1.4)
+    ////Debug.Assert( sizeof( i64 ) == 8 || sizeof( i64 ) == 4 );
+    ////Debug.Assert( sizeof( u64 ) == 8 || sizeof( u64 ) == 4 );
+    ////Debug.Assert( sizeof( u32 ) == 4 );
+    ////Debug.Assert( sizeof( u16 ) == 2 );
+    ////Debug.Assert( sizeof( Pgno ) == 4 );
 
     pBt = new BtShared();//sqlite3MallocZero( sizeof(pBt) );
     //if( pBt==null ){
@@ -2188,7 +2188,7 @@ pBt.secureDelete = true;
 ** SQLITE_OMIT_MEMORYDB has been defined, then ":memory:" is just a
 ** regular file-name. In this case the auto-vacuum applies as per normal.
 */
-      if ( zFilename != "" && !isMemdb )
+      if ( zFilename.Length > 0 && !isMemdb )
       {
         pBt.autoVacuum = ( SQLITE_DEFAULT_AUTOVACUUM != 0 );
         pBt.incrVacuum = ( SQLITE_DEFAULT_AUTOVACUUM == 2 );
@@ -2666,7 +2666,7 @@ static int lockBtree( BtShared pBt )
   MemPage pPage1 = null; /* Page 1 of the database file */
   Pgno nPage;            /* Number of pages in the database */
   Pgno nPageFile = 0;    /* Number of pages in the database file */
-  Pgno nPageHeader;      /* Number of pages in the database according to hdr */
+  ////Pgno nPageHeader;      /* Number of pages in the database according to hdr */
 
   Debug.Assert( sqlite3_mutex_held( pBt.mutex ) );
   Debug.Assert( pBt.pPage1 == null );
@@ -2680,7 +2680,8 @@ static int lockBtree( BtShared pBt )
   /* Do some checking to help insure the file we opened really is
   ** a valid database file.
   */
-  nPage = nPageHeader = sqlite3Get4byte( pPage1.aData, 28 );//get4byte(28+(u8*)pPage1->aData);
+  nPage = sqlite3Get4byte( pPage1.aData, 28 );//get4byte(28+(u8*)pPage1->aData);
+  ////nPageHeader = nPage;
   sqlite3PagerPagecount( pBt.pPager, out nPageFile );
   if ( nPage == 0 || memcmp( pPage1.aData, 24, pPage1.aData, 92, 4 ) != 0 )//memcmp(24 + (u8*)pPage1.aData, 92 + (u8*)pPage1.aData, 4) != 0)
   {
@@ -7755,7 +7756,7 @@ int balance_deeper_called = 0;
           ** copied either into the body of a database page or into the new
           ** pSpace buffer passed to the latter call to balance_nonroot().
           */
-          u8[] pSpace = new u8[pCur.pBt.pageSize];// u8 pSpace = sqlite3PageMalloc( pCur.pBt.pageSize );
+          ////u8[] pSpace = new u8[pCur.pBt.pageSize];// u8 pSpace = sqlite3PageMalloc( pCur.pBt.pageSize );
           rc = balance_nonroot( pParent, iIdx, null, iPage == 1 ? 1 : 0 );
           //if (pFree != null)
           //{
@@ -9126,7 +9127,7 @@ object _pnParentMaxKey  /* C# Needed to determine if content passed*/
       }
       if ( (int)( pc + size - 1 ) >= usableSize )
       {
-        checkAppendMsg( pCheck, "",
+        checkAppendMsg( pCheck, string.Empty,
         "Corruption detected in cell %d on page %d", i, iPage );
       }
       else
@@ -9157,14 +9158,14 @@ object _pnParentMaxKey  /* C# Needed to determine if content passed*/
       }
       else if ( hit[i] > 1 )
       {
-        checkAppendMsg( pCheck, "",
+        checkAppendMsg( pCheck, string.Empty,
         "Multiple uses for byte %d of page %d", i, iPage );
         break;
       }
     }
     if ( cnt != data[hdr + 7] )
     {
-      checkAppendMsg( pCheck, "",
+      checkAppendMsg( pCheck, string.Empty,
       "Fragmentation of %d bytes reported as %d on page %d",
       cnt, data[hdr + 7], iPage );
     }
@@ -9201,7 +9202,6 @@ ref int pnErr  /* Write number of errors seen to this variable */
   int nRef;
   IntegrityCk sCheck = new IntegrityCk();
   BtShared pBt = p.pBt;
-  StringBuilder zErr = new StringBuilder( 100 );//char zErr[100];
 
   sqlite3BtreeEnter( p );
   Debug.Assert( p.inTrans > TRANS_NONE && pBt.inTransaction > TRANS_NONE );
@@ -9216,7 +9216,7 @@ ref int pnErr  /* Write number of errors seen to this variable */
   if ( sCheck.nPage == 0 )
   {
     sqlite3BtreeLeave( p );
-    return "";
+    return string.Empty;
   }
   sCheck.anRef = sqlite3Malloc( sCheck.anRef, (int)sCheck.nPage + 1 );
   //if( !sCheck.anRef ){
@@ -9247,7 +9247,7 @@ ref int pnErr  /* Write number of errors seen to this variable */
 #if !SQLITE_OMIT_AUTOVACUUM
     if ( pBt.autoVacuum && aRoot[i] > 1 )
     {
-      checkPtrmap( sCheck, (u32)aRoot[i], PTRMAP_ROOTPAGE, 0, "" );
+      checkPtrmap( sCheck, (u32)aRoot[i], PTRMAP_ROOTPAGE, 0, string.Empty );
     }
 #endif
     checkTreePage( sCheck, aRoot[i], "List of tree roots: ", ref refNULL, ref refNULL, null, null );
@@ -9268,12 +9268,12 @@ checkAppendMsg(sCheck, 0, "Page %d is never used", i);
     if ( sCheck.anRef[i] == 0 &&
     ( PTRMAP_PAGENO( pBt, i ) != i || !pBt.autoVacuum ) )
     {
-      checkAppendMsg( sCheck, "", "Page %d is never used", i );
+      checkAppendMsg( sCheck, string.Empty, "Page %d is never used", i );
     }
     if ( sCheck.anRef[i] != 0 &&
     ( PTRMAP_PAGENO( pBt, i ) == i && pBt.autoVacuum ) )
     {
-      checkAppendMsg( sCheck, "", "Pointer map page %d is referenced", i );
+      checkAppendMsg( sCheck, string.Empty, "Pointer map page %d is referenced", i );
     }
 #endif
   }
@@ -9284,7 +9284,7 @@ checkAppendMsg(sCheck, 0, "Page %d is never used", i);
   */
   if ( NEVER( nRef != sqlite3PagerRefcount( pBt.pPager ) ) )
   {
-    checkAppendMsg( sCheck, "",
+    checkAppendMsg( sCheck, string.Empty,
     "Outstanding page count goes from %d to %d during this analysis",
     nRef, sqlite3PagerRefcount( pBt.pPager )
     );

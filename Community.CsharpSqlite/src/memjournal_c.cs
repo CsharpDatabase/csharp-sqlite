@@ -224,7 +224,7 @@ namespace Community.CsharpSqlite
       pChunk = p.pFirst;
       while ( pChunk != null )
       {
-        FileChunk pTmp = pChunk;
+        ////FileChunk pTmp = pChunk;
         pChunk = pChunk.pNext;
         //sqlite3_free( ref pTmp );
       }

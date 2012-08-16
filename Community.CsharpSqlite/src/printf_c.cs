@@ -247,7 +247,7 @@ new et_info(   'r', 10, 3, etORDINAL,    0,  0 ),
       //if( N>0 ){
       //  sqlite3StrAccumAppend(pAccum, zSpaces, N);
       //}
-      pAccum.zText.AppendFormat( "{0," + N + "}", "" );
+      pAccum.zText.AppendFormat( "{0," + N + "}", string.Empty );
     }
 
     /*
@@ -950,12 +950,11 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
               int j;
               int k;
               int n;
-              bool isnull;
               bool needQuote;
               char ch;
               char q = ( ( xtype == etSQLESCAPE3 ) ? '"' : '\'' );   /* Quote character */
               string escarg = (string)va_arg( ap, "char*" ) + '\0';
-              isnull = ( escarg == "" || escarg == "NULL\0" );
+              bool isnull = ( escarg.Length == 0 || escarg == "NULL\0" );
               if ( isnull )
                 escarg = ( xtype == etSQLESCAPE2 ) ? "NULL\0" : "(NULL)\0";
               k = precision;
@@ -1276,7 +1275,7 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
       //StrAccum acc = new StrAccum( SQLITE_PRINT_BUF_SIZE );
 #if !SQLITE_OMIT_AUTOINIT
       if ( sqlite3_initialize() != 0 )
-        return "";
+        return string.Empty;
 #endif
       sqlite3StrAccumInit( acc, null, SQLITE_PRINT_BUF_SIZE, SQLITE_PRINT_BUF_SIZE );//zBase).Length;
       //acc.useMalloc = 2;
@@ -1293,7 +1292,7 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
       string z;
 #if  !SQLITE_OMIT_AUTOINIT
       if ( sqlite3_initialize() != 0 )
-        return "";
+        return string.Empty;
 #endif
       //va_list ap;
       lock ( lock_va_list )
@@ -1392,7 +1391,7 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
     */
     static void sqlite3_log( int iErrCode, string zFormat, params va_list[] ap )
     {
-      if (sqlite3GlobalConfig != null && sqlite3GlobalConfig.xLog != null)
+      if ( sqlite3GlobalConfig.xLog != null )
       {
         //va_list ap;                             /* Vararg list */
         lock ( lock_va_list )
@@ -1422,9 +1421,7 @@ for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
         sqlite3VXPrintf( acc, 0, zFormat, ap );
         va_end( ref ap );
       }
-#if !SQLITE_WINRT
       Console.Write( sqlite3StrAccumFinish( acc ) );
-#endif
       //fflush(stdout);
     }
 #endif

@@ -2929,7 +2929,7 @@ op_column_out:
               char cAff;               /* A single character of affinity */
 
               zAffinity = pOp.p4.z;
-              Debug.Assert( !String.IsNullOrEmpty( zAffinity ) );
+              Debug.Assert( !string.IsNullOrEmpty( zAffinity ) );
               Debug.Assert( zAffinity.Length <= pOp.p2 );//zAffinity[pOp.p2] == 0
               //pIn1 = aMem[pOp.p1];
               for ( int zI = 0; zI < zAffinity.Length; zI++ )// while( (cAff = *(zAffinity++))!=0 ){
@@ -2997,7 +2997,7 @@ op_column_out:
               nHdr = 0;          /* Number of bytes of header space */
               nZero = 0;         /* Number of zero bytes at the end of the record */
               nField = pOp.p1;
-              zAffinity = ( pOp.p4.z == null || pOp.p4.z.Length == 0 ) ? "" : pOp.p4.z;
+              zAffinity = pOp.p4.z ?? string.Empty;
               Debug.Assert( nField > 0 && pOp.p2 > 0 && pOp.p2 + nField <= p.nMem + 1 );
               //pData0 = aMem[nField];
               nField = pOp.p2;
@@ -3132,7 +3132,7 @@ op_column_out:
             {
               int p1;                         /* Value of P1 operand */
               string zName;                   /* Name of savepoint */
-              int nName;
+              ////int nName;
               Savepoint pNew;
               Savepoint pSavepoint;
               Savepoint pTmp;
@@ -3163,7 +3163,7 @@ op_column_out:
                 }
                 else
                 {
-                  nName = sqlite3Strlen30( zName );
+                  ////nName = sqlite3Strlen30( zName );
 
 #if !SQLITE_OMIT_VIRTUALTABLE
                   /* This call is Ok even if this savepoint is actually a transaction
@@ -3212,7 +3212,7 @@ op_column_out:
                 ** an error is returned to the user.  */
                 for (
                 pSavepoint = db.pSavepoint;
-                pSavepoint != null && !pSavepoint.zName.Equals( zName, StringComparison.OrdinalIgnoreCase );
+                pSavepoint != null && !pSavepoint.zName.Equals( zName, StringComparison.InvariantCultureIgnoreCase );
                 pSavepoint = pSavepoint.pNext
                 )
                 {
@@ -5605,7 +5605,7 @@ const int MAX_ROWID = i32.MaxValue;//#   define MAX_ROWID 0x7fffffff
                 zSql = sqlite3MPrintf( db,
                 "SELECT name, rootpage, sql FROM '%q'.%s WHERE %s ORDER BY rowid",
                 db.aDb[iDb].zName, zMaster, pOp.p4.z );
-                if ( String.IsNullOrEmpty( zSql ) )
+                if ( string.IsNullOrEmpty( zSql ) )
                 {
                   rc = SQLITE_NOMEM;
                 }
@@ -5738,9 +5738,9 @@ const int MAX_ROWID = i32.MaxValue;//#   define MAX_ROWID 0x7fffffff
               sqlite3VdbeMemSetNull( pIn1 );
               if ( nErr == 0 )
               {
-                Debug.Assert( z == "" );
+                Debug.Assert( z.Length == 0 );
               }
-              else if ( String.IsNullOrEmpty( z ) )
+              else if ( string.IsNullOrEmpty( z ) )
               {
                 goto no_mem;
               }
@@ -6870,7 +6870,7 @@ break;
                   }
                   else
                   {
-                    p.errorAction = pOp.p5 == (u8)OE_Replace ? (u8)OE_Abort : pOp.p5;
+                    p.errorAction = (byte)( ( pOp.p5 == OE_Replace ) ? (byte)OE_Abort : pOp.p5 );
                   }
                 }
                 else
@@ -6933,7 +6933,7 @@ break;
               string zTrace;
               string z;
 
-              if ( db.xTrace != null && !String.IsNullOrEmpty( zTrace = ( pOp.p4.z != null ? pOp.p4.z : p.zSql ) ) )
+              if ( db.xTrace != null && !string.IsNullOrEmpty( zTrace = ( pOp.p4.z ?? p.zSql ) ) )
               {
                 z = sqlite3VdbeExpandSql( p, zTrace );
                 db.xTrace( db.pTraceArg, z );
@@ -6941,7 +6941,7 @@ break;
               }
 #if SQLITE_DEBUG
               if ( ( db.flags & SQLITE_SqlTrace ) != 0
-                && ( zTrace = ( pOp.p4.z != null ? pOp.p4.z : p.zSql ) ) != "" )
+                && ( zTrace = ( pOp.p4.z ?? p.zSql ) ) != string.Empty )
               {
                 sqlite3DebugPrintf( "SQL-trace: %s\n", zTrace );
               }

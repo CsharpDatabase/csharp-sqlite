@@ -472,7 +472,7 @@ p = sqlite3GlobalConfig.m.xMalloc(nFull);
     ** First make sure the memory subsystem is initialized, then do the
     ** allocation.
     */
-    static public byte[] sqlite3_malloc( int n )
+    static byte[] sqlite3_malloc( int n )
     {
 #if !SQLITE_OMIT_AUTOINIT
       if ( sqlite3_initialize() != 0 )
@@ -718,7 +718,7 @@ return p && p>=db.lookaside.pStart && p<db.lookaside.pEnd;
     /*
     ** Free memory previously obtained from sqlite3Malloc().
     */
-    static public void sqlite3_free(ref byte[] p)
+    static void sqlite3_free( ref byte[] p )
     {
       if ( p == null )
         return;
@@ -738,7 +738,7 @@ return p && p>=db.lookaside.pStart && p<db.lookaside.pEnd;
       }
       p = null;
     }
-    static public void sqlite3_free(ref Mem p)
+    static void sqlite3_free( ref Mem p )
     {
       if ( p == null )
         return;
@@ -1105,7 +1105,7 @@ sqlite3MemdebugSetType(pNew, MEMTYPE_DB |
       Debug.Assert( db == null || sqlite3_mutex_held( db.mutex ) );
       if ( /*db != null && db.mallocFailed != 0 || */ rc == SQLITE_IOERR_NOMEM )
       {
-        sqlite3Error( db, SQLITE_NOMEM, "" );
+        sqlite3Error( db, SQLITE_NOMEM, string.Empty );
         //db.mallocFailed = 0;
         rc = SQLITE_NOMEM;
       }

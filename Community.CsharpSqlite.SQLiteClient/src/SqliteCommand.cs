@@ -40,9 +40,7 @@ using System.Data;
 using System.Data.Common;
 using Community.CsharpSqlite;
 using System.Globalization;
-#if SQLITE_WINRT
-using System.Reflection;
-#endif
+
 namespace Community.CsharpSqlite.SQLiteClient
 {
 	public class SqliteCommand : DbCommand, ICloneable
@@ -54,7 +52,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 		private string sql;
 		private int timeout;
 		private CommandType type;
-#if !(SQLITE_SILVERLIGHT || SQLITE_WINRT)
+#if !SQLITE_SILVERLIGHT
 		private UpdateRowSource upd_row_source;
 #endif
 		private SqliteParameterCollection sql_params;
@@ -67,7 +65,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 
 		public SqliteCommand()
 		{
-			sql = "";
+			sql = string.Empty;
 		}
 
 		public SqliteCommand( string sqlText )
@@ -179,7 +177,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 			get { return _designTimeVisible; }
 			set { _designTimeVisible = value; }
 		}
-#if !(SQLITE_SILVERLIGHT || SQLITE_WINRT)
+#if !SQLITE_SILVERLIGHT
 		public override UpdateRowSource UpdatedRowSource
 		{
 			get
@@ -219,7 +217,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 				String name = Sqlite3.sqlite3_bind_parameter_name( pStmt, i );
 
 				SqliteParameter param = null;
-        if ( !String.IsNullOrEmpty( name ) )
+        if ( !string.IsNullOrEmpty( name ) )
           param = sql_params[name] as SqliteParameter;
 				else
 					param = sql_params[i - 1] as SqliteParameter;
@@ -231,12 +229,8 @@ namespace Community.CsharpSqlite.SQLiteClient
 				}
 
 				Type ptype = param.Value.GetType();
-#if (SQLITE_WINRT)
-				if ( ptype.GetTypeInfo().IsEnum )
-#else
 				if ( ptype.IsEnum )
-#endif
-                    ptype = Enum.GetUnderlyingType( ptype );
+					ptype = Enum.GetUnderlyingType( ptype );
 
 				SqliteError err;
 
@@ -257,11 +251,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 				} else if ( ptype.Equals( typeof( Char ) ) )
 				{
 					err = (SqliteError)Sqlite3.sqlite3_bind_int( pStmt, i, (Char)param.Value );
-#if (SQLITE_WINRT)
-                } else if (ptype.GetTypeInfo().IsEnum)
-#else
 				} else if ( ptype.IsEnum )
-#endif
 				{
 					err = (SqliteError)Sqlite3.sqlite3_bind_int( pStmt, i, (Int32)param.Value );
 				} else if ( ptype.Equals( typeof( Int16 ) ) )
@@ -304,7 +294,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 					err = (SqliteError)Sqlite3.sqlite3_bind_text( pStmt, i, param.Value.ToString(), param.Value.ToString().Length, null );
 				} else
 				{
-					throw new ApplicationException( "Unkown Parameter Type" );
+					throw new ApplicationException( "Unknown Parameter Type" );
 				}
 				if ( err != SqliteError.OK )
 				{
@@ -315,7 +305,6 @@ namespace Community.CsharpSqlite.SQLiteClient
 
 		private void GetNextStatement( string pzStart, ref string pzTail, ref Sqlite3.Vdbe pStmt )
 		{
-			UTF8Encoding encoding = new UTF8Encoding();
 			SqliteError err = (SqliteError)Sqlite3.sqlite3_prepare_v2( parent_conn.Handle2, pzStart, pzStart.Length, ref pStmt, ref pzTail );
 			if ( err != SqliteError.OK )
 				throw new SqliteSyntaxException( parent_conn.Handle2.errCode, GetError3() );

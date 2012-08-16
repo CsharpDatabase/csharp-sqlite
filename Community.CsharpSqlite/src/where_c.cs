@@ -456,7 +456,7 @@ public WhereTerm[] aStatic = new WhereTerm[1];    /* Initial static space for a[
       if ( pWC.nTerm >= pWC.nSlot )
       {
         //WhereTerm pOld = pWC.a;
-        sqlite3 db = pWC.pParse.db;
+        //sqlite3 db = pWC.pParse.db;
         Array.Resize( ref pWC.a, pWC.nSlot * 2 );
         //pWC.a = sqlite3DbMallocRaw(db, sizeof(pWC.a[0])*pWC.nSlot*2 );
         //if( pWC.a==null ){
@@ -761,7 +761,7 @@ public WhereTerm[] aStatic = new WhereTerm[1];    /* Initial static space for a[
               if ( NEVER( j >= pIdx.nColumn ) )
                 return null;
             }
-            if ( pColl != null && !pColl.zName.Equals( pIdx.azColl[j], StringComparison.OrdinalIgnoreCase ) )
+            if ( pColl != null && !pColl.zName.Equals( pIdx.azColl[j], StringComparison.InvariantCultureIgnoreCase ) )
               continue;
           }
           return pTerm;
@@ -856,7 +856,7 @@ public WhereTerm[] aStatic = new WhereTerm[1];    /* Initial static space for a[
       {
         z = pRight.u.zToken;
       }
-      if ( !String.IsNullOrEmpty( z ) )
+      if ( !string.IsNullOrEmpty( z ) )
       {
         cnt = 0;
         while ( cnt < z.Length && ( c = z[cnt] ) != 0 && c != wc[0] && c != wc[1] && c != wc[2] )
@@ -918,7 +918,7 @@ ExprList pList;
 if( pExpr.op!=TK_FUNCTION ){
 return 0;
 }
-if( !pExpr.u.zToken.Equals("match", StringComparison.OrdinalIgnoreCase ) ){
+if( !pExpr.u.zToken.Equals("match", StringComparison.InvariantCultureIgnoreCase ) ){
 return 0;
 }
 pList = pExpr.x.pList;
@@ -1694,7 +1694,7 @@ return 1;
       /* Argument pIdx must either point to a 'real' named index structure, 
       ** or an index structure allocated on the stack by bestBtreeIndex() to
       ** represent the rowid index that is part of every table.  */
-      Debug.Assert( !String.IsNullOrEmpty( pIdx.zName ) || ( pIdx.nColumn == 1 && pIdx.aiColumn[0] == -1 ) );
+      Debug.Assert( !string.IsNullOrEmpty( pIdx.zName ) || ( pIdx.nColumn == 1 && pIdx.aiColumn[0] == -1 ) );
 
       /* Match terms of the ORDER BY clause against columns of
       ** the index.
@@ -1726,7 +1726,7 @@ return 1;
         {
           pColl = db.pDfltColl;
         }
-        if ( !String.IsNullOrEmpty( pIdx.zName ) && i < pIdx.nColumn )
+        if ( !string.IsNullOrEmpty( pIdx.zName ) && i < pIdx.nColumn )
         {
           iColumn = pIdx.aiColumn[i];
           if ( iColumn == pIdx.pTable.iPKey )
@@ -1742,7 +1742,7 @@ return 1;
           iSortOrder = 0;
           zColl = pColl.zName;
         }
-        if ( pExpr.iColumn != iColumn || !pColl.zName.Equals( zColl, StringComparison.OrdinalIgnoreCase ) )
+        if ( pExpr.iColumn != iColumn || !pColl.zName.Equals( zColl, StringComparison.InvariantCultureIgnoreCase ) )
         {
           /* Term j of the ORDER BY clause does not match column i of the index */
           if ( i < nEqCol )
@@ -1915,7 +1915,7 @@ sqlite3DebugPrintf( "  estimatedCost=%g\n", p.estimatedCost );
 #if !SQLITE_OMIT_OR_OPTIMIZATION
       int iCur = pSrc.iCursor;   /* The cursor of the table to be accessed */
       Bitmask maskSrc = getMask( pWC.pMaskSet, iCur );  /* Bitmask for pSrc */
-      WhereTerm pWCEnd = pWC.a[pWC.nTerm];        /* End of pWC.a[] */
+      ////WhereTerm pWCEnd = pWC.a[pWC.nTerm];        /* End of pWC.a[] */
       WhereTerm pTerm;                 /* A single term of the WHERE clause */
 
       /* No OR-clause optimization allowed if the INDEXED BY or NOT INDEXED clauses
@@ -1935,7 +1935,7 @@ sqlite3DebugPrintf( "  estimatedCost=%g\n", p.estimatedCost );
         )
         {
           WhereClause pOrWC = pTerm.u.pOrInfo.wc;
-          WhereTerm pOrWCEnd = pOrWC.a[pOrWC.nTerm];
+          ////WhereTerm pOrWCEnd = pOrWC.a[pOrWC.nTerm];
           WhereTerm pOrTerm;
           int flags = WHERE_MULTI_OR;
           double rTotal = 0;
@@ -2455,7 +2455,7 @@ WhereCost pCost            /* Lowest cost query plan */
         //  pParse.db.mallocFailed = 1;
         //}
         // else 
-        if ( String.IsNullOrEmpty( pVtab.zErrMsg ) )
+        if ( string.IsNullOrEmpty( pVtab.zErrMsg ) )
         {
           sqlite3ErrorMsg( pParse, "%s", sqlite3ErrStr( rc ) );
         }
@@ -2753,7 +2753,7 @@ WhereCost pCost            /* Lowest cost query plan */
             //if( null==z ){
             //  return SQLITE_NOMEM;
             //}
-            Debug.Assert( z != "" && pColl != null && pColl.xCmp != null );
+            Debug.Assert( z != string.Empty && pColl != null && pColl.xCmp != null );
           }
           n = sqlite3ValueBytes( pVal, pColl.enc );
 
@@ -3226,7 +3226,7 @@ whereEqualScanEst_cancel:
         sPk = new Index(); // memset( &sPk, 0, sizeof( Index ) );
         sPk.aSortOrder = new byte[1];
         sPk.azColl = new string[1];
-        sPk.azColl[0] = "";
+        sPk.azColl[0] = string.Empty;
         sPk.nColumn = 1;
         sPk.aiColumn = new int[1];
         sPk.aiColumn[0] = aiColumnPk;
@@ -4161,11 +4161,11 @@ whereEqualScanEst_cancel:
         {
           string zWhere = explainIndexRange( db, pLevel, pItem.pTab );
           zMsg.Append( sqlite3MAppendf( db, null, " USING %s%sINDEX%s%s%s",
-          ( ( flags & WHERE_TEMP_INDEX ) != 0 ? "AUTOMATIC " : "" ),
-          ( ( flags & WHERE_IDX_ONLY ) != 0 ? "COVERING " : "" ),
-          ( ( flags & WHERE_TEMP_INDEX ) != 0 ? "" : " " ),
-          ( ( flags & WHERE_TEMP_INDEX ) != 0 ? "" : pLevel.plan.u.pIdx.zName ),
-          zWhere != null ? zWhere : ""
+          ( ( flags & WHERE_TEMP_INDEX ) != 0 ? "AUTOMATIC " : string.Empty ),
+          ( ( flags & WHERE_IDX_ONLY ) != 0 ? "COVERING " : string.Empty ),
+          ( ( flags & WHERE_TEMP_INDEX ) != 0 ? string.Empty : " " ),
+          ( ( flags & WHERE_TEMP_INDEX ) != 0 ? string.Empty : pLevel.plan.u.pIdx.zName ),
+          zWhere ?? string.Empty
           ) );
           sqlite3DbFree( db, ref zWhere );
         }
@@ -4509,7 +4509,7 @@ OP_IdxLT             /* 2: (end_constraints && bRev) */
           int iIdxCur;                   /* The VDBE cursor for the index */
           int nExtraReg = 0;             /* Number of extra registers needed */
           int op;                        /* Instruction opcode */
-          StringBuilder zStartAff = new StringBuilder( "" );
+          StringBuilder zStartAff = new StringBuilder();
           ;/* Affinity for start of range constraint */
           StringBuilder zEndAff;         /* Affinity for end of range constraint */
 
@@ -5609,7 +5609,7 @@ OP_IdxLT             /* 2: (end_constraints && bRev) */
 #if !TCLSH
       sqlite3_query_plan.Length = 0;
 #else
-      sqlite3_query_plan.sValue = "";
+      sqlite3_query_plan.sValue = string.Empty;
 #endif
       for ( i = 0; i < nTabList; i++ )
       {

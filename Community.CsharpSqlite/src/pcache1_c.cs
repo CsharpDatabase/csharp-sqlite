@@ -731,15 +731,16 @@ static int pcache1MemSize(object p){
       //if ( pCache != null )
       {
         //memset( pCache, 0, sz );
-        if ( separateCache != 0 )
-        {
-          //pGroup = new PGroup();//(PGroup)pCache[1];
-          //pGroup.mxPinned = 10;
-        }
-        else
+        if ( separateCache == 0 )
         {
           pGroup = pcache1.grp;
         }
+        ////else
+        ////{
+          ////pGroup = new PGroup();//(PGroup)pCache[1];
+          ////pGroup.mxPinned = 10;
+        ////}
+
         pCache.pGroup = pGroup;
         pCache.szPage = szPage;
         pCache.bPurgeable = bPurgeable;//( bPurgeable ? 1 : 0 );

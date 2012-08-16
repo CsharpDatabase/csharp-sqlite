@@ -233,11 +233,11 @@ end_getDigits:
       //zDate += 5;
       p.tz = sgn * ( nMn + nHr * 60 );
       if ( zDate.Length == 6 )
-        zDate = "";
+        zDate = string.Empty;
       else if ( zDate.Length > 6 )
         zDate = zDate.Substring( 6 ).Trim();// while ( sqlite3Isspace( *(u8)zDate ) ) { zDate++; }
 zulu_time:
-      return zDate != "" ? 1 : 0;
+      return zDate.Length > 0 ? 1 : 0;
     }
 
     /*
@@ -446,7 +446,7 @@ zulu_time:
       {
         return 0;
       }
-      else if ( zDate.Equals( "now", StringComparison.OrdinalIgnoreCase ) )
+      else if ( zDate.Equals( "now", StringComparison.InvariantCultureIgnoreCase ) )
       {
         setDateTimeToCurrent( context, p );
         return 0;
@@ -557,7 +557,7 @@ zulu_time:
     ** If the sqlite3GlobalConfig.bLocaltimeFault variable is true then this
     ** routine will always fail.
     */
-    static int osLocaltime( time_t t, ref tm pTm )
+    static int osLocaltime( time_t t, tm pTm )
     {
       int rc;
 #if (!(HAVE_LOCALTIME_R) || !HAVE_LOCALTIME_R) && (!(HAVE_LOCALTIME_S) || !HAVE_LOCALTIME_S)
@@ -631,7 +631,7 @@ zulu_time:
       x.validJD = 0;
       computeJD( x );
       t = (long)( x.iJD / 1000 - 210866760000L );// (time_t)(x.iJD/1000 - 21086676*(i64)10000);
-      if ( osLocaltime( t, ref sLocal ) != 0 )
+      if ( osLocaltime( t, sLocal ) != 0 )
       {
         sqlite3_result_error( pCtx, "local time unavailable", -1 );
         pRc = SQLITE_ERROR;
@@ -958,7 +958,7 @@ zulu_time:
       else
       {
         z = sqlite3_value_text( argv[0] );
-        if ( String.IsNullOrEmpty( z ) || parseDateOrTime( context, z, ref p ) != 0 )
+        if ( string.IsNullOrEmpty( z ) || parseDateOrTime( context, z, ref p ) != 0 )
         {
           return 1;
         }
@@ -966,7 +966,7 @@ zulu_time:
       for ( i = 1; i < argc; i++ )
       {
         z = sqlite3_value_text( argv[i] );
-        if ( String.IsNullOrEmpty( z ) || parseModifier( context, z, p ) != 0 )
+        if ( string.IsNullOrEmpty( z ) || parseModifier( context, z, p ) != 0 )
           return 1;
       }
       return 0;
@@ -1099,7 +1099,7 @@ zulu_time:
         {
           argv[i + 1].CopyTo( ref argv1[i] );
         }
-        if ( String.IsNullOrEmpty( zFmt ) || isDate( context, argc - 1, argv1, ref x ) != 0 )
+        if ( string.IsNullOrEmpty( zFmt ) || isDate( context, argc - 1, argv1, ref x ) != 0 )
           return;
         db = sqlite3_context_db_handle( context );
         for ( i = 0, n = 1; i < zFmt.Length; i++, n++ )

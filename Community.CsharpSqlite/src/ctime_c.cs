@@ -381,24 +381,24 @@ namespace Community.CsharpSqlite
     ** The name can optionally begin with "SQLITE_" but the "SQLITE_" prefix
     ** is not required for a match.
     */
-    static int sqlite3_compileoption_used( string zOptName )
+    static int sqlite3_compileoption_used (string zOptName)
     {
-      if ( zOptName.EndsWith( "=" ) )
+      if (zOptName.EndsWith ("="))
         return 0;
       int i, n = 0;
-      if ( zOptName.StartsWith( "SQLITE_", System.StringComparison.OrdinalIgnoreCase ) )
+      if (zOptName.StartsWith ("SQLITE_", System.StringComparison.InvariantCultureIgnoreCase))
         n = 7;
       //n = sqlite3Strlen30(zOptName);
 
       /* Since ArraySize(azCompileOpt) is normally in single digits, a
       ** linear search is adequate.  No need for a binary search. */
-      if ( !String.IsNullOrEmpty( zOptName ) )
-        for ( i = 0; i < ArraySize( azCompileOpt ); i++ )
-        {
-          int n1 = ( zOptName.Length-n < azCompileOpt[i].Length ) ? zOptName.Length-n : azCompileOpt[i].Length;
-          if ( String.Compare( zOptName, n, azCompileOpt[i], 0, n1, StringComparison.OrdinalIgnoreCase ) == 0 )
+      if (!string.IsNullOrEmpty (zOptName)) {
+        for (i = 0; i < ArraySize( azCompileOpt ); i++) {
+          int n1 = (zOptName.Length - n < azCompileOpt [i].Length) ? zOptName.Length - n : azCompileOpt [i].Length;
+          if (String.Compare (zOptName, n, azCompileOpt [i], 0, n1, StringComparison.InvariantCultureIgnoreCase) == 0)
             return 1;
         }
+      }
       return 0;
     }
 

@@ -61,7 +61,7 @@ namespace Community.CsharpSqlite
           }
           sqlite3SetString( ref pData.pzErrMsg, db,
           "malformed database schema (%s)", zObj );
-          if ( !String.IsNullOrEmpty( zExtra ) )
+          if ( !string.IsNullOrEmpty( zExtra ) )
           {
             pData.pzErrMsg = sqlite3MAppendf( db, pData.pzErrMsg
             , "%s - %s", pData.pzErrMsg, zExtra );
@@ -106,9 +106,9 @@ namespace Community.CsharpSqlite
         return 0;   /* Might happen if EMPTY_RESULT_CALLBACKS are on */
       if ( argv[1] == null )
       {
-        corruptSchema( pData, argv[0], "" );
+        corruptSchema( pData, argv[0], string.Empty );
       }
-      else if ( !String.IsNullOrEmpty( argv[2] ) )
+      else if ( !string.IsNullOrEmpty( argv[2] ) )
       {
         /* Call the parser to process a CREATE TABLE, INDEX or VIEW.
         ** But because db.init.busy is set to 1, no VDBE code is generated
@@ -158,7 +158,7 @@ sqlite3_prepare(db, argv[2], -1, ref pStmt, 0);
         }
         sqlite3_finalize( pStmt );
       }
-      else if ( argv[0] == null || argv[0] == "" )
+      else if ( string.IsNullOrEmpty( argv[0] ) )
       {
         corruptSchema( pData, null, null );
       }
@@ -261,7 +261,7 @@ sqlite3_prepare(db, argv[2], -1, ref pStmt, 0);
       azArg[0] = zMasterName;
       azArg[1] = "1";
       azArg[2] = zMasterSchema;
-      azArg[3] = "";
+      azArg[3] = string.Empty;
       initData.db = db;
       initData.iDb = iDb;
       initData.rc = SQLITE_OK;
@@ -657,7 +657,7 @@ error_out:
     )
     {
       Parse pParse;             /* Parsing context */
-      string zErrMsg = "";      /* Error message */
+      string zErrMsg = string.Empty;      /* Error message */
       int rc = SQLITE_OK;       /* Result code */
       int i;                    /* Loop counter */
 
@@ -672,7 +672,7 @@ error_out:
       //  goto end_prepare;
       //}
       pParse.pReprepare = pReprepare;
-      pParse.sLastToken.z = "";
+      pParse.sLastToken.z = string.Empty;
 
       //  assert( ppStmt && *ppStmt==0 );
       //Debug.Assert( 0 == db.mallocFailed );
@@ -768,7 +768,7 @@ error_out:
       //}
       //if (pzTail != null)
       {
-        pzTail = pParse.zTail == null ? "" : pParse.zTail.ToString();
+        pzTail = pParse.zTail == null ? string.Empty : pParse.zTail.ToString();
       }
       rc = pParse.rc;
 #if !SQLITE_OMIT_EXPLAIN
@@ -815,7 +815,7 @@ error_out:
         ppStmt = pParse.pVdbe;
       }
 
-      if ( zErrMsg != "" )
+      if ( zErrMsg.Length > 0 )
       {
         sqlite3Error( db, rc, "%s", zErrMsg );
         sqlite3DbFree( db, ref zErrMsg );
@@ -941,17 +941,6 @@ end_prepare:
       string sOut = null;
       return sqlite3_prepare( db, zSql, nBytes, ref ppStmt, ref sOut );
     }
-    static public int sqlite3_prepare(
-    sqlite3 db,           /* Database handle. */
-    StringBuilder zSql,          /* UTF-8 encoded SQL statement. */
-    int nBytes,           /* Length of zSql in bytes. */
-    ref sqlite3_stmt ppStmt,  /* OUT: A pointer to the prepared statement */
-    int dummy             /* OUT: End of parsed string */
-    )
-    {
-        string sOut = null;
-        return sqlite3_prepare(db, zSql.ToString(), nBytes, ref ppStmt, ref sOut);
-    }
     /*
     ** Two versions of the official API.  Legacy and new use.  In the legacy
     ** version, the original SQL text is not saved in the prepared statement
@@ -1022,7 +1011,7 @@ out string pzTail        /* OUT: End of parsed string */
 ** tricky bit is figuring out the pointer to return in pzTail.
 */
 string zSql8;
-string zTail8 = "";
+string zTail8 = string.Empty;
 int rc = SQLITE_OK;
 
 assert( ppStmt );
@@ -1032,11 +1021,11 @@ return SQLITE_MISUSE_BKPT;
 }
 sqlite3_mutex_enter(db.mutex);
 zSql8 = sqlite3Utf16to8(db, zSql, nBytes, SQLITE_UTF16NATIVE);
-if( zSql8 !=""){
+if( zSql8 != string.Empty){
 rc = sqlite3LockAndPrepare(db, zSql8, -1, saveSqlFlag, null, ref ppStmt, ref zTail8);
 }
 
-if( zTail8 !="" && pzTail !=""){
+if( zTail8 != string.Empty && pzTail != string.Empty){
 /* If sqlite3_prepare returns a tail pointer, we calculate the
 ** equivalent pointer into the UTF-16 string by counting the unicode
 ** characters between zSql8 and zTail8, and then returning a pointer

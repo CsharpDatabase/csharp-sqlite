@@ -98,7 +98,7 @@ namespace Community.CsharpSqlite
     sqlite3_value[] argv
     )
     {
-      string z = "";
+      string z = string.Empty;
       UNUSED_PARAMETER( NotUsed );
       switch ( sqlite3_value_type( argv[0] ) )
       {
@@ -241,7 +241,7 @@ namespace Community.CsharpSqlite
     sqlite3_value[] argv
     )
     {
-      string z = "";
+      string z = string.Empty;
       byte[] zBLOB = null;
       string z2;
       int len;
@@ -269,7 +269,7 @@ namespace Community.CsharpSqlite
       else
       {
         z = sqlite3_value_text( argv[0] );
-        if ( String.IsNullOrEmpty( z ) )
+        if ( string.IsNullOrEmpty( z ) )
           return;
         len = 0;
         if ( p1 < 0 )
@@ -371,7 +371,7 @@ namespace Community.CsharpSqlite
     {
       int n = 0;
       double r;
-      string zBuf = "";
+      string zBuf = string.Empty;
       Debug.Assert( argc == 1 || argc == 2 );
       if ( argc == 2 )
       {
@@ -470,7 +470,7 @@ namespace Community.CsharpSqlite
         //{
         //(char)sqlite3Toupper( z1[i] );
         //}
-        sqlite3_result_text( context, z2.Length == 0 ? "" : z2.Substring( 0, n ).ToUpper(), -1, null ); //sqlite3_free );
+        sqlite3_result_text( context, z2.Length == 0 ? string.Empty : z2.Substring( 0, n ).ToUpper(), -1, null ); //sqlite3_free );
         // }
       }
     }
@@ -499,7 +499,7 @@ namespace Community.CsharpSqlite
         //  {
         //    z1[i] = (char)sqlite3Tolower( z1[i] );
         //  }
-        sqlite3_result_text( context, z2.Length == 0 ? "" : z2.Substring( 0, n ).ToLower(), -1, null );//sqlite3_free );
+        sqlite3_result_text( context, z2.Length == 0 ? string.Empty : z2.Substring( 0, n ).ToLower(), -1, null );//sqlite3_free );
         //}
       }
     }
@@ -1260,8 +1260,8 @@ break;
       string zRep;        /* The replacement string C */
       string zOut = null; /* The output */
       int nStr;           /* Size of zStr */
-      int nPattern;       /* Size of zPattern */
-      int nRep;           /* Size of zRep */
+      ////int nPattern;       /* Size of zPattern */
+      ////int nRep;           /* Size of zRep */
       int nOut;           /* Maximum size of zOut */
       //int loopLimit;    /* Last zStr[] that might match zPattern[] */
       int i, j = 0;       /* Loop counters */
@@ -1281,18 +1281,18 @@ break;
         );
         return;
       }
-      if ( zPattern == "" )
+      if ( zPattern.Length == 0 )
       {
         Debug.Assert( sqlite3_value_type( argv[1] ) != SQLITE_NULL );
         sqlite3_result_value( context, argv[0] );
         return;
       }
-      nPattern = sqlite3_value_bytes( argv[1] );
+      ////nPattern = sqlite3_value_bytes( argv[1] );
       Debug.Assert( zPattern == sqlite3_value_text( argv[1] ) );  /* No encoding change */
       zRep = sqlite3_value_text( argv[2] );
       if ( zRep == null )
         return;
-      nRep = sqlite3_value_bytes( argv[2] );
+      ////nRep = sqlite3_value_bytes( argv[2] );
       Debug.Assert( zRep == sqlite3_value_text( argv[2] ) );
       nOut = nStr + 1;
       Debug.Assert( nOut < SQLITE_MAX_LENGTH );
@@ -1551,18 +1551,10 @@ sqlite3_result_text(context, "?000", 4, SQLITE_STATIC);
     )
     {
       string zFile = sqlite3_value_text( argv[0] );
-      string zProc;
       sqlite3 db = (sqlite3)sqlite3_context_db_handle( context );
-      string zErrMsg = "";
+      string zErrMsg = string.Empty;
 
-      if ( argc == 2 )
-      {
-        zProc = sqlite3_value_text( argv[1] );
-      }
-      else
-      {
-        zProc = "";
-      }
+      string zProc = argc == 2 ? zProc = sqlite3_value_text( argv[1] ) : string.Empty;
       if ( zFile != null && sqlite3_load_extension( db, zFile, zProc, ref zErrMsg ) != 0 )
       {
         sqlite3_result_error( context, zErrMsg, -1 );

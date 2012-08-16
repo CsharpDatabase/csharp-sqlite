@@ -152,7 +152,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 
 		protected override string GetParameterName (string parameterName)
 		{
-			if (String.IsNullOrEmpty (parameterName))
+			if (string.IsNullOrEmpty(parameterName))
 				throw new ArgumentException ("parameterName cannot be null or empty");
 			if (parameterName [0] == '?')
 				return parameterName;
@@ -492,7 +492,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 		{
 			if (value == String.Empty || value == null)
 				return value;
-			if (String.IsNullOrEmpty (_quotePrefix) && String.IsNullOrEmpty (_quoteSuffix))
+			if (string.IsNullOrEmpty(_quotePrefix) && string.IsNullOrEmpty(_quoteSuffix))
 				return value;
 			return String.Format ("{0}{1}{2}", _quotePrefix, value, _quoteSuffix);
 		}

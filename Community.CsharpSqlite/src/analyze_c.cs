@@ -112,7 +112,7 @@ string zWhereType   /* Either "tbl" or "idx" */
       ** entire contents of the table. */
       aRoot[i] = pStat.tnum;
       sqlite3TableLock( pParse, iDb, aRoot[i], 1, zTab );
-      if ( !String.IsNullOrEmpty( zWhere ) )
+      if ( !string.IsNullOrEmpty( zWhere ) )
       {
         sqlite3NestedParse( pParse,
         "DELETE FROM %Q.%s WHERE %s=%Q", pDb.zName, zTab, zWhereType, zWhere
@@ -183,7 +183,7 @@ int iMem         /* Available memory locations begin here */
     /* Do not gather statistics on views or virtual tables */
     return;
   }
-  if ( pTab.zName.StartsWith( "sqlite_", StringComparison.OrdinalIgnoreCase ) )
+  if ( pTab.zName.StartsWith( "sqlite_", StringComparison.InvariantCultureIgnoreCase ) )
   {
     /* Do not gather statistics on system tables */
     return;
@@ -628,7 +628,7 @@ static int analysisLoader( object pData, sqlite3_int64 argc, object Oargv, objec
   {
     return 0;
   }
-  if ( !String.IsNullOrEmpty( argv[1] ) )
+  if ( !string.IsNullOrEmpty( argv[1] ) )
   {
     pIndex = sqlite3FindIndex( pInfo.db, argv[1], pInfo.zDatabase );
   }
@@ -780,7 +780,7 @@ static int sqlite3AnalysisLoad( sqlite3 db, int iDb )
         string zIndex;   /* Index name */
         Index pIdx;    /* Pointer to the index object */
         zIndex = sqlite3_column_text( pStmt, 0 );
-        pIdx = !String.IsNullOrEmpty( zIndex ) ? sqlite3FindIndex( db, zIndex, sInfo.zDatabase ) : null;
+        pIdx = !string.IsNullOrEmpty( zIndex ) ? sqlite3FindIndex( db, zIndex, sInfo.zDatabase ) : null;
         if ( pIdx != null )
         {
           int iSample = sqlite3_column_int( pStmt, 1 );

@@ -48,13 +48,13 @@ namespace Community.CsharpSqlite
     //C# Alias
     static public int exec( sqlite3 db,             /* The database on which the SQL executes */    string zSql,            /* The SQL to be executed */    int NoCallback, int NoArgs, int NoErrors )
     {
-      string Errors = "";
+      string Errors = string.Empty;
       return sqlite3_exec( db, zSql, null, null, ref Errors );
     }
 
     static public int exec( sqlite3 db,             /* The database on which the SQL executes */    string zSql,                /* The SQL to be executed */    sqlite3_callback xCallback, /* Invoke this callback routine */    object pArg,                /* First argument to xCallback() */    int NoErrors )
     {
-      string Errors = "";
+      string Errors = string.Empty;
       return sqlite3_exec( db, zSql, xCallback, pArg, ref Errors );
     }
     static public int exec( sqlite3 db,             /* The database on which the SQL executes */    string zSql,                /* The SQL to be executed */    sqlite3_callback xCallback, /* Invoke this callback routine */    object pArg,                /* First argument to xCallback() */    ref string pzErrMsg         /* Write error messages here */)
@@ -69,7 +69,7 @@ namespace Community.CsharpSqlite
     int NoCallback, int NoArgs, int NoErrors
     )
     {
-      string Errors = "";
+      string Errors = string.Empty;
       return sqlite3_exec( db, zSql, null, null, ref Errors );
     }
 
@@ -81,7 +81,7 @@ namespace Community.CsharpSqlite
     int NoErrors
     )
     {
-      string Errors = "";
+      string Errors = string.Empty;
       return sqlite3_exec( db, zSql, xCallback, pArg, ref Errors );
     }
     static public int sqlite3_exec(
@@ -94,7 +94,7 @@ namespace Community.CsharpSqlite
     {
 
       int rc = SQLITE_OK;         /* Return code */
-      string zLeftover = "";      /* Tail of unprocessed SQL */
+      string zLeftover = string.Empty;      /* Tail of unprocessed SQL */
       sqlite3_stmt pStmt = null;  /* The current SQL statement */
       string[] azCols = null;     /* Names of result columns */
       int nRetry = 0;             /* Number of retry attempts */
@@ -103,12 +103,11 @@ namespace Community.CsharpSqlite
       if ( !sqlite3SafetyCheckOk( db ) )
         return SQLITE_MISUSE_BKPT();
 
-      if ( zSql == null )
-        zSql = "";
+      zSql = zSql ?? string.Empty;
 
       sqlite3_mutex_enter( db.mutex );
       sqlite3Error( db, SQLITE_OK, 0 );
-      while ( ( rc == SQLITE_OK || ( rc == SQLITE_SCHEMA && ( ++nRetry ) < 2 ) ) && zSql != "" )
+      while ( ( rc == SQLITE_OK || ( rc == SQLITE_SCHEMA && ( ++nRetry ) < 2 ) ) && zSql.Length > 0 )
       {
         int nCol;
         string[] azVals = null;
@@ -186,14 +185,12 @@ namespace Community.CsharpSqlite
             if ( rc != SQLITE_SCHEMA )
             {
               nRetry = 0;
-              if ( ( zSql = zLeftover ) != "" )
-              {
+              zSql = zLeftover;
                 int zindex = 0;
                 while ( zindex < zSql.Length && sqlite3Isspace( zSql[zindex] ) )
                   zindex++;
-                if ( zindex != 0 )
-                  zSql = zindex < zSql.Length ? zSql.Substring( zindex ) : "";
-              }
+                if ( zindex > 0 )
+                  zSql = zindex < zSql.Length ? zSql.Substring( zindex ) : string.Empty;
             }
             break;
           }
@@ -222,9 +219,9 @@ exec_out:
         //}
         pzErrMsg = sqlite3_errmsg( db );
       }
-      else if ( pzErrMsg != "" )
+      else if ( pzErrMsg.Length > 0 )
       {
-        pzErrMsg = "";
+        pzErrMsg = string.Empty;
       }
 
       Debug.Assert( ( rc & db.errMask ) == rc );

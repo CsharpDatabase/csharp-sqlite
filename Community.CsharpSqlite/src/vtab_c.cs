@@ -376,9 +376,9 @@ namespace Community.CsharpSqlite
       if ( pParse.sArg.z != null && ALWAYS( pParse.pNewTable ) )
       {
         string z = pParse.sArg.z.Substring( 0, pParse.sArg.n );
-        int n = pParse.sArg.n;
+        ////int n = pParse.sArg.n;
         sqlite3 db = pParse.db;
-        addModuleArgument( db, pParse.pNewTable, z );///sqlite3DbStrNDup( db, z, n ) );
+        addModuleArgument( db, pParse.pNewTable, z );////sqlite3DbStrNDup( db, z, n ) );
       }
     }
 
@@ -394,7 +394,7 @@ namespace Community.CsharpSqlite
       if ( pTab == null )
         return;
       addArgumentToVtab( pParse );
-      pParse.sArg.z = "";
+      pParse.sArg.z = string.Empty;
       if ( pTab.nModuleArg < 1 )
         return;
 
@@ -522,7 +522,7 @@ namespace Community.CsharpSqlite
       string zErr = null;
       string zModuleName = sqlite3MPrintf( db, "%s", pTab.zName );
 
-      //if ( String.IsNullOrEmpty( zModuleName ) )
+      //if ( string.IsNullOrEmpty( zModuleName ) )
       //{
       //  return SQLITE_NOMEM;
       //}
@@ -549,7 +549,7 @@ namespace Community.CsharpSqlite
 
       if ( SQLITE_OK != rc )
       {
-        if ( zErr == "" )
+        if ( zErr.Length == 0 )
         {
           pzErr = sqlite3MPrintf( db, "vtable constructor failed: %s", zModuleName );
         }
@@ -586,7 +586,7 @@ namespace Community.CsharpSqlite
 
           for ( iCol = 0; iCol < pTab.nCol; iCol++ )
           {
-            if ( String.IsNullOrEmpty( pTab.aCol[iCol].zType ) )
+            if ( string.IsNullOrEmpty( pTab.aCol[iCol].zType ) )
               continue;
             StringBuilder zType = new StringBuilder( pTab.aCol[iCol].zType);
             int nType;
@@ -771,7 +771,7 @@ namespace Community.CsharpSqlite
 
       int rc = SQLITE_OK;
       Table pTab;
-      string zErr = "";
+      string zErr = string.Empty;
 
       sqlite3_mutex_enter( db.mutex );
       if ( null == db.pVtabCtx || null == ( pTab = db.pVtabCtx.pTab ) )

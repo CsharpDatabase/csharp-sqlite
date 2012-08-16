@@ -607,7 +607,7 @@ static public int sqlite3_backup_step( sqlite3_backup p, int nPage )
       //TESTONLY( rc2  = ) sqlite3BtreeCommitPhaseOne(p.pSrc, 0);
       //TESTONLY( rc2 |= ) sqlite3BtreeCommitPhaseTwo(p.pSrc);
       int rc2;
-      rc2 = sqlite3BtreeCommitPhaseOne( p.pSrc, "" );
+      rc2 = sqlite3BtreeCommitPhaseOne( p.pSrc, string.Empty );
       rc2 |= sqlite3BtreeCommitPhaseTwo( p.pSrc, 0 );
       Debug.Assert( rc2 == SQLITE_OK );
 #else

@@ -941,7 +941,7 @@ public yyStackEntry *yystack;        /* The parser's stack */
 #if !NDEBUG
     //#include <stdio.h>
     static TextWriter yyTraceFILE = null;
-    static string yyTracePrompt = "";
+    static string yyTracePrompt = string.Empty;
 #endif // * NDEBUG */
 
 #if !NDEBUG
@@ -967,8 +967,8 @@ public yyStackEntry *yystack;        /* The parser's stack */
       yyTraceFILE = TraceFILE;
       yyTracePrompt = zTracePrompt;
       if ( yyTraceFILE == null )
-        yyTracePrompt = "";
-      else if ( yyTracePrompt == "" )
+        yyTracePrompt = string.Empty;
+      else if ( yyTracePrompt.Length == 0 )
         yyTraceFILE = null;
     }
 #endif // * NDEBUG */

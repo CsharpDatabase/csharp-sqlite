@@ -149,8 +149,8 @@ TabResult res = new TabResult();
 pazResult = null;
 pnColumn = 0;
 pnRow = 0;
-pzErrMsg = "";
-res.zErrMsg = "";
+pzErrMsg = string.Empty;
+res.zErrMsg = string.Empty;
 res.nResult = 0;
 res.nRow = 0;
 res.nColumn = 0;
@@ -168,8 +168,8 @@ rc = sqlite3_exec(db, zSql, (dxCallback) sqlite3_get_table_cb, res, ref pzErrMsg
 //res.azResult = SQLITE_INT_TO_PTR( res.nData );
 if( (rc&0xff)==SQLITE_ABORT ){
 //sqlite3_free_table(ref res.azResult[1] );
-if( res.zErrMsg !=""){
-if( pzErrMsg !=null ){
+if( res.zErrMsg.Length > 0){
+if( pzErrMsg != null ){
 //sqlite3_free(ref pzErrMsg);
 pzErrMsg = sqlite3_mprintf("%s",res.zErrMsg);
 }

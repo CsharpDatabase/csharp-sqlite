@@ -69,7 +69,7 @@ namespace Community.CsharpSqlite
     //# define sqlite3_errmsg16               0
     static string sqlite3_errmsg16( sqlite3 db )
     {
-      return "";
+      return string.Empty;
     }
     //# define sqlite3_open16                 0
     //# define sqlite3_prepare16              0
@@ -121,22 +121,7 @@ static void sqlite3_progress_handler (sqlite3 db,       int nOps, dxProgress xPr
 
 #if SQLITE_OMIT_GET_TABLE
     //# define //sqlite3_free_table    0
-    static public int sqlite3_free_table(ref string[] pazResult) { pazResult = null; return 0; }
-
-    static public int sqlite3_get_table(
-    sqlite3 db,             /* An open database */
-    string zSql,            /* SQL to be evaluated */
-    ref string[] pazResult, /* Results of the query */
-    ref int pnRow,          /* Number of result rows written here */
-    object dummy,       
-    ref string pzErrmsg     /* Error msg written here */
-    )
-    {
-        int iDummy = 0;
-        return sqlite3_get_table(db, zSql, ref pazResult, ref pnRow, ref iDummy, ref pzErrmsg);
-    }
-
-        //# define sqlite3_get_table     0
+    //# define sqlite3_get_table     0
     static public int sqlite3_get_table(
     sqlite3 db,             /* An open database */
     string zSql,            /* SQL to be evaluated */
@@ -451,13 +436,12 @@ static void sqlite3_progress_handler (sqlite3 db,       int nOps, dxProgress xPr
     {
       sqlite3_vfs pVfs = db.pVfs;
       HANDLE handle;
-      dxInit xInit; //int (*xInit)(sqlite3*,char**,const sqlite3_api_routines);
+      ////dxInit xInit; //int (*xInit)(sqlite3*,char**,const sqlite3_api_routines);
       StringBuilder zErrmsg = new StringBuilder( 100 );
       //object aHandle;
       const int nMsg = 300;
       if ( pzErrMsg != null )
         pzErrMsg = null;
-
 
       /* Ticket #1863.  To avoid a creating security problems for older
       ** applications that relink against newer versions of SQLite, the
@@ -473,7 +457,7 @@ static void sqlite3_progress_handler (sqlite3 db,       int nOps, dxProgress xPr
         return SQLITE_ERROR;
       }
 
-      if ( zProc == null || zProc == "" )
+      if ( string.IsNullOrEmpty( zProc ) )
       {
         zProc = "sqlite3_extension_init";
       }
@@ -482,7 +466,7 @@ static void sqlite3_progress_handler (sqlite3 db,       int nOps, dxProgress xPr
       if ( handle == IntPtr.Zero )
       {
         //    if( pzErrMsg ){
-        pzErrMsg = "";//*pzErrMsg = zErrmsg = sqlite3_malloc(nMsg);
+        pzErrMsg = string.Empty;//*pzErrMsg = zErrmsg = sqlite3_malloc(nMsg);
         //if( zErrmsg !=null){
         sqlite3_snprintf( nMsg, zErrmsg,
         "unable to open shared library [%s]", zFile );
@@ -491,7 +475,7 @@ static void sqlite3_progress_handler (sqlite3 db,       int nOps, dxProgress xPr
       }
       //xInit = (int()(sqlite3*,char**,const sqlite3_api_routines))
       //                 sqlite3OsDlSym(pVfs, handle, zProc);
-      xInit = (dxInit)sqlite3OsDlSym( pVfs, handle, ref zProc );
+      dxInit xInit = (dxInit)sqlite3OsDlSym( pVfs, handle, ref zProc );
       Debugger.Break(); // TODO --
       //if( xInit==0 ){
       //  if( pzErrMsg ){
@@ -726,7 +710,7 @@ if ( wsdAutoext.nExt == 0 )
       }
       for ( i = 0; go; i++ )
       {
-        string zErrmsg = "";
+        string zErrmsg = string.Empty;
 #if SQLITE_THREADSAFE
         sqlite3_mutex mutex = sqlite3MutexAlloc( SQLITE_MUTEX_STATIC_MASTER );
 #else
@@ -744,7 +728,6 @@ if ( wsdAutoext.nExt == 0 )
           wsdAutoext.aExt[i];
         }
         sqlite3_mutex_leave( mutex );
-        zErrmsg = "";
         if ( xInit != null && xInit( db, ref zErrmsg, (sqlite3_api_routines)sqlite3Apis ) != 0 )
         {
           sqlite3Error( db, SQLITE_ERROR,

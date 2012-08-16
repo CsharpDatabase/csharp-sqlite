@@ -6,15 +6,12 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-#if !(SQLITE_SILVERLIGHT || WINDOWS_MOBILE || SQLITE_WINRT)
+#if !(SQLITE_SILVERLIGHT || WINDOWS_MOBILE)
 using System.Management;
 #endif
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-#if SQLITE_WINRT
-using System.Reflection;
-#endif
 
 using i64 = System.Int64;
 
@@ -57,9 +54,7 @@ static void fprintf( TextWriter tw, string zFormat, params object[] ap )
 }
 static void printf( string zFormat, params object[] ap )
 {
-#if !SQLITE_WINRT
   Console.Out.Write( sqlite3_mprintf( zFormat, ap ) );
-#endif
 }
 
 
@@ -175,7 +170,7 @@ sqlite3_value[] argv
   zRegex = sqlite3_value_text( argv[0] );
   zTest = sqlite3_value_text( argv[1] );
 
-  if ( zTest == null || String.IsNullOrEmpty( zRegex ) )
+  if ( zTest == null || string.IsNullOrEmpty( zRegex ) )
   {
     sqlite3_result_int( context, 0 );
     return;
@@ -335,7 +330,7 @@ static String va_arg( object[] ap, String sysType )
       if ( Encoding.UTF8.GetString( (byte[])ap[vaNEXT], 0, ( (byte[])ap[vaNEXT] ).Length ) == "\0" )
       {
         vaNEXT++;
-        return "";
+        return string.Empty;
       }
       else
         return Encoding.UTF8.GetString( (byte[])ap[vaNEXT], 0, ( (byte[])ap[vaNEXT++] ).Length );
@@ -360,12 +355,7 @@ static Token va_arg( object[] ap, Token sysType )
 
 static UInt32 va_arg( object[] ap, UInt32 sysType )
 {
-#if SQLITE_WINRT
-  Type t = ap[vaNEXT].GetType();
-  if ( t.GetTypeInfo().IsClass )
-#else
   if ( ap[vaNEXT].GetType().IsClass )
-#endif
   {
     return (UInt32)ap[vaNEXT++].GetHashCode();
   }
@@ -377,12 +367,7 @@ static UInt32 va_arg( object[] ap, UInt32 sysType )
 
 static UInt64 va_arg( object[] ap, UInt64 sysType )
 {
-#if SQLITE_WINRT
-  Type t = ap[vaNEXT].GetType();
-  if (t.GetTypeInfo().IsClass)
-#else
   if ( ap[vaNEXT].GetType().IsClass )
-#endif
   {
     return (UInt64)ap[vaNEXT++].GetHashCode();
   }
@@ -402,13 +387,13 @@ static void va_end( ref string[] ap )
 {
   ap = null;
   vaNEXT = -1;
-  vaFORMAT = "";
+  vaFORMAT = string.Empty;
 }
 static void va_end( ref object[] ap )
 {
   ap = null;
   vaNEXT = -1;
-  vaFORMAT = "";
+  vaFORMAT = string.Empty;
 }
 
 
@@ -464,7 +449,7 @@ public struct FILETIME
 // Example (C#)
 public static int GetbytesPerSector( StringBuilder diskPath )
 {
-#if !(SQLITE_SILVERLIGHT || WINDOWS_MOBILE || SQLITE_WINRT)
+#if !(SQLITE_SILVERLIGHT || WINDOWS_MOBILE)
   ManagementObjectSearcher mosLogicalDisks = new ManagementObjectSearcher( "select * from Win32_LogicalDisk where DeviceID = '" + diskPath.ToString().Remove( diskPath.Length - 1, 1 ) + "'" );
   try
   {

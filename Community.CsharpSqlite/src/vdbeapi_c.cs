@@ -672,7 +672,7 @@ end_of_step:
         }
         //else
         //{
-        //  v.zErrMsg = "";
+        //  v.zErrMsg = string.Empty;
         //  v->rc = rc = SQLITE_NOMEM;
         //}
       }
@@ -806,8 +806,8 @@ end_of_step:
       if ( null == pVdbeFunc || pVdbeFunc.nAux <= iArg )
       {
         int nAux = ( pVdbeFunc != null ? pVdbeFunc.nAux : 0 );
-        int nMalloc = iArg;
-        ;//VdbeFunc+ sizeof(struct AuxData)*iArg;
+        ////int nMalloc = iArg;
+        //VdbeFunc+ sizeof(struct AuxData)*iArg;
         if ( pVdbeFunc == null )
         {
           //pVdbeFunc = (VdbeFunc)sqlite3DbRealloc( pCtx.s.db, pVdbeFunc, nMalloc );
@@ -916,7 +916,7 @@ return p.pMem.n;
         //         0, 0,  /* pScopyFrom, pFiller */
         //#endif
         //         0, 0 };
-        Mem nullMem = new Mem( null, "", (double)0, 0, 0, MEM_Null, SQLITE_NULL, 0
+        Mem nullMem = new Mem( null, string.Empty, (double)0, 0, 0, MEM_Null, SQLITE_NULL, 0
 #if SQLITE_DEBUG
          , null, null  /* pScopyFrom, pFiller */
 #endif
@@ -1494,7 +1494,7 @@ return bindText(pStmt, i, zData, nData, xDel, SQLITE_UTF16NATIVE);
       Vdbe p = (Vdbe)pStmt;
       if ( p == null || i < 1 || i > p.nzVar )
       {
-        return "";
+        return string.Empty;
       }
       return p.azVar[i - 1];
     }
@@ -1511,7 +1511,7 @@ return bindText(pStmt, i, zData, nData, xDel, SQLITE_UTF16NATIVE);
       {
         return 0;
       }
-      if ( zName != null && zName != "" )
+      if ( !string.IsNullOrEmpty( zName ) )
       {
         for ( i = 0; i < p.nzVar; i++ )
         {

@@ -96,21 +96,20 @@ sqlite3_value[] argv
   sqlite3 db = sqlite3_context_db_handle( context );
   string zName;
   string zFile;
-  string zPath = "";
-  string zErr = "";
+  string zPath = string.Empty;
+  string zErr = string.Empty;
   int flags;
 
   Db aNew = null;
-  string zErrDyn = "";
+  string zErrDyn = string.Empty;
   sqlite3_vfs pVfs = null;
 
   UNUSED_PARAMETER( NotUsed );
 
-  zFile = argv[0].z != null && ( argv[0].z.Length > 0 ) && argv[0].flags != MEM_Null ? sqlite3_value_text( argv[0] ) : "";
-  zName = argv[1].z != null && ( argv[1].z.Length > 0 ) && argv[1].flags != MEM_Null ? sqlite3_value_text( argv[1] ) : "";
-  //if( zFile==null ) zFile = "";
-  //if ( zName == null ) zName = "";
-
+  zFile = argv[0].z != null && ( argv[0].z.Length > 0 ) && argv[0].flags != MEM_Null ? sqlite3_value_text( argv[0] ) : string.Empty;
+  zName = argv[1].z != null && ( argv[1].z.Length > 0 ) && argv[1].flags != MEM_Null ? sqlite3_value_text( argv[1] ) : string.Empty;
+  //if( zFile==null ) zFile = string.Empty;
+  //if ( zName == null ) zName = string.Empty;
 
   /* Check for the following errors:
   **
@@ -134,7 +133,7 @@ sqlite3_value[] argv
   {
     string z = db.aDb[i].zName;
     Debug.Assert( z != null && zName != null );
-    if ( z.Equals( zName, StringComparison.OrdinalIgnoreCase ) )
+    if ( z.Equals( zName, StringComparison.InvariantCultureIgnoreCase ) )
     {
       zErrDyn = sqlite3MPrintf( db, "database %s is already in use", zName );
       goto attach_error;
@@ -166,7 +165,7 @@ sqlite3_value[] argv
   ** or may not be initialised.
   */
   flags = (int)db.openFlags;
-  rc = sqlite3ParseUri( vfsList.zName, zFile, ref flags, ref pVfs, ref zPath, ref zErr );
+  rc = sqlite3ParseUri( db.pVfs.zName, zFile, ref flags, ref pVfs, ref zPath, ref zErr );
   if ( rc != SQLITE_OK )
   {
     //if ( rc == SQLITE_NOMEM )
@@ -276,7 +275,7 @@ sqlite3_value[] argv
       sqlite3DbFree( db, ref zErrDyn );
       zErrDyn = sqlite3MPrintf( db, "out of memory" );
     }
-    else if ( zErrDyn == "" )
+    else if ( zErrDyn.Length == 0 )
     {
       zErrDyn = sqlite3MPrintf( db, "unable to open database: %s", zFile );
     }
@@ -287,7 +286,7 @@ sqlite3_value[] argv
 
 attach_error:
   /* Return an error if we get here */
-  if ( zErrDyn != "" )
+  if ( zErrDyn.Length > 0 )
   {
     sqlite3_result_error( context, zErrDyn, -1 );
     sqlite3DbFree( db, ref zErrDyn );
@@ -310,7 +309,7 @@ int NotUsed,
 sqlite3_value[] argv
 )
 {
-  string zName = zName = argv[0].z != null && ( argv[0].z.Length > 0 ) ? sqlite3_value_text( argv[0] ) : "";//(sqlite3_value_text(argv[0]);
+  string zName = !string.IsNullOrEmpty(argv[0].z) ? sqlite3_value_text( argv[0] ) : string.Empty;//(sqlite3_value_text(argv[0]);
   sqlite3 db = sqlite3_context_db_handle( context );
   int i;
   Db pDb = null;
@@ -318,14 +317,13 @@ sqlite3_value[] argv
 
   UNUSED_PARAMETER( NotUsed );
 
-  if ( zName == null )
-    zName = "";
+  zName = zName ?? string.Empty;
   for ( i = 0; i < db.nDb; i++ )
   {
     pDb = db.aDb[i];
     if ( pDb.pBt == null )
       continue;
-    if ( pDb.zName.Equals( zName, StringComparison.OrdinalIgnoreCase ) )
+    if ( pDb.zName.Equals( zName, StringComparison.InvariantCultureIgnoreCase ) )
       break;
   }
 
@@ -375,7 +373,6 @@ Expr pDbname,       /* Name of the database to use internally */
 Expr pKey           /* Database key for encryption extension */
 )
 {
-  int rc;
   NameContext sName;
   Vdbe v;
   sqlite3 db = pParse.db;
@@ -385,9 +382,9 @@ Expr pKey           /* Database key for encryption extension */
   sName.pParse = pParse;
 
   if (
-  SQLITE_OK != ( rc = resolveAttachExpr( sName, pFilename ) ) ||
-  SQLITE_OK != ( rc = resolveAttachExpr( sName, pDbname ) ) ||
-  SQLITE_OK != ( rc = resolveAttachExpr( sName, pKey ) )
+  SQLITE_OK != resolveAttachExpr( sName, pFilename ) ||
+  SQLITE_OK != resolveAttachExpr( sName, pDbname ) ||
+  SQLITE_OK != resolveAttachExpr( sName, pKey )
   )
   {
     pParse.nErr++;
@@ -402,7 +399,7 @@ if( pAuthArg->op==TK_STRING ){
 }else{
   zAuthArg = 0;
 }
-rc = sqlite3AuthCheck(pParse, type, zAuthArg, 0, 0);
+int rc = sqlite3AuthCheck(pParse, type, zAuthArg, 0, 0);
 if(rc!=SQLITE_OK ){
 goto attach_end;
 }
@@ -544,7 +541,7 @@ SrcList pList       /* The Source list to check and modify */
     {
       pItem.zDatabase = zDb;// sqlite3DbStrDup( pFix.pParse.db, zDb );
     }
-    else if ( !pItem.zDatabase.Equals( zDb ,StringComparison.OrdinalIgnoreCase )  )
+    else if ( !pItem.zDatabase.Equals( zDb ,StringComparison.InvariantCultureIgnoreCase )  )
     {
       sqlite3ErrorMsg( pFix.pParse,
       "%s %T cannot reference objects in database %s",

@@ -63,7 +63,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 			command = cmd;
             rows = new List<object[]>();
             column_names_sens = new Dictionary<String, Object>();
-            column_names_insens = new Dictionary<String, Object>( StringComparer.OrdinalIgnoreCase);
+            column_names_insens = new Dictionary<String, Object>( StringComparer.InvariantCultureIgnoreCase );
 			closed = false;
 			current_row = -1;
 			reading = true;
@@ -128,11 +128,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 						for (int i = 0; i < pN; i++) {
 							string decl = Sqlite3.sqlite3_column_decltype (pVm, i);
 							if (decl != null) {
-								decltypes[i] = decl.ToLower(
-#if !SQLITE_WINRT
-              System.Globalization.CultureInfo.InvariantCulture 
-#endif
-);
+								decltypes[i] = decl.ToLower(System.Globalization.CultureInfo.InvariantCulture);
 								if (decltypes[i] == "int" || decltypes[i] == "integer")
 									declmode[i] = 1;
 								else if (decltypes[i] == "date" || decltypes[i] == "datetime")
@@ -175,12 +171,10 @@ namespace Community.CsharpSqlite.SQLiteClient
 								if (declmode[i] == 1 && val >= int.MinValue && val <= int.MaxValue)
 									data_row[i] = (int)val;
 								
-#if !SQLITE_WINRT
-                                // Or if it was declared a date or datetime, do the reverse of what we
+								// Or if it was declared a date or datetime, do the reverse of what we
 								// do for DateTime parameters.
 								else if (declmode[i] == 2)
 									data_row[i] = DateTime.FromFileTime(val);								
-#endif
 								else
 									data_row[i] = val;
 									
@@ -198,10 +192,10 @@ namespace Community.CsharpSqlite.SQLiteClient
 									else data_row[i] = DateTime.Parse((string)data_row[i], System.Globalization.CultureInfo.InvariantCulture);
 								break;
 							case 4:
-								int blobbytes = Sqlite3.sqlite3_column_bytes16 (pVm, i);
-								byte[] blob = Sqlite3.sqlite3_column_blob(pVm, i);
-								//byte[] blob = new byte[blobbytes];
-								//Marshal.Copy (blobptr, blob, 0, blobbytes);
+                byte[] blob = Sqlite3.sqlite3_column_blob(pVm, i);
+								////int blobbytes = Sqlite3.sqlite3_column_bytes16 (pVm, i);
+								////byte[] blob = new byte[blobbytes];
+								////Marshal.Copy (blobptr, blob, 0, blobbytes);
 								data_row[i] = blob;
 								break;
 							case 5:
@@ -241,7 +235,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 		{
 			return new DbEnumerator (this);
 		}
-#if !(SQLITE_SILVERLIGHT || SQLITE_WINRT)
+#if !SQLITE_SILVERLIGHT 		
 		public override DataTable GetSchemaTable () 
 		{
 			DataTable dataTableSchema = new DataTable ();
@@ -336,7 +330,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 			byte[] data = (byte[])(((object[]) rows[current_row])[i]);
 			if (buffer != null)
 				Array.Copy (data, (int)fieldOffset, buffer, bufferOffset, length);
-#if (SQLITE_SILVERLIGHT||WINDOWS_MOBILE||SQLITE_WINRT)
+#if (SQLITE_SILVERLIGHT||WINDOWS_MOBILE)
             return data.Length - fieldOffset;
 #else
 			return data.LongLength - fieldOffset;
@@ -353,7 +347,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 			char[] data = (char[])(((object[]) rows[current_row])[i]);
 			if (buffer != null)
 				Array.Copy (data, (int)fieldOffset, buffer, bufferOffset, length);
-#if (SQLITE_SILVERLIGHT||WINDOWS_MOBILE || SQLITE_WINRT)
+#if (SQLITE_SILVERLIGHT||WINDOWS_MOBILE)
             return data.Length - fieldOffset;
 #else
 			return data.LongLength - fieldOffset;

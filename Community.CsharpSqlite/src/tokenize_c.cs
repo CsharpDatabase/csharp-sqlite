@@ -627,7 +627,10 @@ namespace Community.CsharpSqlite
         }
       }
 abort_parse:
-      pParse.zTail = new StringBuilder( zSql.Length <= i ? "" : zSql.Substring( i, zSql.Length - i ) );
+        pParse.zTail = new StringBuilder();
+      if (zSql.Length > i ) {
+        pParse.zTail.Append(zSql.Substring( i, zSql.Length - i ));
+      }
       if ( zSql.Length >= i && nErr == 0 && pParse.rc == SQLITE_OK )
       {
         if ( lastTokenParsed != TK_SEMI )
@@ -647,7 +650,7 @@ sqlite3ParserStackPeak(pEngine)
       //{
       //  pParse.rc = SQLITE_NOMEM;
       //}
-      if ( pParse.rc != SQLITE_OK && pParse.rc != SQLITE_DONE && pParse.zErrMsg == "" )
+      if ( pParse.rc != SQLITE_OK && pParse.rc != SQLITE_DONE && pParse.zErrMsg.Length == 0 )
       {
         sqlite3SetString( ref pParse.zErrMsg, db, sqlite3ErrStr( pParse.rc ) );
       }
@@ -656,7 +659,7 @@ sqlite3ParserStackPeak(pEngine)
       {
         pzErrMsg = pParse.zErrMsg;
         sqlite3_log( pParse.rc, "%s", pzErrMsg );
-        pParse.zErrMsg = "";
+        pParse.zErrMsg = string.Empty;
         nErr++;
       }
       if ( pParse.pVdbe != null && pParse.nErr > 0 && pParse.nested == 0 )

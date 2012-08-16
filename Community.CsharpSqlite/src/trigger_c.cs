@@ -82,7 +82,7 @@ namespace Community.CsharpSqlite
         {
           Trigger pTrig = (Trigger)sqliteHashData( p );
           if ( pTrig.pTabSchema == pTab.pSchema
-          && pTrig.table.Equals( pTab.zName, StringComparison.OrdinalIgnoreCase ) )
+          && pTrig.table.Equals( pTab.zName, StringComparison.InvariantCultureIgnoreCase ) )
           {
             pTrig.pNext = ( pList != null ? pList : pTab.pTrigger );
             pList = pTrig;
@@ -121,7 +121,6 @@ namespace Community.CsharpSqlite
       int iDb;                      /* The database to store the trigger in */
       Token pName = null;           /* The unqualified db name */
       DbFixer sFix = new DbFixer(); /* State vector for the DB fixer */
-      int iTabDb;                   /* Index of the database holding pTab */
 
       Debug.Assert( pName1 != null );   /* pName1.z might be NULL, but not pName1 itself */
       Debug.Assert( pName2 != null );
@@ -238,7 +237,7 @@ namespace Community.CsharpSqlite
       }
 
       /* Do not create a trigger on a system table */
-      if ( pTab.zName.StartsWith( "sqlite_", System.StringComparison.OrdinalIgnoreCase ) )
+      if ( pTab.zName.StartsWith( "sqlite_", System.StringComparison.InvariantCultureIgnoreCase ) )
       {
         sqlite3ErrorMsg( pParse, "cannot create trigger on system table" );
         pParse.nErr++;
@@ -260,10 +259,10 @@ namespace Community.CsharpSqlite
         " trigger on table: %S", pTableName, 0 );
         goto trigger_cleanup;
       }
-      iTabDb = sqlite3SchemaToIndex( db, pTab.pSchema );
 
 #if !SQLITE_OMIT_AUTHORIZATION
 {
+      int iTabDb = sqlite3SchemaToIndex( db, pTab.pSchema );
 int code = SQLITE_CREATE_TRIGGER;
 string zDb = db.aDb[iTabDb].zName;
 string zDbTrig = isTemp ? db.aDb[1].zName : zDb;
@@ -604,7 +603,7 @@ triggerfinish_cleanup:
       for ( i = OMIT_TEMPDB; i < db.nDb; i++ )
       {
         int j = ( i < 2 ) ? i ^ 1 : i;  /* Search TEMP before MAIN */
-        if ( zDb != null && !db.aDb[j].zName.Equals( zDb ,StringComparison.OrdinalIgnoreCase )  )
+        if ( zDb != null && !db.aDb[j].zName.Equals( zDb ,StringComparison.InvariantCultureIgnoreCase )  )
           continue;
         Debug.Assert( sqlite3SchemaMutexHeld( db, j, null ) );
         pTrigger = sqlite3HashFind( ( db.aDb[j].pSchema.trigHash ), zName, nName, (Trigger)null );
@@ -957,8 +956,8 @@ new VdbeOpList( OP_Next,       0, ADDR(1),  0), /* 8 */
 */
     static void transferParseError( Parse pTo, Parse pFrom )
     {
-      Debug.Assert( String.IsNullOrEmpty( pFrom.zErrMsg ) || pFrom.nErr != 0 );
-      Debug.Assert( String.IsNullOrEmpty( pTo.zErrMsg ) || pTo.nErr != 0 );
+      Debug.Assert( string.IsNullOrEmpty( pFrom.zErrMsg ) || pFrom.nErr != 0 );
+      Debug.Assert( string.IsNullOrEmpty( pTo.zErrMsg ) || pTo.nErr != 0 );
       if ( pTo.nErr == 0 )
       {
         pTo.zErrMsg = pFrom.zErrMsg;
@@ -1028,11 +1027,11 @@ new VdbeOpList( OP_Next,       0, ADDR(1),  0), /* 8 */
       {
 #if SQLITE_DEBUG
         VdbeComment( v, "Start: %s.%s (%s %s%s%s ON %s)",
-          pTrigger.zName != null ? pTrigger.zName : "", onErrorText( orconf ),
+          pTrigger.zName ?? string.Empty, onErrorText( orconf ),
           ( pTrigger.tr_tm == TRIGGER_BEFORE ? "BEFORE" : "AFTER" ),
-            ( pTrigger.op == TK_UPDATE ? "UPDATE" : "" ),
-            ( pTrigger.op == TK_INSERT ? "INSERT" : "" ),
-            ( pTrigger.op == TK_DELETE ? "DELETE" : "" ),
+            ( pTrigger.op == TK_UPDATE ? "UPDATE" : string.Empty ),
+            ( pTrigger.op == TK_INSERT ? "INSERT" : string.Empty ),
+            ( pTrigger.op == TK_DELETE ? "DELETE" : string.Empty ),
           pTab.zName
         );
 #endif
@@ -1150,12 +1149,12 @@ new VdbeOpList( OP_Next,       0, ADDR(1),  0), /* 8 */
       ** is a pointer to the sub-vdbe containing the trigger program.  */
       if ( pPrg != null )
       {
-        bool bRecursive = ( !String.IsNullOrEmpty( p.zName ) && 0 == ( pParse.db.flags & SQLITE_RecTriggers ) );
+        bool bRecursive = ( !string.IsNullOrEmpty( p.zName ) && 0 == ( pParse.db.flags & SQLITE_RecTriggers ) );
         sqlite3VdbeAddOp3( v, OP_Program, reg, ignoreJump, ++pParse.nMem );
         sqlite3VdbeChangeP4( v, -1, pPrg.pProgram, P4_SUBPROGRAM );
 #if SQLITE_DEBUG
         VdbeComment
-            ( v, "Call: %s.%s", ( !String.IsNullOrEmpty( p.zName ) ? p.zName : "fkey" ), onErrorText( orconf ) );
+            ( v, "Call: %s.%s", ( !string.IsNullOrEmpty( p.zName ) ? p.zName : "fkey" ), onErrorText( orconf ) );
 #endif
 
         /* Set the P5 operand of the OP_Program instruction to non-zero if

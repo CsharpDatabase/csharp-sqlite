@@ -188,7 +188,7 @@ namespace Community.CsharpSqlite
       /* Same as READ_UTF8() above but without the zTerm parameter.
       ** For this routine, we assume the UTF8 string is always zero-terminated.
       */
-      if ( String.IsNullOrEmpty( zIn ) )
+      if ( string.IsNullOrEmpty( zIn ) )
         return 0;
       //c = *( zIn++ );
       //if ( c >= 0xc0 )

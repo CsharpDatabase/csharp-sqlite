@@ -113,7 +113,7 @@ static void sqlite3IoTrace( string X, params object[] ap ) {  }
 **
 ** See also the "PRAGMA temp_store_directory" SQL command.
 */
-    static string sqlite3_temp_directory = "";//string sqlite3_temp_directory = 0;
+    static string sqlite3_temp_directory = string.Empty;//string sqlite3_temp_directory = 0;
 
     /*
     ** Initialize SQLite.
@@ -146,7 +146,7 @@ static void sqlite3IoTrace( string X, params object[] ap ) {  }
     **    *  Recursive calls to this routine from thread X return immediately
     **       without blocking.
     */
-    static public int sqlite3_initialize()
+    static int sqlite3_initialize()
     {
       //--------------------------------------------------------------------
       // Under C#, Need to initialize some static variables
@@ -256,7 +256,7 @@ FuncDefHash *pHash = GLOBAL(FuncDefHash, sqlite3GlobalFunctions);
 memset( pHash, 0, sizeof( sqlite3GlobalFunctions ) );
 #else
           sqlite3GlobalFunctions = new FuncDefHash();
-          FuncDefHash pHash = sqlite3GlobalFunctions;
+          ////FuncDefHash pHash = sqlite3GlobalFunctions;
 #endif
           sqlite3RegisterGlobalFunctions();
           if ( sqlite3GlobalConfig.isPCacheInit == 0 )
@@ -362,7 +362,7 @@ memset( pHash, 0, sizeof( sqlite3GlobalFunctions ) );
     ** behavior.
     */
     // Overloads for ap assignments
-    static public int sqlite3_config( int op, sqlite3_pcache_methods ap )
+    static int sqlite3_config( int op, sqlite3_pcache_methods ap )
     {      //  va_list ap;
       int rc = SQLITE_OK;
       switch ( op )
@@ -377,7 +377,7 @@ memset( pHash, 0, sizeof( sqlite3GlobalFunctions ) );
       return rc;
     }
 
-    static public int sqlite3_config(int op, ref sqlite3_pcache_methods ap)
+    static int sqlite3_config( int op, ref sqlite3_pcache_methods ap )
     {      //  va_list ap;
       int rc = SQLITE_OK;
       switch ( op )
@@ -395,7 +395,7 @@ memset( pHash, 0, sizeof( sqlite3GlobalFunctions ) );
       return rc;
     }
 
-    static public int sqlite3_config(int op, sqlite3_mem_methods ap)
+    static int sqlite3_config( int op, sqlite3_mem_methods ap )
     {      //  va_list ap;
       int rc = SQLITE_OK;
       switch ( op )
@@ -410,7 +410,7 @@ memset( pHash, 0, sizeof( sqlite3GlobalFunctions ) );
       return rc;
     }
 
-    static public int sqlite3_config(int op, ref sqlite3_mem_methods ap)
+    static int sqlite3_config( int op, ref sqlite3_mem_methods ap )
     {      //  va_list ap;
       int rc = SQLITE_OK;
       switch ( op )
@@ -427,7 +427,7 @@ memset( pHash, 0, sizeof( sqlite3GlobalFunctions ) );
     }
 
 #if SQLITE_THREADSAFE // && SQLITE_THREADSAFE>0
-    static public int sqlite3_config( int op, sqlite3_mutex_methods ap )
+    static int sqlite3_config( int op, sqlite3_mutex_methods ap )
     {
       //  va_list ap;
       int rc = SQLITE_OK;
@@ -443,7 +443,7 @@ memset( pHash, 0, sizeof( sqlite3GlobalFunctions ) );
       return rc;
     }
 
-    static public int sqlite3_config( int op, ref sqlite3_mutex_methods ap )
+    static int sqlite3_config( int op, ref sqlite3_mutex_methods ap )
     {
       //  va_list ap;
       int rc = SQLITE_OK;
@@ -460,7 +460,7 @@ memset( pHash, 0, sizeof( sqlite3GlobalFunctions ) );
     }
 #endif
 
-    static public int sqlite3_config(int op, params object[] ap)
+    static int sqlite3_config( int op, params object[] ap )
     {
       //  va_list ap;
       int rc = SQLITE_OK;
@@ -511,21 +511,22 @@ memset( pHash, 0, sizeof( sqlite3GlobalFunctions ) );
           case SQLITE_CONFIG_GETMUTEX:
             {
               /* Retrieve the current mutex implementation */
-              // TODO -- *va_arg(ap, sqlite3_mutex_methods) = sqlite3GlobalConfig.mutex;
+              Debugger.Break(); // TODO -- *va_arg(ap, sqlite3_mutex_methods) = sqlite3GlobalConfig.mutex;
               break;
             }
 #endif
           case SQLITE_CONFIG_MALLOC:
             {
+              Debugger.Break(); // TODO --
               /* Specify an alternative malloc implementation */
-              // TODO -- sqlite3GlobalConfig.m = va_arg(ap, (sqlite3_mem_methods)null);
+              sqlite3GlobalConfig.m = va_arg( ap, (sqlite3_mem_methods)null );
               break;
             }
           case SQLITE_CONFIG_GETMALLOC:
             {
               /* Retrieve the current malloc() implementation */
               //if ( sqlite3GlobalConfig.m.xMalloc == null ) sqlite3MemSetDefault();
-              // TODO --//va_arg(ap, sqlite3_mem_methods) =  sqlite3GlobalConfig.m;
+              //Debugger.Break(); // TODO --//va_arg(ap, sqlite3_mem_methods) =  sqlite3GlobalConfig.m;
               break;
             }
           case SQLITE_CONFIG_MEMSTATUS:
@@ -555,7 +556,7 @@ memset( pHash, 0, sizeof( sqlite3GlobalFunctions ) );
           case SQLITE_CONFIG_PCACHE:
             {
               /* Specify an alternative page cache implementation */
-              // TODO --sqlite3GlobalConfig.pcache = (sqlite3_pcache_methods)va_arg(ap, "sqlite3_pcache_methods");
+              Debugger.Break(); // TODO --sqlite3GlobalConfig.pcache = (sqlite3_pcache_methods)va_arg(ap, "sqlite3_pcache_methods");
               break;
             }
 
@@ -565,7 +566,7 @@ memset( pHash, 0, sizeof( sqlite3GlobalFunctions ) );
               {
                 sqlite3PCacheSetDefault();
               }
-              // TODO -- *va_arg(ap, sqlite3_pcache_methods) = sqlite3GlobalConfig.pcache;
+              Debugger.Break(); // TODO -- *va_arg(ap, sqlite3_pcache_methods) = sqlite3GlobalConfig.pcache;
               break;
             }
 
@@ -746,7 +747,7 @@ break;
       //va_list ap;
       lock ( lock_va_list )
       {
-        va_start( ap, "" );
+        va_start( ap, string.Empty );
         switch ( op )
         {
           case SQLITE_DBCONFIG_LOOKASIDE:
@@ -859,7 +860,7 @@ break;
     int nKey2, string pKey2
     )
     {
-      int n = ( nKey1 < nKey2 ) ? nKey1 : nKey2;
+      ////int n = ( nKey1 < nKey2 ) ? nKey1 : nKey2;
       int r = sqlite3StrNICmp( pKey1, pKey2, ( nKey1 < nKey2 ) ? nKey1 : nKey2 );
       UNUSED_PARAMETER( NotUsed );
       if ( 0 == r )
@@ -1159,7 +1160,7 @@ break;
 /* SQLITE_NOTADB      */ "file is encrypted or is not a database",
 };
       rc &= 0xff;
-      if ( ALWAYS( rc >= 0 ) && rc < aMsg.Length && aMsg[rc] != "" )//(int)(sizeof(aMsg)/sizeof(aMsg[0]))
+      if ( ALWAYS( rc >= 0 ) && rc < aMsg.Length && aMsg[rc].Length > 0 )//(int)(sizeof(aMsg)/sizeof(aMsg[0]))
       {
         return aMsg[rc];
       }
@@ -1314,7 +1315,7 @@ return 1;
     /*
     ** Cause any pending operation to stop at its earliest opportunity.
     */
-    public static void sqlite3_interrupt( sqlite3 db )
+    static void sqlite3_interrupt( sqlite3 db )
     {
       db.u1.isInterrupted = true;
     }
@@ -1586,7 +1587,7 @@ return rc;
 ** If the invoked function returns non-zero, then the commit becomes a
 ** rollback.
 */
-    public static object sqlite3_commit_hook(
+    static object sqlite3_commit_hook(
     sqlite3 db,             /* Attach the hook to this database */
     dxCommitCallback xCallback,   //int (*xCallback)(void),  /* Function to invoke on each commit */
     object pArg             /* Argument to the function */
@@ -1605,7 +1606,7 @@ return rc;
     ** Register a callback to be invoked each time a row is updated,
     ** inserted or deleted using this database connection.
     */
-    public static object sqlite3_update_hook(
+    static object sqlite3_update_hook(
     sqlite3 db,             /* Attach the hook to this database */
     dxUpdateCallback xCallback,   //void (*xCallback)(void*,int,char const *,char const *,sqlite_int64),
     object pArg             /* Argument to the function */
@@ -1624,7 +1625,7 @@ return rc;
     ** Register a callback to be invoked each time a transaction is rolled
     ** back by this database connection.
     */
-    public static object sqlite3_rollback_hook(
+    static object sqlite3_rollback_hook(
     sqlite3 db,             /* Attach the hook to this database */
     dxRollbackCallback xCallback,   //void (*xCallback)(void), /* Callback function */
     object pArg             /* Argument to the function */
@@ -1880,7 +1881,7 @@ int sqlite3Checkpoint(sqlite3 db, int iDb, int eMode, int *pnLog, int *pnCkpt){
       {
         z = sqlite3_value_text( db.pErr );
         //Debug.Assert( 0 == db.mallocFailed );
-        if ( String.IsNullOrEmpty( z ) )
+        if ( string.IsNullOrEmpty( z ) )
         {
           z = sqlite3ErrStr( db.errCode );
         }
@@ -2232,7 +2233,7 @@ static int sqlite3ParseUri(
       while ( iIn < nUri && zUri[iIn] != '/' )
         iIn++;
 
-      if ( iIn != 7 && ( iIn != 16 || String.Compare( "localhost", zUri.Substring( 7, 9 ), StringComparison.OrdinalIgnoreCase ) != 0 ) )//memcmp("localhost", &zUri[7], 9)) )
+      if ( iIn != 7 && ( iIn != 16 || String.Compare( "localhost", zUri.Substring( 7, 9 ), StringComparison.InvariantCultureIgnoreCase ) != 0 ) )//memcmp("localhost", &zUri[7], 9)) )
       {
         pzErrMsg = sqlite3_mprintf("invalid uri authority: %.*s", 
             iIn-7, zUri.Substring(7));
@@ -2319,7 +2320,7 @@ static int sqlite3ParseUri(
         zVfs = zVal;
       }else{
         OpenMode[] aMode = null;
-        string zModeType = "";
+        string zModeType = string.Empty;
         int mask = 0;
         int limit = 0;
 
@@ -2416,8 +2417,8 @@ static int sqlite3ParseUri(
       sqlite3 db;                     /* Store allocated handle here */
       int rc;                         /* Return code */
       int isThreadsafe;               /* True for threadsafe connections */
-      string zOpen = "";              /* Filename argument to pass to BtreeOpen() */
-      string zErrMsg = "";            /* Error message from sqlite3ParseUri() */
+      string zOpen = string.Empty;              /* Filename argument to pass to BtreeOpen() */
+      string zErrMsg = string.Empty;            /* Error message from sqlite3ParseUri() */
 
       ppDb = null;
 #if !SQLITE_OMIT_AUTOINIT
@@ -2563,7 +2564,7 @@ static int sqlite3ParseUri(
   rc = sqlite3ParseUri( zVfs, zFilename, ref flags, ref db.pVfs, ref zOpen, ref zErrMsg );
   if( rc!=SQLITE_OK ){
     //if( rc==SQLITE_NOMEM ) db.mallocFailed = 1;
-    sqlite3Error(db, rc, zErrMsg.Length>0 ? "%s" : "", zErrMsg);
+    sqlite3Error(db, rc, "%s", zErrMsg);
     //sqlite3_free(zErrMsg);
     goto opendb_out;
   }
@@ -2752,7 +2753,7 @@ return sqlite3ApiExit(0, rc);
     /*
 ** Register a new collation sequence with the database handle db.
 */
-    public static int sqlite3_create_collation(
+    static int sqlite3_create_collation(
     sqlite3 db,
     string zName,
     int enc,
@@ -2944,7 +2945,7 @@ void sqlite3_thread_cleanup()
     )
     {
       int rc;
-      string zErrMsg = "";
+      string zErrMsg = string.Empty;
       Table pTab = null;
       Column pCol = null;
       int iCol;
@@ -2986,7 +2987,7 @@ void sqlite3_thread_cleanup()
         for ( iCol = 0; iCol < pTab.nCol; iCol++ )
         {
           pCol = pTab.aCol[iCol];
-          if ( pCol.zName.Equals( zColumnName, StringComparison.OrdinalIgnoreCase ) )
+          if ( pCol.zName.Equals( zColumnName, StringComparison.InvariantCultureIgnoreCase ) )
           {
             break;
           }
@@ -3021,7 +3022,7 @@ void sqlite3_thread_cleanup()
         zDataType = "INTEGER";
         primarykey = 1;
       }
-      if ( String.IsNullOrEmpty( zCollSeq ) )
+      if ( string.IsNullOrEmpty( zCollSeq ) )
       {
         zCollSeq = "BINARY";
       }
@@ -3051,7 +3052,7 @@ error_out:
         zColumnName );
         rc = SQLITE_ERROR;
       }
-      sqlite3Error( db, rc, ( !String.IsNullOrEmpty( zErrMsg ) ? "%s" : null ), zErrMsg );
+      sqlite3Error( db, rc, ( !string.IsNullOrEmpty( zErrMsg ) ? "%s" : null ), zErrMsg );
       sqlite3DbFree( db, ref zErrMsg );
       rc = sqlite3ApiExit( db, rc );
       sqlite3_mutex_leave( db.mutex );
@@ -3122,7 +3123,7 @@ error_out:
           Debug.Assert( fd != null );
           if ( op == SQLITE_FCNTL_FILE_POINTER )
           {
-#if (SQLITE_SILVERLIGHT || WINDOWS_MOBILE || SQLITE_WINRT)
+#if (SQLITE_SILVERLIGHT || WINDOWS_MOBILE)
               pArg = (long)-1; // not supported
 #else
             pArg = (long)fd.fs.Handle;
@@ -3147,7 +3148,7 @@ error_out:
     /*
     ** Interface to the testing logic.
     */
-    static public int sqlite3_test_control(int op, params object[] ap)
+    static int sqlite3_test_control( int op, params object[] ap )
     {
       int rc = 0;
 #if !SQLITE_OMIT_BUILTIN_TEST
@@ -3414,7 +3415,7 @@ error_out:
 ** returns a NULL pointer.
 */
 static string sqlite3_uri_parameter(string zFilename, string zParam){
-  // TODO -- Implement URI
+  Debugger.Break();
   //zFilename += sqlite3Strlen30(zFilename) + 1;
   //while( zFilename[0] ){
   //  int x = strcmp(zFilename, zParam);

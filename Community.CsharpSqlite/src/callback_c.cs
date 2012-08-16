@@ -58,7 +58,7 @@ string zExternal;
 sqlite3_value pTmp = sqlite3ValueNew(db);
 sqlite3ValueSetStr(pTmp, -1, zName, SQLITE_UTF8, SQLITE_STATIC);
 zExternal = sqlite3ValueText(pTmp, SQLITE_UTF16NATIVE);
-if( zExternal!="" ){
+if( zExternal != string.Empty ){
 db.xCollNeeded16( db.pCollNeededArg, db, db.aDbStatic[0].pSchema.enc, zExternal );//(int)ENC(db), zExternal);
 }
 sqlite3ValueFree(ref pTmp);
@@ -339,7 +339,7 @@ sqlite3ValueFree(ref pTmp);
       FuncDef p;
       for ( p = pHash.a[h]; p != null; p = p.pHash )
       {
-        if ( p.zName.Length == nFunc && p.zName.StartsWith( zFunc, StringComparison.OrdinalIgnoreCase ) )
+        if ( p.zName.Length == nFunc && p.zName.StartsWith( zFunc, StringComparison.InvariantCultureIgnoreCase ) )
         {
           return p;
         }

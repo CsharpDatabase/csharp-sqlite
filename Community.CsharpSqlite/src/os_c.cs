@@ -316,7 +316,7 @@ out object pp                 /* OUT: Pointer to mapping */
     */
     static bool isInit = false;
 
-    static public sqlite3_vfs sqlite3_vfs_find(string zVfs)
+    static sqlite3_vfs sqlite3_vfs_find( string zVfs )
     {
       sqlite3_vfs pVfs = null;
 #if SQLITE_THREADSAFE
@@ -333,7 +333,7 @@ out object pp                 /* OUT: Pointer to mapping */
       sqlite3_mutex_enter( mutex );
       for ( pVfs = vfsList; pVfs != null; pVfs = pVfs.pNext )
       {
-        if ( zVfs == null || zVfs == "" )
+        if ( string.IsNullOrEmpty( zVfs ) )
           break;
         if ( zVfs == pVfs.zName )
           break; //strcmp(zVfs, pVfs.zName) == null) break;
@@ -375,7 +375,7 @@ out object pp                 /* OUT: Pointer to mapping */
     ** VFS multiple times.  The new VFS becomes the default if makeDflt is
     ** true.
     */
-    static public int sqlite3_vfs_register( sqlite3_vfs pVfs, int makeDflt )
+    static int sqlite3_vfs_register( sqlite3_vfs pVfs, int makeDflt )
     {
       sqlite3_mutex mutex;
 #if !SQLITE_OMIT_AUTOINIT

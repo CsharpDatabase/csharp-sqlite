@@ -129,7 +129,7 @@ namespace Community.CsharpSqlite
     ** The default size of a disk sector
     */
 #if !SQLITE_DEFAULT_SECTOR_SIZE
-    const int SQLITE_DEFAULT_SECTOR_SIZE = 512;//# define SQLITE_DEFAULT_SECTOR_SIZE 512
+    const int SQLITE_DEFAULT_SECTOR_SIZE = 4096;//# define SQLITE_DEFAULT_SECTOR_SIZE 512
 #endif
 
     /*

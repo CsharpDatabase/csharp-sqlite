@@ -165,7 +165,7 @@ rc = isnan(x);
     //Overloads
     static void sqlite3Error( sqlite3 db, int err_code, int noString )
     {
-      sqlite3Error( db, err_code, err_code == 0 ? null : "" );
+      sqlite3Error( db, err_code, err_code == 0 ? null : string.Empty );
     }
 
     static void sqlite3Error( sqlite3 db, int err_code, string zFormat, params object[] ap )
@@ -253,7 +253,7 @@ rc = isnan(x);
     {
       char quote;
       int i;
-      if ( z == null || z == "" )
+      if ( string.IsNullOrEmpty( z ) )
         return -1;
       quote = z[0];
       switch ( quote )
@@ -370,7 +370,7 @@ rc = isnan(x);
     static bool sqlite3AtoF( string z, ref double pResult, int length, u8 enc )
     {
 #if !SQLITE_OMIT_FLOATING_POINT
-      if ( String.IsNullOrEmpty( z ) )
+      if ( string.IsNullOrEmpty( z ) )
       {
         pResult = 0;
         return false;
@@ -810,7 +810,7 @@ return !sqlite3Atoi64(z, pResult, length, enc);
     static int sqlite3Atoi( string z )
     {
       int x = 0;
-      if ( !String.IsNullOrEmpty( z ) )
+      if ( !string.IsNullOrEmpty( z ) )
         sqlite3GetInt32( z, ref x );
       return x;
     }

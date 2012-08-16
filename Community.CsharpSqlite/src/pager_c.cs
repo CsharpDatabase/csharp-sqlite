@@ -2908,8 +2908,8 @@ delmaster_out:
       }
       if ( pPager.sectorSize < 32 )
       {
-        Debug.Assert( MAX_SECTOR_SIZE >= 512 );
-        pPager.sectorSize = 512;
+        Debug.Assert( MAX_SECTOR_SIZE >= 4096 );
+        pPager.sectorSize = 4096;
       }
       if ( pPager.sectorSize > MAX_SECTOR_SIZE )
       {
@@ -4252,7 +4252,6 @@ static void assertTruncateConstraint(Pager pPager) { }
     */
     static int sqlite3PagerClose( Pager pPager )
     {
-      u8[] pTmp = pPager.pTmpSpace;
 #if SQLITE_TEST
       disable_simulated_io_errors();
 #endif
@@ -4260,17 +4259,17 @@ static void assertTruncateConstraint(Pager pPager) { }
       /* pPager.errCode = 0; */
       pPager.exclusiveMode = false;
 #if !SQLITE_OMIT_WAL
-sqlite3WalClose(pPager->pWal, pPager->ckptSyncFlags, pPager->pageSize, pTmp);
-pPager.pWal = 0;
+      u8[] pTmp = pPager.pTmpSpace;
+      sqlite3WalClose(pPager->pWal, pPager->ckptSyncFlags, pPager->pageSize, pTmp);
+      pPager.pWal = 0;
 #endif
       pager_reset( pPager );
-      if (
+
 #if SQLITE_OMIT_MEMORYDB
-1==MEMDB
+      if ( 1 == MEMDB )
 #else
- 1 == pPager.memDb
+      if ( 1 == pPager.memDb )
 #endif
- )
       {
         pager_unlock( pPager );
       }
@@ -4880,15 +4879,15 @@ static Pgno sqlite3PagerPagenumber( DbPage pPg )    {      return pPg.pgno;    }
       u8 tempFile = 0;         /* True for temp files (incl. in-memory files) */ // Needs to be u8 for later tests
       u8 memDb = 0;            /* True if this is an in-memory file */
       bool readOnly = false;   /* True if this is a read-only file */
-      int journalFileSize;     /* Bytes to allocate for each journal fd */
+      ////int journalFileSize;     /* Bytes to allocate for each journal fd */
       StringBuilder zPathname = null; /* Full path to database file */
       int nPathname = 0;       /* Number of bytes in zPathname */
       bool useJournal = ( flags & PAGER_OMIT_JOURNAL ) == 0; /* False to omit journal */
       bool noReadlock = ( flags & PAGER_NO_READLOCK ) != 0;  /* True to omit read-lock */
-      int pcacheSize = sqlite3PcacheSize();       /* Bytes to allocate for PCache */
+      ////int pcacheSize = sqlite3PcacheSize();       /* Bytes to allocate for PCache */
       u32 szPageDflt = SQLITE_DEFAULT_PAGE_SIZE;  /* Default page size */
-      string zUri = null;     /* URI args to copy */
-      int nUri = 0;           /* Number of bytes of URI args at *zUri */
+      ////string zUri = null;     /* URI args to copy */
+      ////int nUri = 0;           /* Number of bytes of URI args at *zUri */
 
       /* Figure out how much space is required for each journal file-handle
       ** (there are two of them, the main journal and the sub-journal). This
@@ -4898,14 +4897,14 @@ static Pgno sqlite3PagerPagenumber( DbPage pPg )    {      return pPg.pgno;    }
       ** file in memory to implement the atomic-write optimization (see
       ** source file journal.c).
       */
-      if ( sqlite3JournalSize( pVfs ) > sqlite3MemJournalSize() )
-      {
-        journalFileSize = ROUND8( sqlite3JournalSize( pVfs ) );
-      }
-      else
-      {
-        journalFileSize = ROUND8( sqlite3MemJournalSize() );
-      }
+      ////if ( sqlite3JournalSize( pVfs ) > sqlite3MemJournalSize() )
+      ////{
+      ////  journalFileSize = ROUND8( sqlite3JournalSize( pVfs ) );
+      ////}
+      ////else
+      ////{
+      ////  journalFileSize = ROUND8( sqlite3MemJournalSize() );
+      ////}
 
       /* Set the output variable to NULL in case an error occurs. */
       ppPager = null;
@@ -4922,7 +4921,7 @@ static Pgno sqlite3PagerPagenumber( DbPage pPg )    {      return pPg.pgno;    }
       ** to by zPathname, length nPathname. Or, if this is a temporary file,
       ** leave both nPathname and zPathname set to 0.
       */
-      if ( !String.IsNullOrEmpty( zFilename ) )
+      if ( !string.IsNullOrEmpty( zFilename ) )
       {
         string z;
         nPathname = pVfs.mxPathname + 1;
@@ -4935,13 +4934,13 @@ static Pgno sqlite3PagerPagenumber( DbPage pPg )    {      return pPg.pgno;    }
         rc = sqlite3OsFullPathname( pVfs, zFilename, nPathname, zPathname );
 
         nPathname = sqlite3Strlen30( zPathname );
-        z = zUri = zFilename;//.Substring(sqlite3Strlen30( zFilename ) );
+        ////z = zUri = zFilename;//.Substring(sqlite3Strlen30( zFilename ) );
         //while ( *z )
         //{
         //  z += sqlite3Strlen30( z ) + 1;
         //  z += sqlite3Strlen30( z ) + 1;
         //}
-        nUri = zUri.Length;//        &z[1] - zUri;
+        ////nUri = zUri.Length;//        &z[1] - zUri;
         if ( rc == SQLITE_OK && nPathname + 8 > pVfs.mxPathname )
         {
           /* This branch is taken when the journal path required by
@@ -5002,7 +5001,7 @@ static Pgno sqlite3PagerPagenumber( DbPage pPg )    {      return pPg.pgno;    }
         //pPager.zJournal =   (char*)(pPtr += nPathname + 1 + nUri);
         //memcpy(pPager.zFilename, zPathname, nPathname);
         pPager.zFilename = zPathname.ToString();
-        zUri = pPager.zFilename;//.Substring( nPathname + 1 );//memcpy( &pPager.zFilename[nPathname + 1], zUri, nUri );
+        ////zUri = pPager.zFilename;//.Substring( nPathname + 1 );//memcpy( &pPager.zFilename[nPathname + 1], zUri, nUri );
         //memcpy(pPager.zJournal, zPathname, nPathname);
         //memcpy(&pPager.zJournal[nPathname], "-journal", 8);
         pPager.zJournal = pPager.zFilename + "-journal";
@@ -5018,17 +5017,17 @@ memcpy(&pPager.zWal[nPathname], "-wal", 4);
       }
       else
       {
-        pPager.zFilename = "";
+        pPager.zFilename = string.Empty;
       }
       pPager.pVfs = pVfs;
       pPager.vfsFlags = (u32)vfsFlags;
 
       /* Open the pager file.
       */
-      if ( !String.IsNullOrEmpty( zFilename ) )
+      if ( !string.IsNullOrEmpty( zFilename ) )
       {
         int fout = 0;                    /* VFS flags returned by xOpen() */
-        rc = sqlite3OsOpen( pVfs, zFilename, pPager.fd, vfsFlags, ref fout );
+        rc = sqlite3OsOpen( pVfs, pPager.zFilename, pPager.fd, vfsFlags, ref fout );
         Debug.Assert( 0 == memDb );
         readOnly = ( fout & SQLITE_OPEN_READONLY ) != 0;
 

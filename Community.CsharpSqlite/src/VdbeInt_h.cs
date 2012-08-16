@@ -482,7 +482,7 @@ static bool memIsValid( Mem M ) { return true; }
 #endif
       public i64 nFkConstraint;      /* Number of imm. FK constraints this VM */
       public i64 nStmtDefCons;       /* Number of def. constraints when stmt started */
-      public string zSql = "";       /* Text of the SQL statement that generated this */
+      public string zSql = string.Empty;       /* Text of the SQL statement that generated this */
       public object pFree;           /* Free this when deleting the vdbe */
 #if SQLITE_DEBUG
       public FILE trace;             /* Write an execution trace here, if not NULL */

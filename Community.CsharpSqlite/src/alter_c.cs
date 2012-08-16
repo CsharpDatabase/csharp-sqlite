@@ -58,7 +58,7 @@ sqlite3_value[] argv
 )
 {
   string bResult = sqlite3_value_text( argv[0] );
-  string zSql = bResult == null ? "" : bResult;
+  string zSql = bResult ?? string.Empty;
   string zTableName = sqlite3_value_text( argv[1] );
 
   int token = 0;
@@ -76,7 +76,7 @@ sqlite3_value[] argv
   ** statement is that the table name is the first non-space token that
   ** is immediately followed by a TK_LP or TK_USING token.
   */
-  if ( zSql != "" )
+  if ( zSql.Length > 0 )
   {
     do
     {
@@ -132,7 +132,7 @@ static void renameParentFunc(
 )
 {
   sqlite3 db = sqlite3_context_db_handle( context );
-  string zOutput = "";
+  string zOutput = string.Empty;
   string zResult;
   string zInput = sqlite3_value_text( argv[0] );
   string zOld = sqlite3_value_text( argv[1] );
@@ -156,11 +156,11 @@ static void renameParentFunc(
         n = sqlite3GetToken( zInput, zIdx, ref token );
       } while ( token == TK_SPACE );
 
-      zParent = zIdx + n < zInput.Length ? zInput.Substring( zIdx, n ) : "";//sqlite3DbStrNDup(db, zIdx, n);
-      if ( String.IsNullOrEmpty( zParent ) )
+      zParent = zIdx + n < zInput.Length ? zInput.Substring( zIdx, n ) : string.Empty;//sqlite3DbStrNDup(db, zIdx, n);
+      if ( string.IsNullOrEmpty( zParent ) )
         break;
       sqlite3Dequote( ref zParent );
-      if ( zOld.Equals( zParent, StringComparison.OrdinalIgnoreCase) )
+      if ( zOld.Equals( zParent, StringComparison.InvariantCultureIgnoreCase ) )
       {
         string zOut = sqlite3MPrintf( db, "%s%.*s\"%w\"",
             zOutput, zIdx - zLeft, zInput.Substring( zLeft ), zNew
@@ -281,7 +281,6 @@ FUNCTION("sqlite_rename_trigger", 2, 0, 0, renameTriggerFunc),
 FUNCTION("sqlite_rename_parent",  3, 0, 0, renameParentFunc),
 #endif
   };
-  int i;
 #if SQLITE_OMIT_WSD
   FuncDefHash pHash = GLOBAL(FuncDefHash, sqlite3GlobalFunctions);
   FuncDef[] aFunc = GLOBAL(FuncDef, aAlterTableFuncs);
@@ -290,7 +289,7 @@ FUNCTION("sqlite_rename_parent",  3, 0, 0, renameParentFunc),
   FuncDef[] aFunc = aAlterTableFuncs;
 #endif
 
-  for ( i = 0; i < ArraySize( aAlterTableFuncs ); i++ )
+  for (int i = 0; i < ArraySize( aAlterTableFuncs ); i++ )
   {
     sqlite3FuncDefInsert( pHash, aFunc[i] );
   }
@@ -315,7 +314,7 @@ FUNCTION("sqlite_rename_parent",  3, 0, 0, renameParentFunc),
 static string whereOrName( sqlite3 db, string zWhere, string zConstant )
 {
   string zNew;
-  if ( String.IsNullOrEmpty( zWhere ) )
+  if ( string.IsNullOrEmpty( zWhere ) )
   {
     zNew = sqlite3MPrintf( db, "name=%Q", zConstant );
   }
@@ -337,7 +336,7 @@ static string whereOrName( sqlite3 db, string zWhere, string zConstant )
 static string whereForeignKeys( Parse pParse, Table pTab )
 {
   FKey p;
-  string zWhere = "";
+  string zWhere = string.Empty;
   for ( p = sqlite3FkReferences( pTab ); p != null; p = p.pNextTo )
   {
     zWhere = whereOrName( pParse.db, zWhere, p.pFrom.zName );
@@ -355,7 +354,7 @@ static string whereForeignKeys( Parse pParse, Table pTab )
 static string whereTempTriggers( Parse pParse, Table pTab )
 {
   Trigger pTrig;
-  string zWhere = "";
+  string zWhere = string.Empty;
   Schema pTempSchema = pParse.db.aDb[1].pSchema; /* Temp db schema */
 
   /* If the table is not located in the temp.db (in which case NULL is
@@ -374,7 +373,7 @@ static string whereTempTriggers( Parse pParse, Table pTab )
       }
     }
   }
-  if ( !String.IsNullOrEmpty( zWhere ) )
+  if ( !string.IsNullOrEmpty( zWhere ) )
   {
     zWhere = sqlite3MPrintf( pParse.db, "type='trigger' AND (%s)", zWhere );
     //sqlite3DbFree( pParse.db, ref zWhere );
@@ -430,7 +429,7 @@ static void reloadTableSchema( Parse pParse, Table pTab, string zName )
   /* Now, if the table is not stored in the temp database, reload any temp
 ** triggers. Don't use IN(...) in case SQLITE_OMIT_SUBQUERY is defined.
 */
-  if ( ( zWhere = whereTempTriggers( pParse, pTab ) ) != "" )
+  if ( ( zWhere = whereTempTriggers( pParse, pTab ) ).Length > 0 )
   {
     sqlite3VdbeAddParseSchemaOp( v, 1, zWhere );
   }
@@ -447,7 +446,7 @@ static void reloadTableSchema( Parse pParse, Table pTab, string zName )
 */
 static int isSystemTable( Parse pParse, string zName )
 {
-    if (zName.StartsWith("sqlite_", System.StringComparison.OrdinalIgnoreCase))
+  if ( zName.StartsWith( "sqlite_", System.StringComparison.InvariantCultureIgnoreCase ) )
   {
     sqlite3ErrorMsg( pParse, "table %s may not be altered", zName );
     return 1;
@@ -474,7 +473,7 @@ Token pName               /* The new table name. */
   string zTabName;          /* Original name of the table */
   Vdbe v;
 #if !SQLITE_OMIT_TRIGGER
-  string zWhere = "";       /* Where clause to locate temp triggers */
+  string zWhere = string.Empty;       /* Where clause to locate temp triggers */
 #endif
   VTable pVTab = null;      /* Non-zero if this is a v-tab with an xRename() */
   int savedDbFlags;         /* Saved value of db->flags */
@@ -639,7 +638,7 @@ sqlite3MayAbort(pParse);
 ** table. Don't do this if the table being ALTERed is itself located in
 ** the temp database.
 */
-  if ( ( zWhere = whereTempTriggers( pParse, pTab ) ) != "" )
+  if ( ( zWhere = whereTempTriggers( pParse, pTab ) ).Length > 0 )
   {
     sqlite3NestedParse( pParse,
     "UPDATE sqlite_temp_master SET " +

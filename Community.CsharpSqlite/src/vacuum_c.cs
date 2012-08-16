@@ -137,7 +137,6 @@ sqlite3_step(pStmt);
       int rc = SQLITE_OK;     /* Return code from service routines */
       Btree pMain;            /* The database being vacuumed */
       Btree pTemp;            /* The temporary database we vacuum into */
-      string zSql = "";       /* SQL statements */
       int saved_flags;        /* Saved value of the db.flags */
       int saved_nChange;      /* Saved value of db.nChange */
       int saved_nTotalChange; /* Saved value of db.nTotalChange */
@@ -145,7 +144,6 @@ sqlite3_step(pStmt);
       Db pDb = null;          /* Database to detach at end of vacuum */
       bool isMemDb;           /* True if vacuuming a :memory: database */
       int nRes;               /* Bytes of reserved space at the end of each page */
-      int nDb;                /* Number of attached databases */
 
       if ( 0 == db.autoCommit )
       {
@@ -187,7 +185,7 @@ sqlite3_step(pStmt);
       ** time to parse and run the PRAGMA to turn journalling off than it does
       ** to write the journal header file.
       */
-      nDb = db.nDb;
+      string zSql = string.Empty;       /* SQL statements */
       if ( sqlite3TempInMemory( db ) )
       {
         zSql = "ATTACH ':memory:' AS vacuum_db;";
@@ -196,6 +194,7 @@ sqlite3_step(pStmt);
       {
         zSql = "ATTACH '' AS vacuum_db;";
       }
+      int nDb = db.nDb;                /* Number of attached databases */
       rc = execSql( db, pzErrMsg, zSql );
       if ( db.nDb > nDb )
       {

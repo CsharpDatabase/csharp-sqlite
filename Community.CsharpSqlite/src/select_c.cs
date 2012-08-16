@@ -207,7 +207,7 @@ namespace Community.CsharpSqlite
         for ( j = 0; j < ArraySize( aKeyword ); j++ )
         {
           if ( p.n == aKeyword[j].nChar
-          && p.z.StartsWith( zKeyText.Substring( aKeyword[j].i, aKeyword[j].nChar ), StringComparison.OrdinalIgnoreCase ) )
+          && p.z.StartsWith( zKeyText.Substring( aKeyword[j].i, aKeyword[j].nChar ), StringComparison.InvariantCultureIgnoreCase ) )
           {
             jointype |= aKeyword[j].code;
             break;
@@ -225,12 +225,8 @@ namespace Community.CsharpSqlite
       ( jointype & JT_ERROR ) != 0
       )
       {
-        string zSp = " ";
+        string zSp = pC == null ? string.Empty : " ";
         Debug.Assert( pB != null );
-        if ( pC == null )
-        {
-          zSp = "";
-        }
         sqlite3ErrorMsg( pParse, "unknown or unsupported join type: " +
         "%T %T%s%T", pA, pB, zSp, pC );
         jointype = JT_INNER;
@@ -254,7 +250,7 @@ namespace Community.CsharpSqlite
       int i;
       for ( i = 0; i < pTab.nCol; i++ )
       {
-        if ( pTab.aCol[i].zName.Equals( zCol, StringComparison.OrdinalIgnoreCase ) )
+        if ( pTab.aCol[i].zName.Equals( zCol, StringComparison.InvariantCultureIgnoreCase ) )
           return i;
       }
       return -1;
@@ -428,7 +424,7 @@ namespace Community.CsharpSqlite
           if ( pRight.pOn != null || pRight.pUsing != null )
           {
             sqlite3ErrorMsg( pParse, "a NATURAL join may not have " +
-            "an ON or USING clause", "" );
+            "an ON or USING clause", string.Empty );
             return 1;
           }
           for ( j = 0; j < pRightTab.nCol; j++ )
@@ -438,7 +434,7 @@ namespace Community.CsharpSqlite
             int iLeftCol = 0;  /* Matching column in the left table */
 
             zName = pRightTab.aCol[j].zName;
-            int iRightCol = columnIndex( pRightTab, zName );
+            ////int iRightCol = columnIndex( pRightTab, zName );
             if ( tableAndColumnIndex( pSrc, i + 1, zName, ref iLeft, ref iLeftCol ) != 0 )
             {
               addWhereTerm( pParse, pSrc, iLeft, iLeftCol, i + 1, j,
@@ -1028,7 +1024,7 @@ static void explainSetInteger(ref int a, int b){ a = b;}
         Vdbe v = pParse.pVdbe;
         string zMsg = sqlite3MPrintf(
         pParse.db, "COMPOUND SUBQUERIES %d AND %d %s(%s)", iSub1, iSub2,
-        bUseTmp ? "USING TEMP B-TREE " : "", selectOpName( op )
+        bUseTmp ? "USING TEMP B-TREE " : string.Empty, selectOpName( op )
         );
         sqlite3VdbeAddOp4( v, OP_Explain, pParse.iSelectId, 0, 0, zMsg, P4_DYNAMIC );
       }
@@ -1494,7 +1490,7 @@ static void explainComposite(Parse v, int w,int x,int y,bool z) {}
         p = pEList.a[i].pExpr;
         Debug.Assert( p.pRight == null || ExprHasProperty( p.pRight, EP_IntValue )
         || p.pRight.u.zToken == null || p.pRight.u.zToken.Length > 0 );
-        if ( pEList.a[i].zName != null && ( zName = pEList.a[i].zName ) != "" )
+        if ( pEList.a[i].zName != null && ( zName = pEList.a[i].zName ) != string.Empty )
         {
           /* If the column contains an "AS <name>" phrase, use <name> as the name */
           //zName = sqlite3DbStrDup(db, zName);
@@ -1538,7 +1534,7 @@ static void explainComposite(Parse v, int w,int x,int y,bool z) {}
         nName = sqlite3Strlen30( zName );
         for ( j = cnt = 0; j < i; j++ )
         {
-          if ( aCol[j].zName.Equals( zName, StringComparison.OrdinalIgnoreCase ) )
+          if ( aCol[j].zName.Equals( zName, StringComparison.InvariantCultureIgnoreCase ) )
           {
             string zNewName;
             //zName[nName] = 0;
@@ -1546,7 +1542,7 @@ static void explainComposite(Parse v, int w,int x,int y,bool z) {}
             sqlite3DbFree( db, ref zName );
             zName = zNewName;
             j = -1;
-            if ( zName == "" )
+            if ( zName.Length == 0 )
               break;
           }
         }
@@ -1584,7 +1580,7 @@ static void explainComposite(Parse v, int w,int x,int y,bool z) {}
     Select pSelect        /* SELECT used to determine types and collations */
     )
     {
-      sqlite3 db = pParse.db;
+      ////sqlite3 db = pParse.db;
       NameContext sNC;
       Column pCol;
       CollSeq pColl;
@@ -3547,11 +3543,11 @@ break;
       if ( pEList.a[0].pExpr.op != TK_AGG_COLUMN )
         return WHERE_ORDERBY_NORMAL;
       Debug.Assert( !ExprHasProperty( pExpr, EP_IntValue ) );
-      if ( pExpr.u.zToken.Equals( "min", StringComparison.OrdinalIgnoreCase ) )
+      if ( pExpr.u.zToken.Equals( "min", StringComparison.InvariantCultureIgnoreCase ) )
       {
         return WHERE_ORDERBY_MIN;
       }
-      else if ( pExpr.u.zToken.Equals( "max", StringComparison.OrdinalIgnoreCase ) )
+      else if ( pExpr.u.zToken.Equals( "max", StringComparison.InvariantCultureIgnoreCase ) )
       {
         return WHERE_ORDERBY_MAX;
       }
@@ -3613,7 +3609,7 @@ break;
         string zIndex = pFrom.zIndex;
         Index pIdx;
         for ( pIdx = pTab.pIndex;
-        pIdx != null && !pIdx.zName.Equals( zIndex, StringComparison.OrdinalIgnoreCase );
+        pIdx != null && !pIdx.zName.Equals( zIndex, StringComparison.InvariantCultureIgnoreCase );
         pIdx = pIdx.pNext
         )
           ;
@@ -3828,7 +3824,7 @@ break;
                 zTabName = pTab.zName;
               }
               ///if ( db.mallocFailed != 0 ) break;
-              if ( zTName != null && !zTName.Equals( zTabName, StringComparison.OrdinalIgnoreCase ) )
+              if ( zTName != null && !zTName.Equals( zTabName, StringComparison.InvariantCultureIgnoreCase ) )
               {
                 continue;
               }
@@ -3871,7 +3867,7 @@ break;
                 }
                 pRight = sqlite3Expr( db, TK_ID, zName );
                 zColname = zName;
-                zToFree = "";
+                zToFree = string.Empty;
                 if ( longNames || pTabList.nSrc > 1 )
                 {
                   Expr pLeft;
@@ -4041,10 +4037,9 @@ break;
     NameContext pOuterNC  /* Name context for container */
     )
     {
-      sqlite3 db;
       if ( NEVER( p == null ) )
         return;
-      db = pParse.db;
+      ////sqlite3 db = pParse.db;
       if ( ( p.selFlags & SF_HasTypeInfo ) != 0 )
         return;
       sqlite3SelectExpand( pParse, p );
@@ -4221,8 +4216,8 @@ break;
       {
         string zEqp = sqlite3MPrintf( pParse.db, "SCAN TABLE %s %s%s(~%d rows)",
             pTab.zName,
-            pIdx != null ? "USING COVERING INDEX " : "",
-            pIdx != null ? pIdx.zName : "",
+            pIdx != null ? "USING COVERING INDEX " : string.Empty,
+            pIdx != null ? pIdx.zName : string.Empty,
             pTab.nRowEst
         );
         sqlite3VdbeAddOp4(
@@ -5104,7 +5099,7 @@ select_end:
     }
     void sqlite3PrintSelect( Select p, int indent )
     {
-      sqlite3DebugPrintf( "%*sSELECT(%p) ", indent, "", p );
+      sqlite3DebugPrintf( "%*sSELECT(%p) ", indent, string.Empty, p );
       sqlite3PrintExprList( p.pEList );
       sqlite3DebugPrintf( "\n" );
       if ( p.pSrc != null )
@@ -5116,12 +5111,12 @@ select_end:
         {
           SrcList_item pItem = p.pSrc.a[i];
           sqlite3DebugPrintf( "%*s ", indent + 6, zPrefix );
-          zPrefix = "";
+          zPrefix = string.Empty;
           if ( pItem.pSelect != null )
           {
             sqlite3DebugPrintf( "(\n" );
             sqlite3PrintSelect( pItem.pSelect, indent + 10 );
-            sqlite3DebugPrintf( "%*s)", indent + 8, "" );
+            sqlite3DebugPrintf( "%*s)", indent + 8, string.Empty );
           }
           else if ( pItem.zName != null )
           {
@@ -5144,25 +5139,25 @@ select_end:
       }
       if ( p.pWhere != null )
       {
-        sqlite3DebugPrintf( "%*s WHERE ", indent, "" );
+        sqlite3DebugPrintf( "%*s WHERE ", indent, string.Empty );
         sqlite3PrintExpr( p.pWhere );
         sqlite3DebugPrintf( "\n" );
       }
       if ( p.pGroupBy != null )
       {
-        sqlite3DebugPrintf( "%*s GROUP BY ", indent, "" );
+        sqlite3DebugPrintf( "%*s GROUP BY ", indent, string.Empty );
         sqlite3PrintExprList( p.pGroupBy );
         sqlite3DebugPrintf( "\n" );
       }
       if ( p.pHaving != null )
       {
-        sqlite3DebugPrintf( "%*s HAVING ", indent, "" );
+        sqlite3DebugPrintf( "%*s HAVING ", indent, string.Empty );
         sqlite3PrintExpr( p.pHaving );
         sqlite3DebugPrintf( "\n" );
       }
       if ( p.pOrderBy != null )
       {
-        sqlite3DebugPrintf( "%*s ORDER BY ", indent, "" );
+        sqlite3DebugPrintf( "%*s ORDER BY ", indent, string.Empty );
         sqlite3PrintExprList( p.pOrderBy );
         sqlite3DebugPrintf( "\n" );
       }

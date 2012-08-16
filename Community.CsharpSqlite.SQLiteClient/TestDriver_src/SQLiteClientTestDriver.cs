@@ -23,7 +23,7 @@ namespace SQLiteClientTests
       SqliteConnection con = new SqliteConnection();
 
       string dbFilename = @"SqliteTest3.db";
-      string cs = string.Format( "Version=3,uri=file:{0}", dbFilename );
+      string cs = string.Format( "Version=3;uri=file:{0}", dbFilename );
 
       Console.WriteLine( "Set connection String: {0}", cs );
 
@@ -44,6 +44,7 @@ namespace SQLiteClientTests
 
       Console.WriteLine( "insert row 1..." );
       cmd.CommandText = "INSERT INTO TEST_TABLE ( COLA, COLB, COLC ) VALUES (123,'ABC','2008-12-31 18:19:20' )";
+
       cmd.ExecuteNonQuery();
 
       Console.WriteLine( "insert row 2..." );
@@ -537,8 +538,6 @@ namespace SQLiteClientTests
     private void T7_ThreadStart( object iSequence )
     {
       int aValue = (int)iSequence * 1000;
-      int op = aValue % 2;
-      int rows = 0;
 
       SqliteConnection con = new SqliteConnection();
       con.ConnectionString = connstring_T7;
@@ -549,7 +548,7 @@ namespace SQLiteClientTests
       cmd.CommandText = commandt;
       try
       {
-        rows = cmd.ExecuteNonQuery();
+        cmd.ExecuteNonQuery();
         Console.WriteLine( "Created table: ATABLE" + aValue );
       }
       catch ( Exception ex )
@@ -907,7 +906,7 @@ namespace SQLiteClientTests
     {
       SQLiteClientTestDriver tests = new SQLiteClientTestDriver();
 
-      int Test = 124;
+      int Test = 119;
       switch ( Test )
       {
         case 1:

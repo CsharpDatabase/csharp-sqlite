@@ -259,14 +259,12 @@ return null;
     {
       Vdbe v;                /* The virtual database engine */
       Table pTab;            /* The table from which records will be deleted */
-      string zDb;            /* Name of database holding pTab */
       int end, addr = 0;     /* A couple addresses of generated code */
       int i;                 /* Loop counter */
       WhereInfo pWInfo;      /* Information about the WHERE clause */
       Index pIdx;            /* For looping over indices of the table */
       int iCur;              /* VDBE VdbeCursor number for pTab */
       sqlite3 db;            /* Main database structure */
-      AuthContext sContext;  /* Authorization context */
       NameContext sNC;       /* Name context to resolve expressions in */
       int iDb;               /* Database number */
       int memCnt = -1;        /* Memory cell used for change counting */
@@ -276,8 +274,10 @@ return null;
       bool isView;                 /* True if attempting to delete from a view */
       Trigger pTrigger;            /* List of table triggers, if required */
 #endif
-      sContext = new AuthContext();//memset(&sContext, 0, sizeof(sContext));
-
+#if !SQLITE_OMIT_AUTHORIZATION
+      AuthContext sContext = new AuthContext();//memset(&sContext, 0, sizeof(sContext));
+#endif
+      
       db = pParse.db;
       if ( pParse.nErr != 0 /*|| db.mallocFailed != 0 */ )
       {
@@ -323,9 +323,9 @@ isView = false;
       }
       iDb = sqlite3SchemaToIndex( db, pTab.pSchema );
       Debug.Assert( iDb < db.nDb );
-      zDb = db.aDb[iDb].zName;
 #if !SQLITE_OMIT_AUTHORIZATION
-rcauth = sqlite3AuthCheck(pParse, SQLITE_DELETE, pTab->zName, 0, zDb);
+      string zDb = db.aDb[iDb].zName;
+      rcauth = sqlite3AuthCheck(pParse, SQLITE_DELETE, pTab->zName, 0, zDb);
 #else
       rcauth = SQLITE_OK;
 #endif
@@ -732,7 +732,7 @@ sqlite3AuthContextPop(sContext);
         string zAff;
         if ( pTab.pSelect != null|| ( pParse.db.flags & SQLITE_IdxRealAsInt ) != 0 )
         {
-          zAff = "";
+          zAff = string.Empty;
         }
         else
         {

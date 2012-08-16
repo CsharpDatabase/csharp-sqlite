@@ -107,7 +107,7 @@ namespace Community.CsharpSqlite
 #if SQLITE_OMIT_TRACE
 if( 0==isPrepareV2 ) return;
 #endif
-      Debug.Assert( p.zSql == "" );
+      Debug.Assert( p.zSql.Length == 0 );
       p.zSql = z.Substring( 0, n );// sqlite3DbStrNDup(p.db, z, n);
       p.isPrepareV2 = isPrepareV2 != 0;
     }
@@ -115,10 +115,10 @@ if( 0==isPrepareV2 ) return;
     /*
     ** Return the SQL associated with a prepared statement
     */
-    static public string sqlite3_sql( sqlite3_stmt pStmt )
+    static string sqlite3_sql( sqlite3_stmt pStmt )
     {
       Vdbe p = (Vdbe)pStmt;
-      return ( p != null && p.isPrepareV2 ? p.zSql : "" );
+      return ( p != null && p.isPrepareV2 ? p.zSql : string.Empty );
     }
 
     /*
@@ -1120,12 +1120,11 @@ pOp.cnt = 0;
       }
       else if ( n == P4_KEYINFO )
       {
-        KeyInfo pKeyInfo;
-        int nField, nByte;
+        ////int nField = _p4.pKeyInfo.nField;
+        ////int nByte = sizeof(*pKeyInfo) + (nField-1)*sizeof(pKeyInfo.aColl[0]) + nField;
 
-        nField = _p4.pKeyInfo.nField;
-        //nByte = sizeof(*pKeyInfo) + (nField-1)*sizeof(pKeyInfo.aColl[0]) + nField;
-        pKeyInfo = new KeyInfo();//sqlite3DbMallocRaw(0, nByte);
+        KeyInfo pKeyInfo = new KeyInfo();//sqlite3DbMallocRaw(0, nByte);
+
         pOp.p4.pKeyInfo = pKeyInfo;
         if ( pKeyInfo != null )
         {
@@ -1420,10 +1419,6 @@ if( p.nOp==0 ) return dummy;
           {
             if ( pOp.p4.z != null )
               zTemp.Append( pOp.p4.z );
-            //if ( zTemp == null )
-            //{
-            //  zTemp = "";
-            //}
             break;
           }
       }
@@ -1529,9 +1524,9 @@ void sqlite3VdbeLeave(Vdbe *p){
       sqlite3_snprintf( 999, zOut, zFormat1, pc,
       sqlite3OpcodeName( pOp.opcode ), pOp.p1, pOp.p2, pOp.p3, zP4, pOp.p5,
 #if  SQLITE_DEBUG
- pOp.zComment != null ? pOp.zComment : ""
+ pOp.zComment ?? string.Empty
 #else
-""
+string.Empty
 #endif
  );
       pOut.Write( zOut );
@@ -1551,7 +1546,7 @@ void sqlite3VdbeLeave(Vdbe *p){
       if ( p != null && p.Length > starting && p[starting] != null && N != 0 )
       {
         Mem pEnd;
-        sqlite3 db = p[starting].db;
+        //sqlite3 db = p[starting].db;
         //u8 malloc_failed =  db.mallocFailed;
         //if ( db != null ) //&&  db.pnBytesFreed != 0 )
         //{
@@ -1915,7 +1910,7 @@ pOp = p.aOp[0];
 if ( pOp.opcode == OP_Trace && pOp.p4.z != null )
 {
 int i, j;
-string z = "";//char z[1000];
+string z = string.Empty;//char z[1000];
 sqlite3_snprintf( 1000, z, "%s", pOp.p4.z );
 //for(i=0; sqlite3Isspace(z[i]); i++){}
 //for(j=0; z[i]; i++){
@@ -2132,7 +2127,7 @@ sqlite3IoTrace( "SQL %s\n", z.Trim() );
         //  memset(pParse->azVar, 0, pParse->nzVar*sizeof(pParse->azVar[0]));
         //}
         p.nzVar = (i16)pParse.nzVar;
-        p.azVar = new string[(int)p.nzVar == 0 ? 1 : (int)p.nzVar]; //p.azVar = (char*)p.apArg[nArg];
+        p.azVar = new string[p.nzVar == 0 ?  1 : (int)p.nzVar]; //p.azVar = (char*)p.apArg[nArg];
         for ( n = 0; n < p.nzVar; n++ )
         {
           p.azVar[n] = pParse.azVar[n];
@@ -2480,7 +2475,7 @@ sqlite3IoTrace( "SQL %s\n", z.Trim() );
       {
         sqlite3_vfs pVfs = db.pVfs;
         bool needSync = false;
-        string zMaster = "";   /* File-name for the master journal */
+        string zMaster = string.Empty;   /* File-name for the master journal */
         string zMainFile = sqlite3BtreeGetFilename( db.aDb[0].pBt );
         sqlite3_file pMaster = null;
         i64 offset = 0;
@@ -2530,7 +2525,7 @@ sqlite3IoTrace( "SQL %s\n", z.Trim() );
             {
               continue;  /* Ignore TEMP and :memory: databases */
             }
-            Debug.Assert( zFile != "" );
+            Debug.Assert( zFile.Length > 0 );
             if ( !needSync && 0 == sqlite3BtreeSyncDisabled( pBt ) )
             {
               needSync = true;
@@ -3082,11 +3077,11 @@ static void checkActiveVdbeCnt( sqlite3 db ){}
         //if ( p.zErrMsg != 0 ) // Always exists under C#
         {
           sqlite3BeginBenignMalloc();
-          sqlite3ValueSetStr( db.pErr, -1, p.zErrMsg == null ? "" : p.zErrMsg, SQLITE_UTF8, SQLITE_TRANSIENT );
+          sqlite3ValueSetStr( db.pErr, -1, p.zErrMsg ?? string.Empty, SQLITE_UTF8, SQLITE_TRANSIENT );
           sqlite3EndBenignMalloc();
           db.errCode = p.rc;
           sqlite3DbFree( db, ref p.zErrMsg );
-          p.zErrMsg = "";
+          p.zErrMsg = string.Empty;
         }
         //else if ( p.rc != 0 )
         //{
@@ -3108,7 +3103,7 @@ static void checkActiveVdbeCnt( sqlite3 db ){}
         sqlite3Error( db, p.rc, 0 );
         sqlite3ValueSetStr( db.pErr, -1, p.zErrMsg, SQLITE_UTF8, SQLITE_TRANSIENT );
         sqlite3DbFree( db, ref p.zErrMsg );
-        p.zErrMsg = "";
+        p.zErrMsg = string.Empty;
       }
 
       /* Reclaim all memory used by the VDBE
@@ -3538,7 +3533,7 @@ swapMixedEndianFloat( v );
         // TO DO -- PASS TESTS WITH THIS ON Debug.Assert( pMem.n + ( ( pMem.flags & MEM_Zero ) != 0 ? pMem.u.nZero : 0 ) == (int)sqlite3VdbeSerialTypeLen( serial_type ) );
         Debug.Assert( pMem.n <= nBuf );
         if ( ( len = (u32)pMem.n ) != 0 )
-          if ( pMem.zBLOB == null && String.IsNullOrEmpty( pMem.z ) )
+          if ( pMem.zBLOB == null && string.IsNullOrEmpty( pMem.z ) )
           {
           }
           else if ( pMem.zBLOB != null && (( pMem.flags & MEM_Blob ) != 0 || pMem.z == null ))
@@ -3683,7 +3678,7 @@ swapMixedEndianFloat(x);
               }
               else
               {
-                pMem.z = ""; // Corrupted Data
+                pMem.z = string.Empty; // Corrupted Data
                 pMem.n = 0;
               }
               pMem.zBLOB = null;
@@ -3987,11 +3982,10 @@ swapMixedEndianFloat(x);
       int nField;
       int rc = 0;
 
-      byte[] aKey1 = new byte[pKey1.Length - offset];
+      ////byte[] aKey1 = new byte[pKey1.Length - offset];
       //Buffer.BlockCopy( pKey1, offset, aKey1, 0, aKey1.Length );
-      KeyInfo pKeyInfo;
 
-      pKeyInfo = pPKey2.pKeyInfo;
+      KeyInfo pKeyInfo = pPKey2.pKeyInfo;
       mem1.enc = pKeyInfo.enc;
       mem1.db = pKeyInfo.db;
       /* mem1.flags = 0;  // Will be initialized by sqlite3VdbeSerialGet() */
