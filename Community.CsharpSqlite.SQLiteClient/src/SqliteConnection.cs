@@ -343,8 +343,8 @@ namespace Community.CsharpSqlite.SQLiteClient
 				return;
 			}
 			
-			IntPtr errmsg = IntPtr.Zero;
 			/*
+      IntPtr errmsg = IntPtr.Zero;
 			if (Version == 2){
 				try {
 					sqlite_handle = Sqlite.sqlite_open(db_file, db_mode, out errmsg);

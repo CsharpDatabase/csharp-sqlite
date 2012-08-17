@@ -3132,7 +3132,6 @@ op_column_out:
             {
               int p1;                         /* Value of P1 operand */
               string zName;                   /* Name of savepoint */
-              int nName;
               Savepoint pNew;
               Savepoint pSavepoint;
               Savepoint pTmp;
@@ -3163,7 +3162,7 @@ op_column_out:
                 }
                 else
                 {
-                  nName = sqlite3Strlen30( zName );
+                  ////nName = sqlite3Strlen30( zName );
 
 #if !SQLITE_OMIT_VIRTUALTABLE
                   /* This call is Ok even if this savepoint is actually a transaction

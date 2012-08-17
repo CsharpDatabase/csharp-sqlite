@@ -13,8 +13,6 @@ namespace SQLiteClientTests
 {
   public class SQLiteClientTestDriver
   {
-    StringBuilder TempDirectory = new StringBuilder( "B:/TEMP/" );
-
     public void Test1()
     {
       Console.WriteLine( "Test1 Start." );
@@ -537,8 +535,6 @@ namespace SQLiteClientTests
     private void T7_ThreadStart( object iSequence )
     {
       int aValue = (int)iSequence * 1000;
-      int op = aValue % 2;
-      int rows = 0;
 
       SqliteConnection con = new SqliteConnection();
       con.ConnectionString = connstring_T7;
@@ -549,7 +545,7 @@ namespace SQLiteClientTests
       cmd.CommandText = commandt;
       try
       {
-        rows = cmd.ExecuteNonQuery();
+        cmd.ExecuteNonQuery();
         Console.WriteLine( "Created table: ATABLE" + aValue );
       }
       catch ( Exception ex )

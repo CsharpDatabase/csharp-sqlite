@@ -375,7 +375,6 @@ Expr pDbname,       /* Name of the database to use internally */
 Expr pKey           /* Database key for encryption extension */
 )
 {
-  int rc;
   NameContext sName;
   Vdbe v;
   sqlite3 db = pParse.db;
@@ -385,9 +384,9 @@ Expr pKey           /* Database key for encryption extension */
   sName.pParse = pParse;
 
   if (
-  SQLITE_OK != ( rc = resolveAttachExpr( sName, pFilename ) ) ||
-  SQLITE_OK != ( rc = resolveAttachExpr( sName, pDbname ) ) ||
-  SQLITE_OK != ( rc = resolveAttachExpr( sName, pKey ) )
+  SQLITE_OK != resolveAttachExpr( sName, pFilename ) ||
+  SQLITE_OK != resolveAttachExpr( sName, pDbname ) ||
+  SQLITE_OK != resolveAttachExpr( sName, pKey )
   )
   {
     pParse.nErr++;
@@ -402,7 +401,7 @@ if( pAuthArg->op==TK_STRING ){
 }else{
   zAuthArg = 0;
 }
-rc = sqlite3AuthCheck(pParse, type, zAuthArg, 0, 0);
+int rc = sqlite3AuthCheck(pParse, type, zAuthArg, 0, 0);
 if(rc!=SQLITE_OK ){
 goto attach_end;
 }

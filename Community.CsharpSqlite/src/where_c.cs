@@ -456,7 +456,7 @@ public WhereTerm[] aStatic = new WhereTerm[1];    /* Initial static space for a[
       if ( pWC.nTerm >= pWC.nSlot )
       {
         //WhereTerm pOld = pWC.a;
-        sqlite3 db = pWC.pParse.db;
+        //sqlite3 db = pWC.pParse.db;
         Array.Resize( ref pWC.a, pWC.nSlot * 2 );
         //pWC.a = sqlite3DbMallocRaw(db, sizeof(pWC.a[0])*pWC.nSlot*2 );
         //if( pWC.a==null ){

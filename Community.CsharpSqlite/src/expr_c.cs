@@ -943,7 +943,7 @@ sqlite3DbFree( db, ref p.u._zToken );
       if ( p != null )
       {
         bool isReduced = ( flags & EXPRDUP_REDUCE ) != 0;
-        Expr zAlloc = new Expr();
+        ////Expr zAlloc = new Expr();
         u32 staticFlag = 0;
 
         Debug.Assert( pzBuffer == null || isReduced );
@@ -961,14 +961,14 @@ sqlite3DbFree( db, ref p.u._zToken );
         // (Expr)zAlloc;
 
         //if ( pNew != null )
-        {
+        ////{
           /* Set nNewSize to the size allocated for the structure pointed to
           ** by pNew. This is either EXPR_FULLSIZE, EXPR_REDUCEDSIZE or
           ** EXPR_TOKENONLYSIZE. nToken is set to the number of bytes consumed
           ** by the copy of the p->u.zToken string (if any).
           */
           int nStructSize = dupedExprStructSize( p, flags );
-          int nNewSize = nStructSize & 0xfff;
+          ////int nNewSize = nStructSize & 0xfff;
           int nToken;
           if ( !ExprHasProperty( p, EP_IntValue ) && !String.IsNullOrEmpty( p.u.zToken ) )
           {
@@ -985,7 +985,7 @@ sqlite3DbFree( db, ref p.u._zToken );
           }
           else
           {
-            int nSize = exprStructSize( p );
+            ////int nSize = exprStructSize( p );
             //memcpy( zAlloc, p, nSize );
             pNew = p.Copy();
             //memset( &zAlloc[nSize], 0, EXPR_FULLSIZE - nSize );
@@ -1000,11 +1000,11 @@ sqlite3DbFree( db, ref p.u._zToken );
           pNew.flags |= (ushort)staticFlag;
 
           /* Copy the p->u.zToken string, if any. */
-          if ( nToken != 0 )
-          {
-            string zToken;// = pNew.u.zToken = (char)&zAlloc[nNewSize];
-            zToken = p.u.zToken.Substring( 0, nToken );// memcpy( zToken, p.u.zToken, nToken );
-          }
+          ////if ( nToken != 0 )
+          ////{
+          ////  string zToken;// = pNew.u.zToken = (char)&zAlloc[nNewSize];
+          ////  zToken = p.u.zToken.Substring( 0, nToken );// memcpy( zToken, p.u.zToken, nToken );
+          ////}
 
           if ( 0 == ( ( p.flags | pNew.flags ) & EP_TokenOnly ) )
           {
@@ -1042,7 +1042,7 @@ sqlite3DbFree( db, ref p.u._zToken );
               pNew.pRight = sqlite3ExprDup( db, p.pRight, 0 );
             }
           }
-        }
+        ////}
       }
       return pNew;
     }
@@ -1233,7 +1233,6 @@ return null;
     Expr pExpr             /* Expression to be appended. Might be NULL */
     )
     {
-      sqlite3 db = pParse.db;
       if ( pList == null )
       {
         pList = new ExprList();  //sqlite3DbMallocZero(db, ExprList).Length;

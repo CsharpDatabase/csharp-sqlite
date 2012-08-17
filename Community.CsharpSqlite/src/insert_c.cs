@@ -503,7 +503,6 @@ namespace Community.CsharpSqlite
       sqlite3 db;           /* The main database structure */
       Table pTab;           /* The table to insert into.  aka TABLE */
       string zTab;          /* Name of the table into which we are inserting */
-      string zDb;           /* Name of the database holding this table */
       int i = 0;
       int j = 0;
       int idx = 0;            /* Loop counters */
@@ -563,11 +562,12 @@ namespace Community.CsharpSqlite
       iDb = sqlite3SchemaToIndex( db, pTab.pSchema );
       Debug.Assert( iDb < db.nDb );
       pDb = db.aDb[iDb];
-      zDb = pDb.zName;
 #if !SQLITE_OMIT_AUTHORIZATION
-if( sqlite3AuthCheck(pParse, SQLITE_INSERT, pTab.zName, 0, zDb) ){
-goto insert_cleanup;
-}
+      string zDb;           /* Name of the database holding this table */
+      zDb = pDb.zName;
+      if( sqlite3AuthCheck(pParse, SQLITE_INSERT, pTab.zName, 0, zDb) ){
+        goto insert_cleanup;
+      }
 #endif
       /* Figure out if we have any triggers and if the table being
 ** inserted into is a view

@@ -2648,7 +2648,7 @@ exit_drop_table:
       {
         for ( i = 0; i < nCol; i++ )
         {
-          int n = sqlite3Strlen30( pToCol.a[i].zName );
+          ////int n = sqlite3Strlen30( pToCol.a[i].zName );
           if ( pFKey.aCol[i] == null )
             pFKey.aCol[i] = new FKey.sColMap();
           pFKey.aCol[i].zCol = pToCol.a[i].zName;

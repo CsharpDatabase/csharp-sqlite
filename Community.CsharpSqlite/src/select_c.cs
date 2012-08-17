@@ -1584,7 +1584,7 @@ static void explainComposite(Parse v, int w,int x,int y,bool z) {}
     Select pSelect        /* SELECT used to determine types and collations */
     )
     {
-      sqlite3 db = pParse.db;
+      //sqlite3 db = pParse.db;
       NameContext sNC;
       Column pCol;
       CollSeq pColl;
@@ -4041,10 +4041,9 @@ break;
     NameContext pOuterNC  /* Name context for container */
     )
     {
-      sqlite3 db;
       if ( NEVER( p == null ) )
         return;
-      db = pParse.db;
+      //sqlite3 db = pParse.db;
       if ( ( p.selFlags & SF_HasTypeInfo ) != 0 )
         return;
       sqlite3SelectExpand( pParse, p );

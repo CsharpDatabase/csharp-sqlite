@@ -1116,8 +1116,6 @@ return WRC_Prune;
       int i;                 /* Loop counter */
       ExprList pGroupBy;     /* The GROUP BY clause */
       Select pLeftmost;      /* Left-most of SELECT of a compound */
-      sqlite3 db;            /* Database connection */
-
 
       Debug.Assert( p != null );
       if ( ( p.selFlags & SF_Resolved ) != 0 )
@@ -1126,7 +1124,7 @@ return WRC_Prune;
       }
       pOuterNC = pWalker.u.pNC;
       pParse = pWalker.pParse;
-      db = pParse.db;
+      //sqlite3 db = pParse.db;
 
       /* Normally sqlite3SelectExpand() will be called first and will have
       ** already expanded this SELECT.  However, if this is a subquery within

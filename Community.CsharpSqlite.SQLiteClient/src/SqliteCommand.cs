@@ -315,7 +315,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 
 		private void GetNextStatement( string pzStart, ref string pzTail, ref Sqlite3.Vdbe pStmt )
 		{
-			UTF8Encoding encoding = new UTF8Encoding();
+			////UTF8Encoding encoding = new UTF8Encoding();
 			SqliteError err = (SqliteError)Sqlite3.sqlite3_prepare_v2( parent_conn.Handle2, pzStart, pzStart.Length, ref pStmt, ref pzTail );
 			if ( err != SqliteError.OK )
 				throw new SqliteSyntaxException( parent_conn.Handle2.errCode, GetError3() );

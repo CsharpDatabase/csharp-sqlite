@@ -198,7 +198,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 									else data_row[i] = DateTime.Parse((string)data_row[i], System.Globalization.CultureInfo.InvariantCulture);
 								break;
 							case 4:
-								int blobbytes = Sqlite3.sqlite3_column_bytes16 (pVm, i);
+								//int blobbytes = Sqlite3.sqlite3_column_bytes16 (pVm, i);
 								byte[] blob = Sqlite3.sqlite3_column_blob(pVm, i);
 								//byte[] blob = new byte[blobbytes];
 								//Marshal.Copy (blobptr, blob, 0, blobbytes);

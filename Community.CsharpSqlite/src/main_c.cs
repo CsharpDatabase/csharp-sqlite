@@ -256,7 +256,7 @@ FuncDefHash *pHash = GLOBAL(FuncDefHash, sqlite3GlobalFunctions);
 memset( pHash, 0, sizeof( sqlite3GlobalFunctions ) );
 #else
           sqlite3GlobalFunctions = new FuncDefHash();
-          FuncDefHash pHash = sqlite3GlobalFunctions;
+          ////FuncDefHash pHash = sqlite3GlobalFunctions;
 #endif
           sqlite3RegisterGlobalFunctions();
           if ( sqlite3GlobalConfig.isPCacheInit == 0 )
@@ -859,7 +859,7 @@ break;
     int nKey2, string pKey2
     )
     {
-      int n = ( nKey1 < nKey2 ) ? nKey1 : nKey2;
+      ////int n = ( nKey1 < nKey2 ) ? nKey1 : nKey2;
       int r = sqlite3StrNICmp( pKey1, pKey2, ( nKey1 < nKey2 ) ? nKey1 : nKey2 );
       UNUSED_PARAMETER( NotUsed );
       if ( 0 == r )
