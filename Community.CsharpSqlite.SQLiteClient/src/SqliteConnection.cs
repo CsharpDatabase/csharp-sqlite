@@ -174,15 +174,10 @@ namespace Community.CsharpSqlite.SQLiteClient
 				db_file = null;
 				db_mode = 0644;
 				
-				string[] conn_pieces = connstring.Split (',');
+        string[] conn_pieces = connstring.Split(new char[]{',',';'}, StringSplitOptions.RemoveEmptyEntries);
         for ( int i = 0; i < conn_pieces.Length; i++ )
         {
           string piece = conn_pieces[i].Trim();
-          // ignore empty elements
-          if ( piece.Length == 0 )
-          {
-            continue;
-          }
           int firstEqual = piece.IndexOf( '=' );
           if ( firstEqual == -1 )
           {
