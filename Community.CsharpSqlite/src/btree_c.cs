@@ -4142,7 +4142,8 @@ static void assertCellInfo( BtCursor pCur )
 //  #define assertCellInfo(x)
 static void assertCellInfo(BtCursor pCur) { }
 #endif
-#if _MSC_VER
+
+////#if _MSC_VER
 /* Use a real function in MSVC to work around bugs in that compiler. */
 static void getCellInfo( BtCursor pCur )
 {
@@ -4157,17 +4158,17 @@ static void getCellInfo( BtCursor pCur )
     assertCellInfo( pCur );
   }
 }
-#else //* if not _MSC_VER */
-/* Use a macro in all other compilers so that the function is inlined */
-//#define getCellInfo(pCur)                                                      \
-//  if( pCur.info.nSize==null ){                                                   \
-//    int iPage = pCur.iPage;                                                   \
-//    btreeParseCell(pCur.apPage[iPage],pCur.aiIdx[iPage],&pCur.info); \
-//    pCur.validNKey = true;                                                       \
-//  }else{                                                                       \
-//    assertCellInfo(pCur);                                                      \
-//  }
-#endif //* _MSC_VER */
+////#else //* if not _MSC_VER */
+///* Use a macro in all other compilers so that the function is inlined */
+////#define getCellInfo(pCur)                                                      \
+////  if( pCur.info.nSize==null ){                                                   \
+////    int iPage = pCur.iPage;                                                   \
+////    btreeParseCell(pCur.apPage[iPage],pCur.aiIdx[iPage],&pCur.info); \
+////    pCur.validNKey = true;                                                       \
+////  }else{                                                                       \
+////    assertCellInfo(pCur);                                                      \
+////  }
+////#endif //* _MSC_VER */
 
 #if !NDEBUG  //* The next routine used only within Debug.Assert() statements */
 /*
