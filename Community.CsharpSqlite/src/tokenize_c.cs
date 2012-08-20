@@ -126,7 +126,7 @@ namespace Community.CsharpSqlite
     static int sqlite3GetToken( string z, int iOffset, ref int tokenType )
     {
       int i;
-      byte c = 0;
+      char c = '\0';
       switch ( z[iOffset + 0] )
       {
         case ' ':
@@ -151,7 +151,7 @@ namespace Community.CsharpSqlite
             if ( z.Length > iOffset + 1 && z[iOffset + 1] == '-' )
             {
               /* IMP: R-15891-05542 -- syntax diagram for comments */
-              for ( i = 2; z.Length > iOffset + i && ( c = (byte)z[iOffset + i] ) != 0 && c != '\n'; i++ )
+              for ( i = 2; z.Length > iOffset + i && ( c = z[iOffset + i] ) != 0 && c != '\n'; i++ )
               {
               }
               tokenType = TK_SPACE;   /* IMP: R-22934-25134 */
@@ -193,12 +193,12 @@ namespace Community.CsharpSqlite
               return 1;
             }
             /* IMP: R-15891-05542 -- syntax diagram for comments */
-            for ( i = 3, c = (byte)z[iOffset + 2]; iOffset + i < z.Length && ( c != '*' || ( z[iOffset + i] != '/' ) && ( c != 0 ) ); i++ )
+            for ( i = 3, c = z[iOffset + 2]; iOffset + i < z.Length && ( c != '*' || ( z[iOffset + i] != '/' ) && ( c != 0 ) ); i++ )
             {
-              c = (byte)z[iOffset + i];
+              c = z[iOffset + i];
             }
             if ( iOffset + i == z.Length )
-              c = 0;
+              c = '\0';
             if ( c != 0 )
               i++;
             tokenType = TK_SPACE; /* IMP: R-22934-25134 */
@@ -216,7 +216,7 @@ namespace Community.CsharpSqlite
           }
         case '<':
           {
-            if ( ( c = (byte)z[iOffset + 1] ) == '=' )
+            if ( ( c = z[iOffset + 1] ) == '=' )
             {
               tokenType = TK_LE;
               return 2;
@@ -239,7 +239,7 @@ namespace Community.CsharpSqlite
           }
         case '>':
           {
-            if ( z.Length > iOffset + 1 && ( c = (byte)z[iOffset + 1] ) == '=' )
+            if ( z.Length > iOffset + 1 && ( c = z[iOffset + 1] ) == '=' )
             {
               tokenType = TK_GE;
               return 2;
@@ -304,7 +304,7 @@ namespace Community.CsharpSqlite
             testcase( delim == '`' );
             testcase( delim == '\'' );
             testcase( delim == '"' );
-            for ( i = 1; ( iOffset + i ) < z.Length && ( c = (byte)z[iOffset + i] ) != 0; i++ )
+            for ( i = 1; ( iOffset + i ) < z.Length && ( c = z[iOffset + i] ) != 0; i++ )
             {
               if ( c == delim )
               {
@@ -411,7 +411,7 @@ namespace Community.CsharpSqlite
 
         case '[':
           {
-            for ( i = 1, c = (byte)z[iOffset + 0]; c != ']' && ( iOffset + i ) < z.Length && ( c = (byte)z[iOffset + i] ) != 0; i++ )
+            for ( i = 1, c = z[iOffset + 0]; c != ']' && ( iOffset + i ) < z.Length && ( c = z[iOffset + i] ) != 0; i++ )
             {
             }
             tokenType = c == ']' ? TK_ID : TK_ILLEGAL;
@@ -452,9 +452,9 @@ namespace Community.CsharpSqlite
             testcase( z[iOffset + 0] == '@' );
             testcase( z[iOffset + 0] == ':' );
             tokenType = TK_VARIABLE;
-            for ( i = 1; z.Length > iOffset + i && ( c = (byte)z[iOffset + i] ) != 0; i++ )
+            for ( i = 1; z.Length > iOffset + i && ( c = z[iOffset + i] ) != 0; i++ )
             {
-              if ( IdChar( c ) )
+                if (IdChar((byte)c))
               {
                 n++;
 #if !SQLITE_OMIT_TCL_VARIABLE
@@ -464,7 +464,7 @@ namespace Community.CsharpSqlite
                 do
                 {
                   i++;
-                } while ( ( iOffset + i ) < z.Length && ( c = (byte)z[iOffset + i] ) != 0 && !sqlite3Isspace( c ) && c != ')' );
+                } while ( ( iOffset + i ) < z.Length && ( c = z[iOffset + i] ) != 0 && !sqlite3Isspace( c ) && c != ')' );
                 if ( c == ')' )
                 {
                   i++;
@@ -551,7 +551,6 @@ namespace Community.CsharpSqlite
       byte enableLookaside;           /* Saved value of db->lookaside.bEnabled */
       sqlite3 db = pParse.db;         /* The database connection */
       int mxSqlLen;                   /* Max length of an SQL string */
-
 
       mxSqlLen = db.aLimit[SQLITE_LIMIT_SQL_LENGTH];
       if ( db.activeVdbeCnt == 0 )
