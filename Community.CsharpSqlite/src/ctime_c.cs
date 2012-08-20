@@ -140,9 +140,9 @@ namespace Community.CsharpSqlite
 #if SQLITE_HAS_CODEC
 "HAS_CODEC",
 #endif
-#if SQLITE_HAVE_ISNAN
-"HAVE_ISNAN",
-#endif
+////#if SQLITE_HAVE_ISNAN
+////"HAVE_ISNAN",
+////#endif
 #if SQLITE_HOMEGROWN_RECURSIVE_MUTEX
 "HOMEGROWN_RECURSIVE_MUTEX",
 #endif

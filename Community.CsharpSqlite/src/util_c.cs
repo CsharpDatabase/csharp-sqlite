@@ -44,10 +44,9 @@ namespace Community.CsharpSqlite
     */
     //#include "sqliteInt.h"
     //#include <stdarg.h>
-#if SQLITE_HAVE_ISNAN
+//#if SQLITE_HAVE_ISNAN
 //# include <math.h>
-#endif
-
+//#endif
 
     /*
 ** Routine needed to support the testcase() macro.
@@ -68,8 +67,8 @@ dummy += (uint)x;
 */
     static bool sqlite3IsNaN( double x )
     {
-      bool rc;   /* The value return */
-#if !(SQLITE_HAVE_ISNAN)
+////      bool rc;   /* The value return */
+////#if !(SQLITE_HAVE_ISNAN)
       /*
 ** Systems that support the isnan() library function should probably
 ** make use of it by compiling with -DSQLITE_HAVE_ISNAN.  But we have
@@ -93,15 +92,18 @@ dummy += (uint)x;
 **      involving NaN. For example, x != x evaluates to true if x is NaN
 **      ...
 */
-#if __FAST_MATH__
-# error SQLite will not work correctly with the -ffast-math option of GCC.
-#endif
-      double y = x;
-      double z = y;
-      rc = ( y != z );
-#else  //* if defined(SQLITE_HAVE_ISNAN) */
-rc = isnan(x);
-#endif //* SQLITE_HAVE_ISNAN */
+////#if __FAST_MATH__
+////# error SQLite will not work correctly with the -ffast-math option of GCC.
+////#endif
+////      double y = x;
+////      double z = y;
+////      rc = ( y != z );
+////#else  //* if defined(SQLITE_HAVE_ISNAN) */
+////rc = isnan(x);
+////#endif //* SQLITE_HAVE_ISNAN */
+
+      bool rc = double.IsNaN(x);
+
       testcase( rc );
       return rc;
     }
@@ -139,7 +141,6 @@ rc = isnan(x);
       int iLen = z.IndexOf( '\0' );
       return 0x3fffffff & (iLen == -1 ? z.Length : iLen);
     }
-
 
     /*
     ** Set the most recent error code and error string for the sqlite
