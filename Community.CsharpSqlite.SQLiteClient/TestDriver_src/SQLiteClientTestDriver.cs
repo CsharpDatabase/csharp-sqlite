@@ -13,8 +13,6 @@ namespace SQLiteClientTests
 {
   public class SQLiteClientTestDriver
   {
-    StringBuilder TempDirectory = new StringBuilder( "B:/TEMP/" );
-
     public void Test1()
     {
       Console.WriteLine( "Test1 Start." );
@@ -898,15 +896,55 @@ namespace SQLiteClientTests
         Sqlite3.sqlite3_finalize( stmt );
       }
 
-
       Console.WriteLine( "Test Done." );
+    }
+
+    public void Issue_149 ()
+    {
+      Console.WriteLine ("Test Issue 149 - Test Start.");
+
+      SqliteConnection con = new SqliteConnection ();
+
+      string dbFilename = @"SqliteTest3.db";
+      string cs = string.Format ("Version=3,uri=file:{0}", dbFilename);
+
+      if (File.Exists (dbFilename))
+        File.Delete (dbFilename);
+
+      con.ConnectionString = cs;
+      con.Open ();
+
+      Console.WriteLine ("create command...");
+      IDbCommand cmd = con.CreateCommand ();
+
+      cmd.CommandText = "CREATE TABLE TestZeroArrayTable (TheField BLOB)";
+      cmd.ExecuteNonQuery ();
+
+      cmd.CommandText = "INSERT INTO TestZeroArrayTable VALUES(?)";
+      IDbDataParameter field6 = cmd.CreateParameter ();
+      cmd.Parameters.Add (field6);
+
+      byte[] data = new byte[] {};
+
+      field6.Value = data;
+      cmd.ExecuteNonQuery ();
+
+      cmd.CommandText = "SELECT TheField FROM TestZeroArrayTable";
+      byte[] res = (byte[])cmd.ExecuteScalar ();
+
+      if (res == null)
+        throw new ArgumentException ("res == null");
+      if (res.Length != 0)
+        throw new ArgumentException ("res.Length != 0");
+
+      Console.WriteLine ("Test Done.");
     }
 
     public static int Main( string[] args )
     {
       SQLiteClientTestDriver tests = new SQLiteClientTestDriver();
 
-      int Test = 119;
+      int Test = 149;
       switch ( Test )
       {
         case 1:
@@ -944,6 +982,9 @@ namespace SQLiteClientTests
           break;
         case 124:
           tests.Issue_124();
+          break;
+        case 149:
+          tests.Issue_149();
           break;
       }
       Console.WriteLine( "Press Enter to Continue" );
