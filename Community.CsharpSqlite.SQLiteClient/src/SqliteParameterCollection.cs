@@ -9,7 +9,8 @@
 //			Chris Turchin <chris@turchin.net>
 //			Jeroen Zwartepoorte <jeroen@xs4all.nl>
 //			Thomas Zoechling <thomas.zoechling@gmx.at>
-//          Alex West <alxwest@gmail.com>       
+//			Alex West <alxwest@gmail.com>       
+//			Stewart Adcock <stewart.adcock@medit.fr>       
 //
 // Copyright (C) 2002  Vladimir Vukicevic
 //
@@ -93,7 +94,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 		
 		private bool isPrefixed (string parameterName)
 		{
-			return parameterName.Length > 1 && (parameterName[0] == ':' || parameterName[0] == '$');
+			return parameterName.Length > 1 && (parameterName[0] == ':' || parameterName[0] == '$' || parameterName[0] == '@');
 		}
 
 		protected override DbParameter GetParameter (int parameterIndex)
