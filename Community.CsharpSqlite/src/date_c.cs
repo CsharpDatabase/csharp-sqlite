@@ -446,7 +446,7 @@ zulu_time:
       {
         return 0;
       }
-      else if ( zDate.Equals( "now", StringComparison.InvariantCultureIgnoreCase ) )
+      else if ( zDate.Equals( "now", StringComparison.OrdinalIgnoreCase ) )
       {
         setDateTimeToCurrent( context, p );
         return 0;

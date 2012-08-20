@@ -199,7 +199,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 								db_file = tvalue;
  #if !(SQLITE_SILVERLIGHT || WINDOWS_MOBILE)
 							} else if (tvalue_lc.StartsWith ("|DataDirectory|",
-											 StringComparison.InvariantCultureIgnoreCase)) {
+											 StringComparison.OrdinalIgnoreCase)) {
 								AppDomainSetup ads = AppDomain.CurrentDomain.SetupInformation;
 								string filePath = String.Format ("App_Data{0}{1}",
 												 Path.DirectorySeparatorChar,

@@ -3212,7 +3212,7 @@ op_column_out:
                 ** an error is returned to the user.  */
                 for (
                 pSavepoint = db.pSavepoint;
-                pSavepoint != null && !pSavepoint.zName.Equals( zName, StringComparison.InvariantCultureIgnoreCase );
+                pSavepoint != null && !pSavepoint.zName.Equals( zName, StringComparison.OrdinalIgnoreCase );
                 pSavepoint = pSavepoint.pNext
                 )
                 {
