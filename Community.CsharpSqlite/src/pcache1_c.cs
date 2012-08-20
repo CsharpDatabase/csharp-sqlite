@@ -729,7 +729,7 @@ static int pcache1MemSize(object p){
       //sz = sizeof( PCache1 ) + sizeof( PGroup ) * separateCache;
       pCache = new PCache1();//(PCache1)sqlite3_malloc( sz );
       //if ( pCache != null )
-      {
+      //{
         //memset( pCache, 0, sz );
         if ( separateCache == 0 )
         {
@@ -752,7 +752,7 @@ static int pcache1MemSize(object p){
           pGroup.mxPinned = pGroup.nMaxPage + 10 - pGroup.nMinPage;
           pcache1LeaveMutex( pGroup );
         }
-      }
+      //}
       return (sqlite3_pcache)pCache;
     }
 
