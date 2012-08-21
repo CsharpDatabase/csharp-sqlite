@@ -1056,7 +1056,7 @@ namespace SQLiteClientTests
     {
       SQLiteClientTestDriver tests = new SQLiteClientTestDriver();
 
-      int Test = 8;
+      int Test = 1;
       switch ( Test )
       {
         case 1:

@@ -4,9 +4,11 @@
 // Author(s):
 //   Sureshkumar T (tsureshkumar@novell.com)
 //   Marek Habersack (grendello@gmail.com)
+//   Stewart Adcock (stewart.adcock@medit.fr)
 //
 // Copyright (C) 2004 Novell, Inc (http://www.novell.com)
 // Copyright (C) 2007 Marek Habersack
+// Copyright (C) 2012 MEDIT SA (http://medit-pharma.com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -38,25 +40,29 @@ using System.Text;
 
 namespace Community.CsharpSqlite.SQLiteClient
 {
-	public sealed class SqliteConnectionStringBuilder : DbConnectionStringBuilder
-	{
-		private const string DEF_URI = null;
-		private const Int32 DEF_MODE = 0644;
-		private const Int32 DEF_VERSION = 3;
-		private const Encoding DEF_ENCODING = null;
-		private const Int32 DEF_BUSYTIMEOUT = 0;
+  public sealed class SqliteConnectionStringBuilder : DbConnectionStringBuilder
+  {
+    private const string DEF_URI = null;
+    private const Int32 DEF_MODE = 0644;
+    private const Int32 DEF_VERSION = 3;
+    private const Encoding DEF_ENCODING = null;
+    private const Int32 DEF_BUSYTIMEOUT = 0;
+    private const bool DEF_READONLY = false;
+    private const bool DEF_FAILIFMISSING = false;
 
-		#region // Fields
+#region // Fields
  		private string 	_uri;
 		private Int32 _mode;
 		private Int32 _version;
 		private Encoding _encoding;
-		private Int32 _busy_timeout;
+    private Int32 _busy_timeout;
+    private bool _readonly;
+		private bool _failIfMissing;
 		
 		private static Dictionary <string, string> _keywords; // for mapping duplicate keywords
-		#endregion // Fields
+#endregion // Fields
 
-		#region Constructors
+#region Constructors
 		public SqliteConnectionStringBuilder () : this (String.Empty)
 		{
 		}
@@ -78,11 +84,14 @@ namespace Community.CsharpSqlite.SQLiteClient
 			_keywords ["VERSION"]                   = "Version";
 			_keywords ["BUSY TIMEOUT"]              = "Busy Timeout";
 			_keywords ["BUSYTIMEOUT"]               = "Busy Timeout";
-			_keywords ["ENCODING"]                  = "Encoding";
+      _keywords ["ENCODING"]                  = "Encoding";
+      _keywords ["READ ONLY"]                 = "Read Only";
+      _keywords ["READONLY"]                  = "Read Only";
+			_keywords ["FAILIFMISSING"]             = "FailIfMissing";
 		}
-		#endregion // Constructors
+#endregion // Constructors
 
-		#region Properties
+#region Properties
 		public string DataSource { 
 			get { return _uri; }
 			set { 
@@ -135,6 +144,22 @@ namespace Community.CsharpSqlite.SQLiteClient
 			get { return true; }
 		}
 
+    public bool ReadOnly { 
+      get { return _readonly; }
+      set { 
+        base ["Read Only"] = value;
+        _readonly = value; 
+      }
+    }
+
+    public bool FailIfMissing { 
+      get { return _failIfMissing; }
+      set { 
+        base ["FailIfMissing"] = value;
+        _failIfMissing = value; 
+      }
+    }
+
 		public override object this [string keyword] { 
 			get { 
 				string mapped = MapKeyword (keyword);
@@ -150,16 +175,18 @@ namespace Community.CsharpSqlite.SQLiteClient
 		public override ICollection Values { 
 			get { return base.Values; }
 		}
-		#endregion // Properties
+#endregion // Properties
 
-		#region Methods
+#region Methods
 		private void Init ()
 		{
 			_uri = DEF_URI;
 			_mode = DEF_MODE;
 			_version = DEF_VERSION;
 			_encoding = DEF_ENCODING;
-			_busy_timeout = DEF_BUSYTIMEOUT;
+      _busy_timeout = DEF_BUSYTIMEOUT;
+      _readonly = DEF_READONLY;
+			_failIfMissing = DEF_FAILIFMISSING;
 		}
 
 		public override void Clear ()
@@ -193,9 +220,9 @@ namespace Community.CsharpSqlite.SQLiteClient
 			return base.TryGetValue (_keywords [keyword.ToUpper ().Trim ()], out value);
 		}
 
-		#endregion // Methods
+#endregion // Methods
 
-		#region Private Methods
+#region Private Methods
 		private string MapKeyword (string keyword)
 		{
 			keyword = keyword.ToUpper ().Trim ();
@@ -203,79 +230,94 @@ namespace Community.CsharpSqlite.SQLiteClient
 				throw new ArgumentException("Keyword not supported :" + keyword);
 			return _keywords [keyword];
 		}
-		
-		private void SetValue (string key, object value)
-		{
-			if (key == null)
-				throw new ArgumentNullException ("key cannot be null!");
 
-			string mappedKey = MapKeyword (key);
+    private void SetValue (string key, object value)
+    {
+      if (key == null)
+        throw new ArgumentNullException ("key cannot be null!");
 
-			switch (mappedKey.ToUpper (CultureInfo.InvariantCulture).Trim ()) {
-				case "DATA SOURCE":
-					if (value == null) {
-						_uri = DEF_URI;
-						base.Remove (mappedKey);
-					} else
-						this.Uri = value.ToString ();
-					break;				
+      string mappedKey = MapKeyword (key);
 
-				case "MODE":
-					if (value == null) {
-						_mode = DEF_MODE;
-						base.Remove (mappedKey);
-					} else 
-						this.Mode = ConvertToInt32 (value);
-					break;
+      switch (mappedKey.ToUpper (CultureInfo.InvariantCulture).Trim ()) {
+      case "DATA SOURCE":
+        if (value == null) {
+          _uri = DEF_URI;
+          base.Remove (mappedKey);
+        } else
+          this.Uri = value.ToString ();
+        break;				
 
-				case "VERSION":
-					if (value == null) {
-						_version = DEF_MODE;
-						base.Remove (mappedKey);
-					} else 
-						this.Version = ConvertToInt32 (value);
-					break;
-					
-				case "BUSY TIMEOUT":
-					if (value == null) {
-						_busy_timeout = DEF_BUSYTIMEOUT;
-						base.Remove (mappedKey);
-					} else 
-						this.BusyTimeout = ConvertToInt32 (value);
-					break;
-					
-				case "ENCODING" :
-					if (value == null) {
-						_encoding = DEF_ENCODING;
-						base.Remove (mappedKey);
-					} else if (value is string) {
-						this.Encoding = Encoding.GetEncoding ((string) value);
-					} else
-						throw new ArgumentException ("Cannot set encoding from a non-string argument");
-					
-					break;
+      case "MODE":
+        if (value == null) {
+          _mode = DEF_MODE;
+          base.Remove (mappedKey);
+        } else 
+          this.Mode = ConvertToInt32 (value);
+        break;
 
-				default :
-					throw new ArgumentException("Keyword not supported :" + key);
-			}
-		}
+      case "VERSION":
+        if (value == null) {
+          _version = DEF_MODE;
+          base.Remove (mappedKey);
+        } else 
+          this.Version = ConvertToInt32 (value);
+        break;
+
+      case "BUSY TIMEOUT":
+        if (value == null) {
+          _busy_timeout = DEF_BUSYTIMEOUT;
+          base.Remove (mappedKey);
+        } else 
+          this.BusyTimeout = ConvertToInt32 (value);
+        break;
+
+      case "ENCODING":
+        if (value == null) {
+          _encoding = DEF_ENCODING;
+          base.Remove (mappedKey);
+        } else if (value is string) {
+          this.Encoding = Encoding.GetEncoding ((string)value);
+        } else
+          throw new ArgumentException ("Cannot set encoding from a non-string argument");
+        break;
+
+      case "READ ONLY":
+        if (value == null) {
+          _readonly = DEF_READONLY;
+          base.Remove (mappedKey);
+        } else 
+          this.ReadOnly = ConvertToBoolean (value);
+        break;
+
+      case "FAILIFMISSING":
+        if (value == null) {
+          _failIfMissing = DEF_FAILIFMISSING;
+          base.Remove (mappedKey);
+        } else 
+          this.FailIfMissing = ConvertToBoolean (value);
+        break;
+
+      default:
+        throw new ArgumentException ("Keyword not supported :" + key);
+      }
+    }
 
 		private static int ConvertToInt32 (object value) 
 		{
 			return Int32.Parse (value.ToString (), CultureInfo.InvariantCulture);
 		}
 
-		private static bool ConvertToBoolean (object value) 
-		{
-			if (value == null)
-				throw new ArgumentNullException ("null value cannot be converted to boolean");
-			string upper = value.ToString ().ToUpper ().Trim ();
-			if (upper == "YES" || upper == "TRUE")
-				return true;
-			if (upper == "NO" || upper == "FALSE")
-				return false;
-			throw new ArgumentException (String.Format ("Invalid boolean value: {0}", value.ToString ()));
-		}
-		#endregion // Private Methods
-	}
+    private static bool ConvertToBoolean (object value)
+    {
+      if (value == null)
+        throw new ArgumentNullException ("null value cannot be converted to boolean");
+      string upper = value.ToString ().ToUpper ().Trim ();
+      if (upper == "YES" || upper == "TRUE")
+        return true;
+      if (upper == "NO" || upper == "FALSE")
+        return false;
+      throw new ArgumentException (String.Format ("Invalid boolean value: {0}", value.ToString ()));
+    }
+#endregion // Private Methods
+  }
 }
