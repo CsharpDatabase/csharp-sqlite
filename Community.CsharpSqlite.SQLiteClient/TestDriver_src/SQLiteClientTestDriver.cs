@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Data;
 using System.Data.Common;
 using System.IO;
@@ -317,7 +317,7 @@ namespace SQLiteClientTests
       cmd.ExecuteNonQuery();
     }
 
-    //nSoftware code for Threading
+    // Software code for Threading
     string connstring_T5;
     public void Test5()
     {
@@ -405,7 +405,7 @@ namespace SQLiteClientTests
       cmd.ExecuteNonQuery();
     }
 
-    //nSoftware code for Threading & Transactions
+    // Software code for Threading & Transactions
     static string connstring_T6;
     public void Test6()
     {
@@ -493,7 +493,8 @@ namespace SQLiteClientTests
       cmd.CommandText = String.Format( "INSERT INTO BTABLE ( A, B, C ) VALUES (6,'threader', '1' )" );
       cmd.ExecuteNonQuery();
     }
-    //nSoftware code for Threading
+
+    // Software code for Threading
     string connstring_T7;
     public void Test7()
     {
@@ -570,6 +571,119 @@ namespace SQLiteClientTests
       cmd.ExecuteNonQuery();
     }
 
+    // Connectio string parsing tests/
+    public void Test8 ()
+    {
+      Console.WriteLine ("Test8 Start.");
+
+      Console.WriteLine ("Create connection...");
+      SqliteConnection con = new SqliteConnection ();
+
+      string dbFilename = @"SqliteTest3.db";
+
+      // Test Read Only = True, missing db file
+      string cs = string.Format ("Version=3;Read Only=True;uri=file:{0}", dbFilename);
+
+      Console.WriteLine ("Set connection string: {0}", cs);
+
+      if (File.Exists (dbFilename))
+        File.Delete (dbFilename);
+
+      con.ConnectionString = cs;
+
+      Console.WriteLine ("Open database...");
+      con.Open ();
+
+      Console.WriteLine ("create command...");
+      IDbCommand cmd = con.CreateCommand ();
+
+      Console.WriteLine ("create table TEST_TABLE...");
+      cmd.CommandText = "CREATE TABLE TEST_TABLE ( COLA INTEGER, COLB TEXT )";
+      bool didFail = false;
+      try {
+        cmd.ExecuteNonQuery ();
+      } catch (Exception ex) {
+        didFail = true;
+      }
+      if (!didFail) {
+        Console.WriteLine ("Test failed!");
+        throw new ApplicationException("Test failed!");
+      }
+
+      con.Close ();
+
+      // Test Read Only = True, existng db file
+      cs = string.Format ("Version=3;uri=file:{0}", dbFilename);
+
+      Console.WriteLine ("Set connection string: {0}", cs);
+
+      if (File.Exists (dbFilename))
+        File.Delete (dbFilename);
+
+      con.ConnectionString = cs;
+      con.Open ();
+
+      cmd = con.CreateCommand ();
+      cmd.CommandText = "CREATE TABLE TEST_TABLE ( COLA INTEGER, COLB TEXT )";
+      cmd.ExecuteNonQuery ();
+      con.Close ();
+
+      cs = string.Format ("Version=3;Read Only=True;uri=file:{0}", dbFilename);
+
+      Console.WriteLine ("Set connection string: {0}", cs);
+
+      con.ConnectionString = cs;
+
+      Console.WriteLine ("Open database...");
+      con.Open ();
+
+      Console.WriteLine ("create command...");
+      cmd = con.CreateCommand ();
+
+      Console.WriteLine ("create table TEST_TABLE2...");
+      cmd.CommandText = "CREATE TABLE TEST_TABLE2 ( COLA INTEGER, COLB TEXT )";
+      didFail = false;
+      try {
+        cmd.ExecuteNonQuery ();
+      } catch (Exception ex) {
+        didFail = true;
+      }
+      if (didFail) {
+        Console.WriteLine ("Test failed!");
+        throw new ApplicationException("Test failed!");
+      }
+
+      // Test FailIfMissing = True, existng db file
+      cs = string.Format ("Version=3;FailIfMissing=True;uri=file:{0}", dbFilename);
+
+      Console.WriteLine ("Set connection string: {0}", cs);
+
+      if (File.Exists (dbFilename))
+        File.Delete (dbFilename);
+
+      con.ConnectionString = cs;
+
+      Console.WriteLine ("Open database...");
+      con.Open ();
+
+      Console.WriteLine ("create command...");
+      cmd = con.CreateCommand ();
+
+      Console.WriteLine ("create table TEST_TABLE2...");
+      cmd.CommandText = "CREATE TABLE TEST_TABLE2 ( COLA INTEGER, COLB TEXT )";
+      didFail = false;
+      try {
+        cmd.ExecuteNonQuery ();
+      } catch (Exception ex) {
+        didFail = true;
+      }
+      if (!didFail) {
+        Console.WriteLine ("Test failed!");
+        throw new ApplicationException("Test failed!");
+      }
+
+      Console.WriteLine( "Test8 Done." );
+    }
 
     public void Issue_65()
     {
@@ -623,10 +737,9 @@ namespace SQLiteClientTests
           conn.Dispose();
         }
       }
-
     }
 
-    //Issue 76 Encryption is not implemented in C#SQLite client connection and command objects 
+    // Issue 76 Encryption is not implemented in C#SQLite client connection and command objects 
     public void Issue_76()
     {
       Console.WriteLine( "Test for Issue_76 Start." );
@@ -691,7 +804,7 @@ namespace SQLiteClientTests
       Console.WriteLine( "Issue_76 Done." );
     }
 
-    //Multi thread execution special command or ddl command results in exception..
+    // Multi thread execution special command or ddl command results in exception..
     public void Issue_86()
     {
       AppDomain.CurrentDomain.UnhandledException +=
@@ -759,7 +872,6 @@ namespace SQLiteClientTests
 
     }
 #endif
-
 
     public void Issue_119()
     {
@@ -944,7 +1056,7 @@ namespace SQLiteClientTests
     {
       SQLiteClientTestDriver tests = new SQLiteClientTestDriver();
 
-      int Test = 149;
+      int Test = 8;
       switch ( Test )
       {
         case 1:
@@ -967,6 +1079,9 @@ namespace SQLiteClientTests
           break;
         case 7:
           tests.Test7();
+          break;
+        case 8:
+          tests.Test8();
           break;
         case 65:
           tests.Issue_65();

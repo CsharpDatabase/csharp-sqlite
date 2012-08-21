@@ -42,7 +42,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 	{
 		private const string DEF_URI = null;
 		private const Int32 DEF_MODE = 0644;
-		private const Int32 DEF_VERSION = 2;
+		private const Int32 DEF_VERSION = 3;
 		private const Encoding DEF_ENCODING = null;
 		private const Int32 DEF_BUSYTIMEOUT = 0;
 
@@ -70,7 +70,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 		static SqliteConnectionStringBuilder ()
 		{
 			_keywords = new Dictionary <string, string> ();
-			_keywords ["URI"] 			= "Uri";
+			_keywords ["URI"]                       = "Uri";
 			_keywords ["DATA SOURCE"]               = "Data Source";
 			_keywords ["DATASOURCE"]                = "Data Source";
 			_keywords ["URI"]                       = "Data Source";
@@ -260,12 +260,12 @@ namespace Community.CsharpSqlite.SQLiteClient
 			}
 		}
 
-		static int ConvertToInt32 (object value) 
+		private static int ConvertToInt32 (object value) 
 		{
 			return Int32.Parse (value.ToString (), CultureInfo.InvariantCulture);
 		}
 
-		static bool ConvertToBoolean (object value) 
+		private static bool ConvertToBoolean (object value) 
 		{
 			if (value == null)
 				throw new ArgumentNullException ("null value cannot be converted to boolean");
@@ -278,5 +278,4 @@ namespace Community.CsharpSqlite.SQLiteClient
 		}
 		#endregion // Private Methods
 	}
- 
 }

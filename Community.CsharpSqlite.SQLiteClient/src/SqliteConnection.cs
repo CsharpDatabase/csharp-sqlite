@@ -3,8 +3,8 @@
 //
 // Represents an open connection to a Sqlite database file.
 //
-// Author(s): Vladimir Vukicevic  <vladimir@pobox.com>
-//            Everaldo Canuto  <everaldo_canuto@yahoo.com.br>
+// Author(s): Vladimir Vukicevic <vladimir@pobox.com>
+//            Everaldo Canuto <everaldo_canuto@yahoo.com.br>
 //            Daniel Morgan <monodanmorg@yahoo.com>
 //            Noah Hart <Noah.Hart@gmail.com>
 //            Stewart Adcock <stewart.adcock@medit.fr>
@@ -40,22 +40,29 @@ using Community.CsharpSqlite;
 
 namespace Community.CsharpSqlite.SQLiteClient
 {
-	public class SqliteConnection : DbConnection, ICloneable
+  /// <summary>
+  /// Represents an open connection to a SQLite3 database.
+  /// </summary>
+  /// <remarks>
+  /// This only supports SQLite version 3, NOT version 2.
+  /// </remarks>
+  public class SqliteConnection : DbConnection, ICloneable
   {
 
 #region Fields
 
-		private string conn_str;
-		private string db_file;
-		private int db_mode;
-		private int db_version;
-		private string db_password;
-		private IntPtr sqlite_handle;
-		private Sqlite3.sqlite3 sqlite_handle2;
-		private ConnectionState state;
-		private Encoding encoding;
-		private int busy_timeout;
-		bool disposed;
+    private string conn_str;
+    private string db_file;
+    private int db_version;
+    private int db_BusyTimeout;
+    private string db_password;
+    private bool db_IsReadonly;
+    private bool db_IsFailIfMissing;
+    private Encoding db_Encoding; // This is ignored for SQLIte3.
+    private IntPtr sqlite_handle;
+    private Sqlite3.sqlite3 sqlite_handle2;
+    private ConnectionState state;
+    private bool disposed;
 
 #endregion
 
@@ -64,12 +71,11 @@ namespace Community.CsharpSqlite.SQLiteClient
 		public SqliteConnection ()
 		{
 			db_file = null;
-			db_mode = 0644;
 			db_version = 3;
 			state = ConnectionState.Closed;
 			sqlite_handle = IntPtr.Zero;
-			encoding = null;
-			busy_timeout = 0;
+			db_Encoding = null;
+			db_BusyTimeout = 0;
 		}
 		
 		public SqliteConnection (string connstring) : this ()
@@ -111,8 +117,9 @@ namespace Community.CsharpSqlite.SQLiteClient
 			get { return state; }
 		}
 
+    [Obsolete("Only meaningful for SQLite2 which is unsupported.")]
 		public Encoding Encoding {
-			get { return encoding; }
+			get { return db_Encoding; }
 		}
 
 		public int Version {
@@ -139,113 +146,136 @@ namespace Community.CsharpSqlite.SQLiteClient
 
 		public int LastInsertRowId {
 			get {
-				//if (Version == 3)
 					return (int) Sqlite3.sqlite3_last_insert_rowid(Handle2);
-					//return (int)Sqlite.sqlite3_last_insert_rowid (Handle);
-				//else
-				//	return Sqlite.sqlite_last_insert_rowid (Handle);
 			}
 		}
 
 		public int BusyTimeout {
 			get {
-				return busy_timeout;  
+				return db_BusyTimeout;  
 			}
 			set {
-				busy_timeout = value < 0 ? 0 : value;
+				db_BusyTimeout = value < 0 ? 0 : value;
 			}
 		}
 		
 #endregion
 
 #region Private Methods
-		
-		private void SetConnectionString(string connstring)
-		{
-			if (connstring == null) {
-				Close ();
-				conn_str = null;
-				return;
-			}
-			
-			if (connstring != conn_str) {
-				Close ();
-				conn_str = connstring;
-				
-				db_file = null;
-				db_mode = 0644;
-				
-        string[] conn_pieces = connstring.Split(new char[]{',',';'}, StringSplitOptions.RemoveEmptyEntries);
-        for ( int i = 0; i < conn_pieces.Length; i++ )
-        {
-          string piece = conn_pieces[i].Trim();
-          int firstEqual = piece.IndexOf( '=' );
-          if ( firstEqual == -1 )
-          {
-            throw new InvalidOperationException( "Invalid connection string" );
+    private void SetConnectionString (string connstring)
+    {
+      if (connstring == null) {
+        Close ();
+        conn_str = null;
+        return;
+      }
+
+      if (connstring != conn_str) {
+        Close ();
+        conn_str = connstring;
+
+        db_file = null;
+        db_IsReadonly = false;
+        db_IsFailIfMissing = false;
+
+        string[] conn_pieces = connstring.Split (new char[]{',',';'}, StringSplitOptions.RemoveEmptyEntries);
+        for (int i = 0; i < conn_pieces.Length; i++) {
+          string piece = conn_pieces [i].Trim ();
+          int firstEqual = piece.IndexOf ('=');
+          if (firstEqual == -1) {
+            throw new InvalidOperationException ("Invalid connection string");
           }
-          string token = piece.Substring( 0, firstEqual );
-          string tvalue = piece.Remove( 0, firstEqual + 1 ).Trim();
-          string tvalue_lc = tvalue.ToLower( System.Globalization.CultureInfo.InvariantCulture ).Trim();
-          switch ( token.ToLower( System.Globalization.CultureInfo.InvariantCulture ).Trim() )
-          {
-            case "data source":
-						case "uri": 
-							if (tvalue_lc.StartsWith ("file://")) {
-								db_file = tvalue.Substring (7);
-							} else if (tvalue_lc.StartsWith ("file:")) {
-								db_file = tvalue.Substring (5);
-							} else if (tvalue_lc.StartsWith ("/")) {
-								db_file = tvalue;
- #if !(SQLITE_SILVERLIGHT || WINDOWS_MOBILE)
-							} else if (tvalue_lc.StartsWith ("|DataDirectory|",
+          string token = piece.Substring (0, firstEqual);
+          string tvalue = piece.Remove (0, firstEqual + 1).Trim ();
+          string tvalue_lc = tvalue.ToLower (System.Globalization.CultureInfo.InvariantCulture).Trim ();
+          switch (token.ToLower (System.Globalization.CultureInfo.InvariantCulture).Trim ()) {
+          case "data source":
+          case "uri": 
+            if (tvalue_lc.StartsWith ("file://")) {
+              db_file = tvalue.Substring (7);
+            } else if (tvalue_lc.StartsWith ("file:")) {
+              db_file = tvalue.Substring (5);
+            } else if (tvalue_lc.StartsWith ("/")) {
+              db_file = tvalue;
+              #if !(SQLITE_SILVERLIGHT || WINDOWS_MOBILE)
+            } else if (tvalue_lc.StartsWith ("|DataDirectory|",
 											 StringComparison.OrdinalIgnoreCase)) {
-								AppDomainSetup ads = AppDomain.CurrentDomain.SetupInformation;
-								string filePath = String.Format ("App_Data{0}{1}",
+              AppDomainSetup ads = AppDomain.CurrentDomain.SetupInformation;
+              string filePath = String.Format ("App_Data{0}{1}",
 												 Path.DirectorySeparatorChar,
 												 tvalue_lc.Substring (15));
 								
-								db_file = Path.Combine (ads.ApplicationBase, filePath);
+              db_file = Path.Combine (ads.ApplicationBase, filePath);
 #endif
-							} else {
+            } else {
 #if !WINDOWS_PHONE
-                                throw new InvalidOperationException ("Invalid connection string: invalid URI");
+              throw new InvalidOperationException ("Invalid connection string: invalid URI");
 #else
-                                db_file = tvalue;		
+              db_file = tvalue;
 #endif
-							}
-                            break;
+            }
+            break;
 
-						case "mode": 
-							db_mode = Convert.ToInt32 (tvalue);
-							break;
+          case "mode": // Ignored for SQLite3.
+            ////int db_mode = Convert.ToInt32 (tvalue);
+            break;
 
-						case "version":
-							db_version = Convert.ToInt32 (tvalue);
-				if (db_version < 3) throw new InvalidOperationException ("Minimum database version is 3");
-							break;
+          case "version":
+            db_version = Convert.ToInt32 (tvalue);
+            if (db_version < 3)
+              throw new InvalidOperationException ("Minimum database version is 3");
+            break;
 
-						case "encoding": // only for sqlite2
-							encoding = Encoding.GetEncoding (tvalue);
-							break;
+          case "encoding": // Ignored for SQLite3.
+            db_Encoding = Encoding.GetEncoding (tvalue);
+            break;
 
-						case "busy_timeout":
-							busy_timeout = Convert.ToInt32 (tvalue);
-							break;
+          case "busy_timeout":
+            db_BusyTimeout = Convert.ToInt32 (tvalue);
+            break;
 
-			case "password":
-				if (!string.IsNullOrEmpty(db_password) && ( db_password.Length != 34 || !db_password.StartsWith("0x")))
-							throw new InvalidOperationException ("Invalid password string: must be 34 hex digits starting with 0x");
-					db_password =  tvalue ;
-				break;
-			}
-				}
-				
-				if (db_file == null) {
-					throw new InvalidOperationException ("Invalid connection string: no URI");
-				}
-			}
-		}		
+          case "read only":
+          case "readonly":
+            db_IsReadonly = ConvertStringToBoolean (tvalue.ToLowerInvariant());
+            break;
+
+          case "failifmissing":
+            db_IsFailIfMissing = ConvertStringToBoolean (tvalue.ToLowerInvariant());
+            break;
+
+          case "password":
+            if (!string.IsNullOrEmpty (db_password) && (db_password.Length != 34 || !db_password.StartsWith ("0x")))
+              throw new InvalidOperationException ("Invalid password string: must be 34 hex digits starting with 0x");
+            db_password = tvalue;
+            break;
+          }
+        }
+
+        if (db_file == null) {
+          throw new InvalidOperationException ("Invalid connection string: no URI");
+        }
+      }
+    }
+
+    /// <summary>
+    /// Convert the specified string to a boolean value.
+    /// </summary>
+    /// <remarks>
+    /// The string must be one of "true", "yes" (converted to <c>true<c/c>),
+    /// "false", "no" (converted to <c>false<c/c>).
+    /// </remarks>
+    /// <exception cref="ArgumentNullException">Thrown if string is null.</exception>
+    /// <exception cref="ArgumentException">Thrown if string is not converted to valid boolean.</exception>
+    private static bool ConvertStringToBoolean (string value) 
+    {
+      if (value == null)
+        throw new ArgumentNullException ("null value cannot be converted to boolean");
+      if (value == "yes" || value == "true")
+        return true;
+      if (value == "no" || value == "false")
+        return false;
+      throw new ArgumentException (string.Format ("Invalid boolean value: \"{0}\"", value));
+    }
 #endregion
 
 #region Internal Methods
@@ -302,10 +332,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 			state = ConnectionState.Closed;
 		
 			if (Version == 3)
-				//Sqlite3.sqlite3_close()
 				Sqlite3.sqlite3_close (sqlite_handle2);
-			//else 
-				//Sqlite.sqlite_close (sqlite_handle);
 			sqlite_handle = IntPtr.Zero;
 		}
 
@@ -321,56 +348,47 @@ namespace Community.CsharpSqlite.SQLiteClient
 			return new SqliteCommand (null, this);
 		}
 
-		public override void Open ()
-		{
-			if (conn_str == null) {
-				throw new InvalidOperationException ("No database specified");
-			}
-			
-			if (state != ConnectionState.Closed) {
-				return;
-			}
-			
-			/*
-      IntPtr errmsg = IntPtr.Zero;
-			if (Version == 2){
-				try {
-					sqlite_handle = Sqlite.sqlite_open(db_file, db_mode, out errmsg);
-					if (errmsg != IntPtr.Zero) {
-						string msg = Marshal.PtrToStringAnsi (errmsg);
-						Sqlite.sqliteFree (errmsg);
-						throw new ApplicationException (msg);
-					}
-				} catch (DllNotFoundException) {
-					db_version = 3;
-				} catch (EntryPointNotFoundException) {
-					db_version = 3;
-				}
-				
-				if (busy_timeout != 0)
-					Sqlite.sqlite_busy_timeout (sqlite_handle, busy_timeout);
-			}
-			 */
-			if (Version == 3) {
-				sqlite_handle = (IntPtr)1;
-				int flags = Sqlite3.SQLITE_OPEN_NOMUTEX | Sqlite3.SQLITE_OPEN_READWRITE | Sqlite3.SQLITE_OPEN_CREATE;
-				int err = Sqlite3.sqlite3_open_v2( db_file, out sqlite_handle2, flags, null );
-				//int err = Sqlite.sqlite3_open16(db_file, out sqlite_handle);
-				if (err == (int)SqliteError.ERROR)
-					throw new ApplicationException (Sqlite3.sqlite3_errmsg(sqlite_handle2));
-					//throw new ApplicationException (Marshal.PtrToStringUni( Sqlite.sqlite3_errmsg16 (sqlite_handle)));
-				if (busy_timeout != 0)
-					Sqlite3.sqlite3_busy_timeout(sqlite_handle2, busy_timeout);
-					//Sqlite.sqlite3_busy_timeout (sqlite_handle, busy_timeout);
-				if ( !string.IsNullOrEmpty( db_password ) )
-				{
-					SqliteCommand cmd = (SqliteCommand)this.CreateCommand();
-					cmd.CommandText = "pragma hexkey='" + db_password + "'";
-					cmd.ExecuteNonQuery();
-				}
-			}
-			state = ConnectionState.Open;
-		}
+    /// <summary>
+    /// Opens the connection using the parameters provided by the <see cref="ConnectionString">ConnectionString</see>.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown if no database was specified.</exception>
+    /// <exception cref="InvalidOperationException">Thrown if the connection stater is not closed.</exception>
+    /// <exception cref="ApplicationException">Thrown if a database error occurred.</exception>
+    public override void Open ()
+    {
+      if (conn_str == null) {
+        throw new InvalidOperationException ("No database specified");
+      }
+
+      if (state != ConnectionState.Closed) {
+        throw new InvalidOperationException ("Connection state is not closed.");
+      }
+
+      if (Version == 3) {
+        int flags = Sqlite3.SQLITE_OPEN_NOMUTEX;
+        if (!db_IsFailIfMissing && !db_IsReadonly)
+          flags |= Sqlite3.SQLITE_OPEN_CREATE;
+        if (db_IsReadonly) {
+          flags |= Sqlite3.SQLITE_OPEN_READONLY;
+        } else {
+          flags |= Sqlite3.SQLITE_OPEN_READWRITE;
+        }
+
+        sqlite_handle = (IntPtr)1;
+        int err = Sqlite3.sqlite3_open_v2( db_file, out sqlite_handle2, flags, null );
+        if (err == (int)SqliteError.ERROR)
+          throw new ApplicationException (Sqlite3.sqlite3_errmsg(sqlite_handle2));
+        if (db_BusyTimeout != 0)
+          Sqlite3.sqlite3_busy_timeout(sqlite_handle2, db_BusyTimeout);
+        if ( !string.IsNullOrEmpty( db_password ) )
+        {
+          SqliteCommand cmd = (SqliteCommand)this.CreateCommand();
+          cmd.CommandText = "pragma hexkey='" + db_password + "'";
+          cmd.ExecuteNonQuery();
+        }
+      }
+      state = ConnectionState.Open;
+    }
 
 #if !SQLITE_SILVERLIGHT
 	public override DataTable GetSchema( String collectionName )
