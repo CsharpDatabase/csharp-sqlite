@@ -38,9 +38,9 @@ namespace Community.CsharpSqlite
     ** macro to SQLITE_DEBUG and some older makefiles have not yet made the
     ** switch.  The following code should catch this problem at compile-time.
     */
-#if MEMORY_DEBUG
+//#if MEMORY_DEBUG
 //# error "The MEMORY_DEBUG macro is obsolete.  Use SQLITE_DEBUG instead."
-#endif
+//#endif
 
 #if SQLITE_DEBUG || TRACE
     static bool sqlite3OsTrace = false;
