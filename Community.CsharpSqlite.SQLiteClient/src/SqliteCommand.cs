@@ -449,9 +449,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 			else
 			psql = Marshal.StringToHGlobalUni (sql.Trim());
 			*/
-			string queryval = sql.Trim();
 			string pzTail = sql.Trim();
-			IntPtr errMsgPtr;
 
 			parent_conn.StartExec();
 
@@ -463,7 +461,7 @@ namespace Community.CsharpSqlite.SQLiteClient
 				{
 					Sqlite3.Vdbe pStmt = null;
 
-					queryval = pzTail;
+					string queryval = pzTail;
 					GetNextStatement( queryval, ref pzTail, ref pStmt );
 
 					if ( pStmt == null )
