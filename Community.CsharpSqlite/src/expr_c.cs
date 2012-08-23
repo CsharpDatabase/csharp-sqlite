@@ -502,8 +502,8 @@ namespace Community.CsharpSqlite
             //pNew.u.zToken = (char)&pNew[1];
             if ( pToken.n > 0 )
               pNew.u.zToken = pToken.z.Substring( 0, pToken.n );//memcpy(pNew.u.zToken, pToken.z, pToken.n);
-            else if ( pToken.n == 0 && pToken.z == "" )
-              pNew.u.zToken = "";
+            else if ( pToken.n == 0 && string.IsNullOrEmpty(pToken.z))
+              pNew.u.zToken = string.Empty;
             //pNew.u.zToken[pToken.n] = 0;
             if ( dequote != 0 && nExtra >= 3
             && ( ( c = pToken.z[0] ) == '\'' || c == '"' || c == '[' || c == '`' ) )
@@ -537,7 +537,7 @@ sqlite3Dequote(ref pNew.u._zToken);
     {
       Token x = new Token();
       x.z = zToken;
-      x.n = !String.IsNullOrEmpty( zToken ) ? sqlite3Strlen30( zToken ) : 0;
+      x.n = !string.IsNullOrEmpty( zToken ) ? sqlite3Strlen30( zToken ) : 0;
       return sqlite3ExprAlloc( db, op, x, 0 );
     }
 
@@ -961,7 +961,7 @@ sqlite3DbFree( db, ref p.u._zToken );
         // (Expr)zAlloc;
 
         //if ( pNew != null )
-        ////{
+        {
           /* Set nNewSize to the size allocated for the structure pointed to
           ** by pNew. This is either EXPR_FULLSIZE, EXPR_REDUCEDSIZE or
           ** EXPR_TOKENONLYSIZE. nToken is set to the number of bytes consumed
@@ -969,26 +969,26 @@ sqlite3DbFree( db, ref p.u._zToken );
           */
           int nStructSize = dupedExprStructSize( p, flags );
           ////int nNewSize = nStructSize & 0xfff;
-          int nToken;
-          if ( !ExprHasProperty( p, EP_IntValue ) && !String.IsNullOrEmpty( p.u.zToken ) )
-          {
-            nToken = sqlite3Strlen30( p.u.zToken );
-          }
-          else
-          {
-            nToken = 0;
-          }
+          ////int nToken;
+          ////if ( !ExprHasProperty( p, EP_IntValue ) && !string.IsNullOrEmpty( p.u.zToken ) )
+          ////{
+          ////  nToken = sqlite3Strlen30( p.u.zToken );
+          ////}
+          ////else
+          ////{
+          ////  nToken = 0;
+          ////}
           if ( isReduced )
           {
             Debug.Assert( !ExprHasProperty( p, EP_Reduced ) );
-            pNew = p.Copy( EXPR_TOKENONLYSIZE );//memcpy( zAlloc, p, nNewSize );
+            pNew = p.Copy( EXPR_TOKENONLYSIZE );////memcpy( zAlloc, p, nNewSize );
           }
           else
           {
             ////int nSize = exprStructSize( p );
-            //memcpy( zAlloc, p, nSize );
+            ////memcpy( zAlloc, p, nSize );
             pNew = p.Copy();
-            //memset( &zAlloc[nSize], 0, EXPR_FULLSIZE - nSize );
+            ////memset( &zAlloc[nSize], 0, EXPR_FULLSIZE - nSize );
           }
 
           /* Set the EP_Reduced, EP_TokenOnly, and EP_Static flags appropriately. */
@@ -1042,7 +1042,7 @@ sqlite3DbFree( db, ref p.u._zToken );
               pNew.pRight = sqlite3ExprDup( db, p.pRight, 0 );
             }
           }
-        ////}
+        }
       }
       return pNew;
     }
@@ -1075,7 +1075,7 @@ sqlite3DbFree( db, ref p.u._zToken );
       ExprList pNew;
       ExprList_item pItem;
       ExprList_item pOldItem;
-      int i;
+
       if ( p == null )
         return null;
       pNew = new ExprList();//sqlite3DbMallocRaw(db, sizeof(*pNew) );
@@ -1088,7 +1088,7 @@ sqlite3DbFree( db, ref p.u._zToken );
       //  return null;
       //}
       //pOldItem = p.a;
-      for ( i = 0; i < p.nExpr; i++ )
+      for (int i = 0; i < p.nExpr; i++ )
       {//pItem++, pOldItem++){
         pItem = pNew.a[i] = new ExprList_item();
         pOldItem = p.a[i];
@@ -1114,7 +1114,6 @@ sqlite3DbFree( db, ref p.u._zToken );
     static SrcList sqlite3SrcListDup( sqlite3 db, SrcList p, int flags )
     {
       SrcList pNew;
-      int i;
       int nByte;
       if ( p == null )
         return null;
@@ -1125,7 +1124,7 @@ sqlite3DbFree( db, ref p.u._zToken );
       if ( pNew == null )
         return null;
       pNew.nSrc = pNew.nAlloc = p.nSrc;
-      for ( i = 0; i < p.nSrc; i++ )
+      for (int i = 0; i < p.nSrc; i++ )
       {
         pNew.a[i] = new SrcList_item();
         SrcList_item pNewItem = pNew.a[i];
@@ -1233,6 +1232,7 @@ return null;
     Expr pExpr             /* Expression to be appended. Might be NULL */
     )
     {
+      ////sqlite3 db = pParse.db;
       if ( pList == null )
       {
         pList = new ExprList();  //sqlite3DbMallocZero(db, ExprList).Length;
@@ -1294,7 +1294,7 @@ return null;
         pItem = pList.a[pList.nExpr - 1];
         Debug.Assert( pItem.zName == null );
         pItem.zName = pName.z.Substring( 0, pName.n );//sqlite3DbStrNDup(pParse.db, pName.z, pName.n);
-        if ( dequote != 0 && !String.IsNullOrEmpty( pItem.zName ) )
+        if ( dequote != 0 && !string.IsNullOrEmpty( pItem.zName ) )
           sqlite3Dequote( ref pItem.zName );
       }
     }
@@ -1949,7 +1949,7 @@ return null;
       if ( pParse.explain == 2 )
       {
         string zMsg = sqlite3MPrintf(
-            pParse.db, "EXECUTE %s%s SUBQUERY %d", testAddr != 0 ? "" : "CORRELATED ",
+            pParse.db, "EXECUTE %s%s SUBQUERY %d", testAddr != 0 ? string.Empty : "CORRELATED ",
             pExpr.op == TK_IN ? "LIST" : "SCALAR", pParse.iNextSelectId
         );
         sqlite3VdbeAddOp4( v, OP_Explain, pParse.iSelectId, 0, 0, zMsg, P4_DYNAMIC );
@@ -2316,7 +2316,7 @@ return null;
 */
     static void codeReal( Vdbe v, string z, bool negateFlag, int iMem )
     {
-      if ( ALWAYS( !String.IsNullOrEmpty( z ) ) )
+      if ( ALWAYS( !string.IsNullOrEmpty( z ) ) )
       {
         double value = 0;
         //string zV;
@@ -2352,7 +2352,7 @@ return null;
         int c;
         i64 value = 0;
         string z = pExpr.u.zToken;
-        Debug.Assert( !String.IsNullOrEmpty( z ) );
+        Debug.Assert( !string.IsNullOrEmpty( z ) );
         c = sqlite3Atoi64( z, ref value, sqlite3Strlen30( z ), SQLITE_UTF8 );
         if ( c == 0 || ( c == 2 && negFlag ) )
         {
@@ -2366,7 +2366,7 @@ return null;
         else
         {
 #if SQLITE_OMIT_FLOATING_POINT
-sqlite3ErrorMsg(pParse, "oversized integer: %s%s", negFlag ? "-" : "", z);
+sqlite3ErrorMsg(pParse, "oversized integer: %s%s", negFlag ? "-" : string.Empty, z);
 #else
           codeReal( v, z, negFlag, iMem );
 #endif
