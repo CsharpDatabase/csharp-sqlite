@@ -669,10 +669,10 @@ static int sqlite3VdbeCheckFk( Vdbe p, int i ) { return 0; }
 //  int sqlite3VdbeMemExpandBlob(Mem );
 #else
     //  #define sqlite3VdbeMemExpandBlob(x) SQLITE_OK
-    static int sqlite3VdbeMemExpandBlob( Mem x )
-    {
-      return SQLITE_OK;
-    }
+    ////static int sqlite3VdbeMemExpandBlob( Mem x )
+    ////{
+    ////  return SQLITE_OK;
+    ////}
 #endif
 
     //#endif //* !_VDBEINT_H_) */

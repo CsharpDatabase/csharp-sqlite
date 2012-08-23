@@ -189,7 +189,7 @@ return ( p == null || p.expired ) ? 1 : 0;
       Mem p = pVal;
       if ( ( p.flags & ( MEM_Blob | MEM_Str ) ) != 0 )
       {
-        sqlite3VdbeMemExpandBlob( p );
+        ////sqlite3VdbeMemExpandBlob( p );
         if ( p.zBLOB == null && p.z != null )
         {
           if ( p.z.Length == 0 )

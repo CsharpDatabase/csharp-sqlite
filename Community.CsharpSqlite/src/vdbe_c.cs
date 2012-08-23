@@ -243,10 +243,10 @@ static void UPDATE_MAX_BLOBSIZE( Mem P ) { }
     ** P if required.
     */
     //#define ExpandBlob(P) (((P).flags&MEM_Zero)?sqlite3VdbeMemExpandBlob(P):0)
-    static int ExpandBlob( Mem P )
-    {
-      return ( P.flags & MEM_Zero ) != 0 ? sqlite3VdbeMemExpandBlob( P ) : 0;
-    }
+    ////static int ExpandBlob( Mem P )
+    ////{
+    ////  return ( P.flags & MEM_Zero ) != 0 ? sqlite3VdbeMemExpandBlob( P ) : 0;
+    ////}
 
     /*
     ** Argument pMem points at a register that will be passed to a
@@ -1439,8 +1439,8 @@ pOp.p1 = pOut.n;
                 sqlite3VdbeMemSetNull( pOut );
                 break;
               }
-              if ( ExpandBlob( pIn1 ) != 0 || ExpandBlob( pIn2 ) != 0 )
-                goto no_mem;
+              ////if ( ExpandBlob( pIn1 ) != 0 || ExpandBlob( pIn2 ) != 0 )
+              ////  goto no_mem;
               if ( ( ( pIn1.flags & ( MEM_Str | MEM_Blob ) ) == 0 ) && sqlite3VdbeMemStringify( pIn1, encoding ) != 0 )
               {
                 goto no_mem;
@@ -1990,7 +1990,7 @@ arithmetic_result_is_null:
               Debug.Assert( MEM_Str == ( MEM_Blob >> 3 ) );
               pIn1.flags |= (u16)( ( pIn1.flags & MEM_Blob ) >> 3 );
               applyAffinity( pIn1, SQLITE_AFF_TEXT, encoding );
-              rc = ExpandBlob( pIn1 );
+              rc = 0; ////ExpandBlob( pIn1 );
               Debug.Assert( ( pIn1.flags & MEM_Str ) != 0 /*|| db.mallocFailed != 0 */ );
               pIn1.flags = (u16)( pIn1.flags & ~( MEM_Int | MEM_Real | MEM_Blob | MEM_Zero ) );
 #if SQLITE_TEST
@@ -2219,8 +2219,8 @@ arithmetic_result_is_null:
                 }
 
                 Debug.Assert( pOp.p4type == P4_COLLSEQ || pOp.p4.pColl == null );
-                ExpandBlob( pIn1 );
-                ExpandBlob( pIn3 );
+                ////ExpandBlob( pIn1 );
+                ////ExpandBlob( pIn3 );
                 res = sqlite3MemCompare( pIn3, pIn1, pOp.p4.pColl );
               }
               switch ( pOp.opcode )
@@ -2938,7 +2938,7 @@ op_column_out:
                 pIn1 = aMem[pOp.p1 + zI];
                 //Debug.Assert( pIn1 <= p->aMem[p->nMem] );
                 Debug.Assert( memIsValid( pIn1 ) );
-                ExpandBlob( pIn1 );
+                ////ExpandBlob( pIn1 );
                 applyAffinity( pIn1, cAff, encoding );
                 //pIn1++;
               }
@@ -3021,10 +3021,10 @@ op_column_out:
                 {
                   applyAffinity( pRec, (char)zAffinity[pD0], encoding );
                 }
-                if ( ( pRec.flags & MEM_Zero ) != 0 && pRec.n > 0 )
-                {
-                  sqlite3VdbeMemExpandBlob( pRec );
-                }
+                ////if ( ( pRec.flags & MEM_Zero ) != 0 && pRec.n > 0 )
+                ////{
+                ////  sqlite3VdbeMemExpandBlob( pRec );
+                ////}
                 serial_type = sqlite3VdbeSerialType( pRec, file_format );
                 len = (int)sqlite3VdbeSerialTypeLen( serial_type );
                 nData += (u64)len;
@@ -4086,7 +4086,7 @@ op_column_out:
                       Debug.Assert( memIsValid( r.aMem[i] ) );
                   }
 #endif
-                  ExpandBlob( r.aMem[0] );
+                  ////ExpandBlob( r.aMem[0] );
                   rc = sqlite3BtreeMovetoUnpacked( pC.pCursor, r, 0, 0, ref res );
                   if ( rc != SQLITE_OK )
                   {
@@ -5225,7 +5225,7 @@ const int MAX_ROWID = i32.MaxValue;//#   define MAX_ROWID 0x7fffffff
               if ( ALWAYS( pCrsr != null ) )
               {
                 Debug.Assert( !pC.isTable );
-                ExpandBlob( pIn2 );
+                ////ExpandBlob( pIn2 );
                 if ( rc == SQLITE_OK )
                 {
                   nKey = pIn2.n;

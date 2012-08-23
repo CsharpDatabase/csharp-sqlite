@@ -46,11 +46,11 @@ namespace Community.CsharpSqlite
     ** P if required.
     */
     //#define expandBlob(P) (((P)->flags&MEM_Zero)?sqlite3VdbeMemExpandBlob(P):0)
-    static void expandBlob( Mem P )
-    {
-      if ( ( P.flags & MEM_Zero ) != 0 )
-        sqlite3VdbeMemExpandBlob( P );
-    } // TODO -- Convert to inline for speed
+    ////static void expandBlob( Mem P )
+    ////{
+    ////  if ( ( P.flags & MEM_Zero ) != 0 )
+    ////    sqlite3VdbeMemExpandBlob( P );
+    ////} // TODO -- Convert to inline for speed
 
     /*
     ** If pMem is an object with a valid string representation, this routine
@@ -169,7 +169,7 @@ return rc;
       int f;
       Debug.Assert( pMem.db == null || sqlite3_mutex_held( pMem.db.mutex ) );
       Debug.Assert( ( pMem.flags & MEM_RowSet ) == 0 );
-      expandBlob( pMem );
+      ////expandBlob( pMem );
       f = pMem.flags;
       if ( ( f & ( MEM_Str | MEM_Blob ) ) != 0 ) // TODO -- && pMem.z != pMem.zMalloc )
       {
@@ -759,7 +759,7 @@ return r;
 
 #if SQLITE_DEBUG
     /*
-** This routine prepares a memory cell for modication by breaking
+** This routine prepares a memory cell for modification by breaking
 ** its link to a shallow copy and by marking any current shallow
 ** copies of this cell as invalid.
 **
@@ -832,9 +832,6 @@ return r;
 
       return rc;
     }
-
-
-
 
     /*
     ** Transfer the contents of pFrom to pTo. Any existing value in pTo is
@@ -1355,8 +1352,8 @@ return SQLITE_NOMEM;
       }
       Debug.Assert( ( MEM_Blob >> 3 ) == MEM_Str );
       pVal.flags |= (u16)( ( pVal.flags & MEM_Blob ) >> 3 );
-      if ( ( pVal.flags & MEM_Zero ) != 0 )
-        sqlite3VdbeMemExpandBlob( pVal ); // expandBlob(pVal);
+      ////if ( ( pVal.flags & MEM_Zero ) != 0 )
+      ////  sqlite3VdbeMemExpandBlob( pVal ); // expandBlob(pVal);
       if ( ( pVal.flags & MEM_Str ) != 0 )
       {
         if ( sqlite3VdbeChangeEncoding( pVal, enc & ~SQLITE_UTF16_ALIGNED ) != SQLITE_OK )
