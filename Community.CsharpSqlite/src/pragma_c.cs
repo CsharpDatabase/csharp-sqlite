@@ -1779,14 +1779,13 @@ new VdbeOpList( OP_ResultRow,       1,  1,  0)
                                                               for ( i = 0; i < db.nDb; i++ )
                                                               {
                                                                 Btree pBt;
-                                                                Pager pPager;
                                                                 string zState = "unknown";
                                                                 sqlite3_int64 j = 0;
                                                                 if ( db.aDb[i].zName == null )
                                                                   continue;
                                                                 sqlite3VdbeAddOp4( v, OP_String8, 0, 1, 0, db.aDb[i].zName, P4_STATIC );
                                                                 pBt = db.aDb[i].pBt;
-                                                                if ( pBt == null || ( pPager = sqlite3BtreePager( pBt ) ) == null )
+                                                                if ( pBt == null || sqlite3BtreePager( pBt ) == null )
                                                                 {
                                                                   zState = "closed";
                                                                 }
