@@ -51,7 +51,7 @@ namespace Community.CsharpSqlite.SQLiteClient
     private const bool DEF_FAILIFMISSING = false;
 
 #region // Fields
- 		private string 	_uri;
+ 		private string _uri;
 		private Int32 _mode;
 		private Int32 _version;
 		private Encoding _encoding;
@@ -245,7 +245,7 @@ namespace Community.CsharpSqlite.SQLiteClient
           base.Remove (mappedKey);
         } else
           this.Uri = value.ToString ();
-        break;				
+        break;
 
       case "MODE":
         if (value == null) {
