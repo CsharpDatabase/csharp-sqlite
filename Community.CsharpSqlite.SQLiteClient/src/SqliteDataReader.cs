@@ -323,7 +323,8 @@ namespace Community.CsharpSqlite.SQLiteClient
 
 		public override bool GetBoolean (int i)
 		{
-			return Convert.ToBoolean (((object[]) rows[current_row])[i]);
+            int result = Convert.ToInt32(((object[])rows[current_row])[i]);
+			return Convert.ToBoolean(result);
 		}
 
 		public override byte GetByte (int i)
