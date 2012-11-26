@@ -4,7 +4,9 @@ using System.Data.Common;
 
 namespace Community.CsharpSqlite.SQLiteClient
 {
-    //This is the base exception of all sqlite exceptions
+    /// <summary>
+    /// Base exception for all Sqlite exceptions.
+    /// </summary>
     public class SqliteException : DbException
     {
         public int SqliteErrorCode { get; protected set; }
@@ -26,7 +28,9 @@ namespace Community.CsharpSqlite.SQLiteClient
         }
     }
 
-    // This exception is raised whenever a statement cannot be compiled.
+    /// <summary>
+    /// The exception that is raised whenever a statement cannot be compiled.
+    /// </summary>
     public class SqliteSyntaxException : SqliteException
     {
         public SqliteSyntaxException(int errcode)
@@ -44,8 +48,9 @@ namespace Community.CsharpSqlite.SQLiteClient
         }
     }
 
-    // This exception is raised whenever the execution
-    // of a statement fails.
+    /// <summary>
+    /// The exception that is raised whenever the execution of a statement fails.
+    /// </summary>
     public class SqliteExecutionException : SqliteException
     {
         public SqliteExecutionException()
@@ -66,8 +71,9 @@ namespace Community.CsharpSqlite.SQLiteClient
         }
     }
 
-    // This exception is raised whenever Sqlite says it
-    // cannot run a command because something is busy.
+    /// <summary>
+    /// The exception that is raised whenever Sqlite reports it cannot run a command due to being busy.
+    /// </summary>
     public class SqliteBusyException : SqliteException
     {
         public SqliteBusyException()
