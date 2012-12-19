@@ -1,11 +1,11 @@
 using System.Diagnostics;
 using System.IO;
 
-using Community.CsharpSQLite;
-using Xunit;
 using Community.CsharpSqlite;
 
-namespace Community.CsharpSQLite.UnitTests
+using Xunit;
+
+namespace Community.CsharpSqlite.UnitTests
 {
     public class Stress
     {

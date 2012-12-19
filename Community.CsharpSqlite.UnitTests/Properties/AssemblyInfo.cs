@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle( "Community.CsharpSQLite.UnitTests.Properties" )]
+[assembly: AssemblyTitle("Community.CsharpSqlite.UnitTests.Properties")]
 [assembly: AssemblyDescription( "" )]
 [assembly: AssemblyConfiguration( "" )]
-[assembly: AssemblyCompany( "Microsoft" )]
-[assembly: AssemblyProduct( "Community.CsharpSQLite.UnitTests.Properties" )]
-[assembly: AssemblyCopyright( "Copyright © Microsoft 2010" )]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("Community.CsharpSqlite.UnitTests.Properties")]
+[assembly: AssemblyCopyright("")]
 [assembly: AssemblyTrademark( "" )]
 [assembly: AssemblyCulture( "" )]
 
@@ -29,5 +29,5 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.7.5.0")]
+[assembly: AssemblyVersion("3.7.7.1")]
 [assembly: AssemblyFileVersion( "1.0.0.0" )]
