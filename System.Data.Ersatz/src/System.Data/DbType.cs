@@ -13,6 +13,14 @@
         Int64,
         Byte,
         Binary,
-        Decimal
+        Decimal,
+        UInt16,
+        UInt32,
+        UInt64,
+        Object,
+        AnsiString,
+        AnsiStringFixedLength,
+        StringFixedLength,
+        Time
     }
 }
