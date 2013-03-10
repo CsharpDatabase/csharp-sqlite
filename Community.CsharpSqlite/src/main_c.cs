@@ -2931,7 +2931,7 @@ void sqlite3_thread_cleanup()
 */
 #if SQLITE_ENABLE_COLUMN_METADATA
 
-    static int sqlite3_table_column_metadata(
+    public static int sqlite3_table_column_metadata(
     sqlite3 db,            /* Connection handle */
     string zDbName,        /* Database name or NULL */
     string zTableName,     /* Table name */
