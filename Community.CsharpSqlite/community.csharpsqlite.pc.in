@@ -1,0 +1,6 @@
+Name: Community.CsharpSqlite
+Description: Community.CsharpSqlite
+Version: 0.1
+
+Requires: 
+Libs: -r:@expanded_libdir@/@PACKAGE@/Community.CsharpSqlite.dll
