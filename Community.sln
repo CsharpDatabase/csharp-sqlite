@@ -1,9 +1,7 @@
+﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Community.CsharpSqlite.SQLiteClient", "Community.CsharpSqlite.SQLiteClient\Community.CsharpSqlite.SQLiteClient.csproj", "{7BC68E61-C64C-488C-975F-1E2248383B80}"
-	ProjectSection(ProjectDependencies) = postProject
-		{F1653F20-D47D-4F29-8C55-3C835542AF5F} = {F1653F20-D47D-4F29-8C55-3C835542AF5F}
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SQLiteClientTests", "Community.CsharpSqlite.SQLiteClient\TestDriver_src\SQLiteClientTests.csproj", "{B83741E9-7012-491E-B15D-3B083506A143}"
 EndProject
@@ -29,7 +27,7 @@ Global
 		{F1653F20-D47D-4F29-8C55-3C835542AF5F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = SQLiteClientTests.csproj
+		StartupItem = Community.CsharpSqlite.SQLiteClient\TestDriver_src\SQLiteClientTests.csproj
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
